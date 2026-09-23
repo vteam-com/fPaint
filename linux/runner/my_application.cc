@@ -7,12 +7,87 @@
 
 #include "flutter/generated_plugin_registrant.h"
 
+// Location of the application icon inside the built bundle, relative to the
+// executable. The icon is the same Flutter asset every platform uses
+// (see `packages/fpaint_assets/assets/app_icon.png`), so the Linux runner does
+// not need a second copy of the image.
+static const char kApplicationIconAssetPath[] =
+    "data/flutter_assets/packages/fpaint_assets/assets/app_icon.png";
+
+// The kernel exposes the running executable through this symbolic link.
+static const char kExecutablePath[] = "/proc/self/exe";
+
+// Sizes the application icon is handed to the window manager in. Desktops pick
+// the size closest to what they display, and GTK silently drops icons that are
+// too large for the windowing system (a lone 512x512 pixbuf never reaches the
+// X11 `_NET_WM_ICON` property), so the bundled image is scaled down to the sizes
+// desktop environments ask for.
+static const int kApplicationIconSizes[] = {16, 32, 48, 64, 128, 256};
+
 struct _MyApplication {
   GtkApplication parent_instance;
   char** dart_entrypoint_arguments;
 };
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
+
+// Returns the absolute path of the bundled application icon, or nullptr when it
+// cannot be resolved (e.g. when the runner is not started from a built bundle).
+// The bundle directory is derived from the executable because the Flutter engine
+// does not expose it to the runner.
+static gchar* my_application_find_icon_path() {
+  g_autofree gchar* executable_path = g_file_read_link(kExecutablePath, nullptr);
+  if (executable_path == nullptr) {
+    return nullptr;
+  }
+  g_autofree gchar* bundle_directory = g_path_get_dirname(executable_path);
+  return g_build_filename(bundle_directory, kApplicationIconAssetPath, nullptr);
+}
+
+// Sets the window icon shown by the window manager, the task bar and window
+// switchers. On X11 this is what fills in the `_NET_WM_ICON` property; without
+// it desktops fall back to a generic icon (KDE displays its X logo). The window
+// must be realized, as GTK forwards the icon to the windowing system through the
+// GDK window.
+static void my_application_set_window_icon(GtkWindow* window) {
+  g_autofree gchar* icon_path = my_application_find_icon_path();
+  if (icon_path == nullptr) {
+    g_warning("Unable to locate the application icon");
+    return;
+  }
+  if (!g_file_test(icon_path, G_FILE_TEST_IS_REGULAR)) {
+    g_warning("Application icon not found: %s", icon_path);
+    return;
+  }
+
+  g_autoptr(GError) error = nullptr;
+  g_autoptr(GdkPixbuf) source = gdk_pixbuf_new_from_file(icon_path, &error);
+  if (source == nullptr) {
+    g_warning("Unable to load the application icon from %s: %s", icon_path,
+              error != nullptr ? error->message : "unknown error");
+    return;
+  }
+
+  GList* icons = nullptr;
+  for (guint i = 0; i < G_N_ELEMENTS(kApplicationIconSizes); i++) {
+    const int size = kApplicationIconSizes[i];
+    GdkPixbuf* icon =
+        gdk_pixbuf_scale_simple(source, size, size, GDK_INTERP_BILINEAR);
+    if (icon == nullptr) {
+      g_warning("Unable to scale the application icon to %d pixels", size);
+      continue;
+    }
+    icons = g_list_append(icons, icon);
+  }
+  if (icons == nullptr) {
+    g_warning("Unable to prepare the application icon");
+    return;
+  }
+
+  // GtkWindow references the pixbufs and copies the list.
+  gtk_window_set_icon_list(window, icons);
+  g_list_free_full(icons, g_object_unref);
+}
 
 // Implements GApplication::activate.
 static void my_application_activate(GApplication* application) {
@@ -48,6 +123,14 @@ static void my_application_activate(GApplication* application) {
   }
 
   gtk_window_set_default_size(window, 1280, 720);
+
+  // Realize the window before applying the icon: GTK only forwards the icon list
+  // to the windowing system once the window owns a GDK window. Applying it here,
+  // before the window is shown, means window managers have the icon in the very
+  // first frame they see.
+  gtk_widget_realize(GTK_WIDGET(window));
+  my_application_set_window_icon(window);
+
   gtk_widget_show(GTK_WIDGET(window));
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();

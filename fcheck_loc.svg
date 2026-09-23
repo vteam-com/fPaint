@@ -7759,129 +7759,115 @@ File: lib/widgets/app_popup_menu.dart</title>
   <rect x="930.6251279777757" y="770.8459859312454" width="124.19194223938082" height="126.63012079868051" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="930.6251279777757" y="770.8459859312454" width="124.19194223938082" height="126.63012079868051" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="930.6251279777757" y="770.8459859312454" width="124.19194223938082" height="126.63012079868051" fill="transparent" pointer-events="all">
-    <title>116 LOC File: lib/widgets/hatch_marks_picker.dart</title>
+    <title>116 LOC File: lib/widgets/container_slider.dart</title>
   </rect>
-  <text x="938.6251279777757" y="785.8459859312454" text-anchor="start" font-size="4.04" fill="#000" font-weight="700">hatch_marks_picker.dart</text>
-  <text x="1046.8170702171565" y="785.8459859312454" text-anchor="end" font-size="4.04" fill="#000" font-weight="700">116 LOC</text>
+  <text x="938.6251279777757" y="785.8459859312454" text-anchor="start" font-size="4.66" fill="#000" font-weight="700">container_slider.dart</text>
+  <text x="1046.8170702171565" y="785.8459859312454" text-anchor="end" font-size="4.66" fill="#000" font-weight="700">116 LOC</text>
 <g>
-  <rect x="938.6251279777757" y="794.8459859312454" width="70.88437594993916" height="94.63012079868051" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
-  <rect x="938.6251279777757" y="794.8459859312454" width="70.88437594993916" height="94.63012079868051" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="938.6251279777757" y="794.8459859312454" width="70.88437594993916" height="94.63012079868051" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="938.6251279777757" y="794.8459859312454" width="70.88437594993916" height="94.63012079868051" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>76 LOC in Class: _HatchMarksControlsState
+  <rect x="938.6251279777757" y="794.8459859312454" width="62.49017353481479" height="94.63012079868051" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
+  <rect x="938.6251279777757" y="794.8459859312454" width="62.49017353481479" height="94.63012079868051" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="938.6251279777757" y="794.8459859312454" width="62.49017353481479" height="94.63012079868051" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="938.6251279777757" y="794.8459859312454" width="62.49017353481479" height="94.63012079868051" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
+    <title>67 LOC in Class: _ContainerSliderState
 
-File: lib/widgets/hatch_marks_picker.dart</title>
+File: lib/widgets/container_slider.dart</title>
   </rect>
-  <text x="946.6251279777757" y="809.8459859312454" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">_HatchMarksControlsState</text>
-  <text x="1001.5095039277148" y="809.8459859312454" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">76 LOC</text>
+  <text x="946.6251279777757" y="809.8459859312454" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">_ContainerSliderState</text>
+  <text x="993.1153015125905" y="809.8459859312454" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">67 LOC</text>
 <g>
-  <rect x="946.6251279777757" y="870.3227975465993" width="29.553125511505698" height="11.15330918332667" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="946.6251279777757" y="870.3227975465993" width="29.553125511505698" height="11.15330918332667" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="946.6251279777757" y="870.3227975465993" width="29.553125511505698" height="11.15330918332667" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="946.6251279777757" y="870.3227975465993" width="29.553125511505698" height="11.15330918332667" fill="transparent" pointer-events="all">
-    <title>7 LOC in Method: _HatchMarksControlsState.didUpdateWidget()
+  <rect x="973.7443958730844" y="869.5465599111296" width="19.37090563950616" height="11.92954681879629" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="973.7443958730844" y="869.5465599111296" width="19.37090563950616" height="11.92954681879629" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="973.7443958730844" y="869.5465599111296" width="19.37090563950616" height="11.92954681879629" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="973.7443958730844" y="869.5465599111296" width="19.37090563950616" height="11.92954681879629" fill="transparent" pointer-events="all">
+    <title>5 LOC in Method: _ContainerSliderState.initState()
 
-File: lib/widgets/hatch_marks_picker.dart</title>
+File: lib/widgets/container_slider.dart</title>
   </rect>
-  <text x="961.4016907335285" y="875.8994521382626" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="961.4016907335285" dy="-6.0" font-size="3.00">didUpdateWidget</tspan>
-    <tspan x="961.4016907335285" dy="14.0" font-size="3.00">7</tspan>
+  <text x="983.4298486928375" y="875.5113333205278" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="983.4298486928375" dy="-6.0" font-size="3.00">initState</tspan>
+    <tspan x="983.4298486928375" dy="14.0" font-size="3.00">5</tspan>
   </text>
 </g>
 <g>
-  <rect x="946.6251279777757" y="818.8459859312454" width="54.884375949939155" height="51.47681161535384" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="946.6251279777757" y="818.8459859312454" width="54.884375949939155" height="51.47681161535384" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="946.6251279777757" y="818.8459859312454" width="54.884375949939155" height="51.47681161535384" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="946.6251279777757" y="818.8459859312454" width="54.884375949939155" height="51.47681161535384" fill="transparent" pointer-events="all">
-    <title>60 LOC in Method: _HatchMarksControlsState.build()
+  <rect x="946.6251279777757" y="818.8459859312454" width="46.49017353481479" height="50.70057397988422" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="946.6251279777757" y="818.8459859312454" width="46.49017353481479" height="50.70057397988422" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="946.6251279777757" y="818.8459859312454" width="46.49017353481479" height="50.70057397988422" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="946.6251279777757" y="818.8459859312454" width="46.49017353481479" height="50.70057397988422" fill="transparent" pointer-events="all">
+    <title>51 LOC in Method: _ContainerSliderState.build()
 
-File: lib/widgets/hatch_marks_picker.dart</title>
+File: lib/widgets/container_slider.dart</title>
   </rect>
-  <text x="974.0673159527453" y="844.5843917389224" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="974.0673159527453" dy="-6.0" font-size="14.00">build</tspan>
-    <tspan x="974.0673159527453" dy="14.0" font-size="14.00">60</tspan>
+  <text x="969.8702147451831" y="844.1962729211875" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="969.8702147451831" dy="-6.0" font-size="14.00">build</tspan>
+    <tspan x="969.8702147451831" dy="14.0" font-size="14.00">51</tspan>
   </text>
 </g>
 <g>
-  <rect x="976.1782534892814" y="870.3227975465993" width="25.331250438433457" height="11.15330918332667" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="976.1782534892814" y="870.3227975465993" width="25.331250438433457" height="11.15330918332667" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="976.1782534892814" y="870.3227975465993" width="25.331250438433457" height="11.15330918332667" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="976.1782534892814" y="870.3227975465993" width="25.331250438433457" height="11.15330918332667" fill="transparent" pointer-events="all">
-    <title>6 LOC in Method: _HatchMarksControlsState._update()
+  <rect x="946.6251279777757" y="869.5465599111296" width="27.119267895308628" height="11.92954681879629" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="946.6251279777757" y="869.5465599111296" width="27.119267895308628" height="11.92954681879629" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="946.6251279777757" y="869.5465599111296" width="27.119267895308628" height="11.92954681879629" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="946.6251279777757" y="869.5465599111296" width="27.119267895308628" height="11.92954681879629" fill="transparent" pointer-events="all">
+    <title>7 LOC in Method: _ContainerSliderState._adjustValue()
 
-File: lib/widgets/hatch_marks_picker.dart</title>
+File: lib/widgets/container_slider.dart</title>
   </rect>
-  <text x="988.8438787084981" y="875.8994521382626" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="988.8438787084981" dy="-6.0" font-size="3.78">_update</tspan>
-    <tspan x="988.8438787084981" dy="14.0" font-size="3.78">6</tspan>
-  </text>
-</g>
-</g>
-<g>
-  <rect x="1009.5095039277148" y="794.8459859312454" width="37.30756628944167" height="54.41231945924129" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.45"/>
-  <rect x="1009.5095039277148" y="794.8459859312454" width="37.30756628944167" height="54.41231945924129" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1009.5095039277148" y="794.8459859312454" width="37.30756628944167" height="54.41231945924129" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8" stroke-dasharray="6,4"/>
-  <rect x="1009.5095039277148" y="794.8459859312454" width="37.30756628944167" height="54.41231945924129" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>23 LOC in Class: &lt;...&gt;
-
-File: lib/widgets/hatch_marks_picker.dart</title>
-  </rect>
-  <text x="1017.5095039277148" y="809.8459859312454" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">&lt;...&gt;</text>
-  <text x="1038.8170702171565" y="809.8459859312454" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">23 LOC</text>
-<g>
-  <rect x="1017.5095039277148" y="818.8459859312454" width="21.307566289441667" height="22.41231945924129" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1017.5095039277148" y="818.8459859312454" width="21.307566289441667" height="22.41231945924129" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1017.5095039277148" y="818.8459859312454" width="21.307566289441667" height="22.41231945924129" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1017.5095039277148" y="818.8459859312454" width="21.307566289441667" height="22.41231945924129" fill="transparent" pointer-events="all">
-    <title>23 LOC in Function: showHatchMarksPicker()
-
-File: lib/widgets/hatch_marks_picker.dart</title>
-  </rect>
-  <text x="1028.1632870724357" y="830.052145660866" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1028.1632870724357" dy="-6.0" font-size="3.00">showHatchMarksPicker</tspan>
-    <tspan x="1028.1632870724357" dy="14.0" font-size="3.00">23</tspan>
+  <text x="960.18476192543" y="875.5113333205278" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="960.18476192543" dy="-6.0" font-size="3.00">_adjustValue</tspan>
+    <tspan x="960.18476192543" dy="14.0" font-size="3.00">7</tspan>
   </text>
 </g>
 </g>
 <g>
-  <rect x="1009.5095039277148" y="849.2583053904867" width="37.30756628944167" height="40.21780133943922" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
-  <rect x="1009.5095039277148" y="849.2583053904867" width="37.30756628944167" height="40.21780133943922" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1009.5095039277148" y="849.2583053904867" width="37.30756628944167" height="40.21780133943922" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1009.5095039277148" y="849.2583053904867" width="37.30756628944167" height="40.21780133943922" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>17 LOC in Class: HatchMarksControls
+  <rect x="1001.1153015125905" y="794.8459859312454" width="45.701768704566035" height="79.18030515807962" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
+  <rect x="1001.1153015125905" y="794.8459859312454" width="45.701768704566035" height="79.18030515807962" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1001.1153015125905" y="794.8459859312454" width="45.701768704566035" height="79.18030515807962" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1001.1153015125905" y="794.8459859312454" width="45.701768704566035" height="79.18030515807962" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
+    <title>41 LOC in Class: ContainerSlider
 
-File: lib/widgets/hatch_marks_picker.dart</title>
+File: lib/widgets/container_slider.dart</title>
   </rect>
-  <text x="1017.5095039277148" y="864.2583053904867" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">HatchMarksControls</text>
-  <text x="1038.8170702171565" y="864.2583053904867" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">17 LOC</text>
+  <text x="1009.1153015125905" y="809.8459859312454" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">ContainerSlider</text>
+  <text x="1038.8170702171565" y="809.8459859312454" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">41 LOC</text>
 <g>
-  <rect x="1017.5095039277148" y="873.2583053904867" width="15.98067471708125" height="8.21780133943922" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1017.5095039277148" y="873.2583053904867" width="15.98067471708125" height="8.21780133943922" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1017.5095039277148" y="873.2583053904867" width="15.98067471708125" height="8.21780133943922" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1017.5095039277148" y="873.2583053904867" width="15.98067471708125" height="8.21780133943922" fill="transparent" pointer-events="all">
-    <title>6 LOC in Method: HatchMarksControls.HatchMarksControls()
+  <rect x="1009.1153015125905" y="818.8459859312454" width="29.701768704566035" height="42.891186507345104" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1009.1153015125905" y="818.8459859312454" width="29.701768704566035" height="42.891186507345104" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1009.1153015125905" y="818.8459859312454" width="29.701768704566035" height="42.891186507345104" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1009.1153015125905" y="818.8459859312454" width="29.701768704566035" height="42.891186507345104" fill="transparent" pointer-events="all">
+    <title>20 LOC in Method: ContainerSlider.ContainerSlider()
 
-File: lib/widgets/hatch_marks_picker.dart</title>
+File: lib/widgets/container_slider.dart</title>
   </rect>
-  <text x="1025.4998412862556" y="877.3672060602063" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1025.4998412862556" dy="-6.0" font-size="3.00">HatchMarksControls</tspan>
-    <tspan x="1025.4998412862556" dy="14.0" font-size="3.00">6</tspan>
+  <text x="1023.9661858648735" y="840.291579184918" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1023.9661858648735" dy="-6.0" font-size="3.00">ContainerSlider</tspan>
+    <tspan x="1023.9661858648735" dy="14.0" font-size="3.00">20</tspan>
   </text>
 </g>
 <g>
-  <rect x="1033.490178644796" y="873.2583053904867" width="5.326891572360417" height="8.21780133943922" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1033.490178644796" y="873.2583053904867" width="5.326891572360417" height="8.21780133943922" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1033.490178644796" y="873.2583053904867" width="5.326891572360417" height="8.21780133943922" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1033.490178644796" y="873.2583053904867" width="5.326891572360417" height="8.21780133943922" fill="transparent" pointer-events="all">
-    <title>2 LOC in Method: HatchMarksControls.createState()
+  <rect x="1009.1153015125905" y="861.7371724385905" width="29.701768704566035" height="4.289118650734515" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1009.1153015125905" y="861.7371724385905" width="29.701768704566035" height="4.289118650734515" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1009.1153015125905" y="861.7371724385905" width="29.701768704566035" height="4.289118650734515" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1009.1153015125905" y="861.7371724385905" width="29.701768704566035" height="4.289118650734515" fill="transparent" pointer-events="all">
+    <title>2 LOC in Method: ContainerSlider.createState()
 
-File: lib/widgets/hatch_marks_picker.dart</title>
+File: lib/widgets/container_slider.dart</title>
   </rect>
-  <text x="1036.1536244309764" y="877.3672060602063" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1036.1536244309764" dy="-6.0" font-size="3.00">createState</tspan>
-    <tspan x="1036.1536244309764" dy="14.0" font-size="3.00">2</tspan>
+  <text x="1023.9661858648735" y="863.8817317639578" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1023.9661858648735" dy="-6.0" font-size="3.14">createState</tspan>
+    <tspan x="1023.9661858648735" dy="14.0" font-size="3.14">2</tspan>
   </text>
 </g>
+</g>
+<g>
+  <rect x="1001.1153015125905" y="874.026291089325" width="45.701768704566035" height="15.449815640600889" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
+  <rect x="1001.1153015125905" y="874.026291089325" width="45.701768704566035" height="15.449815640600889" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1001.1153015125905" y="874.026291089325" width="45.701768704566035" height="15.449815640600889" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1001.1153015125905" y="874.026291089325" width="45.701768704566035" height="15.449815640600889" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
+    <title>8 LOC in Class: _HorizontalDragRecognizer
+
+File: lib/widgets/container_slider.dart</title>
+  </rect>
+  <text x="1009.1153015125905" y="889.026291089325" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">_HorizontalDragRecognizer</text>
+  <text x="1038.8170702171565" y="889.026291089325" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">8 LOC</text>
 </g>
 </g>
 <g>
@@ -7889,115 +7875,129 @@ File: lib/widgets/hatch_marks_picker.dart</title>
   <rect x="1056.8170702171565" y="770.8459859312454" width="124.19194223938082" height="126.63012079868051" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="1056.8170702171565" y="770.8459859312454" width="124.19194223938082" height="126.63012079868051" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="1056.8170702171565" y="770.8459859312454" width="124.19194223938082" height="126.63012079868051" fill="transparent" pointer-events="all">
-    <title>116 LOC File: lib/widgets/container_slider.dart</title>
+    <title>116 LOC File: lib/widgets/hatch_marks_picker.dart</title>
   </rect>
-  <text x="1064.8170702171565" y="785.8459859312454" text-anchor="start" font-size="4.66" fill="#000" font-weight="700">container_slider.dart</text>
-  <text x="1173.0090124565372" y="785.8459859312454" text-anchor="end" font-size="4.66" fill="#000" font-weight="700">116 LOC</text>
+  <text x="1064.8170702171565" y="785.8459859312454" text-anchor="start" font-size="4.04" fill="#000" font-weight="700">hatch_marks_picker.dart</text>
+  <text x="1173.0090124565372" y="785.8459859312454" text-anchor="end" font-size="4.04" fill="#000" font-weight="700">116 LOC</text>
 <g>
-  <rect x="1064.8170702171565" y="794.8459859312454" width="62.49017353481479" height="94.63012079868051" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
-  <rect x="1064.8170702171565" y="794.8459859312454" width="62.49017353481479" height="94.63012079868051" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1064.8170702171565" y="794.8459859312454" width="62.49017353481479" height="94.63012079868051" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1064.8170702171565" y="794.8459859312454" width="62.49017353481479" height="94.63012079868051" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>67 LOC in Class: _ContainerSliderState
+  <rect x="1064.8170702171565" y="794.8459859312454" width="70.88437594993916" height="94.63012079868051" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
+  <rect x="1064.8170702171565" y="794.8459859312454" width="70.88437594993916" height="94.63012079868051" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1064.8170702171565" y="794.8459859312454" width="70.88437594993916" height="94.63012079868051" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1064.8170702171565" y="794.8459859312454" width="70.88437594993916" height="94.63012079868051" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
+    <title>76 LOC in Class: _HatchMarksControlsState
 
-File: lib/widgets/container_slider.dart</title>
+File: lib/widgets/hatch_marks_picker.dart</title>
   </rect>
-  <text x="1072.8170702171565" y="809.8459859312454" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">_ContainerSliderState</text>
-  <text x="1119.3072437519713" y="809.8459859312454" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">67 LOC</text>
+  <text x="1072.8170702171565" y="809.8459859312454" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">_HatchMarksControlsState</text>
+  <text x="1127.7014461670956" y="809.8459859312454" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">76 LOC</text>
 <g>
-  <rect x="1099.9363381124651" y="869.5465599111296" width="19.37090563950616" height="11.92954681879629" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1099.9363381124651" y="869.5465599111296" width="19.37090563950616" height="11.92954681879629" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1099.9363381124651" y="869.5465599111296" width="19.37090563950616" height="11.92954681879629" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1099.9363381124651" y="869.5465599111296" width="19.37090563950616" height="11.92954681879629" fill="transparent" pointer-events="all">
-    <title>5 LOC in Method: _ContainerSliderState.initState()
+  <rect x="1072.8170702171565" y="870.3227975465993" width="29.553125511505698" height="11.15330918332667" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1072.8170702171565" y="870.3227975465993" width="29.553125511505698" height="11.15330918332667" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1072.8170702171565" y="870.3227975465993" width="29.553125511505698" height="11.15330918332667" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1072.8170702171565" y="870.3227975465993" width="29.553125511505698" height="11.15330918332667" fill="transparent" pointer-events="all">
+    <title>7 LOC in Method: _HatchMarksControlsState.didUpdateWidget()
 
-File: lib/widgets/container_slider.dart</title>
+File: lib/widgets/hatch_marks_picker.dart</title>
   </rect>
-  <text x="1109.6217909322181" y="875.5113333205278" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1109.6217909322181" dy="-6.0" font-size="3.00">initState</tspan>
-    <tspan x="1109.6217909322181" dy="14.0" font-size="3.00">5</tspan>
+  <text x="1087.5936329729093" y="875.8994521382626" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1087.5936329729093" dy="-6.0" font-size="3.00">didUpdateWidget</tspan>
+    <tspan x="1087.5936329729093" dy="14.0" font-size="3.00">7</tspan>
   </text>
 </g>
 <g>
-  <rect x="1072.8170702171565" y="818.8459859312454" width="46.49017353481479" height="50.70057397988422" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1072.8170702171565" y="818.8459859312454" width="46.49017353481479" height="50.70057397988422" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1072.8170702171565" y="818.8459859312454" width="46.49017353481479" height="50.70057397988422" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1072.8170702171565" y="818.8459859312454" width="46.49017353481479" height="50.70057397988422" fill="transparent" pointer-events="all">
-    <title>51 LOC in Method: _ContainerSliderState.build()
+  <rect x="1072.8170702171565" y="818.8459859312454" width="54.884375949939155" height="51.47681161535384" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1072.8170702171565" y="818.8459859312454" width="54.884375949939155" height="51.47681161535384" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1072.8170702171565" y="818.8459859312454" width="54.884375949939155" height="51.47681161535384" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1072.8170702171565" y="818.8459859312454" width="54.884375949939155" height="51.47681161535384" fill="transparent" pointer-events="all">
+    <title>60 LOC in Method: _HatchMarksControlsState.build()
 
-File: lib/widgets/container_slider.dart</title>
+File: lib/widgets/hatch_marks_picker.dart</title>
   </rect>
-  <text x="1096.062156984564" y="844.1962729211875" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1096.062156984564" dy="-6.0" font-size="14.00">build</tspan>
-    <tspan x="1096.062156984564" dy="14.0" font-size="14.00">51</tspan>
+  <text x="1100.259258192126" y="844.5843917389224" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1100.259258192126" dy="-6.0" font-size="14.00">build</tspan>
+    <tspan x="1100.259258192126" dy="14.0" font-size="14.00">60</tspan>
   </text>
 </g>
 <g>
-  <rect x="1072.8170702171565" y="869.5465599111296" width="27.119267895308628" height="11.92954681879629" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1072.8170702171565" y="869.5465599111296" width="27.119267895308628" height="11.92954681879629" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1072.8170702171565" y="869.5465599111296" width="27.119267895308628" height="11.92954681879629" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1072.8170702171565" y="869.5465599111296" width="27.119267895308628" height="11.92954681879629" fill="transparent" pointer-events="all">
-    <title>7 LOC in Method: _ContainerSliderState._adjustValue()
+  <rect x="1102.370195728662" y="870.3227975465993" width="25.331250438433457" height="11.15330918332667" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1102.370195728662" y="870.3227975465993" width="25.331250438433457" height="11.15330918332667" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1102.370195728662" y="870.3227975465993" width="25.331250438433457" height="11.15330918332667" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1102.370195728662" y="870.3227975465993" width="25.331250438433457" height="11.15330918332667" fill="transparent" pointer-events="all">
+    <title>6 LOC in Method: _HatchMarksControlsState._update()
 
-File: lib/widgets/container_slider.dart</title>
+File: lib/widgets/hatch_marks_picker.dart</title>
   </rect>
-  <text x="1086.3767041648107" y="875.5113333205278" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1086.3767041648107" dy="-6.0" font-size="3.00">_adjustValue</tspan>
-    <tspan x="1086.3767041648107" dy="14.0" font-size="3.00">7</tspan>
-  </text>
-</g>
-</g>
-<g>
-  <rect x="1127.3072437519713" y="794.8459859312454" width="45.701768704566035" height="79.18030515807962" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
-  <rect x="1127.3072437519713" y="794.8459859312454" width="45.701768704566035" height="79.18030515807962" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1127.3072437519713" y="794.8459859312454" width="45.701768704566035" height="79.18030515807962" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1127.3072437519713" y="794.8459859312454" width="45.701768704566035" height="79.18030515807962" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>41 LOC in Class: ContainerSlider
-
-File: lib/widgets/container_slider.dart</title>
-  </rect>
-  <text x="1135.3072437519713" y="809.8459859312454" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">ContainerSlider</text>
-  <text x="1165.0090124565374" y="809.8459859312454" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">41 LOC</text>
-<g>
-  <rect x="1135.3072437519713" y="818.8459859312454" width="29.701768704566035" height="42.891186507345104" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1135.3072437519713" y="818.8459859312454" width="29.701768704566035" height="42.891186507345104" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1135.3072437519713" y="818.8459859312454" width="29.701768704566035" height="42.891186507345104" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1135.3072437519713" y="818.8459859312454" width="29.701768704566035" height="42.891186507345104" fill="transparent" pointer-events="all">
-    <title>20 LOC in Method: ContainerSlider.ContainerSlider()
-
-File: lib/widgets/container_slider.dart</title>
-  </rect>
-  <text x="1150.1581281042543" y="840.291579184918" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1150.1581281042543" dy="-6.0" font-size="3.00">ContainerSlider</tspan>
-    <tspan x="1150.1581281042543" dy="14.0" font-size="3.00">20</tspan>
-  </text>
-</g>
-<g>
-  <rect x="1135.3072437519713" y="861.7371724385905" width="29.701768704566035" height="4.289118650734515" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1135.3072437519713" y="861.7371724385905" width="29.701768704566035" height="4.289118650734515" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1135.3072437519713" y="861.7371724385905" width="29.701768704566035" height="4.289118650734515" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1135.3072437519713" y="861.7371724385905" width="29.701768704566035" height="4.289118650734515" fill="transparent" pointer-events="all">
-    <title>2 LOC in Method: ContainerSlider.createState()
-
-File: lib/widgets/container_slider.dart</title>
-  </rect>
-  <text x="1150.1581281042543" y="863.8817317639578" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1150.1581281042543" dy="-6.0" font-size="3.14">createState</tspan>
-    <tspan x="1150.1581281042543" dy="14.0" font-size="3.14">2</tspan>
+  <text x="1115.0358209478788" y="875.8994521382626" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1115.0358209478788" dy="-6.0" font-size="3.78">_update</tspan>
+    <tspan x="1115.0358209478788" dy="14.0" font-size="3.78">6</tspan>
   </text>
 </g>
 </g>
 <g>
-  <rect x="1127.3072437519713" y="874.026291089325" width="45.701768704566035" height="15.449815640600889" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
-  <rect x="1127.3072437519713" y="874.026291089325" width="45.701768704566035" height="15.449815640600889" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1127.3072437519713" y="874.026291089325" width="45.701768704566035" height="15.449815640600889" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1127.3072437519713" y="874.026291089325" width="45.701768704566035" height="15.449815640600889" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>8 LOC in Class: _HorizontalDragRecognizer
+  <rect x="1135.7014461670956" y="794.8459859312454" width="37.30756628944167" height="54.41231945924129" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.45"/>
+  <rect x="1135.7014461670956" y="794.8459859312454" width="37.30756628944167" height="54.41231945924129" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1135.7014461670956" y="794.8459859312454" width="37.30756628944167" height="54.41231945924129" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8" stroke-dasharray="6,4"/>
+  <rect x="1135.7014461670956" y="794.8459859312454" width="37.30756628944167" height="54.41231945924129" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
+    <title>23 LOC in Class: &lt;...&gt;
 
-File: lib/widgets/container_slider.dart</title>
+File: lib/widgets/hatch_marks_picker.dart</title>
   </rect>
-  <text x="1135.3072437519713" y="889.026291089325" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">_HorizontalDragRecognizer</text>
-  <text x="1165.0090124565374" y="889.026291089325" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">8 LOC</text>
+  <text x="1143.7014461670956" y="809.8459859312454" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">&lt;...&gt;</text>
+  <text x="1165.0090124565372" y="809.8459859312454" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">23 LOC</text>
+<g>
+  <rect x="1143.7014461670956" y="818.8459859312454" width="21.307566289441667" height="22.41231945924129" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1143.7014461670956" y="818.8459859312454" width="21.307566289441667" height="22.41231945924129" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1143.7014461670956" y="818.8459859312454" width="21.307566289441667" height="22.41231945924129" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1143.7014461670956" y="818.8459859312454" width="21.307566289441667" height="22.41231945924129" fill="transparent" pointer-events="all">
+    <title>23 LOC in Function: showHatchMarksPicker()
+
+File: lib/widgets/hatch_marks_picker.dart</title>
+  </rect>
+  <text x="1154.3552293118164" y="830.052145660866" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1154.3552293118164" dy="-6.0" font-size="3.00">showHatchMarksPicker</tspan>
+    <tspan x="1154.3552293118164" dy="14.0" font-size="3.00">23</tspan>
+  </text>
+</g>
+</g>
+<g>
+  <rect x="1135.7014461670956" y="849.2583053904867" width="37.30756628944167" height="40.21780133943922" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
+  <rect x="1135.7014461670956" y="849.2583053904867" width="37.30756628944167" height="40.21780133943922" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1135.7014461670956" y="849.2583053904867" width="37.30756628944167" height="40.21780133943922" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1135.7014461670956" y="849.2583053904867" width="37.30756628944167" height="40.21780133943922" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
+    <title>17 LOC in Class: HatchMarksControls
+
+File: lib/widgets/hatch_marks_picker.dart</title>
+  </rect>
+  <text x="1143.7014461670956" y="864.2583053904867" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">HatchMarksControls</text>
+  <text x="1165.0090124565372" y="864.2583053904867" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">17 LOC</text>
+<g>
+  <rect x="1143.7014461670956" y="873.2583053904867" width="15.98067471708125" height="8.21780133943922" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1143.7014461670956" y="873.2583053904867" width="15.98067471708125" height="8.21780133943922" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1143.7014461670956" y="873.2583053904867" width="15.98067471708125" height="8.21780133943922" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1143.7014461670956" y="873.2583053904867" width="15.98067471708125" height="8.21780133943922" fill="transparent" pointer-events="all">
+    <title>6 LOC in Method: HatchMarksControls.HatchMarksControls()
+
+File: lib/widgets/hatch_marks_picker.dart</title>
+  </rect>
+  <text x="1151.6917835256363" y="877.3672060602063" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1151.6917835256363" dy="-6.0" font-size="3.00">HatchMarksControls</tspan>
+    <tspan x="1151.6917835256363" dy="14.0" font-size="3.00">6</tspan>
+  </text>
+</g>
+<g>
+  <rect x="1159.6821208841768" y="873.2583053904867" width="5.326891572360417" height="8.21780133943922" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1159.6821208841768" y="873.2583053904867" width="5.326891572360417" height="8.21780133943922" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1159.6821208841768" y="873.2583053904867" width="5.326891572360417" height="8.21780133943922" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1159.6821208841768" y="873.2583053904867" width="5.326891572360417" height="8.21780133943922" fill="transparent" pointer-events="all">
+    <title>2 LOC in Method: HatchMarksControls.createState()
+
+File: lib/widgets/hatch_marks_picker.dart</title>
+  </rect>
+  <text x="1162.3455666703571" y="877.3672060602063" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1162.3455666703571" dy="-6.0" font-size="3.00">createState</tspan>
+    <tspan x="1162.3455666703571" dy="14.0" font-size="3.00">2</tspan>
+  </text>
+</g>
 </g>
 </g>
 <g>
@@ -9731,103 +9731,101 @@ File: lib/widgets/side_panel_header.dart</title>
   <rect x="1688.6986453456293" y="638.8892240774267" width="61.66796289943673" height="136.46369213082568" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="1688.6986453456293" y="638.8892240774267" width="61.66796289943673" height="136.46369213082568" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="1688.6986453456293" y="638.8892240774267" width="61.66796289943673" height="136.46369213082568" fill="transparent" pointer-events="all">
-    <title>63 LOC File: lib/widgets/fill_preview_overlay.dart</title>
+    <title>63 LOC File: lib/widgets/brush_size_picker.dart</title>
   </rect>
-  <text x="1696.6986453456293" y="653.8892240774267" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">fill_preview_overlay.dart</text>
+  <text x="1696.6986453456293" y="653.8892240774267" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">brush_size_picker.dart</text>
   <text x="1742.3666082450661" y="653.8892240774267" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">63 LOC</text>
 <g>
-  <rect x="1696.6986453456293" y="662.8892240774267" width="45.66796289943673" height="58.03538451712538" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
-  <rect x="1696.6986453456293" y="662.8892240774267" width="45.66796289943673" height="58.03538451712538" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1696.6986453456293" y="662.8892240774267" width="45.66796289943673" height="58.03538451712538" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1696.6986453456293" y="662.8892240774267" width="45.66796289943673" height="58.03538451712538" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>35 LOC in Class: _FillPreviewPainter
+  <rect x="1696.6986453456293" y="662.8892240774267" width="45.66796289943673" height="43.111999927007425" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.45"/>
+  <rect x="1696.6986453456293" y="662.8892240774267" width="45.66796289943673" height="43.111999927007425" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1696.6986453456293" y="662.8892240774267" width="45.66796289943673" height="43.111999927007425" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8" stroke-dasharray="6,4"/>
+  <rect x="1696.6986453456293" y="662.8892240774267" width="45.66796289943673" height="43.111999927007425" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
+    <title>26 LOC in Class: &lt;...&gt;
 
-File: lib/widgets/fill_preview_overlay.dart</title>
+File: lib/widgets/brush_size_picker.dart</title>
   </rect>
-  <text x="1704.6986453456293" y="677.8892240774267" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">_FillPreviewPainter</text>
-  <text x="1734.3666082450661" y="677.8892240774267" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">35 LOC</text>
+  <text x="1704.6986453456293" y="677.8892240774267" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">&lt;...&gt;</text>
+  <text x="1734.3666082450661" y="677.8892240774267" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">26 LOC</text>
 <g>
-  <rect x="1726.7103597548887" y="686.8892240774267" width="7.656248490177219" height="13.01769225856269" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1726.7103597548887" y="686.8892240774267" width="7.656248490177219" height="13.01769225856269" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1726.7103597548887" y="686.8892240774267" width="7.656248490177219" height="13.01769225856269" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1726.7103597548887" y="686.8892240774267" width="7.656248490177219" height="13.01769225856269" fill="transparent" pointer-events="all">
-    <title>4 LOC in Method: _FillPreviewPainter._FillPreviewPainter()
+  <rect x="1704.6986453456293" y="686.8892240774267" width="29.66796289943673" height="11.111999927007425" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1704.6986453456293" y="686.8892240774267" width="29.66796289943673" height="11.111999927007425" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1704.6986453456293" y="686.8892240774267" width="29.66796289943673" height="11.111999927007425" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1704.6986453456293" y="686.8892240774267" width="29.66796289943673" height="11.111999927007425" fill="transparent" pointer-events="all">
+    <title>26 LOC in Function: showBrushSizePicker()
 
-File: lib/widgets/fill_preview_overlay.dart</title>
+File: lib/widgets/brush_size_picker.dart</title>
   </rect>
-  <text x="1730.5384839999774" y="693.398070206708" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1730.5384839999774" dy="-6.0" font-size="3.00">_FillPreviewPainter</tspan>
-    <tspan x="1730.5384839999774" dy="14.0" font-size="3.00">4</tspan>
-  </text>
-</g>
-<g>
-  <rect x="1704.6986453456293" y="686.8892240774267" width="22.01171440925951" height="26.03538451712538" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1704.6986453456293" y="686.8892240774267" width="22.01171440925951" height="26.03538451712538" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1704.6986453456293" y="686.8892240774267" width="22.01171440925951" height="26.03538451712538" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1704.6986453456293" y="686.8892240774267" width="22.01171440925951" height="26.03538451712538" fill="transparent" pointer-events="all">
-    <title>23 LOC in Method: _FillPreviewPainter.paint()
-
-File: lib/widgets/fill_preview_overlay.dart</title>
-  </rect>
-  <text x="1715.7045025502591" y="699.9069163359893" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1715.7045025502591" dy="-6.0" font-size="4.64">paint</tspan>
-    <tspan x="1715.7045025502591" dy="14.0" font-size="4.64">23</tspan>
-  </text>
-</g>
-<g>
-  <rect x="1726.7103597548887" y="699.9069163359893" width="7.656248490177219" height="13.01769225856269" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1726.7103597548887" y="699.9069163359893" width="7.656248490177219" height="13.01769225856269" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1726.7103597548887" y="699.9069163359893" width="7.656248490177219" height="13.01769225856269" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1726.7103597548887" y="699.9069163359893" width="7.656248490177219" height="13.01769225856269" fill="transparent" pointer-events="all">
-    <title>4 LOC in Method: _FillPreviewPainter.shouldRepaint()
-
-File: lib/widgets/fill_preview_overlay.dart</title>
-  </rect>
-  <text x="1730.5384839999774" y="706.4157624652706" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1730.5384839999774" dy="-6.0" font-size="3.00">shouldRepaint</tspan>
-    <tspan x="1730.5384839999774" dy="14.0" font-size="3.00">4</tspan>
+  <text x="1719.5326267953476" y="692.4452240409304" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1719.5326267953476" dy="-6.0" font-size="3.00">showBrushSizePicker</tspan>
+    <tspan x="1719.5326267953476" dy="14.0" font-size="3.00">26</tspan>
   </text>
 </g>
 </g>
 <g>
-  <rect x="1696.6986453456293" y="720.9246085945521" width="45.66796289943673" height="46.4283076137003" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
-  <rect x="1696.6986453456293" y="720.9246085945521" width="45.66796289943673" height="46.4283076137003" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1696.6986453456293" y="720.9246085945521" width="45.66796289943673" height="46.4283076137003" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1696.6986453456293" y="720.9246085945521" width="45.66796289943673" height="46.4283076137003" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>28 LOC in Class: FillPreviewOverlay
+  <rect x="1696.6986453456293" y="706.0012240044341" width="45.66796289943673" height="38.137538396968104" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
+  <rect x="1696.6986453456293" y="706.0012240044341" width="45.66796289943673" height="38.137538396968104" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1696.6986453456293" y="706.0012240044341" width="45.66796289943673" height="38.137538396968104" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1696.6986453456293" y="706.0012240044341" width="45.66796289943673" height="38.137538396968104" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
+    <title>23 LOC in Class: _BrushSizePickerState
 
-File: lib/widgets/fill_preview_overlay.dart</title>
+File: lib/widgets/brush_size_picker.dart</title>
   </rect>
-  <text x="1704.6986453456293" y="735.9246085945521" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">FillPreviewOverlay</text>
-  <text x="1734.3666082450661" y="735.9246085945521" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">28 LOC</text>
+  <text x="1704.6986453456293" y="721.0012240044341" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">_BrushSizePickerState</text>
+  <text x="1734.3666082450661" y="721.0012240044341" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">23 LOC</text>
 <g>
-  <rect x="1723.770907209553" y="744.9246085945521" width="10.595701035513116" height="14.428307613700298" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1723.770907209553" y="744.9246085945521" width="10.595701035513116" height="14.428307613700298" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1723.770907209553" y="744.9246085945521" width="10.595701035513116" height="14.428307613700298" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1723.770907209553" y="744.9246085945521" width="10.595701035513116" height="14.428307613700298" fill="transparent" pointer-events="all">
-    <title>5 LOC in Method: FillPreviewOverlay.FillPreviewOverlay()
+  <rect x="1719.5326267953476" y="730.0012240044341" width="8.90038886983102" height="6.137538396968104" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1719.5326267953476" y="730.0012240044341" width="8.90038886983102" height="6.137538396968104" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1719.5326267953476" y="730.0012240044341" width="8.90038886983102" height="6.137538396968104" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1719.5326267953476" y="730.0012240044341" width="8.90038886983102" height="6.137538396968104" fill="transparent" pointer-events="all">
+    <title>6 LOC in Method: _BrushSizePickerState.clampValue()
 
-File: lib/widgets/fill_preview_overlay.dart</title>
+File: lib/widgets/brush_size_picker.dart</title>
   </rect>
-  <text x="1729.0687577273095" y="752.1387624014022" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1729.0687577273095" dy="-6.0" font-size="3.00">FillPreviewOverlay</tspan>
-    <tspan x="1729.0687577273095" dy="14.0" font-size="3.00">5</tspan>
+  <text x="1723.9828212302632" y="733.0699932029181" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1723.9828212302632" dy="-6.0" font-size="3.00">clampValue</tspan>
+    <tspan x="1723.9828212302632" dy="14.0" font-size="3.00">6</tspan>
   </text>
 </g>
 <g>
-  <rect x="1704.6986453456293" y="744.9246085945521" width="19.072261863923615" height="14.428307613700298" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1704.6986453456293" y="744.9246085945521" width="19.072261863923615" height="14.428307613700298" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1704.6986453456293" y="744.9246085945521" width="19.072261863923615" height="14.428307613700298" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1704.6986453456293" y="744.9246085945521" width="19.072261863923615" height="14.428307613700298" fill="transparent" pointer-events="all">
-    <title>9 LOC in Method: FillPreviewOverlay.build()
+  <rect x="1704.6986453456293" y="730.0012240044341" width="14.833981449718365" height="6.137538396968104" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1704.6986453456293" y="730.0012240044341" width="14.833981449718365" height="6.137538396968104" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1704.6986453456293" y="730.0012240044341" width="14.833981449718365" height="6.137538396968104" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1704.6986453456293" y="730.0012240044341" width="14.833981449718365" height="6.137538396968104" fill="transparent" pointer-events="all">
+    <title>10 LOC in Method: _BrushSizePickerState.buildPickerWidget()
 
-File: lib/widgets/fill_preview_overlay.dart</title>
+File: lib/widgets/brush_size_picker.dart</title>
   </rect>
-  <text x="1714.2347762775912" y="752.1387624014022" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1714.2347762775912" dy="-6.0" font-size="3.81">build</tspan>
-    <tspan x="1714.2347762775912" dy="14.0" font-size="3.81">9</tspan>
+  <text x="1712.1156360704886" y="733.0699932029181" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1712.1156360704886" dy="-6.0" font-size="3.00">buildPickerWidget</tspan>
+    <tspan x="1712.1156360704886" dy="14.0" font-size="3.00">10</tspan>
   </text>
 </g>
+<g>
+  <rect x="1728.4330156651786" y="730.0012240044341" width="5.933592579887346" height="6.137538396968104" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1728.4330156651786" y="730.0012240044341" width="5.933592579887346" height="6.137538396968104" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1728.4330156651786" y="730.0012240044341" width="5.933592579887346" height="6.137538396968104" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1728.4330156651786" y="730.0012240044341" width="5.933592579887346" height="6.137538396968104" fill="transparent" pointer-events="all">
+    <title>4 LOC in Method: _BrushSizePickerState.formatValue()
+
+File: lib/widgets/brush_size_picker.dart</title>
+  </rect>
+  <text x="1731.3998119551222" y="733.0699932029181" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1731.3998119551222" dy="-6.0" font-size="3.00">formatValue</tspan>
+    <tspan x="1731.3998119551222" dy="14.0" font-size="3.00">4</tspan>
+  </text>
+</g>
+</g>
+<g>
+  <rect x="1696.6986453456293" y="744.1387624014022" width="45.66796289943673" height="23.21415380685015" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
+  <rect x="1696.6986453456293" y="744.1387624014022" width="45.66796289943673" height="23.21415380685015" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1696.6986453456293" y="744.1387624014022" width="45.66796289943673" height="23.21415380685015" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1696.6986453456293" y="744.1387624014022" width="45.66796289943673" height="23.21415380685015" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
+    <title>14 LOC in Class: BrushSizePicker
+
+File: lib/widgets/brush_size_picker.dart</title>
+  </rect>
+  <text x="1704.6986453456293" y="759.1387624014022" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">BrushSizePicker</text>
+  <text x="1734.3666082450661" y="759.1387624014022" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">14 LOC</text>
 </g>
 </g>
 <g>
@@ -9835,101 +9833,103 @@ File: lib/widgets/fill_preview_overlay.dart</title>
   <rect x="1558.3309117896397" y="777.3529162082523" width="65.91249375939918" height="127.80971137264908" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="1558.3309117896397" y="777.3529162082523" width="65.91249375939918" height="127.80971137264908" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="1558.3309117896397" y="777.3529162082523" width="65.91249375939918" height="127.80971137264908" fill="transparent" pointer-events="all">
-    <title>63 LOC File: lib/widgets/brush_size_picker.dart</title>
+    <title>63 LOC File: lib/widgets/fill_preview_overlay.dart</title>
   </rect>
-  <text x="1566.3309117896397" y="792.3529162082523" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">brush_size_picker.dart</text>
+  <text x="1566.3309117896397" y="792.3529162082523" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">fill_preview_overlay.dart</text>
   <text x="1616.243405549039" y="792.3529162082523" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">63 LOC</text>
 <g>
-  <rect x="1566.3309117896397" y="801.3529162082523" width="49.91249375939918" height="39.54051580458533" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.45"/>
-  <rect x="1566.3309117896397" y="801.3529162082523" width="49.91249375939918" height="39.54051580458533" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1566.3309117896397" y="801.3529162082523" width="49.91249375939918" height="39.54051580458533" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8" stroke-dasharray="6,4"/>
-  <rect x="1566.3309117896397" y="801.3529162082523" width="49.91249375939918" height="39.54051580458533" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>26 LOC in Class: &lt;...&gt;
+  <rect x="1566.3309117896397" y="801.3529162082523" width="49.91249375939918" height="53.22761742924949" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
+  <rect x="1566.3309117896397" y="801.3529162082523" width="49.91249375939918" height="53.22761742924949" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1566.3309117896397" y="801.3529162082523" width="49.91249375939918" height="53.22761742924949" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1566.3309117896397" y="801.3529162082523" width="49.91249375939918" height="53.22761742924949" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
+    <title>35 LOC in Class: _FillPreviewPainter
 
-File: lib/widgets/brush_size_picker.dart</title>
+File: lib/widgets/fill_preview_overlay.dart</title>
   </rect>
-  <text x="1574.3309117896397" y="816.3529162082523" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">&lt;...&gt;</text>
-  <text x="1608.243405549039" y="816.3529162082523" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">26 LOC</text>
+  <text x="1574.3309117896397" y="816.3529162082523" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">_FillPreviewPainter</text>
+  <text x="1608.243405549039" y="816.3529162082523" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">35 LOC</text>
 <g>
-  <rect x="1574.3309117896397" y="825.3529162082523" width="33.91249375939918" height="7.540515804585333" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1574.3309117896397" y="825.3529162082523" width="33.91249375939918" height="7.540515804585333" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1574.3309117896397" y="825.3529162082523" width="33.91249375939918" height="7.540515804585333" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1574.3309117896397" y="825.3529162082523" width="33.91249375939918" height="7.540515804585333" fill="transparent" pointer-events="all">
-    <title>26 LOC in Function: showBrushSizePicker()
+  <rect x="1599.4917942562906" y="825.3529162082523" width="8.751611292748176" height="10.613808714624746" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1599.4917942562906" y="825.3529162082523" width="8.751611292748176" height="10.613808714624746" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1599.4917942562906" y="825.3529162082523" width="8.751611292748176" height="10.613808714624746" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1599.4917942562906" y="825.3529162082523" width="8.751611292748176" height="10.613808714624746" fill="transparent" pointer-events="all">
+    <title>4 LOC in Method: _FillPreviewPainter._FillPreviewPainter()
 
-File: lib/widgets/brush_size_picker.dart</title>
+File: lib/widgets/fill_preview_overlay.dart</title>
   </rect>
-  <text x="1591.2871586693393" y="829.1231741105449" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1591.2871586693393" dy="-6.0" font-size="3.00">showBrushSizePicker</tspan>
-    <tspan x="1591.2871586693393" dy="14.0" font-size="3.00">26</tspan>
+  <text x="1603.8675999026648" y="830.6598205655647" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1603.8675999026648" dy="-6.0" font-size="3.00">_FillPreviewPainter</tspan>
+    <tspan x="1603.8675999026648" dy="14.0" font-size="3.00">4</tspan>
+  </text>
+</g>
+<g>
+  <rect x="1574.3309117896397" y="825.3529162082523" width="25.160882466651007" height="21.22761742924949" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1574.3309117896397" y="825.3529162082523" width="25.160882466651007" height="21.22761742924949" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1574.3309117896397" y="825.3529162082523" width="25.160882466651007" height="21.22761742924949" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1574.3309117896397" y="825.3529162082523" width="25.160882466651007" height="21.22761742924949" fill="transparent" pointer-events="all">
+    <title>23 LOC in Method: _FillPreviewPainter.paint()
+
+File: lib/widgets/fill_preview_overlay.dart</title>
+  </rect>
+  <text x="1586.9113530229652" y="835.966724922877" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1586.9113530229652" dy="-6.0" font-size="5.85">paint</tspan>
+    <tspan x="1586.9113530229652" dy="14.0" font-size="5.85">23</tspan>
+  </text>
+</g>
+<g>
+  <rect x="1599.4917942562906" y="835.966724922877" width="8.751611292748176" height="10.613808714624746" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1599.4917942562906" y="835.966724922877" width="8.751611292748176" height="10.613808714624746" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1599.4917942562906" y="835.966724922877" width="8.751611292748176" height="10.613808714624746" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1599.4917942562906" y="835.966724922877" width="8.751611292748176" height="10.613808714624746" fill="transparent" pointer-events="all">
+    <title>4 LOC in Method: _FillPreviewPainter.shouldRepaint()
+
+File: lib/widgets/fill_preview_overlay.dart</title>
+  </rect>
+  <text x="1603.8675999026648" y="841.2736292801894" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1603.8675999026648" dy="-6.0" font-size="3.00">shouldRepaint</tspan>
+    <tspan x="1603.8675999026648" dy="14.0" font-size="3.00">4</tspan>
   </text>
 </g>
 </g>
 <g>
-  <rect x="1566.3309117896397" y="840.8934320128376" width="49.91249375939918" height="34.978148596363944" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
-  <rect x="1566.3309117896397" y="840.8934320128376" width="49.91249375939918" height="34.978148596363944" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1566.3309117896397" y="840.8934320128376" width="49.91249375939918" height="34.978148596363944" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1566.3309117896397" y="840.8934320128376" width="49.91249375939918" height="34.978148596363944" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>23 LOC in Class: _BrushSizePickerState
+  <rect x="1566.3309117896397" y="854.5805336375017" width="49.91249375939918" height="42.582093943399585" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
+  <rect x="1566.3309117896397" y="854.5805336375017" width="49.91249375939918" height="42.582093943399585" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1566.3309117896397" y="854.5805336375017" width="49.91249375939918" height="42.582093943399585" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1566.3309117896397" y="854.5805336375017" width="49.91249375939918" height="42.582093943399585" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
+    <title>28 LOC in Class: FillPreviewOverlay
 
-File: lib/widgets/brush_size_picker.dart</title>
+File: lib/widgets/fill_preview_overlay.dart</title>
   </rect>
-  <text x="1574.3309117896397" y="855.8934320128376" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">_BrushSizePickerState</text>
-  <text x="1608.243405549039" y="855.8934320128376" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">23 LOC</text>
+  <text x="1574.3309117896397" y="869.5805336375017" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">FillPreviewOverlay</text>
+  <text x="1608.243405549039" y="869.5805336375017" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">28 LOC</text>
 <g>
-  <rect x="1591.2871586693393" y="864.8934320128376" width="10.173748127819755" height="2.978148596363944" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1591.2871586693393" y="864.8934320128376" width="10.173748127819755" height="2.978148596363944" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1591.2871586693393" y="864.8934320128376" width="10.173748127819755" height="2.978148596363944" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1591.2871586693393" y="864.8934320128376" width="10.173748127819755" height="2.978148596363944" fill="transparent" pointer-events="all">
-    <title>6 LOC in Method: _BrushSizePickerState.clampValue()
+  <rect x="1596.1318006349677" y="878.5805336375017" width="12.111604914071137" height="10.582093943399585" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1596.1318006349677" y="878.5805336375017" width="12.111604914071137" height="10.582093943399585" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1596.1318006349677" y="878.5805336375017" width="12.111604914071137" height="10.582093943399585" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1596.1318006349677" y="878.5805336375017" width="12.111604914071137" height="10.582093943399585" fill="transparent" pointer-events="all">
+    <title>5 LOC in Method: FillPreviewOverlay.FillPreviewOverlay()
 
-File: lib/widgets/brush_size_picker.dart</title>
+File: lib/widgets/fill_preview_overlay.dart</title>
   </rect>
-  <text x="1596.3740327332491" y="866.3825063110196" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1596.3740327332491" dy="-6.0" font-size="3.00">clampValue</tspan>
-    <tspan x="1596.3740327332491" dy="14.0" font-size="3.00">6</tspan>
+  <text x="1602.1876030920032" y="883.8715806092015" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1602.1876030920032" dy="-6.0" font-size="3.00">FillPreviewOverlay</tspan>
+    <tspan x="1602.1876030920032" dy="14.0" font-size="3.00">5</tspan>
   </text>
 </g>
 <g>
-  <rect x="1574.3309117896397" y="864.8934320128376" width="16.95624687969959" height="2.978148596363944" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1574.3309117896397" y="864.8934320128376" width="16.95624687969959" height="2.978148596363944" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1574.3309117896397" y="864.8934320128376" width="16.95624687969959" height="2.978148596363944" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1574.3309117896397" y="864.8934320128376" width="16.95624687969959" height="2.978148596363944" fill="transparent" pointer-events="all">
-    <title>10 LOC in Method: _BrushSizePickerState.buildPickerWidget()
+  <rect x="1574.3309117896397" y="878.5805336375017" width="21.800888845328046" height="10.582093943399585" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1574.3309117896397" y="878.5805336375017" width="21.800888845328046" height="10.582093943399585" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1574.3309117896397" y="878.5805336375017" width="21.800888845328046" height="10.582093943399585" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1574.3309117896397" y="878.5805336375017" width="21.800888845328046" height="10.582093943399585" fill="transparent" pointer-events="all">
+    <title>9 LOC in Method: FillPreviewOverlay.build()
 
-File: lib/widgets/brush_size_picker.dart</title>
+File: lib/widgets/fill_preview_overlay.dart</title>
   </rect>
-  <text x="1582.8090352294894" y="866.3825063110196" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1582.8090352294894" dy="-6.0" font-size="3.00">buildPickerWidget</tspan>
-    <tspan x="1582.8090352294894" dy="14.0" font-size="3.00">10</tspan>
+  <text x="1585.2313562123038" y="883.8715806092015" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1585.2313562123038" dy="-6.0" font-size="4.96">build</tspan>
+    <tspan x="1585.2313562123038" dy="14.0" font-size="4.96">9</tspan>
   </text>
 </g>
-<g>
-  <rect x="1601.4609067971592" y="864.8934320128376" width="6.782498751879837" height="2.978148596363944" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1601.4609067971592" y="864.8934320128376" width="6.782498751879837" height="2.978148596363944" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1601.4609067971592" y="864.8934320128376" width="6.782498751879837" height="2.978148596363944" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1601.4609067971592" y="864.8934320128376" width="6.782498751879837" height="2.978148596363944" fill="transparent" pointer-events="all">
-    <title>4 LOC in Method: _BrushSizePickerState.formatValue()
-
-File: lib/widgets/brush_size_picker.dart</title>
-  </rect>
-  <text x="1604.852156173099" y="866.3825063110196" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1604.852156173099" dy="-6.0" font-size="3.00">formatValue</tspan>
-    <tspan x="1604.852156173099" dy="14.0" font-size="3.00">4</tspan>
-  </text>
-</g>
-</g>
-<g>
-  <rect x="1566.3309117896397" y="875.8715806092016" width="49.91249375939918" height="21.2910469716998" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
-  <rect x="1566.3309117896397" y="875.8715806092016" width="49.91249375939918" height="21.2910469716998" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1566.3309117896397" y="875.8715806092016" width="49.91249375939918" height="21.2910469716998" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1566.3309117896397" y="875.8715806092016" width="49.91249375939918" height="21.2910469716998" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>14 LOC in Class: BrushSizePicker
-
-File: lib/widgets/brush_size_picker.dart</title>
-  </rect>
-  <text x="1574.3309117896397" y="890.8715806092016" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">BrushSizePicker</text>
-  <text x="1608.243405549039" y="890.8715806092016" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">14 LOC</text>
 </g>
 </g>
 <g>
@@ -10435,21 +10435,21 @@ File: lib/widgets/app_text.dart</title>
   <rect x="1471.7323710605292" y="1102.1075184588844" width="102.97450424755851" height="53.98630052566296" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="1471.7323710605292" y="1102.1075184588844" width="102.97450424755851" height="53.98630052566296" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="1471.7323710605292" y="1102.1075184588844" width="102.97450424755851" height="53.98630052566296" fill="transparent" pointer-events="all">
-    <title>42 LOC File: lib/widgets/text_alignment_dropdown.dart</title>
+    <title>42 LOC File: lib/widgets/app_icon.dart</title>
   </rect>
-  <text x="1479.7323710605292" y="1117.1075184588844" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">text_alignment_dropdown.dart</text>
-  <text x="1566.7068753080878" y="1117.1075184588844" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">42 LOC</text>
+  <text x="1479.7323710605292" y="1117.1075184588844" text-anchor="start" font-size="5.69" fill="#000" font-weight="700">app_icon.dart</text>
+  <text x="1566.7068753080878" y="1117.1075184588844" text-anchor="end" font-size="5.69" fill="#000" font-weight="700">42 LOC</text>
 <g>
   <rect x="1479.7323710605292" y="1126.1075184588844" width="86.97450424755851" height="21.986300525662962" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
   <rect x="1479.7323710605292" y="1126.1075184588844" width="86.97450424755851" height="21.986300525662962" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="1479.7323710605292" y="1126.1075184588844" width="86.97450424755851" height="21.986300525662962" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="1479.7323710605292" y="1126.1075184588844" width="86.97450424755851" height="21.986300525662962" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>42 LOC in Class: TextAlignmentDropdown
+    <title>42 LOC in Class: AppSvgIcon
 
-File: lib/widgets/text_alignment_dropdown.dart</title>
+File: lib/widgets/app_icon.dart</title>
   </rect>
-  <text x="1487.7323710605292" y="1141.1075184588844" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">TextAlignmentDropdown</text>
-  <text x="1558.7068753080878" y="1141.1075184588844" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">42 LOC</text>
+  <text x="1487.7323710605292" y="1141.1075184588844" text-anchor="start" font-size="5.53" fill="#000" font-weight="700">AppSvgIcon</text>
+  <text x="1558.7068753080878" y="1141.1075184588844" text-anchor="end" font-size="5.53" fill="#000" font-weight="700">42 LOC</text>
 </g>
 </g>
 <g>
@@ -10457,61 +10457,47 @@ File: lib/widgets/text_alignment_dropdown.dart</title>
   <rect x="1576.7068753080878" y="907.1626275809015" width="56.73315651552035" height="98.06501422724061" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="1576.7068753080878" y="907.1626275809015" width="56.73315651552035" height="98.06501422724061" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="1576.7068753080878" y="907.1626275809015" width="56.73315651552035" height="98.06501422724061" fill="transparent" pointer-events="all">
-    <title>42 LOC File: lib/widgets/app_icon.dart</title>
+    <title>42 LOC File: lib/widgets/text_alignment_dropdown.dart</title>
   </rect>
-  <text x="1584.7068753080878" y="922.1626275809015" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">app_icon.dart</text>
+  <text x="1584.7068753080878" y="922.1626275809015" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">text_alignment_dropdown.dart</text>
   <text x="1625.440031823608" y="922.1626275809015" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">42 LOC</text>
 <g>
   <rect x="1584.7068753080878" y="931.1626275809015" width="40.73315651552035" height="66.06501422724061" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
   <rect x="1584.7068753080878" y="931.1626275809015" width="40.73315651552035" height="66.06501422724061" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="1584.7068753080878" y="931.1626275809015" width="40.73315651552035" height="66.06501422724061" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="1584.7068753080878" y="931.1626275809015" width="40.73315651552035" height="66.06501422724061" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>42 LOC in Class: AppSvgIcon
+    <title>42 LOC in Class: TextAlignmentDropdown
 
-File: lib/widgets/app_icon.dart</title>
+File: lib/widgets/text_alignment_dropdown.dart</title>
   </rect>
-  <text x="1592.7068753080878" y="946.1626275809015" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">AppSvgIcon</text>
+  <text x="1592.7068753080878" y="946.1626275809015" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">TextAlignmentDropdown</text>
   <text x="1617.440031823608" y="946.1626275809015" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">42 LOC</text>
 <g>
-  <rect x="1592.7068753080878" y="980.711388251332" width="24.73315651552035" height="8.516253556810153" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1592.7068753080878" y="980.711388251332" width="24.73315651552035" height="8.516253556810153" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1592.7068753080878" y="980.711388251332" width="24.73315651552035" height="8.516253556810153" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1592.7068753080878" y="980.711388251332" width="24.73315651552035" height="8.516253556810153" fill="transparent" pointer-events="all">
-    <title>8 LOC in Method: AppSvgIcon.AppSvgIcon()
+  <rect x="1592.7068753080878" y="983.5501394369353" width="24.73315651552035" height="5.677502371206767" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1592.7068753080878" y="983.5501394369353" width="24.73315651552035" height="5.677502371206767" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1592.7068753080878" y="983.5501394369353" width="24.73315651552035" height="5.677502371206767" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1592.7068753080878" y="983.5501394369353" width="24.73315651552035" height="5.677502371206767" fill="transparent" pointer-events="all">
+    <title>6 LOC in Method: TextAlignmentDropdown.TextAlignmentDropdown()
 
-File: lib/widgets/app_icon.dart</title>
+File: lib/widgets/text_alignment_dropdown.dart</title>
   </rect>
-  <text x="1605.073453565848" y="984.9695150297371" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1605.073453565848" dy="-6.0" font-size="3.00">AppSvgIcon</tspan>
-    <tspan x="1605.073453565848" dy="14.0" font-size="3.00">8</tspan>
+  <text x="1605.073453565848" y="986.3888906225387" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1605.073453565848" dy="-6.0" font-size="3.00">TextAlignmentDropdown</tspan>
+    <tspan x="1605.073453565848" dy="14.0" font-size="3.00">6</tspan>
   </text>
 </g>
 <g>
-  <rect x="1592.7068753080878" y="955.1626275809015" width="24.73315651552035" height="13.838912029816496" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1592.7068753080878" y="955.1626275809015" width="24.73315651552035" height="13.838912029816496" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1592.7068753080878" y="955.1626275809015" width="24.73315651552035" height="13.838912029816496" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1592.7068753080878" y="955.1626275809015" width="24.73315651552035" height="13.838912029816496" fill="transparent" pointer-events="all">
-    <title>13 LOC in Method: AppSvgIcon.build()
+  <rect x="1592.7068753080878" y="955.1626275809015" width="24.73315651552035" height="28.387511856033843" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1592.7068753080878" y="955.1626275809015" width="24.73315651552035" height="28.387511856033843" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1592.7068753080878" y="955.1626275809015" width="24.73315651552035" height="28.387511856033843" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1592.7068753080878" y="955.1626275809015" width="24.73315651552035" height="28.387511856033843" fill="transparent" pointer-events="all">
+    <title>30 LOC in Method: TextAlignmentDropdown.build()
 
-File: lib/widgets/app_icon.dart</title>
+File: lib/widgets/text_alignment_dropdown.dart</title>
   </rect>
-  <text x="1605.073453565848" y="962.0820835958098" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+  <text x="1605.073453565848" y="969.3563835089184" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
     <tspan x="1605.073453565848" dy="-6.0" font-size="6.19">build</tspan>
-    <tspan x="1605.073453565848" dy="14.0" font-size="6.19">13</tspan>
-  </text>
-</g>
-<g>
-  <rect x="1592.7068753080878" y="969.0015396107179" width="24.73315651552035" height="11.709848640613961" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1592.7068753080878" y="969.0015396107179" width="24.73315651552035" height="11.709848640613961" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1592.7068753080878" y="969.0015396107179" width="24.73315651552035" height="11.709848640613961" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1592.7068753080878" y="969.0015396107179" width="24.73315651552035" height="11.709848640613961" fill="transparent" pointer-events="all">
-    <title>11 LOC in Method: AppSvgIcon.defaultColor()
-
-File: lib/widgets/app_icon.dart</title>
-  </rect>
-  <text x="1605.073453565848" y="974.8564639310249" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1605.073453565848" dy="-6.0" font-size="3.00">defaultColor</tspan>
-    <tspan x="1605.073453565848" dy="14.0" font-size="3.00">11</tspan>
+    <tspan x="1605.073453565848" dy="14.0" font-size="6.19">30</tspan>
   </text>
 </g>
 </g>
@@ -10811,20 +10797,20 @@ File: lib/widgets/app_scaffold.dart</title>
   <rect x="1717.4929847943424" y="1049.7552728547194" width="32.8736234507236" height="70.22569741988539" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="1717.4929847943424" y="1049.7552728547194" width="32.8736234507236" height="70.22569741988539" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="1717.4929847943424" y="1049.7552728547194" width="32.8736234507236" height="70.22569741988539" fill="transparent" pointer-events="all">
-    <title>18 LOC File: lib/widgets/app_divider.dart</title>
+    <title>18 LOC File: lib/widgets/app_card.dart</title>
   </rect>
-  <text x="1725.4929847943424" y="1064.7552728547194" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">app_divider.dart</text>
+  <text x="1725.4929847943424" y="1064.7552728547194" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">app_card.dart</text>
   <text x="1742.3666082450661" y="1064.7552728547194" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">18 LOC</text>
 <g>
   <rect x="1725.4929847943424" y="1073.7552728547194" width="16.8736234507236" height="38.22569741988539" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
   <rect x="1725.4929847943424" y="1073.7552728547194" width="16.8736234507236" height="38.22569741988539" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="1725.4929847943424" y="1073.7552728547194" width="16.8736234507236" height="38.22569741988539" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="1725.4929847943424" y="1073.7552728547194" width="16.8736234507236" height="38.22569741988539" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>18 LOC in Class: AppDivider
+    <title>18 LOC in Class: AppCard
 
-File: lib/widgets/app_divider.dart</title>
+File: lib/widgets/app_card.dart</title>
   </rect>
-  <text x="1733.4929847943424" y="1088.7552728547194" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">AppDivider</text>
+  <text x="1733.4929847943424" y="1088.7552728547194" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">AppCard</text>
   <text x="1734.3666082450661" y="1088.7552728547194" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">18 LOC</text>
 </g>
 </g>
@@ -10833,20 +10819,20 @@ File: lib/widgets/app_divider.dart</title>
   <rect x="1674.869667243458" y="1121.9809702746047" width="67.74724690144721" height="34.11284870994271" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="1674.869667243458" y="1121.9809702746047" width="67.74724690144721" height="34.11284870994271" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="1674.869667243458" y="1121.9809702746047" width="67.74724690144721" height="34.11284870994271" fill="transparent" pointer-events="all">
-    <title>18 LOC File: lib/widgets/app_card.dart</title>
+    <title>18 LOC File: lib/widgets/app_divider.dart</title>
   </rect>
-  <text x="1682.869667243458" y="1136.9809702746047" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">app_card.dart</text>
+  <text x="1682.869667243458" y="1136.9809702746047" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">app_divider.dart</text>
   <text x="1734.6169141449052" y="1136.9809702746047" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">18 LOC</text>
 <g>
   <rect x="1682.869667243458" y="1145.9809702746047" width="51.74724690144721" height="2.1128487099427105" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
   <rect x="1682.869667243458" y="1145.9809702746047" width="51.74724690144721" height="2.1128487099427105" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="1682.869667243458" y="1145.9809702746047" width="51.74724690144721" height="2.1128487099427105" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="1682.869667243458" y="1145.9809702746047" width="51.74724690144721" height="2.1128487099427105" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>18 LOC in Class: AppCard
+    <title>18 LOC in Class: AppDivider
 
-File: lib/widgets/app_card.dart</title>
+File: lib/widgets/app_divider.dart</title>
   </rect>
-  <text x="1690.869667243458" y="1160.9809702746047" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">AppCard</text>
+  <text x="1690.869667243458" y="1160.9809702746047" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">AppDivider</text>
   <text x="1726.6169141449052" y="1160.9809702746047" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">18 LOC</text>
 </g>
 </g>
@@ -19579,145 +19565,61 @@ File: lib/providers/app_provider_selection_commit.dart</title>
   <rect x="1355.620957409229" y="1592.1984492220613" width="144.75950487284442" height="91.78624386230783" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="1355.620957409229" y="1592.1984492220613" width="144.75950487284442" height="91.78624386230783" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="1355.620957409229" y="1592.1984492220613" width="144.75950487284442" height="91.78624386230783" fill="transparent" pointer-events="all">
-    <title>100 LOC File: lib/providers/wand_selection_manager.dart</title>
+    <title>100 LOC File: lib/providers/selection_effect_renderer.dart</title>
   </rect>
-  <text x="1363.620957409229" y="1607.1984492220613" text-anchor="start" font-size="4.25" fill="#000" font-weight="700">wand_selection_manager.dart</text>
-  <text x="1492.3804622820735" y="1607.1984492220613" text-anchor="end" font-size="4.25" fill="#000" font-weight="700">100 LOC</text>
+  <text x="1363.620957409229" y="1607.1984492220613" text-anchor="start" font-size="3.82" fill="#000" font-weight="700">selection_effect_renderer.dart</text>
+  <text x="1492.3804622820735" y="1607.1984492220613" text-anchor="end" font-size="3.82" fill="#000" font-weight="700">100 LOC</text>
 <g>
   <rect x="1363.620957409229" y="1616.1984492220613" width="128.75950487284442" height="59.78624386230783" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
   <rect x="1363.620957409229" y="1616.1984492220613" width="128.75950487284442" height="59.78624386230783" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="1363.620957409229" y="1616.1984492220613" width="128.75950487284442" height="59.78624386230783" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="1363.620957409229" y="1616.1984492220613" width="128.75950487284442" height="59.78624386230783" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>100 LOC in Class: WandSelectionManager
+    <title>100 LOC in Class: SelectionEffectRenderer
 
-File: lib/providers/wand_selection_manager.dart</title>
+File: lib/providers/selection_effect_renderer.dart</title>
   </rect>
-  <text x="1371.620957409229" y="1631.1984492220613" text-anchor="start" font-size="4.63" fill="#000" font-weight="700">WandSelectionManager</text>
-  <text x="1484.3804622820735" y="1631.1984492220613" text-anchor="end" font-size="4.63" fill="#000" font-weight="700">100 LOC</text>
+  <text x="1371.620957409229" y="1631.1984492220613" text-anchor="start" font-size="4.22" fill="#000" font-weight="700">SelectionEffectRenderer</text>
+  <text x="1484.3804622820735" y="1631.1984492220613" text-anchor="end" font-size="4.22" fill="#000" font-weight="700">100 LOC</text>
 <g>
-  <rect x="1463.7537235858215" y="1660.5750280544203" width="10.313369348126017" height="7.409665029948755" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1463.7537235858215" y="1660.5750280544203" width="10.313369348126017" height="7.409665029948755" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1463.7537235858215" y="1660.5750280544203" width="10.313369348126017" height="7.409665029948755" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1463.7537235858215" y="1660.5750280544203" width="10.313369348126017" height="7.409665029948755" fill="transparent" pointer-events="all">
-    <title>2 LOC in Method: WandSelectionManager.requestVersion()
+  <rect x="1418.1955355088821" y="1640.1984492220613" width="33.09246338659565" height="27.786243862307828" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1418.1955355088821" y="1640.1984492220613" width="33.09246338659565" height="27.786243862307828" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1418.1955355088821" y="1640.1984492220613" width="33.09246338659565" height="27.786243862307828" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1418.1955355088821" y="1640.1984492220613" width="33.09246338659565" height="27.786243862307828" fill="transparent" pointer-events="all">
+    <title>27 LOC in Method: SelectionEffectRenderer.maskToSelection()
 
-File: lib/providers/wand_selection_manager.dart</title>
+File: lib/providers/selection_effect_renderer.dart</title>
   </rect>
-  <text x="1468.9104082598844" y="1664.2798605693947" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1468.9104082598844" dy="-6.0" font-size="3.00">requestVersion</tspan>
-    <tspan x="1468.9104082598844" dy="14.0" font-size="3.00">2</tspan>
+  <text x="1434.74176720218" y="1654.0915711532152" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1434.74176720218" dy="-6.0" font-size="3.00">maskToSelection</tspan>
+    <tspan x="1434.74176720218" dy="14.0" font-size="3.00">27</tspan>
   </text>
 </g>
 <g>
-  <rect x="1474.0670929339476" y="1660.5750280544203" width="10.313369348126017" height="7.409665029948755" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1474.0670929339476" y="1660.5750280544203" width="10.313369348126017" height="7.409665029948755" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1474.0670929339476" y="1660.5750280544203" width="10.313369348126017" height="7.409665029948755" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1474.0670929339476" y="1660.5750280544203" width="10.313369348126017" height="7.409665029948755" fill="transparent" pointer-events="all">
-    <title>2 LOC in Method: WandSelectionManager.hasPendingRequest()
+  <rect x="1371.620957409229" y="1640.1984492220613" width="46.57457809965313" height="27.786243862307828" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1371.620957409229" y="1640.1984492220613" width="46.57457809965313" height="27.786243862307828" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1371.620957409229" y="1640.1984492220613" width="46.57457809965313" height="27.786243862307828" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1371.620957409229" y="1640.1984492220613" width="46.57457809965313" height="27.786243862307828" fill="transparent" pointer-events="all">
+    <title>38 LOC in Method: SelectionEffectRenderer.buildMaskedImage()
 
-File: lib/providers/wand_selection_manager.dart</title>
+File: lib/providers/selection_effect_renderer.dart</title>
   </rect>
-  <text x="1479.2237776080106" y="1664.2798605693947" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1479.2237776080106" dy="-6.0" font-size="3.00">hasPendingRequest</tspan>
-    <tspan x="1479.2237776080106" dy="14.0" font-size="3.00">2</tspan>
+  <text x="1394.9082464590556" y="1654.0915711532152" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1394.9082464590556" dy="-6.0" font-size="4.19">buildMaskedImage</tspan>
+    <tspan x="1394.9082464590556" dy="14.0" font-size="4.19">38</tspan>
   </text>
 </g>
 <g>
-  <rect x="1439.001637150319" y="1640.1984492220613" width="24.752086435502434" height="13.893121931153914" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1439.001637150319" y="1640.1984492220613" width="24.752086435502434" height="13.893121931153914" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1439.001637150319" y="1640.1984492220613" width="24.752086435502434" height="13.893121931153914" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1439.001637150319" y="1640.1984492220613" width="24.752086435502434" height="13.893121931153914" fill="transparent" pointer-events="all">
-    <title>9 LOC in Method: WandSelectionManager.queueRequest()
+  <rect x="1451.2879988954778" y="1640.1984492220613" width="31.866816594499504" height="27.786243862307828" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1451.2879988954778" y="1640.1984492220613" width="31.866816594499504" height="27.786243862307828" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1451.2879988954778" y="1640.1984492220613" width="31.866816594499504" height="27.786243862307828" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1451.2879988954778" y="1640.1984492220613" width="31.866816594499504" height="27.786243862307828" fill="transparent" pointer-events="all">
+    <title>26 LOC in Method: SelectionEffectRenderer.buildPreviewProxy()
 
-File: lib/providers/wand_selection_manager.dart</title>
+File: lib/providers/selection_effect_renderer.dart</title>
   </rect>
-  <text x="1451.3776803680703" y="1647.1450101876383" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1451.3776803680703" dy="-6.0" font-size="3.00">queueRequest</tspan>
-    <tspan x="1451.3776803680703" dy="14.0" font-size="3.00">9</tspan>
-  </text>
-</g>
-<g>
-  <rect x="1418.374898454067" y="1640.1984492220613" width="20.626738696252026" height="27.786243862307828" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1418.374898454067" y="1640.1984492220613" width="20.626738696252026" height="27.786243862307828" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1418.374898454067" y="1640.1984492220613" width="20.626738696252026" height="27.786243862307828" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1418.374898454067" y="1640.1984492220613" width="20.626738696252026" height="27.786243862307828" fill="transparent" pointer-events="all">
-    <title>15 LOC in Method: WandSelectionManager.takePendingRequest()
-
-File: lib/providers/wand_selection_manager.dart</title>
-  </rect>
-  <text x="1428.6882678021932" y="1654.0915711532152" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1428.6882678021932" dy="-6.0" font-size="3.00">takePendingRequest</tspan>
-    <tspan x="1428.6882678021932" dy="14.0" font-size="3.00">15</tspan>
-  </text>
-</g>
-<g>
-  <rect x="1463.7537235858215" y="1640.1984492220613" width="11.250948379773835" height="20.376578832359073" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1463.7537235858215" y="1640.1984492220613" width="11.250948379773835" height="20.376578832359073" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1463.7537235858215" y="1640.1984492220613" width="11.250948379773835" height="20.376578832359073" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1463.7537235858215" y="1640.1984492220613" width="11.250948379773835" height="20.376578832359073" fill="transparent" pointer-events="all">
-    <title>6 LOC in Method: WandSelectionManager.cancelPendingRequest()
-
-File: lib/providers/wand_selection_manager.dart</title>
-  </rect>
-  <text x="1469.3791977757085" y="1650.3867386382408" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1469.3791977757085" dy="-6.0" font-size="3.00">cancelPendingRequest</tspan>
-    <tspan x="1469.3791977757085" dy="14.0" font-size="3.00">6</tspan>
-  </text>
-</g>
-<g>
-  <rect x="1475.0046719655954" y="1640.1984492220613" width="9.375790316478199" height="20.376578832359073" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1475.0046719655954" y="1640.1984492220613" width="9.375790316478199" height="20.376578832359073" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1475.0046719655954" y="1640.1984492220613" width="9.375790316478199" height="20.376578832359073" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1475.0046719655954" y="1640.1984492220613" width="9.375790316478199" height="20.376578832359073" fill="transparent" pointer-events="all">
-    <title>5 LOC in Method: WandSelectionManager.reset()
-
-File: lib/providers/wand_selection_manager.dart</title>
-  </rect>
-  <text x="1479.6925671238346" y="1650.3867386382408" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1479.6925671238346" dy="-6.0" font-size="3.00">reset</tspan>
-    <tspan x="1479.6925671238346" dy="14.0" font-size="3.00">5</tspan>
-  </text>
-</g>
-<g>
-  <rect x="1439.001637150319" y="1654.0915711532152" width="24.752086435502434" height="13.893121931153914" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1439.001637150319" y="1654.0915711532152" width="24.752086435502434" height="13.893121931153914" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1439.001637150319" y="1654.0915711532152" width="24.752086435502434" height="13.893121931153914" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1439.001637150319" y="1654.0915711532152" width="24.752086435502434" height="13.893121931153914" fill="transparent" pointer-events="all">
-    <title>9 LOC in Method: WandSelectionManager.clearCache()
-
-File: lib/providers/wand_selection_manager.dart</title>
-  </rect>
-  <text x="1451.3776803680703" y="1661.0381321187922" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1451.3776803680703" dy="-6.0" font-size="3.00">clearCache</tspan>
-    <tspan x="1451.3776803680703" dy="14.0" font-size="3.00">9</tspan>
-  </text>
-</g>
-<g>
-  <rect x="1371.620957409229" y="1640.1984492220613" width="23.37697052241896" height="27.786243862307828" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1371.620957409229" y="1640.1984492220613" width="23.37697052241896" height="27.786243862307828" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1371.620957409229" y="1640.1984492220613" width="23.37697052241896" height="27.786243862307828" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1371.620957409229" y="1640.1984492220613" width="23.37697052241896" height="27.786243862307828" fill="transparent" pointer-events="all">
-    <title>17 LOC in Method: WandSelectionManager.cachedImageData()
-
-File: lib/providers/wand_selection_manager.dart</title>
-  </rect>
-  <text x="1383.3094426704386" y="1654.0915711532152" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1383.3094426704386" dy="-6.0" font-size="3.00">cachedImageData</tspan>
-    <tspan x="1383.3094426704386" dy="14.0" font-size="3.00">17</tspan>
-  </text>
-</g>
-<g>
-  <rect x="1394.997927931648" y="1640.1984492220613" width="23.37697052241896" height="27.786243862307828" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1394.997927931648" y="1640.1984492220613" width="23.37697052241896" height="27.786243862307828" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1394.997927931648" y="1640.1984492220613" width="23.37697052241896" height="27.786243862307828" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1394.997927931648" y="1640.1984492220613" width="23.37697052241896" height="27.786243862307828" fill="transparent" pointer-events="all">
-    <title>17 LOC in Method: WandSelectionManager.storeCache()
-
-File: lib/providers/wand_selection_manager.dart</title>
-  </rect>
-  <text x="1406.6864131928576" y="1654.0915711532152" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1406.6864131928576" dy="-6.0" font-size="3.00">storeCache</tspan>
-    <tspan x="1406.6864131928576" dy="14.0" font-size="3.00">17</tspan>
+  <text x="1467.2214071927276" y="1654.0915711532152" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1467.2214071927276" dy="-6.0" font-size="3.00">buildPreviewProxy</tspan>
+    <tspan x="1467.2214071927276" dy="14.0" font-size="3.00">26</tspan>
   </text>
 </g>
 </g>
@@ -19727,61 +19629,145 @@ File: lib/providers/wand_selection_manager.dart</title>
   <rect x="1355.620957409229" y="1685.9846930843692" width="144.75950487284442" height="91.78624386230783" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="1355.620957409229" y="1685.9846930843692" width="144.75950487284442" height="91.78624386230783" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="1355.620957409229" y="1685.9846930843692" width="144.75950487284442" height="91.78624386230783" fill="transparent" pointer-events="all">
-    <title>100 LOC File: lib/providers/selection_effect_renderer.dart</title>
+    <title>100 LOC File: lib/providers/wand_selection_manager.dart</title>
   </rect>
-  <text x="1363.620957409229" y="1700.9846930843692" text-anchor="start" font-size="3.82" fill="#000" font-weight="700">selection_effect_renderer.dart</text>
-  <text x="1492.3804622820735" y="1700.9846930843692" text-anchor="end" font-size="3.82" fill="#000" font-weight="700">100 LOC</text>
+  <text x="1363.620957409229" y="1700.9846930843692" text-anchor="start" font-size="4.25" fill="#000" font-weight="700">wand_selection_manager.dart</text>
+  <text x="1492.3804622820735" y="1700.9846930843692" text-anchor="end" font-size="4.25" fill="#000" font-weight="700">100 LOC</text>
 <g>
   <rect x="1363.620957409229" y="1709.9846930843692" width="128.75950487284442" height="59.78624386230783" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
   <rect x="1363.620957409229" y="1709.9846930843692" width="128.75950487284442" height="59.78624386230783" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="1363.620957409229" y="1709.9846930843692" width="128.75950487284442" height="59.78624386230783" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="1363.620957409229" y="1709.9846930843692" width="128.75950487284442" height="59.78624386230783" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>100 LOC in Class: SelectionEffectRenderer
+    <title>100 LOC in Class: WandSelectionManager
 
-File: lib/providers/selection_effect_renderer.dart</title>
+File: lib/providers/wand_selection_manager.dart</title>
   </rect>
-  <text x="1371.620957409229" y="1724.9846930843692" text-anchor="start" font-size="4.22" fill="#000" font-weight="700">SelectionEffectRenderer</text>
-  <text x="1484.3804622820735" y="1724.9846930843692" text-anchor="end" font-size="4.22" fill="#000" font-weight="700">100 LOC</text>
+  <text x="1371.620957409229" y="1724.9846930843692" text-anchor="start" font-size="4.63" fill="#000" font-weight="700">WandSelectionManager</text>
+  <text x="1484.3804622820735" y="1724.9846930843692" text-anchor="end" font-size="4.63" fill="#000" font-weight="700">100 LOC</text>
 <g>
-  <rect x="1418.1955355088821" y="1733.9846930843692" width="33.09246338659565" height="27.786243862307828" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1418.1955355088821" y="1733.9846930843692" width="33.09246338659565" height="27.786243862307828" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1418.1955355088821" y="1733.9846930843692" width="33.09246338659565" height="27.786243862307828" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1418.1955355088821" y="1733.9846930843692" width="33.09246338659565" height="27.786243862307828" fill="transparent" pointer-events="all">
-    <title>27 LOC in Method: SelectionEffectRenderer.maskToSelection()
+  <rect x="1463.7537235858215" y="1754.3612719167281" width="10.313369348126017" height="7.409665029948755" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1463.7537235858215" y="1754.3612719167281" width="10.313369348126017" height="7.409665029948755" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1463.7537235858215" y="1754.3612719167281" width="10.313369348126017" height="7.409665029948755" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1463.7537235858215" y="1754.3612719167281" width="10.313369348126017" height="7.409665029948755" fill="transparent" pointer-events="all">
+    <title>2 LOC in Method: WandSelectionManager.requestVersion()
 
-File: lib/providers/selection_effect_renderer.dart</title>
+File: lib/providers/wand_selection_manager.dart</title>
   </rect>
-  <text x="1434.74176720218" y="1747.877815015523" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1434.74176720218" dy="-6.0" font-size="3.00">maskToSelection</tspan>
-    <tspan x="1434.74176720218" dy="14.0" font-size="3.00">27</tspan>
+  <text x="1468.9104082598844" y="1758.0661044317026" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1468.9104082598844" dy="-6.0" font-size="3.00">requestVersion</tspan>
+    <tspan x="1468.9104082598844" dy="14.0" font-size="3.00">2</tspan>
   </text>
 </g>
 <g>
-  <rect x="1371.620957409229" y="1733.9846930843692" width="46.57457809965313" height="27.786243862307828" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1371.620957409229" y="1733.9846930843692" width="46.57457809965313" height="27.786243862307828" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1371.620957409229" y="1733.9846930843692" width="46.57457809965313" height="27.786243862307828" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1371.620957409229" y="1733.9846930843692" width="46.57457809965313" height="27.786243862307828" fill="transparent" pointer-events="all">
-    <title>38 LOC in Method: SelectionEffectRenderer.buildMaskedImage()
+  <rect x="1474.0670929339476" y="1754.3612719167281" width="10.313369348126017" height="7.409665029948755" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1474.0670929339476" y="1754.3612719167281" width="10.313369348126017" height="7.409665029948755" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1474.0670929339476" y="1754.3612719167281" width="10.313369348126017" height="7.409665029948755" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1474.0670929339476" y="1754.3612719167281" width="10.313369348126017" height="7.409665029948755" fill="transparent" pointer-events="all">
+    <title>2 LOC in Method: WandSelectionManager.hasPendingRequest()
 
-File: lib/providers/selection_effect_renderer.dart</title>
+File: lib/providers/wand_selection_manager.dart</title>
   </rect>
-  <text x="1394.9082464590556" y="1747.877815015523" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1394.9082464590556" dy="-6.0" font-size="4.19">buildMaskedImage</tspan>
-    <tspan x="1394.9082464590556" dy="14.0" font-size="4.19">38</tspan>
+  <text x="1479.2237776080106" y="1758.0661044317026" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1479.2237776080106" dy="-6.0" font-size="3.00">hasPendingRequest</tspan>
+    <tspan x="1479.2237776080106" dy="14.0" font-size="3.00">2</tspan>
   </text>
 </g>
 <g>
-  <rect x="1451.2879988954778" y="1733.9846930843692" width="31.866816594499504" height="27.786243862307828" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="1451.2879988954778" y="1733.9846930843692" width="31.866816594499504" height="27.786243862307828" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="1451.2879988954778" y="1733.9846930843692" width="31.866816594499504" height="27.786243862307828" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="1451.2879988954778" y="1733.9846930843692" width="31.866816594499504" height="27.786243862307828" fill="transparent" pointer-events="all">
-    <title>26 LOC in Method: SelectionEffectRenderer.buildPreviewProxy()
+  <rect x="1439.001637150319" y="1733.9846930843692" width="24.752086435502434" height="13.893121931153914" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1439.001637150319" y="1733.9846930843692" width="24.752086435502434" height="13.893121931153914" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1439.001637150319" y="1733.9846930843692" width="24.752086435502434" height="13.893121931153914" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1439.001637150319" y="1733.9846930843692" width="24.752086435502434" height="13.893121931153914" fill="transparent" pointer-events="all">
+    <title>9 LOC in Method: WandSelectionManager.queueRequest()
 
-File: lib/providers/selection_effect_renderer.dart</title>
+File: lib/providers/wand_selection_manager.dart</title>
   </rect>
-  <text x="1467.2214071927276" y="1747.877815015523" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="1467.2214071927276" dy="-6.0" font-size="3.00">buildPreviewProxy</tspan>
-    <tspan x="1467.2214071927276" dy="14.0" font-size="3.00">26</tspan>
+  <text x="1451.3776803680703" y="1740.9312540499461" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1451.3776803680703" dy="-6.0" font-size="3.00">queueRequest</tspan>
+    <tspan x="1451.3776803680703" dy="14.0" font-size="3.00">9</tspan>
+  </text>
+</g>
+<g>
+  <rect x="1418.374898454067" y="1733.9846930843692" width="20.626738696252026" height="27.786243862307828" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1418.374898454067" y="1733.9846930843692" width="20.626738696252026" height="27.786243862307828" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1418.374898454067" y="1733.9846930843692" width="20.626738696252026" height="27.786243862307828" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1418.374898454067" y="1733.9846930843692" width="20.626738696252026" height="27.786243862307828" fill="transparent" pointer-events="all">
+    <title>15 LOC in Method: WandSelectionManager.takePendingRequest()
+
+File: lib/providers/wand_selection_manager.dart</title>
+  </rect>
+  <text x="1428.6882678021932" y="1747.877815015523" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1428.6882678021932" dy="-6.0" font-size="3.00">takePendingRequest</tspan>
+    <tspan x="1428.6882678021932" dy="14.0" font-size="3.00">15</tspan>
+  </text>
+</g>
+<g>
+  <rect x="1463.7537235858215" y="1733.9846930843692" width="11.250948379773835" height="20.376578832359073" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1463.7537235858215" y="1733.9846930843692" width="11.250948379773835" height="20.376578832359073" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1463.7537235858215" y="1733.9846930843692" width="11.250948379773835" height="20.376578832359073" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1463.7537235858215" y="1733.9846930843692" width="11.250948379773835" height="20.376578832359073" fill="transparent" pointer-events="all">
+    <title>6 LOC in Method: WandSelectionManager.cancelPendingRequest()
+
+File: lib/providers/wand_selection_manager.dart</title>
+  </rect>
+  <text x="1469.3791977757085" y="1744.1729825005486" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1469.3791977757085" dy="-6.0" font-size="3.00">cancelPendingRequest</tspan>
+    <tspan x="1469.3791977757085" dy="14.0" font-size="3.00">6</tspan>
+  </text>
+</g>
+<g>
+  <rect x="1475.0046719655954" y="1733.9846930843692" width="9.375790316478199" height="20.376578832359073" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1475.0046719655954" y="1733.9846930843692" width="9.375790316478199" height="20.376578832359073" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1475.0046719655954" y="1733.9846930843692" width="9.375790316478199" height="20.376578832359073" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1475.0046719655954" y="1733.9846930843692" width="9.375790316478199" height="20.376578832359073" fill="transparent" pointer-events="all">
+    <title>5 LOC in Method: WandSelectionManager.reset()
+
+File: lib/providers/wand_selection_manager.dart</title>
+  </rect>
+  <text x="1479.6925671238346" y="1744.1729825005486" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1479.6925671238346" dy="-6.0" font-size="3.00">reset</tspan>
+    <tspan x="1479.6925671238346" dy="14.0" font-size="3.00">5</tspan>
+  </text>
+</g>
+<g>
+  <rect x="1439.001637150319" y="1747.877815015523" width="24.752086435502434" height="13.893121931153914" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1439.001637150319" y="1747.877815015523" width="24.752086435502434" height="13.893121931153914" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1439.001637150319" y="1747.877815015523" width="24.752086435502434" height="13.893121931153914" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1439.001637150319" y="1747.877815015523" width="24.752086435502434" height="13.893121931153914" fill="transparent" pointer-events="all">
+    <title>9 LOC in Method: WandSelectionManager.clearCache()
+
+File: lib/providers/wand_selection_manager.dart</title>
+  </rect>
+  <text x="1451.3776803680703" y="1754.8243759811" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1451.3776803680703" dy="-6.0" font-size="3.00">clearCache</tspan>
+    <tspan x="1451.3776803680703" dy="14.0" font-size="3.00">9</tspan>
+  </text>
+</g>
+<g>
+  <rect x="1371.620957409229" y="1733.9846930843692" width="23.37697052241896" height="27.786243862307828" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1371.620957409229" y="1733.9846930843692" width="23.37697052241896" height="27.786243862307828" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1371.620957409229" y="1733.9846930843692" width="23.37697052241896" height="27.786243862307828" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1371.620957409229" y="1733.9846930843692" width="23.37697052241896" height="27.786243862307828" fill="transparent" pointer-events="all">
+    <title>17 LOC in Method: WandSelectionManager.cachedImageData()
+
+File: lib/providers/wand_selection_manager.dart</title>
+  </rect>
+  <text x="1383.3094426704386" y="1747.877815015523" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1383.3094426704386" dy="-6.0" font-size="3.00">cachedImageData</tspan>
+    <tspan x="1383.3094426704386" dy="14.0" font-size="3.00">17</tspan>
+  </text>
+</g>
+<g>
+  <rect x="1394.997927931648" y="1733.9846930843692" width="23.37697052241896" height="27.786243862307828" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="1394.997927931648" y="1733.9846930843692" width="23.37697052241896" height="27.786243862307828" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="1394.997927931648" y="1733.9846930843692" width="23.37697052241896" height="27.786243862307828" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="1394.997927931648" y="1733.9846930843692" width="23.37697052241896" height="27.786243862307828" fill="transparent" pointer-events="all">
+    <title>17 LOC in Method: WandSelectionManager.storeCache()
+
+File: lib/providers/wand_selection_manager.dart</title>
+  </rect>
+  <text x="1406.6864131928576" y="1747.877815015523" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="1406.6864131928576" dy="-6.0" font-size="3.00">storeCache</tspan>
+    <tspan x="1406.6864131928576" dy="14.0" font-size="3.00">17</tspan>
   </text>
 </g>
 </g>
@@ -24709,19 +24695,19 @@ File: lib/files/file_jpeg.dart</title>
   <rect x="2710.493710357146" y="703.976385805695" width="86.9066826832663" height="23.966697522468223" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="2710.493710357146" y="703.976385805695" width="86.9066826832663" height="23.966697522468223" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="2710.493710357146" y="703.976385805695" width="86.9066826832663" height="23.966697522468223" fill="transparent" pointer-events="all">
-    <title>17 LOC File: lib/files/file_webp.dart</title>
+    <title>17 LOC File: lib/files/export_file_name.dart</title>
   </rect>
-  <text x="2718.493710357146" y="718.976385805695" text-anchor="start" font-size="4.22" fill="#000" font-weight="700">file_webp.dart</text>
-  <text x="2789.4003930404124" y="718.976385805695" text-anchor="end" font-size="4.22" fill="#000" font-weight="700">17 LOC</text>
+  <text x="2718.493710357146" y="718.976385805695" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">export_file_name.dart</text>
+  <text x="2789.4003930404124" y="718.976385805695" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">17 LOC</text>
 </g>
 <g>
   <rect x="2710.493710357146" y="729.9430833281632" width="37.77404225304018" height="56.04320622669367" fill="#1f6f8b" fill-opacity="0.62"/>
   <rect x="2710.493710357146" y="729.9430833281632" width="37.77404225304018" height="56.04320622669367" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="2710.493710357146" y="729.9430833281632" width="37.77404225304018" height="56.04320622669367" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="2710.493710357146" y="729.9430833281632" width="37.77404225304018" height="56.04320622669367" fill="transparent" pointer-events="all">
-    <title>17 LOC File: lib/files/export_file_name.dart</title>
+    <title>17 LOC File: lib/files/file_webp.dart</title>
   </rect>
-  <text x="2718.493710357146" y="744.9430833281632" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">export_file_name.dart</text>
+  <text x="2718.493710357146" y="744.9430833281632" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">file_webp.dart</text>
   <text x="2740.267752610186" y="744.9430833281632" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">17 LOC</text>
 <g>
   <rect x="2718.493710357146" y="753.9430833281632" width="21.77404225304018" height="24.04320622669367" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.45"/>
@@ -24730,7 +24716,7 @@ File: lib/files/file_jpeg.dart</title>
   <rect x="2718.493710357146" y="753.9430833281632" width="21.77404225304018" height="24.04320622669367" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
     <title>17 LOC in Class: &lt;...&gt;
 
-File: lib/files/export_file_name.dart</title>
+File: lib/files/file_webp.dart</title>
   </rect>
   <text x="2726.493710357146" y="768.9430833281632" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">&lt;...&gt;</text>
   <text x="2732.267752610186" y="768.9430833281632" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">17 LOC</text>
@@ -31503,21 +31489,21 @@ File: lib/models/brush_grain.dart</title>
   <rect x="2126.2441590340495" y="1792.9649030285182" width="88.70481301942395" height="61.017548485740946" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="2126.2441590340495" y="1792.9649030285182" width="88.70481301942395" height="61.017548485740946" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="2126.2441590340495" y="1792.9649030285182" width="88.70481301942395" height="61.017548485740946" fill="transparent" pointer-events="all">
-    <title>43 LOC File: lib/models/canvas_resize.dart</title>
+    <title>43 LOC File: lib/models/region_action.dart</title>
   </rect>
-  <text x="2134.2441590340495" y="1807.9649030285182" text-anchor="start" font-size="3.26" fill="#000" font-weight="700">canvas_resize.dart</text>
-  <text x="2206.9489720534734" y="1807.9649030285182" text-anchor="end" font-size="3.26" fill="#000" font-weight="700">43 LOC</text>
+  <text x="2134.2441590340495" y="1807.9649030285182" text-anchor="start" font-size="3.34" fill="#000" font-weight="700">region_action.dart</text>
+  <text x="2206.9489720534734" y="1807.9649030285182" text-anchor="end" font-size="3.34" fill="#000" font-weight="700">43 LOC</text>
 <g>
-  <rect x="2134.2441590340495" y="1816.9649030285182" width="72.70481301942395" height="29.017548485740946" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.45"/>
+  <rect x="2134.2441590340495" y="1816.9649030285182" width="72.70481301942395" height="29.017548485740946" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
   <rect x="2134.2441590340495" y="1816.9649030285182" width="72.70481301942395" height="29.017548485740946" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="2134.2441590340495" y="1816.9649030285182" width="72.70481301942395" height="29.017548485740946" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8" stroke-dasharray="6,4"/>
+  <rect x="2134.2441590340495" y="1816.9649030285182" width="72.70481301942395" height="29.017548485740946" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="2134.2441590340495" y="1816.9649030285182" width="72.70481301942395" height="29.017548485740946" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>43 LOC in Class: &lt;...&gt;
+    <title>43 LOC in Class: RegionAction
 
-File: lib/models/canvas_resize.dart</title>
+File: lib/models/region_action.dart</title>
   </rect>
-  <text x="2142.2441590340495" y="1831.9649030285182" text-anchor="start" font-size="4.08" fill="#000" font-weight="700">&lt;...&gt;</text>
-  <text x="2198.9489720534734" y="1831.9649030285182" text-anchor="end" font-size="4.08" fill="#000" font-weight="700">43 LOC</text>
+  <text x="2142.2441590340495" y="1831.9649030285182" text-anchor="start" font-size="3.56" fill="#000" font-weight="700">RegionAction</text>
+  <text x="2198.9489720534734" y="1831.9649030285182" text-anchor="end" font-size="3.56" fill="#000" font-weight="700">43 LOC</text>
 </g>
 </g>
 <g>
@@ -31525,21 +31511,21 @@ File: lib/models/canvas_resize.dart</title>
   <rect x="2126.2441590340495" y="1855.982451514259" width="88.70481301942395" height="61.017548485740946" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="2126.2441590340495" y="1855.982451514259" width="88.70481301942395" height="61.017548485740946" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="2126.2441590340495" y="1855.982451514259" width="88.70481301942395" height="61.017548485740946" fill="transparent" pointer-events="all">
-    <title>43 LOC File: lib/models/region_action.dart</title>
+    <title>43 LOC File: lib/models/canvas_resize.dart</title>
   </rect>
-  <text x="2134.2441590340495" y="1870.982451514259" text-anchor="start" font-size="3.34" fill="#000" font-weight="700">region_action.dart</text>
-  <text x="2206.9489720534734" y="1870.982451514259" text-anchor="end" font-size="3.34" fill="#000" font-weight="700">43 LOC</text>
+  <text x="2134.2441590340495" y="1870.982451514259" text-anchor="start" font-size="3.26" fill="#000" font-weight="700">canvas_resize.dart</text>
+  <text x="2206.9489720534734" y="1870.982451514259" text-anchor="end" font-size="3.26" fill="#000" font-weight="700">43 LOC</text>
 <g>
-  <rect x="2134.2441590340495" y="1879.982451514259" width="72.70481301942395" height="29.017548485740946" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
+  <rect x="2134.2441590340495" y="1879.982451514259" width="72.70481301942395" height="29.017548485740946" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.45"/>
   <rect x="2134.2441590340495" y="1879.982451514259" width="72.70481301942395" height="29.017548485740946" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="2134.2441590340495" y="1879.982451514259" width="72.70481301942395" height="29.017548485740946" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="2134.2441590340495" y="1879.982451514259" width="72.70481301942395" height="29.017548485740946" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8" stroke-dasharray="6,4"/>
   <rect x="2134.2441590340495" y="1879.982451514259" width="72.70481301942395" height="29.017548485740946" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>43 LOC in Class: RegionAction
+    <title>43 LOC in Class: &lt;...&gt;
 
-File: lib/models/region_action.dart</title>
+File: lib/models/canvas_resize.dart</title>
   </rect>
-  <text x="2142.2441590340495" y="1894.982451514259" text-anchor="start" font-size="3.56" fill="#000" font-weight="700">RegionAction</text>
-  <text x="2198.9489720534734" y="1894.982451514259" text-anchor="end" font-size="3.56" fill="#000" font-weight="700">43 LOC</text>
+  <text x="2142.2441590340495" y="1894.982451514259" text-anchor="start" font-size="4.08" fill="#000" font-weight="700">&lt;...&gt;</text>
+  <text x="2198.9489720534734" y="1894.982451514259" text-anchor="end" font-size="4.08" fill="#000" font-weight="700">43 LOC</text>
 </g>
 </g>
 <g>
@@ -32509,20 +32495,20 @@ File: lib/constants/app_flood_fill.dart</title>
   <rect x="2568.443835234773" y="1859.6278424773398" width="24.5956522370313" height="39.10380136184167" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="2568.443835234773" y="1859.6278424773398" width="24.5956522370313" height="39.10380136184167" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="2568.443835234773" y="1859.6278424773398" width="24.5956522370313" height="39.10380136184167" fill="transparent" pointer-events="all">
-    <title>9 LOC File: lib/constants/app_font_size.dart</title>
+    <title>9 LOC File: lib/constants/app_spacing.dart</title>
   </rect>
-  <text x="2576.443835234773" y="1874.6278424773398" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">app_font_size.dart</text>
+  <text x="2576.443835234773" y="1874.6278424773398" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">app_spacing.dart</text>
   <text x="2585.039487471804" y="1874.6278424773398" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">9 LOC</text>
 <g>
   <rect x="2576.443835234773" y="1883.6278424773398" width="8.595652237031299" height="7.103801361841668" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
   <rect x="2576.443835234773" y="1883.6278424773398" width="8.595652237031299" height="7.103801361841668" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="2576.443835234773" y="1883.6278424773398" width="8.595652237031299" height="7.103801361841668" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="2576.443835234773" y="1883.6278424773398" width="8.595652237031299" height="7.103801361841668" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>9 LOC in Class: AppFontSize
+    <title>9 LOC in Class: AppSpacing
 
-File: lib/constants/app_font_size.dart</title>
+File: lib/constants/app_spacing.dart</title>
   </rect>
-  <text x="2584.443835234773" y="1898.6278424773398" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">AppFontSize</text>
+  <text x="2584.443835234773" y="1898.6278424773398" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">AppSpacing</text>
   <text x="2577.039487471804" y="1898.6278424773398" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">9 LOC</text>
 </g>
 </g>
@@ -32531,20 +32517,20 @@ File: lib/constants/app_font_size.dart</title>
   <rect x="2595.039487471804" y="1859.6278424773398" width="24.5956522370313" height="39.10380136184167" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="2595.039487471804" y="1859.6278424773398" width="24.5956522370313" height="39.10380136184167" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="2595.039487471804" y="1859.6278424773398" width="24.5956522370313" height="39.10380136184167" fill="transparent" pointer-events="all">
-    <title>9 LOC File: lib/constants/app_spacing.dart</title>
+    <title>9 LOC File: lib/constants/app_font_size.dart</title>
   </rect>
-  <text x="2603.039487471804" y="1874.6278424773398" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">app_spacing.dart</text>
+  <text x="2603.039487471804" y="1874.6278424773398" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">app_font_size.dart</text>
   <text x="2611.635139708835" y="1874.6278424773398" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">9 LOC</text>
 <g>
   <rect x="2603.039487471804" y="1883.6278424773398" width="8.595652237031299" height="7.103801361841668" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
   <rect x="2603.039487471804" y="1883.6278424773398" width="8.595652237031299" height="7.103801361841668" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="2603.039487471804" y="1883.6278424773398" width="8.595652237031299" height="7.103801361841668" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="2603.039487471804" y="1883.6278424773398" width="8.595652237031299" height="7.103801361841668" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>9 LOC in Class: AppSpacing
+    <title>9 LOC in Class: AppFontSize
 
-File: lib/constants/app_spacing.dart</title>
+File: lib/constants/app_font_size.dart</title>
   </rect>
-  <text x="2611.039487471804" y="1898.6278424773398" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">AppSpacing</text>
+  <text x="2611.039487471804" y="1898.6278424773398" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">AppFontSize</text>
   <text x="2603.635139708835" y="1898.6278424773398" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">9 LOC</text>
 </g>
 </g>
@@ -32563,20 +32549,20 @@ File: lib/constants/app_spacing.dart</title>
   <rect x="2621.6351397088356" y="1859.6278424773398" width="32.778929848425555" height="18.954879125644773" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="2621.6351397088356" y="1859.6278424773398" width="32.778929848425555" height="18.954879125644773" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="2621.6351397088356" y="1859.6278424773398" width="32.778929848425555" height="18.954879125644773" fill="transparent" pointer-events="all">
-    <title>6 LOC File: lib/constants/interaction_input_modality.dart</title>
+    <title>6 LOC File: lib/constants/app_radius.dart</title>
   </rect>
-  <text x="2629.6351397088356" y="1874.6278424773398" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">interaction_input_modality.dart</text>
-  <text x="2646.414069557261" y="1872.5827216029845" text-anchor="end" dominant-baseline="ideographic" font-size="5.67" fill="#000" font-weight="700">6 LOC</text>
+  <text x="2629.6351397088356" y="1874.6278424773398" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">app_radius.dart</text>
+  <text x="2646.414069557261" y="1874.6278424773398" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">6 LOC</text>
 </g>
 <g>
   <rect x="2621.6351397088356" y="1880.5827216029845" width="32.778929848425555" height="18.954879125644773" fill="#1f6f8b" fill-opacity="0.62"/>
   <rect x="2621.6351397088356" y="1880.5827216029845" width="32.778929848425555" height="18.954879125644773" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
   <rect x="2621.6351397088356" y="1880.5827216029845" width="32.778929848425555" height="18.954879125644773" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
   <rect x="2621.6351397088356" y="1880.5827216029845" width="32.778929848425555" height="18.954879125644773" fill="transparent" pointer-events="all">
-    <title>6 LOC File: lib/constants/app_radius.dart</title>
+    <title>6 LOC File: lib/constants/interaction_input_modality.dart</title>
   </rect>
-  <text x="2629.6351397088356" y="1895.5827216029845" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">app_radius.dart</text>
-  <text x="2646.414069557261" y="1895.5827216029845" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">6 LOC</text>
+  <text x="2629.6351397088356" y="1895.5827216029845" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">interaction_input_modality.dart</text>
+  <text x="2646.414069557261" y="1893.5376007286293" text-anchor="end" dominant-baseline="ideographic" font-size="5.67" fill="#000" font-weight="700">6 LOC</text>
 </g>
 <g>
   <rect x="2621.6351397088356" y="1901.5376007286293" width="32.778929848425555" height="15.462399271370643" fill="#1f6f8b" fill-opacity="0.62"/>
