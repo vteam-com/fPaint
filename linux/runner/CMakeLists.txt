@@ -16,8 +16,11 @@ add_executable(${BINARY_NAME}
 # that need different build settings.
 apply_standard_settings(${BINARY_NAME})
 
-# Add preprocessor definitions for the application ID.
+# Add preprocessor definitions for the application ID and for the icon theme
+# directory the application icon is installed in (see linux/CMakeLists.txt).
 add_definitions(-DAPPLICATION_ID="${APPLICATION_ID}")
+add_definitions(
+  -DAPPLICATION_ICON_SIZE_DIRECTORY="${APPLICATION_ICON_SIZE_DIRECTORY}")
 
 # Add dependency libraries. Add any application-specific dependencies here.
 target_link_libraries(${BINARY_NAME} PRIVATE flutter)
