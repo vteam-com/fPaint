@@ -404,7 +404,7 @@
 </g>
 <g>
   <path d="M 280.0 1638.0 H 238.0 Q 232.0 1638.0 232.0 1644.0 V 3698.0 Q 232.0 3704.0 238.0 3704.0 H 460.0" class="edgeVertical"/>
-  <title>xml -> petitparser v7.0.2</title>
+  <title>xml -> petitparser v7.1.0</title>
 </g>
 <g>
   <path d="M 280.0 230.0 H 235.0 Q 229.0 230.0 229.0 236.0 V 2354.0 Q 229.0 2360.0 235.0 2360.0 H 460.0" class="edgeVertical"/>
@@ -1386,10 +1386,10 @@
   <path d="M 746.0,3640.0 L 734.0,3633.0 Q 731.0,3633.0 731.0,3636.0 L 731.0,3644.0 Q 731.0,3647.0 734.0,3647.0 Z" fill="#10b981"/>
   <text x="735.68" y="3641.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. ffi</title></g><g class="packageNode">
 <rect x="460.0" y="3678.0" width="280.0" height="52.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
-<g class="packageMetadataPill"><title>Dart ^3.8.0</title><rect x="571.45" y="3717.0" width="57.099999999999994" height="9.0" rx="4.5" ry="4.5" class="packageMetadataPillShape"/><text x="600.0" y="3722" class="packageLabelMetadata" text-anchor="middle" dominant-baseline="middle">Dart ^3.8.0</text></g>
-<g class="platformBadge platformBadge--dart"><title>Dart SDK ^3.8.0</title><rect x="586.0" y="3701.0" width="28.0" height="13.0" rx="6.5" ry="6.5" fill="#0175c2" stroke="#0369a1" stroke-width="0.6"/><text x="600.0" y="3707.5" class="packageLabelPlatformBadge" text-anchor="middle" dominant-baseline="middle">Dart</text></g>
+<g class="packageMetadataPill"><title>Dart ^3.13.0</title><rect x="569.4" y="3717.0" width="61.199999999999996" height="9.0" rx="4.5" ry="4.5" class="packageMetadataPillShape"/><text x="600.0" y="3722" class="packageLabelMetadata" text-anchor="middle" dominant-baseline="middle">Dart ^3.13.0</text></g>
+<g class="platformBadge platformBadge--dart"><title>Dart SDK ^3.13.0</title><rect x="586.0" y="3701.0" width="28.0" height="13.0" rx="6.5" ry="6.5" fill="#0175c2" stroke="#0369a1" stroke-width="0.6"/><text x="600.0" y="3707.5" class="packageLabelPlatformBadge" text-anchor="middle" dominant-baseline="middle">Dart</text></g>
 <text x="468.0" y="3696.0" class="packageLabelDerivedName packageLabelCaption" text-anchor="start">petitparser</text>
-<text x="732.0" y="3696.0" class="packageLabelDerivedVersion" text-anchor="end">^7.0.2</text>
+<text x="732.0" y="3696.0" class="packageLabelDerivedVersion" text-anchor="end">^7.1.0</text>
 </g>
 <g class="badge incomingBadge">
   <path d="M 466.0,3704.0 L 454.0,3697.0 Q 451.0,3697.0 451.0,3700.0 L 451.0,3708.0 Q 451.0,3711.0 454.0,3711.0 Z" fill="#3b82f6"/>

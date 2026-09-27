@@ -242,6 +242,10 @@
   <title>. ▶ files</title>
 </g>
 <g>
+  <path d="M 262.0 5801.0 C 282.0 5801.0, 254.0 5801.0, 274.0 5801.0" class="edgeVertical"/>
+  <title>. ▶ providers</title>
+</g>
+<g>
   <path d="M 262.0 7997.0 C 282.0 7997.0, 254.0 7997.0, 274.0 7997.0" class="edgeVertical"/>
   <title>. ▶ helpers</title>
 </g>
@@ -250,28 +254,24 @@
   <title>. ▶ l10n</title>
 </g>
 <g>
-  <path d="M 262.0 7139.0 C 282.0 7139.0, 254.0 7139.0, 274.0 7139.0" class="edgeVertical"/>
-  <title>. ▶ models</title>
-</g>
-<g>
-  <path d="M 262.0 763.0 C 282.0 763.0, 254.0 763.0, 274.0 763.0" class="edgeVertical"/>
-  <title>. ▶ panels</title>
-</g>
-<g>
-  <path d="M 262.0 5801.0 C 282.0 5801.0, 254.0 5801.0, 274.0 5801.0" class="edgeVertical"/>
-  <title>. ▶ providers</title>
-</g>
-<g>
   <path d="M 262.0 3605.0 C 282.0 3605.0, 254.0 3605.0, 274.0 3605.0" class="edgeVertical"/>
   <title>. ▶ widgets</title>
+</g>
+<g>
+  <path d="M 262.0 2283.0 C 282.0 2283.0, 254.0 2283.0, 274.0 2283.0" class="edgeVertical"/>
+  <title>. ▶ pages</title>
 </g>
 <g>
   <path d="M 262.0 4959.0 C 282.0 4959.0, 254.0 4959.0, 274.0 4959.0" class="edgeVertical"/>
   <title>. ▶ recovery</title>
 </g>
 <g>
-  <path d="M 262.0 2283.0 C 282.0 2283.0, 254.0 2283.0, 274.0 2283.0" class="edgeVertical"/>
-  <title>. ▶ pages</title>
+  <path d="M 262.0 763.0 C 282.0 763.0, 254.0 763.0, 274.0 763.0" class="edgeVertical"/>
+  <title>. ▶ panels</title>
+</g>
+<g>
+  <path d="M 262.0 7139.0 C 282.0 7139.0, 254.0 7139.0, 274.0 7139.0" class="edgeVertical"/>
+  <title>. ▶ models</title>
 </g>
 <g>
   <path d="M 326.0 579.0 C 346.0 579.0, 318.0 579.0, 338.0 579.0" class="edgeVertical"/>
@@ -286,7 +286,9 @@
   <title>panels ▶ tools</title>
 </g>
 <g class="folderLayer">
-<rect x="218.0" y="80.0" width="484.0" height="9250.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: .</title></rect>
+<rect x="218.0" y="80.0" width="484.0" height="9250.0" rx="12.0" ry="12.0" class="layerBackground layerBackgroundWarning"><title>Folder: .
+
+2 Documentation warnings</title></rect>
 </g>
 <g class="folderLayer">
 <rect x="282.0" y="132.0" width="396.0" height="194.0" rx="12.0" ry="12.0" class="layerBackgroundVirtualFolder" stroke-dasharray="4 2"><title>Folder: ...</title></rect>
@@ -298,13 +300,22 @@
 <rect x="282.0" y="1200.0" width="396.0" height="994.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: files</title></rect>
 </g>
 <g class="folderLayer">
+<rect x="282.0" y="5080.0" width="396.0" height="1442.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: providers</title></rect>
+</g>
+<g class="folderLayer">
 <rect x="282.0" y="7756.0" width="396.0" height="482.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: helpers</title></rect>
 </g>
 <g class="folderLayer">
 <rect x="282.0" y="8262.0" width="396.0" height="98.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: l10n</title></rect>
 </g>
 <g class="folderLayer">
-<rect x="282.0" y="6546.0" width="396.0" height="1186.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: models</title></rect>
+<rect x="282.0" y="2372.0" width="396.0" height="2466.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: widgets</title></rect>
+</g>
+<g class="folderLayer">
+<rect x="282.0" y="2218.0" width="396.0" height="130.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: pages</title></rect>
+</g>
+<g class="folderLayer">
+<rect x="282.0" y="4862.0" width="396.0" height="194.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: recovery</title></rect>
 </g>
 <g class="folderLayer">
 <rect x="282.0" y="350.0" width="396.0" height="826.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: panels</title></rect>
@@ -319,16 +330,7 @@
 <rect x="346.0" y="966.0" width="308.0" height="162.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: panels/tools</title></rect>
 </g>
 <g class="folderLayer">
-<rect x="282.0" y="5080.0" width="396.0" height="1442.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: providers</title></rect>
-</g>
-<g class="folderLayer">
-<rect x="282.0" y="2372.0" width="396.0" height="2466.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: widgets</title></rect>
-</g>
-<g class="folderLayer">
-<rect x="282.0" y="4862.0" width="396.0" height="194.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: recovery</title></rect>
-</g>
-<g class="folderLayer">
-<rect x="282.0" y="2218.0" width="396.0" height="130.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: pages</title></rect>
+<rect x="282.0" y="6546.0" width="396.0" height="1186.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: models</title></rect>
 </g>
 <g>
   <path d="M 352.0 426.0 H 334.0 Q 328.0 426.0 328.0 432.0 V 787.0 Q 328.0 793.0 334.0 793.0 H 356.0" class="edgeVertical"/>
@@ -545,6 +547,17 @@
 3. l10n
 4. providers
 5. widgets</title></g><g class="badge incomingBadge">
+  <path d="M 298.0,5093.0 L 286.0,5086.0 Q 283.0,5086.0 283.0,5089.0 L 283.0,5097.0 Q 283.0,5100.0 286.0,5100.0 Z" fill="#3b82f6"/>
+  <text x="287.68" y="5094.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">6</text><title>1. ...
+2. files
+3. pages
+4. panels
+5. recovery
+6. widgets</title></g><g class="badge outgoingBadge">
+  <path d="M 282.0,5104.0 L 294.0,5097.0 Q 297.0,5097.0 297.0,5100.0 L 297.0,5108.0 Q 297.0,5111.0 294.0,5111.0 Z" fill="#10b981"/>
+  <text x="292.32" y="5105.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. constants
+2. helpers
+3. models</title></g><g class="badge incomingBadge">
   <path d="M 298.0,7769.0 L 286.0,7762.0 Q 283.0,7762.0 283.0,7765.0 L 283.0,7773.0 Q 283.0,7776.0 286.0,7776.0 Z" fill="#3b82f6"/>
   <text x="287.68" y="7770.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">7</text><title>1. ...
 2. files
@@ -562,16 +575,34 @@
 4. pages
 5. panels
 6. widgets</title></g><g class="badge incomingBadge">
-  <path d="M 298.0,6559.0 L 286.0,6552.0 Q 283.0,6552.0 283.0,6555.0 L 283.0,6563.0 Q 283.0,6566.0 286.0,6566.0 Z" fill="#3b82f6"/>
-  <text x="287.68" y="6560.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">5</text><title>1. ...
-2. pages
-3. panels
-4. providers
-5. widgets</title></g><g class="badge outgoingBadge">
-  <path d="M 282.0,6570.0 L 294.0,6563.0 Q 297.0,6563.0 297.0,6566.0 L 297.0,6574.0 Q 297.0,6577.0 294.0,6577.0 Z" fill="#10b981"/>
-  <text x="292.32" y="6571.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. constants
+  <path d="M 298.0,2385.0 L 286.0,2378.0 Q 283.0,2378.0 283.0,2381.0 L 283.0,2389.0 Q 283.0,2392.0 286.0,2392.0 Z" fill="#3b82f6"/>
+  <text x="287.68" y="2386.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">4</text><title>1. ...
+2. files
+3. pages
+4. panels</title></g><g class="badge outgoingBadge">
+  <path d="M 282.0,2396.0 L 294.0,2389.0 Q 297.0,2389.0 297.0,2392.0 L 297.0,2400.0 Q 297.0,2403.0 294.0,2403.0 Z" fill="#10b981"/>
+  <text x="292.32" y="2397.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">6</text><title>1. constants
 2. helpers
-3. l10n</title></g><g class="badge incomingBadge">
+3. l10n
+4. models
+5. providers
+6. recovery</title></g><g class="badge incomingBadge">
+  <path d="M 298.0,2231.0 L 286.0,2224.0 Q 283.0,2224.0 283.0,2227.0 L 283.0,2235.0 Q 283.0,2238.0 286.0,2238.0 Z" fill="#3b82f6"/>
+  <text x="287.68" y="2232.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. ...
+2. panels</title></g><g class="badge outgoingBadge">
+  <path d="M 282.0,2242.0 L 294.0,2235.0 Q 297.0,2235.0 297.0,2238.0 L 297.0,2246.0 Q 297.0,2249.0 294.0,2249.0 Z" fill="#10b981"/>
+  <text x="292.32" y="2243.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">5</text><title>1. constants
+2. l10n
+3. models
+4. providers
+5. widgets</title></g><g class="badge incomingBadge">
+  <path d="M 298.0,4875.0 L 286.0,4868.0 Q 283.0,4868.0 283.0,4871.0 L 283.0,4879.0 Q 283.0,4882.0 286.0,4882.0 Z" fill="#3b82f6"/>
+  <text x="287.68" y="4876.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. ...
+2. widgets</title></g><g class="badge outgoingBadge">
+  <path d="M 282.0,4886.0 L 294.0,4879.0 Q 297.0,4879.0 297.0,4882.0 L 297.0,4890.0 Q 297.0,4893.0 294.0,4893.0 Z" fill="#10b981"/>
+  <text x="292.32" y="4887.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. constants
+2. helpers
+3. providers</title></g><g class="badge incomingBadge">
   <path d="M 298.0,363.0 L 286.0,356.0 Q 283.0,356.0 283.0,359.0 L 283.0,367.0 Q 283.0,370.0 286.0,370.0 Z" fill="#3b82f6"/>
   <text x="287.68" y="364.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. ...</title></g><g class="badge outgoingBadge">
   <path d="M 282.0,374.0 L 294.0,367.0 Q 297.0,367.0 297.0,370.0 L 297.0,378.0 Q 297.0,381.0 294.0,381.0 Z" fill="#10b981"/>
@@ -590,45 +621,18 @@
   <text x="351.68" y="794.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel</title></g><g class="badge incomingBadge">
   <path d="M 362.0,979.0 L 350.0,972.0 Q 347.0,972.0 347.0,975.0 L 347.0,983.0 Q 347.0,986.0 350.0,986.0 Z" fill="#3b82f6"/>
   <text x="351.68" y="980.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel</title></g><g class="badge incomingBadge">
-  <path d="M 298.0,5093.0 L 286.0,5086.0 Q 283.0,5086.0 283.0,5089.0 L 283.0,5097.0 Q 283.0,5100.0 286.0,5100.0 Z" fill="#3b82f6"/>
-  <text x="287.68" y="5094.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">6</text><title>1. ...
-2. files
-3. pages
-4. panels
-5. recovery
-6. widgets</title></g><g class="badge outgoingBadge">
-  <path d="M 282.0,5104.0 L 294.0,5097.0 Q 297.0,5097.0 297.0,5100.0 L 297.0,5108.0 Q 297.0,5111.0 294.0,5111.0 Z" fill="#10b981"/>
-  <text x="292.32" y="5105.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. constants
-2. helpers
-3. models</title></g><g class="badge incomingBadge">
-  <path d="M 298.0,2385.0 L 286.0,2378.0 Q 283.0,2378.0 283.0,2381.0 L 283.0,2389.0 Q 283.0,2392.0 286.0,2392.0 Z" fill="#3b82f6"/>
-  <text x="287.68" y="2386.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">4</text><title>1. ...
-2. files
-3. pages
-4. panels</title></g><g class="badge outgoingBadge">
-  <path d="M 282.0,2396.0 L 294.0,2389.0 Q 297.0,2389.0 297.0,2392.0 L 297.0,2400.0 Q 297.0,2403.0 294.0,2403.0 Z" fill="#10b981"/>
-  <text x="292.32" y="2397.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">6</text><title>1. constants
-2. helpers
-3. l10n
-4. models
-5. providers
-6. recovery</title></g><g class="badge incomingBadge">
-  <path d="M 298.0,4875.0 L 286.0,4868.0 Q 283.0,4868.0 283.0,4871.0 L 283.0,4879.0 Q 283.0,4882.0 286.0,4882.0 Z" fill="#3b82f6"/>
-  <text x="287.68" y="4876.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. ...
-2. widgets</title></g><g class="badge outgoingBadge">
-  <path d="M 282.0,4886.0 L 294.0,4879.0 Q 297.0,4879.0 297.0,4882.0 L 297.0,4890.0 Q 297.0,4893.0 294.0,4893.0 Z" fill="#10b981"/>
-  <text x="292.32" y="4887.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. constants
-2. helpers
-3. providers</title></g><g class="badge incomingBadge">
-  <path d="M 298.0,2231.0 L 286.0,2224.0 Q 283.0,2224.0 283.0,2227.0 L 283.0,2235.0 Q 283.0,2238.0 286.0,2238.0 Z" fill="#3b82f6"/>
-  <text x="287.68" y="2232.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. ...
-2. panels</title></g><g class="badge outgoingBadge">
-  <path d="M 282.0,2242.0 L 294.0,2235.0 Q 297.0,2235.0 297.0,2238.0 L 297.0,2246.0 Q 297.0,2249.0 294.0,2249.0 Z" fill="#10b981"/>
-  <text x="292.32" y="2243.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">5</text><title>1. constants
-2. l10n
-3. models
+  <path d="M 298.0,6559.0 L 286.0,6552.0 Q 283.0,6552.0 283.0,6555.0 L 283.0,6563.0 Q 283.0,6566.0 286.0,6566.0 Z" fill="#3b82f6"/>
+  <text x="287.68" y="6560.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">5</text><title>1. ...
+2. pages
+3. panels
 4. providers
-5. widgets</title></g><rect x="290.0" y="170.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: main.dart</title></rect>
+5. widgets</title></g><g class="badge outgoingBadge">
+  <path d="M 282.0,6570.0 L 294.0,6563.0 Q 297.0,6563.0 297.0,6566.0 L 297.0,6574.0 Q 297.0,6577.0 294.0,6577.0 Z" fill="#10b981"/>
+  <text x="292.32" y="6571.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. constants
+2. helpers
+3. l10n</title></g><rect x="290.0" y="170.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode fileNodeWarning"><title>File: main.dart
+
+2 Documentation warnings</title></rect>
 <rect x="290.0" y="202.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: main_screen.dart</title></rect>
 <rect x="290.0" y="234.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: shell_top_bar.dart</title></rect>
 <rect x="290.0" y="266.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: shell_top_bar_responsive_groups.dart</title></rect>
@@ -687,70 +691,6 @@
 <rect x="290.0" y="2070.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: files/webp_bit_writer.dart</title></rect>
 <rect x="290.0" y="2102.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: files/webp_encoder_shared.dart</title></rect>
 <rect x="290.0" y="2134.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: files/file_operation_exception.dart</title></rect>
-<rect x="290.0" y="7794.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/image_effects.dart</title></rect>
-<rect x="290.0" y="7826.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/smudge_helper.dart</title></rect>
-<rect x="290.0" y="7858.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/transform_helper.dart</title></rect>
-<rect x="290.0" y="7890.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/image_helper.dart</title></rect>
-<rect x="290.0" y="7922.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/shortcut_tooltip.dart</title></rect>
-<rect x="290.0" y="7954.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/color_helper.dart</title></rect>
-<rect x="290.0" y="7986.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/viewport_transform_helper.dart</title></rect>
-<rect x="290.0" y="8018.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/smudge_helper_steps.dart</title></rect>
-<rect x="290.0" y="8050.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/draft_flusher.dart</title></rect>
-<rect x="290.0" y="8082.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/list_helper.dart</title></rect>
-<rect x="290.0" y="8114.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/draw_path_helper.dart</title></rect>
-<rect x="290.0" y="8146.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/shortcuts_constants.dart</title></rect>
-<rect x="290.0" y="8178.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/log_helper.dart</title></rect>
-<rect x="290.0" y="8300.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: l10n/app_localizations.dart</title></rect>
-<rect x="290.0" y="6584.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/render_helper.dart</title></rect>
-<rect x="290.0" y="6616.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/tool_descriptor.dart</title></rect>
-<rect x="290.0" y="6648.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/selector_model.dart</title></rect>
-<rect x="290.0" y="6680.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/effect_preview_model.dart</title></rect>
-<rect x="290.0" y="6712.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/tool_family.dart</title></rect>
-<rect x="290.0" y="6744.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/transform_model.dart</title></rect>
-<rect x="290.0" y="6776.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/fill_model.dart</title></rect>
-<rect x="290.0" y="6808.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/effect_brush_model.dart</title></rect>
-<rect x="290.0" y="6840.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/image_placement_model.dart</title></rect>
-<rect x="290.0" y="6872.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/brush_hatch.dart</title></rect>
-<rect x="290.0" y="6904.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/hatch_marks_renderer.dart</title></rect>
-<rect x="290.0" y="6936.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/effect_labels.dart</title></rect>
-<rect x="290.0" y="6968.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/selection_effect.dart</title></rect>
-<rect x="290.0" y="7000.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/text_tool_state.dart</title></rect>
-<rect x="290.0" y="7032.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/brush_grain.dart</title></rect>
-<rect x="290.0" y="7064.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/image_placement_layer_restore_state.dart</title></rect>
-<rect x="290.0" y="7096.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/canvas_resize.dart</title></rect>
-<rect x="290.0" y="7128.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/layer_state_snapshot.dart</title></rect>
-<rect x="290.0" y="7160.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/user_action_drawing.dart</title></rect>
-<rect x="290.0" y="7192.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/brush_style.dart</title></rect>
-<rect x="290.0" y="7224.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/halftone_fill.dart</title></rect>
-<rect x="290.0" y="7256.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/hatch_marks.dart</title></rect>
-<rect x="290.0" y="7288.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/text_object.dart</title></rect>
-<rect x="290.0" y="7320.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/hatch_pattern.dart</title></rect>
-<rect x="290.0" y="7352.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/cut_action.dart</title></rect>
-<rect x="290.0" y="7384.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/image_action.dart</title></rect>
-<rect x="290.0" y="7416.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/non_rendering_action.dart</title></rect>
-<rect x="290.0" y="7448.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/region_action.dart</title></rect>
-<rect x="290.0" y="7480.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/stroke_action.dart</title></rect>
-<rect x="290.0" y="7512.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/text_action.dart</title></rect>
-<rect x="290.0" y="7544.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/dependency_versions.dart</title></rect>
-<rect x="290.0" y="7576.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/menu_model.dart</title></rect>
-<rect x="290.0" y="7608.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/version.dart</title></rect>
-<rect x="290.0" y="7640.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/visible_model.dart</title></rect>
-<rect x="290.0" y="7672.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/app_icon_enum.dart</title></rect>
-<rect x="354.0" y="440.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/side_panel/menu.dart</title></rect>
-<rect x="354.0" y="472.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/side_panel/recent_files_dialog.dart</title></rect>
-<rect x="354.0" y="504.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/side_panel/share_panel.dart</title></rect>
-<rect x="354.0" y="536.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/side_panel/side_panel.dart</title></rect>
-<rect x="354.0" y="568.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/side_panel/top_menu_and_layers_panel.dart</title></rect>
-<rect x="354.0" y="600.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/side_panel/canvas_settings.dart</title></rect>
-<rect x="354.0" y="632.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/side_panel/image_size_settings.dart</title></rect>
-<rect x="354.0" y="664.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/side_panel/about.dart</title></rect>
-<rect x="354.0" y="696.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/side_panel/attribution_dialog.dart</title></rect>
-<rect x="354.0" y="818.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/layers/layer_selector.dart</title></rect>
-<rect x="354.0" y="850.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/layers/layer_thumbnail.dart</title></rect>
-<rect x="354.0" y="882.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/layers/blend_mode.dart</title></rect>
-<rect x="354.0" y="1004.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/tools/tools_panel.dart</title></rect>
-<rect x="354.0" y="1036.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/tools/tool_family_rail.dart</title></rect>
-<rect x="354.0" y="1068.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/tools/hatch_tool_option.dart</title></rect>
 <rect x="290.0" y="5118.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: providers/layer_provider_storage_export.dart</title></rect>
 <rect x="290.0" y="5150.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: providers/editor_scopes.dart</title></rect>
 <rect x="290.0" y="5182.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: providers/app_provider.dart</title></rect>
@@ -794,6 +734,20 @@
 <rect x="290.0" y="6398.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: providers/wand_selection_request.dart</title></rect>
 <rect x="290.0" y="6430.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: providers/inherited_scope.dart</title></rect>
 <rect x="290.0" y="6462.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: providers/inherited_provider.dart</title></rect>
+<rect x="290.0" y="7794.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/image_effects.dart</title></rect>
+<rect x="290.0" y="7826.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/smudge_helper.dart</title></rect>
+<rect x="290.0" y="7858.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/transform_helper.dart</title></rect>
+<rect x="290.0" y="7890.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/image_helper.dart</title></rect>
+<rect x="290.0" y="7922.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/shortcut_tooltip.dart</title></rect>
+<rect x="290.0" y="7954.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/color_helper.dart</title></rect>
+<rect x="290.0" y="7986.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/viewport_transform_helper.dart</title></rect>
+<rect x="290.0" y="8018.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/smudge_helper_steps.dart</title></rect>
+<rect x="290.0" y="8050.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/draft_flusher.dart</title></rect>
+<rect x="290.0" y="8082.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/list_helper.dart</title></rect>
+<rect x="290.0" y="8114.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/draw_path_helper.dart</title></rect>
+<rect x="290.0" y="8146.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/shortcuts_constants.dart</title></rect>
+<rect x="290.0" y="8178.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: helpers/log_helper.dart</title></rect>
+<rect x="290.0" y="8300.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: l10n/app_localizations.dart</title></rect>
 <rect x="290.0" y="2410.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/main_view.dart</title></rect>
 <rect x="290.0" y="2442.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/canvas_gesture_handler.dart</title></rect>
 <rect x="290.0" y="2474.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/shell_selection_sub_toolbar.dart</title></rect>
@@ -869,12 +823,62 @@
 <rect x="290.0" y="4714.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/canvas_gesture_handler_eyedropper.dart</title></rect>
 <rect x="290.0" y="4746.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/canvas_gesture_handler_rotation.dart</title></rect>
 <rect x="290.0" y="4778.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/canvas_gesture_handler_state_methods.dart</title></rect>
+<rect x="290.0" y="2256.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: pages/settings_page.dart</title></rect>
+<rect x="290.0" y="2288.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: pages/platforms_page.dart</title></rect>
 <rect x="290.0" y="4900.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: recovery/draft_recovery_controller.dart</title></rect>
 <rect x="290.0" y="4932.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: recovery/storage_io_impl.dart</title></rect>
 <rect x="290.0" y="4964.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: recovery/storage_web_impl.dart</title></rect>
 <rect x="290.0" y="4996.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: recovery/draft_recovery_storage.dart</title></rect>
-<rect x="290.0" y="2256.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: pages/settings_page.dart</title></rect>
-<rect x="290.0" y="2288.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: pages/platforms_page.dart</title></rect>
+<rect x="354.0" y="440.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/side_panel/menu.dart</title></rect>
+<rect x="354.0" y="472.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/side_panel/recent_files_dialog.dart</title></rect>
+<rect x="354.0" y="504.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/side_panel/share_panel.dart</title></rect>
+<rect x="354.0" y="536.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/side_panel/side_panel.dart</title></rect>
+<rect x="354.0" y="568.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/side_panel/top_menu_and_layers_panel.dart</title></rect>
+<rect x="354.0" y="600.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/side_panel/canvas_settings.dart</title></rect>
+<rect x="354.0" y="632.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/side_panel/image_size_settings.dart</title></rect>
+<rect x="354.0" y="664.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/side_panel/about.dart</title></rect>
+<rect x="354.0" y="696.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/side_panel/attribution_dialog.dart</title></rect>
+<rect x="354.0" y="818.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/layers/layer_selector.dart</title></rect>
+<rect x="354.0" y="850.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/layers/layer_thumbnail.dart</title></rect>
+<rect x="354.0" y="882.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/layers/blend_mode.dart</title></rect>
+<rect x="354.0" y="1004.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/tools/tools_panel.dart</title></rect>
+<rect x="354.0" y="1036.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/tools/tool_family_rail.dart</title></rect>
+<rect x="354.0" y="1068.0" width="292.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: panels/tools/hatch_tool_option.dart</title></rect>
+<rect x="290.0" y="6584.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/render_helper.dart</title></rect>
+<rect x="290.0" y="6616.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/tool_descriptor.dart</title></rect>
+<rect x="290.0" y="6648.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/selector_model.dart</title></rect>
+<rect x="290.0" y="6680.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/effect_preview_model.dart</title></rect>
+<rect x="290.0" y="6712.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/tool_family.dart</title></rect>
+<rect x="290.0" y="6744.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/transform_model.dart</title></rect>
+<rect x="290.0" y="6776.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/fill_model.dart</title></rect>
+<rect x="290.0" y="6808.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/effect_brush_model.dart</title></rect>
+<rect x="290.0" y="6840.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/image_placement_model.dart</title></rect>
+<rect x="290.0" y="6872.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/brush_hatch.dart</title></rect>
+<rect x="290.0" y="6904.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/hatch_marks_renderer.dart</title></rect>
+<rect x="290.0" y="6936.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/effect_labels.dart</title></rect>
+<rect x="290.0" y="6968.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/selection_effect.dart</title></rect>
+<rect x="290.0" y="7000.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/text_tool_state.dart</title></rect>
+<rect x="290.0" y="7032.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/brush_grain.dart</title></rect>
+<rect x="290.0" y="7064.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/image_placement_layer_restore_state.dart</title></rect>
+<rect x="290.0" y="7096.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/canvas_resize.dart</title></rect>
+<rect x="290.0" y="7128.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/layer_state_snapshot.dart</title></rect>
+<rect x="290.0" y="7160.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/user_action_drawing.dart</title></rect>
+<rect x="290.0" y="7192.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/brush_style.dart</title></rect>
+<rect x="290.0" y="7224.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/halftone_fill.dart</title></rect>
+<rect x="290.0" y="7256.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/hatch_marks.dart</title></rect>
+<rect x="290.0" y="7288.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/text_object.dart</title></rect>
+<rect x="290.0" y="7320.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/hatch_pattern.dart</title></rect>
+<rect x="290.0" y="7352.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/cut_action.dart</title></rect>
+<rect x="290.0" y="7384.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/image_action.dart</title></rect>
+<rect x="290.0" y="7416.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/non_rendering_action.dart</title></rect>
+<rect x="290.0" y="7448.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/region_action.dart</title></rect>
+<rect x="290.0" y="7480.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/stroke_action.dart</title></rect>
+<rect x="290.0" y="7512.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/text_action.dart</title></rect>
+<rect x="290.0" y="7544.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/dependency_versions.dart</title></rect>
+<rect x="290.0" y="7576.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/menu_model.dart</title></rect>
+<rect x="290.0" y="7608.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/version.dart</title></rect>
+<rect x="290.0" y="7640.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/visible_model.dart</title></rect>
+<rect x="290.0" y="7672.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: models/app_icon_enum.dart</title></rect>
 <g>
   <path d="M 666.0 8602.0 H 682.0 Q 688.0 8602.0 688.0 8608.0 V 9225.0 Q 688.0 9231.0 682.0 9231.0 H 662.0" class="edgeVertical"/>
   <title>constants/app_layout.dart ▶ constants/app_interaction.dart</title>
@@ -5009,711 +5013,6 @@
 8. files/import_files.dart
 9. files/save.dart</title></g><text x="472.0" y="2148.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">file_operation_exception.dart</text>
 <g class="badge incomingBadge">
-  <path d="M 656.0,7803.0 L 668.0,7796.0 Q 671.0,7796.0 671.0,7799.0 L 671.0,7807.0 Q 671.0,7810.0 668.0,7810.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="7804.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. models/selection_effect.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,7814.0 L 660.0,7807.0 Q 657.0,7807.0 657.0,7810.0 L 657.0,7818.0 Q 657.0,7821.0 660.0,7821.0 Z" fill="#10b981"/>
-  <text x="661.68" y="7815.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. constants/constants.dart
-2. helpers/image_helper.dart</title></g><text x="472.0" y="7808.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">image_effects.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,7835.0 L 668.0,7828.0 Q 671.0,7828.0 671.0,7831.0 L 671.0,7839.0 Q 671.0,7842.0 668.0,7842.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="7836.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. providers/app_provider.dart
-2. providers/pixel_brush_commit.dart
-3. widgets/canvas_gesture_handler.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,7846.0 L 660.0,7839.0 Q 657.0,7839.0 657.0,7842.0 L 657.0,7850.0 Q 657.0,7853.0 660.0,7853.0 Z" fill="#10b981"/>
-  <text x="661.68" y="7847.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. constants/constants.dart
-2. helpers/image_helper.dart</title></g><text x="472.0" y="7840.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">smudge_helper.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,7867.0 L 668.0,7860.0 Q 671.0,7860.0 671.0,7863.0 L 671.0,7871.0 Q 671.0,7874.0 668.0,7874.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="7868.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">6</text><title>1. models/selector_model.dart
-2. models/transform_model.dart
-3. providers/app_provider.dart
-4. widgets/canvas_gesture_handler.dart
-5. widgets/selector_widget.dart
-6. widgets/transform_widget.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,7878.0 L 660.0,7871.0 Q 657.0,7871.0 657.0,7874.0 L 657.0,7882.0 Q 657.0,7885.0 660.0,7885.0 Z" fill="#10b981"/>
-  <text x="661.68" y="7879.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. constants/constants.dart
-2. helpers/image_helper.dart</title></g><text x="472.0" y="7872.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">transform_helper.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 654.0,7899.0 L 670.0,7891.4 Q 673.0,7891.4 673.0,7894.4 L 673.0,7903.6 Q 673.0,7906.6 670.0,7906.6 Z" fill="#3b82f6"/>
-  <text x="667.28" y="7900.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">17</text><title>1. files/file_ora.dart
-2. files/file_tiff.dart
-3. files/import_files.dart
-4. helpers/image_effects.dart
-5. helpers/smudge_helper.dart
-6. helpers/transform_helper.dart
-7. panels/side_panel/recent_files_dialog.dart
-8. panels/side_panel/share_panel.dart
-9. providers/app_provider.dart
-10. providers/fill_service.dart
-11. providers/layer_provider.dart
-12. providers/layer_provider_storage_export.dart
-13. providers/layers_provider.dart
-14. providers/selection_effect_renderer.dart
-15. providers/wand_source_sampler.dart
-16. widgets/magnifier_loupe.dart
-17. widgets/top_colors.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,7910.0 L 660.0,7903.0 Q 657.0,7903.0 657.0,7906.0 L 657.0,7914.0 Q 657.0,7917.0 660.0,7917.0 Z" fill="#10b981"/>
-  <text x="661.68" y="7911.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. constants/constants.dart
-2. helpers/color_helper.dart
-3. helpers/log_helper.dart</title></g><text x="472.0" y="7904.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">image_helper.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,7931.0 L 668.0,7924.0 Q 671.0,7924.0 671.0,7927.0 L 671.0,7935.0 Q 671.0,7938.0 668.0,7938.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="7932.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">8</text><title>1. panels/side_panel/menu.dart
-2. panels/side_panel/top_menu_and_layers_panel.dart
-3. panels/tools/tool_family_rail.dart
-4. shell_top_bar.dart
-5. widgets/fill_widget.dart
-6. widgets/overlay_control_widgets.dart
-7. widgets/shell_selection_sub_toolbar.dart
-8. widgets/shortcuts_help.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,7942.0 L 660.0,7935.0 Q 657.0,7935.0 657.0,7938.0 L 657.0,7946.0 Q 657.0,7949.0 660.0,7949.0 Z" fill="#10b981"/>
-  <text x="661.68" y="7943.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. helpers/shortcuts_constants.dart</title></g><text x="472.0" y="7936.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">shortcut_tooltip.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,7963.0 L 668.0,7956.0 Q 671.0,7956.0 671.0,7959.0 L 671.0,7967.0 Q 671.0,7970.0 668.0,7970.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="7964.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">9</text><title>1. helpers/image_helper.dart
-2. panels/tools/tools_panel.dart
-3. providers/layer_provider.dart
-4. providers/layers_provider.dart
-5. providers/recent_colors.dart
-6. providers/top_colors_analyzer.dart
-7. widgets/color_picker_dialog.dart
-8. widgets/color_preview.dart
-9. widgets/top_colors.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,7974.0 L 660.0,7967.0 Q 657.0,7967.0 657.0,7970.0 L 657.0,7978.0 Q 657.0,7981.0 660.0,7981.0 Z" fill="#10b981"/>
-  <text x="661.68" y="7975.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. constants/constants.dart</title></g><text x="472.0" y="7968.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">color_helper.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 654.0,7995.0 L 670.0,7987.4 Q 673.0,7987.4 673.0,7990.4 L 673.0,7999.6 Q 673.0,8002.6 670.0,8002.6 Z" fill="#3b82f6"/>
-  <text x="667.28" y="7996.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">10</text><title>1. providers/app_provider.dart
-2. providers/layer_provider.dart
-3. providers/layers_provider.dart
-4. widgets/canvas_gesture_handler.dart
-5. widgets/canvas_panel.dart
-6. widgets/canvas_panel_painter.dart
-7. widgets/fill_preview_overlay.dart
-8. widgets/main_view.dart
-9. widgets/shortcuts.dart
-10. widgets/transform_widget.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,8006.0 L 660.0,7999.0 Q 657.0,7999.0 657.0,8002.0 L 657.0,8010.0 Q 657.0,8013.0 660.0,8013.0 Z" fill="#10b981"/>
-  <text x="661.68" y="8007.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. constants/constants.dart</title></g><text x="472.0" y="8000.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">viewport_transform_helper.dart</text>
-<text x="472.0" y="8032.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">smudge_helper_steps.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,8059.0 L 668.0,8052.0 Q 671.0,8052.0 671.0,8055.0 L 671.0,8063.0 Q 671.0,8066.0 668.0,8066.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="8060.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. recovery/draft_recovery_controller.dart</title></g><text x="472.0" y="8064.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">draft_flusher.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,8091.0 L 668.0,8084.0 Q 671.0,8084.0 671.0,8087.0 L 671.0,8095.0 Q 671.0,8098.0 668.0,8098.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="8092.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. files/file_ora.dart
-2. widgets/color_selector.dart</title></g><text x="472.0" y="8096.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">list_helper.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,8123.0 L 668.0,8116.0 Q 671.0,8116.0 671.0,8119.0 L 671.0,8127.0 Q 671.0,8130.0 668.0,8130.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="8124.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">5</text><title>1. models/fill_model.dart
-2. models/selector_model.dart
-3. providers/layer_provider.dart
-4. widgets/selector_widget.dart</title></g><text x="472.0" y="8128.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">draw_path_helper.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,8155.0 L 668.0,8148.0 Q 671.0,8148.0 671.0,8151.0 L 671.0,8159.0 Q 671.0,8162.0 668.0,8162.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="8156.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">9</text><title>1. helpers/shortcut_tooltip.dart
-2. models/tool_family.dart
-3. panels/side_panel/menu.dart
-4. panels/side_panel/top_menu_and_layers_panel.dart
-5. shell_top_bar.dart
-6. widgets/fill_widget.dart
-7. widgets/overlay_control_widgets.dart
-8. widgets/shell_selection_sub_toolbar.dart
-9. widgets/shortcuts_help.dart</title></g><text x="472.0" y="8160.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">shortcuts_constants.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 654.0,8187.0 L 670.0,8179.4 Q 673.0,8179.4 673.0,8182.4 L 673.0,8191.6 Q 673.0,8194.6 670.0,8194.6 Z" fill="#3b82f6"/>
-  <text x="667.28" y="8188.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">19</text><title>1. files/file_heic.dart
-2. files/file_heic_web.dart
-3. files/file_ora.dart
-4. files/file_psd.dart
-5. files/file_tiff.dart
-6. files/import_files.dart
-7. files/save.dart
-8. files/save_backup.dart
-9. helpers/image_helper.dart
-10. main.dart
-11. panels/side_panel/recent_files_dialog.dart
-12. providers/app_preferences.dart
-13. providers/layers_provider.dart
-14. providers/macos_bookmark_service.dart
-15. providers/undo_provider.dart
-16. recovery/draft_recovery_controller.dart
-17. recovery/storage_io_impl.dart
-18. widgets/app_snackbar.dart
-19. widgets/color_picker_dialog.dart</title></g><text x="472.0" y="8192.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">log_helper.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 654.0,8309.0 L 670.0,8301.4 Q 673.0,8301.4 673.0,8304.4 L 673.0,8313.6 Q 673.0,8316.6 670.0,8316.6 Z" fill="#3b82f6"/>
-  <text x="667.28" y="8310.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">47</text><title>1. files/import_files.dart
-2. files/quit_confirmation.dart
-3. main.dart
-4. models/effect_labels.dart
-5. models/tool_descriptor.dart
-6. models/tool_family.dart
-7. pages/platforms_page.dart
-8. pages/settings_page.dart
-9. panels/layers/blend_mode.dart
-10. panels/layers/layer_selector.dart
-11. panels/side_panel/about.dart
-12. panels/side_panel/canvas_settings.dart
-13. panels/side_panel/image_size_settings.dart
-14. panels/side_panel/menu.dart
-15. panels/side_panel/recent_files_dialog.dart
-16. panels/side_panel/share_panel.dart
-17. panels/side_panel/side_panel.dart
-18. panels/side_panel/top_menu_and_layers_panel.dart
-19. panels/tools/hatch_tool_option.dart
-20. panels/tools/tool_family_rail.dart
-21. panels/tools/tools_panel.dart
-22. shell_top_bar.dart
-23. widgets/brush_intensity_picker.dart
-24. widgets/brush_size_picker.dart
-25. widgets/brush_style_picker.dart
-26. widgets/canvas_gesture_handler.dart
-27. widgets/color_picker_dialog.dart
-28. widgets/confirm_discard_dialog.dart
-29. widgets/effect_intensity_controls.dart
-30. widgets/effect_preview_bottom_sheet.dart
-31. widgets/fill_widget.dart
-32. widgets/gradient_color_list_editor.dart
-33. widgets/halftone_size_picker.dart
-34. widgets/hatch_marks_picker.dart
-35. widgets/hatch_settings_picker.dart
-36. widgets/main_view.dart
-37. widgets/overlay_control_widgets.dart
-38. widgets/selector_widget.dart
-39. widgets/shell_selection_sub_toolbar.dart
-40. widgets/shortcuts_help.dart
-41. widgets/text_alignment_dropdown.dart
-42. widgets/text_attributes_widget.dart
-43. widgets/text_editor.dart
-44. widgets/text_editor_dialog.dart
-45. widgets/tolerance_picker.dart
-46. widgets/top_colors.dart
-47. widgets/transform_widget.dart</title></g><text x="472.0" y="8314.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">app_localizations.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,6593.0 L 668.0,6586.0 Q 671.0,6586.0 671.0,6589.0 L 671.0,6597.0 Q 671.0,6600.0 668.0,6600.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="6594.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. providers/layer_provider.dart
-2. providers/layer_provider_storage_export.dart
-3. widgets/fill_preview_overlay.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,6604.0 L 660.0,6597.0 Q 657.0,6597.0 657.0,6600.0 L 657.0,6608.0 Q 657.0,6611.0 660.0,6611.0 Z" fill="#10b981"/>
-  <text x="661.68" y="6605.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">9</text><title>1. constants/constants.dart
-2. models/brush_grain.dart
-3. models/brush_hatch.dart
-4. models/brush_style.dart
-5. models/halftone_fill.dart
-6. models/hatch_marks.dart
-7. models/hatch_marks_renderer.dart
-8. models/hatch_pattern.dart
-9. models/text_object.dart</title></g><text x="472.0" y="6598.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">render_helper.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,6625.0 L 668.0,6618.0 Q 671.0,6618.0 671.0,6621.0 L 671.0,6629.0 Q 671.0,6632.0 668.0,6632.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="6626.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/tools/tool_family_rail.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,6636.0 L 660.0,6629.0 Q 657.0,6629.0 657.0,6632.0 L 657.0,6640.0 Q 657.0,6643.0 660.0,6643.0 Z" fill="#10b981"/>
-  <text x="661.68" y="6637.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">6</text><title>1. l10n/app_localizations.dart
-2. models/app_icon_enum.dart
-3. models/effect_labels.dart
-4. models/selection_effect.dart
-5. models/tool_family.dart
-6. models/user_action_drawing.dart</title></g><text x="472.0" y="6630.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">tool_descriptor.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,6657.0 L 668.0,6650.0 Q 671.0,6650.0 671.0,6653.0 L 671.0,6661.0 Q 671.0,6664.0 668.0,6664.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="6658.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">6</text><title>1. providers/app_provider.dart
-2. providers/selector_geometry_controller.dart
-3. providers/selector_geometry_host.dart
-4. widgets/canvas_gesture_handler.dart
-5. widgets/selector_widget.dart
-6. widgets/shell_selection_sub_toolbar.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,6668.0 L 660.0,6661.0 Q 657.0,6661.0 657.0,6664.0 L 657.0,6672.0 Q 657.0,6675.0 660.0,6675.0 Z" fill="#10b981"/>
-  <text x="661.68" y="6669.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">5</text><title>1. constants/constants.dart
-2. helpers/draw_path_helper.dart
-3. helpers/transform_helper.dart
-4. models/visible_model.dart</title></g><text x="472.0" y="6662.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">selector_model.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,6689.0 L 668.0,6682.0 Q 671.0,6682.0 671.0,6685.0 L 671.0,6693.0 Q 671.0,6696.0 668.0,6696.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="6690.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. providers/app_provider.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,6700.0 L 660.0,6693.0 Q 657.0,6693.0 657.0,6696.0 L 657.0,6704.0 Q 657.0,6707.0 660.0,6707.0 Z" fill="#10b981"/>
-  <text x="661.68" y="6701.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. constants/constants.dart
-2. models/selection_effect.dart
-3. models/visible_model.dart</title></g><text x="472.0" y="6694.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">effect_preview_model.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,6721.0 L 668.0,6714.0 Q 671.0,6714.0 671.0,6717.0 L 671.0,6725.0 Q 671.0,6728.0 668.0,6728.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="6722.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. models/tool_descriptor.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,6732.0 L 660.0,6725.0 Q 657.0,6725.0 657.0,6728.0 L 657.0,6736.0 Q 657.0,6739.0 660.0,6739.0 Z" fill="#10b981"/>
-  <text x="661.68" y="6733.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. helpers/shortcuts_constants.dart
-2. l10n/app_localizations.dart
-3. models/user_action_drawing.dart</title></g><text x="472.0" y="6726.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">tool_family.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,6753.0 L 668.0,6746.0 Q 671.0,6746.0 671.0,6749.0 L 671.0,6757.0 Q 671.0,6760.0 668.0,6760.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="6754.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. providers/app_provider.dart
-2. widgets/main_view.dart
-3. widgets/transform_widget.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,6764.0 L 660.0,6757.0 Q 657.0,6757.0 657.0,6760.0 L 657.0,6768.0 Q 657.0,6771.0 660.0,6771.0 Z" fill="#10b981"/>
-  <text x="661.68" y="6765.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. constants/constants.dart
-2. helpers/transform_helper.dart
-3. models/visible_model.dart</title></g><text x="472.0" y="6758.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">transform_model.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,6785.0 L 668.0,6778.0 Q 671.0,6778.0 671.0,6781.0 L 671.0,6789.0 Q 671.0,6792.0 668.0,6792.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="6786.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">7</text><title>1. panels/tools/tools_panel.dart
-2. providers/app_provider.dart
-3. providers/fill_service.dart
-4. widgets/canvas_gesture_handler.dart
-5. widgets/fill_widget.dart
-6. widgets/gradient_color_list_editor.dart
-7. widgets/main_view.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,6796.0 L 660.0,6789.0 Q 657.0,6789.0 657.0,6792.0 L 657.0,6800.0 Q 657.0,6803.0 660.0,6803.0 Z" fill="#10b981"/>
-  <text x="661.68" y="6797.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. constants/constants.dart
-2. helpers/draw_path_helper.dart
-3. models/visible_model.dart</title></g><text x="472.0" y="6790.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">fill_model.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,6817.0 L 668.0,6810.0 Q 671.0,6810.0 671.0,6813.0 L 671.0,6821.0 Q 671.0,6824.0 668.0,6824.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="6818.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. providers/app_provider.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,6828.0 L 660.0,6821.0 Q 657.0,6821.0 657.0,6824.0 L 657.0,6832.0 Q 657.0,6835.0 660.0,6835.0 Z" fill="#10b981"/>
-  <text x="661.68" y="6829.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. constants/constants.dart
-2. models/selection_effect.dart</title></g><text x="472.0" y="6822.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">effect_brush_model.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,6849.0 L 668.0,6842.0 Q 671.0,6842.0 671.0,6845.0 L 671.0,6853.0 Q 671.0,6856.0 668.0,6856.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="6850.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. providers/app_provider.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,6860.0 L 660.0,6853.0 Q 657.0,6853.0 657.0,6856.0 L 657.0,6864.0 Q 657.0,6867.0 660.0,6867.0 Z" fill="#10b981"/>
-  <text x="661.68" y="6861.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. models/image_placement_layer_restore_state.dart
-2. models/visible_model.dart</title></g><text x="472.0" y="6854.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">image_placement_model.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,6881.0 L 668.0,6874.0 Q 671.0,6874.0 671.0,6877.0 L 671.0,6885.0 Q 671.0,6888.0 668.0,6888.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="6882.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. models/render_helper.dart
-2. providers/app_provider.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,6892.0 L 660.0,6885.0 Q 657.0,6885.0 657.0,6888.0 L 657.0,6896.0 Q 657.0,6899.0 660.0,6899.0 Z" fill="#10b981"/>
-  <text x="661.68" y="6893.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. constants/constants.dart
-2. models/hatch_pattern.dart</title></g><text x="472.0" y="6886.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">brush_hatch.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,6913.0 L 668.0,6906.0 Q 671.0,6906.0 671.0,6909.0 L 671.0,6917.0 Q 671.0,6920.0 668.0,6920.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="6914.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. models/render_helper.dart
-2. providers/layer_provider_storage_export.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,6924.0 L 660.0,6917.0 Q 657.0,6917.0 657.0,6920.0 L 657.0,6928.0 Q 657.0,6931.0 660.0,6931.0 Z" fill="#10b981"/>
-  <text x="661.68" y="6925.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. constants/constants.dart
-2. models/hatch_marks.dart</title></g><text x="472.0" y="6918.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">hatch_marks_renderer.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,6945.0 L 668.0,6938.0 Q 671.0,6938.0 671.0,6941.0 L 671.0,6949.0 Q 671.0,6952.0 668.0,6952.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="6946.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">5</text><title>1. models/tool_descriptor.dart
-2. panels/tools/tool_family_rail.dart
-3. widgets/effect_intensity_controls.dart
-4. widgets/selector_widget.dart
-5. widgets/shell_selection_sub_toolbar.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,6956.0 L 660.0,6949.0 Q 657.0,6949.0 657.0,6952.0 L 657.0,6960.0 Q 657.0,6963.0 660.0,6963.0 Z" fill="#10b981"/>
-  <text x="661.68" y="6957.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. l10n/app_localizations.dart
-2. models/selection_effect.dart</title></g><text x="472.0" y="6950.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">effect_labels.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 654.0,6977.0 L 670.0,6969.4 Q 673.0,6969.4 673.0,6972.4 L 673.0,6981.6 Q 673.0,6984.6 670.0,6984.6 Z" fill="#3b82f6"/>
-  <text x="667.28" y="6978.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">12</text><title>1. models/effect_brush_model.dart
-2. models/effect_labels.dart
-3. models/effect_preview_model.dart
-4. models/tool_descriptor.dart
-5. panels/tools/tool_family_rail.dart
-6. providers/app_provider.dart
-7. providers/selection_effect_preview_state.dart
-8. widgets/effect_intensity_controls.dart
-9. widgets/effect_preview_bottom_sheet.dart
-10. widgets/main_view.dart
-11. widgets/selector_widget.dart
-12. widgets/shell_selection_sub_toolbar.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,6988.0 L 660.0,6981.0 Q 657.0,6981.0 657.0,6984.0 L 657.0,6992.0 Q 657.0,6995.0 660.0,6995.0 Z" fill="#10b981"/>
-  <text x="661.68" y="6989.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. constants/constants.dart
-2. helpers/image_effects.dart
-3. models/app_icon_enum.dart</title></g><text x="472.0" y="6982.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">selection_effect.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,7009.0 L 668.0,7002.0 Q 671.0,7002.0 671.0,7005.0 L 671.0,7013.0 Q 671.0,7016.0 668.0,7016.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="7010.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">5</text><title>1. providers/app_provider.dart
-2. widgets/text_attributes_widget.dart
-3. widgets/text_editor.dart
-4. widgets/text_editor_dialog.dart
-5. widgets/text_style_toggle_buttons.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,7020.0 L 660.0,7013.0 Q 657.0,7013.0 657.0,7016.0 L 657.0,7024.0 Q 657.0,7027.0 660.0,7027.0 Z" fill="#10b981"/>
-  <text x="661.68" y="7021.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. constants/constants.dart
-2. models/text_object.dart</title></g><text x="472.0" y="7014.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">text_tool_state.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,7041.0 L 668.0,7034.0 Q 671.0,7034.0 671.0,7037.0 L 671.0,7045.0 Q 671.0,7048.0 668.0,7048.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="7042.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. models/render_helper.dart
-2. providers/app_provider.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,7052.0 L 660.0,7045.0 Q 657.0,7045.0 657.0,7048.0 L 657.0,7056.0 Q 657.0,7059.0 660.0,7059.0 Z" fill="#10b981"/>
-  <text x="661.68" y="7053.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. constants/constants.dart</title></g><text x="472.0" y="7046.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">brush_grain.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,7073.0 L 668.0,7066.0 Q 671.0,7066.0 671.0,7069.0 L 671.0,7077.0 Q 671.0,7080.0 668.0,7080.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="7074.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. models/image_placement_model.dart
-2. providers/app_provider.dart
-3. providers/pixel_brush_commit.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,7084.0 L 660.0,7077.0 Q 657.0,7077.0 657.0,7080.0 L 657.0,7088.0 Q 657.0,7091.0 660.0,7091.0 Z" fill="#10b981"/>
-  <text x="661.68" y="7085.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. models/layer_state_snapshot.dart</title></g><text x="472.0" y="7078.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">image_placement_layer_restore_state.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,7105.0 L 668.0,7098.0 Q 671.0,7098.0 671.0,7101.0 L 671.0,7109.0 Q 671.0,7112.0 668.0,7112.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="7106.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">4</text><title>1. providers/layers_provider.dart
-2. providers/shell_provider.dart
-3. widgets/nine_grid_selector.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,7116.0 L 660.0,7109.0 Q 657.0,7109.0 657.0,7112.0 L 657.0,7120.0 Q 657.0,7123.0 660.0,7123.0 Z" fill="#10b981"/>
-  <text x="661.68" y="7117.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. constants/constants.dart</title></g><text x="472.0" y="7110.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">canvas_resize.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,7137.0 L 668.0,7130.0 Q 671.0,7130.0 671.0,7133.0 L 671.0,7141.0 Q 671.0,7144.0 668.0,7144.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="7138.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">5</text><title>1. models/image_placement_layer_restore_state.dart
-2. providers/layer_crop_state.dart
-3. providers/layer_provider.dart
-4. providers/layers_provider.dart
-5. providers/pixel_brush_commit.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,7148.0 L 660.0,7141.0 Q 657.0,7141.0 657.0,7144.0 L 657.0,7152.0 Q 657.0,7155.0 660.0,7155.0 Z" fill="#10b981"/>
-  <text x="661.68" y="7149.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. models/user_action_drawing.dart</title></g><text x="472.0" y="7142.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">layer_state_snapshot.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 654.0,7169.0 L 670.0,7161.4 Q 673.0,7161.4 673.0,7164.4 L 673.0,7173.6 Q 673.0,7176.6 670.0,7176.6 Z" fill="#3b82f6"/>
-  <text x="667.28" y="7170.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">18</text><title>1. models/layer_state_snapshot.dart
-2. models/tool_descriptor.dart
-3. models/tool_family.dart
-4. panels/tools/tool_family_rail.dart
-5. panels/tools/tools_panel.dart
-6. providers/app_provider.dart
-7. providers/fill_service.dart
-8. providers/layer_provider.dart
-9. providers/layer_provider_storage_export.dart
-10. providers/layers_provider.dart
-11. providers/pixel_brush_commit.dart
-12. shell_top_bar.dart
-13. widgets/canvas_gesture_handler.dart
-14. widgets/fill_preview_overlay.dart
-15. widgets/main_view.dart
-16. widgets/shell_selection_sub_toolbar.dart
-17. widgets/shortcuts.dart
-18. widgets/text_editor.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,7180.0 L 660.0,7173.0 Q 657.0,7173.0 657.0,7176.0 L 657.0,7184.0 Q 657.0,7187.0 660.0,7187.0 Z" fill="#10b981"/>
-  <text x="661.68" y="7181.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">6</text><title>1. models/app_icon_enum.dart
-2. models/brush_style.dart
-3. models/halftone_fill.dart
-4. models/hatch_pattern.dart
-5. models/text_object.dart</title></g><text x="472.0" y="7174.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">user_action_drawing.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,7201.0 L 668.0,7194.0 Q 671.0,7194.0 671.0,7197.0 L 671.0,7205.0 Q 671.0,7208.0 668.0,7208.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="7202.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">4</text><title>1. models/render_helper.dart
-2. models/user_action_drawing.dart
-3. widgets/brush_style_picker.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,7212.0 L 660.0,7205.0 Q 657.0,7205.0 657.0,7208.0 L 657.0,7216.0 Q 657.0,7219.0 660.0,7219.0 Z" fill="#10b981"/>
-  <text x="661.68" y="7213.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. constants/constants.dart
-2. models/hatch_marks.dart
-3. models/hatch_pattern.dart</title></g><text x="472.0" y="7206.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">brush_style.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,7233.0 L 668.0,7226.0 Q 671.0,7226.0 671.0,7229.0 L 671.0,7237.0 Q 671.0,7240.0 668.0,7240.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="7234.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. models/render_helper.dart
-2. models/user_action_drawing.dart
-3. providers/fill_service.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,7244.0 L 660.0,7237.0 Q 657.0,7237.0 657.0,7240.0 L 657.0,7248.0 Q 657.0,7251.0 660.0,7251.0 Z" fill="#10b981"/>
-  <text x="661.68" y="7245.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. constants/constants.dart</title></g><text x="472.0" y="7238.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">halftone_fill.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,7265.0 L 668.0,7258.0 Q 671.0,7258.0 671.0,7261.0 L 671.0,7269.0 Q 671.0,7272.0 668.0,7272.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="7266.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">7</text><title>1. models/brush_style.dart
-2. models/hatch_marks_renderer.dart
-3. models/render_helper.dart
-4. panels/tools/hatch_tool_option.dart
-5. panels/tools/tools_panel.dart
-6. providers/app_provider.dart
-7. widgets/hatch_marks_picker.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,7276.0 L 660.0,7269.0 Q 657.0,7269.0 657.0,7272.0 L 657.0,7280.0 Q 657.0,7283.0 660.0,7283.0 Z" fill="#10b981"/>
-  <text x="661.68" y="7277.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. constants/constants.dart</title></g><text x="472.0" y="7270.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">hatch_marks.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,7297.0 L 668.0,7290.0 Q 671.0,7290.0 671.0,7293.0 L 671.0,7301.0 Q 671.0,7304.0 668.0,7304.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="7298.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">8</text><title>1. models/render_helper.dart
-2. models/text_tool_state.dart
-3. models/user_action_drawing.dart
-4. providers/app_provider.dart
-5. providers/layer_provider.dart
-6. widgets/canvas_gesture_handler.dart
-7. widgets/text_editor.dart
-8. widgets/text_editor_dialog.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,7308.0 L 660.0,7301.0 Q 657.0,7301.0 657.0,7304.0 L 657.0,7312.0 Q 657.0,7315.0 660.0,7315.0 Z" fill="#10b981"/>
-  <text x="661.68" y="7309.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. constants/constants.dart</title></g><text x="472.0" y="7302.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">text_object.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,7329.0 L 668.0,7322.0 Q 671.0,7322.0 671.0,7325.0 L 671.0,7333.0 Q 671.0,7336.0 668.0,7336.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="7330.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">9</text><title>1. models/brush_hatch.dart
-2. models/brush_style.dart
-3. models/render_helper.dart
-4. models/user_action_drawing.dart
-5. panels/tools/hatch_tool_option.dart
-6. panels/tools/tools_panel.dart
-7. providers/app_provider.dart
-8. providers/fill_service.dart
-9. widgets/hatch_settings_picker.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,7340.0 L 660.0,7333.0 Q 657.0,7333.0 657.0,7336.0 L 657.0,7344.0 Q 657.0,7347.0 660.0,7347.0 Z" fill="#10b981"/>
-  <text x="661.68" y="7341.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. constants/constants.dart</title></g><text x="472.0" y="7334.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">hatch_pattern.dart</text>
-<text x="472.0" y="7366.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">cut_action.dart</text>
-<text x="472.0" y="7398.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">image_action.dart</text>
-<text x="472.0" y="7430.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">non_rendering_action.dart</text>
-<text x="472.0" y="7462.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">region_action.dart</text>
-<text x="472.0" y="7494.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">stroke_action.dart</text>
-<text x="472.0" y="7526.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">text_action.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,7553.0 L 668.0,7546.0 Q 671.0,7546.0 671.0,7549.0 L 671.0,7557.0 Q 671.0,7560.0 668.0,7560.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="7554.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel/attribution_dialog.dart</title></g><text x="472.0" y="7558.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">dependency_versions.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,7585.0 L 668.0,7578.0 Q 671.0,7578.0 671.0,7581.0 L 671.0,7589.0 Q 671.0,7592.0 668.0,7592.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="7586.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel/menu.dart</title></g><text x="472.0" y="7590.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">menu_model.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,7617.0 L 668.0,7610.0 Q 671.0,7610.0 671.0,7613.0 L 671.0,7621.0 Q 671.0,7624.0 668.0,7624.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="7618.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel/about.dart</title></g><text x="472.0" y="7622.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">version.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 656.0,7649.0 L 668.0,7642.0 Q 671.0,7642.0 671.0,7645.0 L 671.0,7653.0 Q 671.0,7656.0 668.0,7656.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="7650.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">5</text><title>1. models/effect_preview_model.dart
-2. models/fill_model.dart
-3. models/image_placement_model.dart
-4. models/selector_model.dart
-5. models/transform_model.dart</title></g><text x="472.0" y="7654.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">visible_model.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 654.0,7681.0 L 670.0,7673.4 Q 673.0,7673.4 673.0,7676.4 L 673.0,7685.6 Q 673.0,7688.6 670.0,7688.6 Z" fill="#3b82f6"/>
-  <text x="667.28" y="7682.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">38</text><title>1. models/selection_effect.dart
-2. models/tool_descriptor.dart
-3. models/user_action_drawing.dart
-4. pages/platforms_page.dart
-5. pages/settings_page.dart
-6. panels/layers/layer_selector.dart
-7. panels/side_panel/menu.dart
-8. panels/side_panel/recent_files_dialog.dart
-9. panels/side_panel/share_panel.dart
-10. panels/side_panel/top_menu_and_layers_panel.dart
-11. panels/tools/hatch_tool_option.dart
-12. panels/tools/tools_panel.dart
-13. shell_top_bar.dart
-14. widgets/app_button_row.dart
-15. widgets/app_buttons.dart
-16. widgets/app_icon.dart
-17. widgets/app_snackbar.dart
-18. widgets/brush_style_picker.dart
-19. widgets/color_picker_dialog.dart
-20. widgets/color_preview.dart
-21. widgets/file_type_icon.dart
-22. widgets/fill_widget.dart
-23. widgets/gradient_color_list_editor.dart
-24. widgets/halftone_size_picker.dart
-25. widgets/hatch_marks_picker.dart
-26. widgets/hatch_settings_picker.dart
-27. widgets/nine_grid_selector.dart
-28. widgets/overlay_control_widgets.dart
-29. widgets/selector_widget.dart
-30. widgets/shell_selection_sub_toolbar.dart
-31. widgets/size_fields_row.dart
-32. widgets/text_attributes_widget.dart
-33. widgets/text_editor_dialog.dart
-34. widgets/text_style_toggle_buttons.dart
-35. widgets/tolerance_picker.dart
-36. widgets/toolbar_icon_button.dart
-37. widgets/top_colors.dart
-38. widgets/transform_widget.dart</title></g><text x="472.0" y="7686.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">app_icon_enum.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 632.0,449.0 L 644.0,442.0 Q 647.0,442.0 647.0,445.0 L 647.0,453.0 Q 647.0,456.0 644.0,456.0 Z" fill="#3b82f6"/>
-  <text x="642.32" y="450.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. shell_top_bar.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 650.0,460.0 L 634.0,452.4 Q 631.0,452.4 631.0,455.4 L 631.0,464.6 Q 631.0,467.6 634.0,467.6 Z" fill="#10b981"/>
-  <text x="636.72" y="461.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">21</text><title>1. constants/constants.dart
-2. files/import_files.dart
-3. files/save.dart
-4. helpers/shortcut_tooltip.dart
-5. helpers/shortcuts_constants.dart
-6. l10n/app_localizations.dart
-7. models/app_icon_enum.dart
-8. models/menu_model.dart
-9. pages/settings_page.dart
-10. panels/side_panel/about.dart
-11. panels/side_panel/canvas_settings.dart
-12. panels/side_panel/image_size_settings.dart
-13. panels/side_panel/recent_files_dialog.dart
-14. panels/side_panel/share_panel.dart
-15. providers/app_preferences.dart
-16. providers/app_provider.dart
-17. providers/editor_scopes.dart
-18. providers/shell_provider.dart
-19. widgets/app_icon.dart
-20. widgets/material_free.dart
-21. widgets/shortcuts.dart</title></g><text x="492.0" y="454.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">menu.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 632.0,481.0 L 644.0,474.0 Q 647.0,474.0 647.0,477.0 L 647.0,485.0 Q 647.0,488.0 644.0,488.0 Z" fill="#3b82f6"/>
-  <text x="642.32" y="482.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. panels/side_panel/menu.dart
-2. shell_top_bar.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 650.0,492.0 L 634.0,484.4 Q 631.0,484.4 631.0,487.4 L 631.0,496.6 Q 631.0,499.6 634.0,499.6 Z" fill="#10b981"/>
-  <text x="636.72" y="493.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">15</text><title>1. constants/constants.dart
-2. files/file_ora.dart
-3. files/file_psd.dart
-4. files/import_files.dart
-5. helpers/image_helper.dart
-6. helpers/log_helper.dart
-7. l10n/app_localizations.dart
-8. models/app_icon_enum.dart
-9. providers/app_preferences.dart
-10. providers/app_provider.dart
-11. providers/macos_bookmark_service.dart
-12. providers/shell_provider.dart
-13. widgets/app_icon.dart
-14. widgets/confirm_discard_dialog.dart
-15. widgets/material_free.dart</title></g><text x="492.0" y="486.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">recent_files_dialog.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 632.0,513.0 L 644.0,506.0 Q 647.0,506.0 647.0,509.0 L 647.0,517.0 Q 647.0,520.0 644.0,520.0 Z" fill="#3b82f6"/>
-  <text x="642.32" y="514.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. panels/side_panel/menu.dart
-2. shell_top_bar.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 650.0,524.0 L 634.0,516.4 Q 631.0,516.4 631.0,519.4 L 631.0,528.6 Q 631.0,531.6 634.0,531.6 Z" fill="#10b981"/>
-  <text x="636.72" y="525.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">14</text><title>1. constants/constants.dart
-2. files/export_file_name.dart
-3. files/file_heic.dart
-4. files/file_heic_web.dart
-5. files/save.dart
-6. helpers/image_helper.dart
-7. l10n/app_localizations.dart
-8. models/app_icon_enum.dart
-9. providers/app_preferences.dart
-10. providers/app_provider.dart
-11. providers/shell_provider.dart
-12. widgets/app_icon.dart
-13. widgets/file_type_icon.dart
-14. widgets/material_free.dart</title></g><text x="492.0" y="518.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">share_panel.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 632.0,545.0 L 644.0,538.0 Q 647.0,538.0 647.0,541.0 L 647.0,549.0 Q 647.0,552.0 644.0,552.0 Z" fill="#3b82f6"/>
-  <text x="642.32" y="546.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. main_screen.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 648.0,556.0 L 636.0,549.0 Q 633.0,549.0 633.0,552.0 L 633.0,560.0 Q 633.0,563.0 636.0,563.0 Z" fill="#10b981"/>
-  <text x="637.68" y="557.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">8</text><title>1. constants/constants.dart
-2. l10n/app_localizations.dart
-3. panels/side_panel/top_menu_and_layers_panel.dart
-4. panels/tools/tools_panel.dart
-5. providers/app_preferences.dart
-6. providers/app_provider.dart
-7. widgets/material_free.dart
-8. widgets/side_panel_header.dart</title></g><text x="492.0" y="550.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">side_panel.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 632.0,577.0 L 644.0,570.0 Q 647.0,570.0 647.0,573.0 L 647.0,581.0 Q 647.0,584.0 644.0,584.0 Z" fill="#3b82f6"/>
-  <text x="642.32" y="578.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel/side_panel.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 650.0,588.0 L 634.0,580.4 Q 631.0,580.4 631.0,583.4 L 631.0,592.6 Q 631.0,595.6 634.0,595.6 Z" fill="#10b981"/>
-  <text x="636.72" y="589.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">10</text><title>1. constants/constants.dart
-2. helpers/shortcut_tooltip.dart
-3. helpers/shortcuts_constants.dart
-4. l10n/app_localizations.dart
-5. models/app_icon_enum.dart
-6. panels/layers/layer_selector.dart
-7. providers/app_provider.dart
-8. providers/shell_provider.dart
-9. widgets/app_buttons.dart
-10. widgets/side_panel_header.dart</title></g><text x="492.0" y="582.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">top_menu_and_layers_panel.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 632.0,609.0 L 644.0,602.0 Q 647.0,602.0 647.0,605.0 L 647.0,613.0 Q 647.0,616.0 644.0,616.0 Z" fill="#3b82f6"/>
-  <text x="642.32" y="610.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel/menu.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 648.0,620.0 L 636.0,613.0 Q 633.0,613.0 633.0,616.0 L 633.0,624.0 Q 633.0,627.0 636.0,627.0 Z" fill="#10b981"/>
-  <text x="637.68" y="621.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">7</text><title>1. constants/constants.dart
-2. l10n/app_localizations.dart
-3. providers/app_provider.dart
-4. providers/shell_provider.dart
-5. widgets/material_free.dart
-6. widgets/nine_grid_selector.dart
-7. widgets/size_fields_row.dart</title></g><text x="492.0" y="614.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">canvas_settings.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 632.0,641.0 L 644.0,634.0 Q 647.0,634.0 647.0,637.0 L 647.0,645.0 Q 647.0,648.0 644.0,648.0 Z" fill="#3b82f6"/>
-  <text x="642.32" y="642.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel/menu.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 648.0,652.0 L 636.0,645.0 Q 633.0,645.0 633.0,648.0 L 633.0,656.0 Q 633.0,659.0 636.0,659.0 Z" fill="#10b981"/>
-  <text x="637.68" y="653.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">6</text><title>1. constants/constants.dart
-2. l10n/app_localizations.dart
-3. providers/app_provider.dart
-4. providers/shell_provider.dart
-5. widgets/material_free.dart
-6. widgets/size_fields_row.dart</title></g><text x="492.0" y="646.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">image_size_settings.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 632.0,673.0 L 644.0,666.0 Q 647.0,666.0 647.0,669.0 L 647.0,677.0 Q 647.0,680.0 644.0,680.0 Z" fill="#3b82f6"/>
-  <text x="642.32" y="674.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel/menu.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 648.0,684.0 L 636.0,677.0 Q 633.0,677.0 633.0,680.0 L 633.0,688.0 Q 633.0,691.0 636.0,691.0 Z" fill="#10b981"/>
-  <text x="637.68" y="685.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">5</text><title>1. constants/constants.dart
-2. l10n/app_localizations.dart
-3. models/version.dart
-4. panels/side_panel/attribution_dialog.dart
-5. widgets/material_free.dart</title></g><text x="492.0" y="678.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">about.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 632.0,705.0 L 644.0,698.0 Q 647.0,698.0 647.0,701.0 L 647.0,709.0 Q 647.0,712.0 644.0,712.0 Z" fill="#3b82f6"/>
-  <text x="642.32" y="706.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel/about.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 648.0,716.0 L 636.0,709.0 Q 633.0,709.0 633.0,712.0 L 633.0,720.0 Q 633.0,723.0 636.0,723.0 Z" fill="#10b981"/>
-  <text x="637.68" y="717.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. constants/constants.dart
-2. models/dependency_versions.dart
-3. widgets/material_free.dart</title></g><text x="492.0" y="710.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">attribution_dialog.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 632.0,827.0 L 644.0,820.0 Q 647.0,820.0 647.0,823.0 L 647.0,831.0 Q 647.0,834.0 644.0,834.0 Z" fill="#3b82f6"/>
-  <text x="642.32" y="828.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel/top_menu_and_layers_panel.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 650.0,838.0 L 634.0,830.4 Q 631.0,830.4 631.0,833.4 L 631.0,842.6 Q 631.0,845.6 634.0,845.6 Z" fill="#10b981"/>
-  <text x="636.72" y="839.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">13</text><title>1. constants/constants.dart
-2. l10n/app_localizations.dart
-3. models/app_icon_enum.dart
-4. panels/layers/blend_mode.dart
-5. panels/layers/layer_thumbnail.dart
-6. providers/app_provider.dart
-7. providers/undo_provider.dart
-8. widgets/app_icon.dart
-9. widgets/color_picker_dialog.dart
-10. widgets/color_preview.dart
-11. widgets/container_slider.dart
-12. widgets/material_free.dart
-13. widgets/truncated_text.dart</title></g><text x="492.0" y="832.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">layer_selector.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 632.0,859.0 L 644.0,852.0 Q 647.0,852.0 647.0,855.0 L 647.0,863.0 Q 647.0,866.0 644.0,866.0 Z" fill="#3b82f6"/>
-  <text x="642.32" y="860.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/layers/layer_selector.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 648.0,870.0 L 636.0,863.0 Q 633.0,863.0 633.0,866.0 L 633.0,874.0 Q 633.0,877.0 636.0,877.0 Z" fill="#10b981"/>
-  <text x="637.68" y="871.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">4</text><title>1. constants/constants.dart
-2. providers/layer_provider.dart
-3. widgets/image_painter.dart
-4. widgets/transparent_background.dart</title></g><text x="492.0" y="864.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">layer_thumbnail.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 632.0,891.0 L 644.0,884.0 Q 647.0,884.0 647.0,887.0 L 647.0,895.0 Q 647.0,898.0 644.0,898.0 Z" fill="#3b82f6"/>
-  <text x="642.32" y="892.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/layers/layer_selector.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 648.0,902.0 L 636.0,895.0 Q 633.0,895.0 633.0,898.0 L 633.0,906.0 Q 633.0,909.0 636.0,909.0 Z" fill="#10b981"/>
-  <text x="637.68" y="903.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. l10n/app_localizations.dart
-2. widgets/material_free.dart</title></g><text x="492.0" y="896.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">blend_mode.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 632.0,1013.0 L 644.0,1006.0 Q 647.0,1006.0 647.0,1009.0 L 647.0,1017.0 Q 647.0,1020.0 644.0,1020.0 Z" fill="#3b82f6"/>
-  <text x="642.32" y="1014.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel/side_panel.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 650.0,1024.0 L 634.0,1016.4 Q 631.0,1016.4 631.0,1019.4 L 631.0,1028.6 Q 631.0,1031.6 634.0,1031.6 Z" fill="#10b981"/>
-  <text x="636.72" y="1025.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">25</text><title>1. constants/constants.dart
-2. helpers/color_helper.dart
-3. l10n/app_localizations.dart
-4. models/app_icon_enum.dart
-5. models/fill_model.dart
-6. models/hatch_marks.dart
-7. models/hatch_pattern.dart
-8. models/user_action_drawing.dart
-9. panels/tools/hatch_tool_option.dart
-10. panels/tools/tool_family_rail.dart
-11. providers/app_provider.dart
-12. widgets/app_icon.dart
-13. widgets/brush_intensity_picker.dart
-14. widgets/brush_size_picker.dart
-15. widgets/brush_style_picker.dart
-16. widgets/color_picker_dialog.dart
-17. widgets/color_preview.dart
-18. widgets/color_selector.dart
-19. widgets/gradient_color_list_editor.dart
-20. widgets/halftone_size_picker.dart
-21. widgets/material_free.dart
-22. widgets/text_attributes_widget.dart
-23. widgets/tolerance_picker.dart
-24. widgets/tool_attribute_widget.dart
-25. widgets/top_colors.dart</title></g><text x="492.0" y="1018.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">tools_panel.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 632.0,1045.0 L 644.0,1038.0 Q 647.0,1038.0 647.0,1041.0 L 647.0,1049.0 Q 647.0,1052.0 644.0,1052.0 Z" fill="#3b82f6"/>
-  <text x="642.32" y="1046.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/tools/tools_panel.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 650.0,1056.0 L 634.0,1048.4 Q 631.0,1048.4 631.0,1051.4 L 631.0,1060.6 Q 631.0,1063.6 634.0,1063.6 Z" fill="#10b981"/>
-  <text x="636.72" y="1057.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">12</text><title>1. constants/constants.dart
-2. helpers/shortcut_tooltip.dart
-3. l10n/app_localizations.dart
-4. models/effect_labels.dart
-5. models/selection_effect.dart
-6. models/tool_descriptor.dart
-7. models/user_action_drawing.dart
-8. providers/app_provider.dart
-9. widgets/app_buttons.dart
-10. widgets/app_divider.dart
-11. widgets/app_slider.dart
-12. widgets/side_panel_header.dart</title></g><text x="492.0" y="1050.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">tool_family_rail.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 632.0,1077.0 L 644.0,1070.0 Q 647.0,1070.0 647.0,1073.0 L 647.0,1081.0 Q 647.0,1084.0 644.0,1084.0 Z" fill="#3b82f6"/>
-  <text x="642.32" y="1078.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/tools/tools_panel.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 648.0,1088.0 L 636.0,1081.0 Q 633.0,1081.0 633.0,1084.0 L 633.0,1092.0 Q 633.0,1095.0 636.0,1095.0 Z" fill="#10b981"/>
-  <text x="637.68" y="1089.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">9</text><title>1. constants/constants.dart
-2. l10n/app_localizations.dart
-3. models/app_icon_enum.dart
-4. models/hatch_marks.dart
-5. models/hatch_pattern.dart
-6. widgets/hatch_marks_picker.dart
-7. widgets/hatch_settings_picker.dart
-8. widgets/material_free.dart
-9. widgets/tool_attribute_widget.dart</title></g><text x="492.0" y="1082.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">hatch_tool_option.dart</text>
-<g class="badge incomingBadge">
   <path d="M 656.0,5127.0 L 668.0,5120.0 Q 671.0,5120.0 671.0,5123.0 L 671.0,5131.0 Q 671.0,5134.0 668.0,5134.0 Z" fill="#3b82f6"/>
   <text x="666.32" y="5128.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. files/file_ora.dart</title></g><g class="badge outgoingBadge">
   <path d="M 672.0,5138.0 L 660.0,5131.0 Q 657.0,5131.0 657.0,5134.0 L 657.0,5142.0 Q 657.0,5145.0 660.0,5145.0 Z" fill="#10b981"/>
@@ -6033,6 +5332,188 @@
 6. providers/shell_provider.dart
 7. providers/undo_provider.dart
 8. widgets/canvas_gesture_handler.dart</title></g><text x="472.0" y="6476.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">inherited_provider.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,7803.0 L 668.0,7796.0 Q 671.0,7796.0 671.0,7799.0 L 671.0,7807.0 Q 671.0,7810.0 668.0,7810.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="7804.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. models/selection_effect.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,7814.0 L 660.0,7807.0 Q 657.0,7807.0 657.0,7810.0 L 657.0,7818.0 Q 657.0,7821.0 660.0,7821.0 Z" fill="#10b981"/>
+  <text x="661.68" y="7815.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. constants/constants.dart
+2. helpers/image_helper.dart</title></g><text x="472.0" y="7808.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">image_effects.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,7835.0 L 668.0,7828.0 Q 671.0,7828.0 671.0,7831.0 L 671.0,7839.0 Q 671.0,7842.0 668.0,7842.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="7836.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. providers/app_provider.dart
+2. providers/pixel_brush_commit.dart
+3. widgets/canvas_gesture_handler.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,7846.0 L 660.0,7839.0 Q 657.0,7839.0 657.0,7842.0 L 657.0,7850.0 Q 657.0,7853.0 660.0,7853.0 Z" fill="#10b981"/>
+  <text x="661.68" y="7847.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. constants/constants.dart
+2. helpers/image_helper.dart</title></g><text x="472.0" y="7840.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">smudge_helper.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,7867.0 L 668.0,7860.0 Q 671.0,7860.0 671.0,7863.0 L 671.0,7871.0 Q 671.0,7874.0 668.0,7874.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="7868.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">6</text><title>1. models/selector_model.dart
+2. models/transform_model.dart
+3. providers/app_provider.dart
+4. widgets/canvas_gesture_handler.dart
+5. widgets/selector_widget.dart
+6. widgets/transform_widget.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,7878.0 L 660.0,7871.0 Q 657.0,7871.0 657.0,7874.0 L 657.0,7882.0 Q 657.0,7885.0 660.0,7885.0 Z" fill="#10b981"/>
+  <text x="661.68" y="7879.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. constants/constants.dart
+2. helpers/image_helper.dart</title></g><text x="472.0" y="7872.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">transform_helper.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 654.0,7899.0 L 670.0,7891.4 Q 673.0,7891.4 673.0,7894.4 L 673.0,7903.6 Q 673.0,7906.6 670.0,7906.6 Z" fill="#3b82f6"/>
+  <text x="667.28" y="7900.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">17</text><title>1. files/file_ora.dart
+2. files/file_tiff.dart
+3. files/import_files.dart
+4. helpers/image_effects.dart
+5. helpers/smudge_helper.dart
+6. helpers/transform_helper.dart
+7. panels/side_panel/recent_files_dialog.dart
+8. panels/side_panel/share_panel.dart
+9. providers/app_provider.dart
+10. providers/fill_service.dart
+11. providers/layer_provider.dart
+12. providers/layer_provider_storage_export.dart
+13. providers/layers_provider.dart
+14. providers/selection_effect_renderer.dart
+15. providers/wand_source_sampler.dart
+16. widgets/magnifier_loupe.dart
+17. widgets/top_colors.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,7910.0 L 660.0,7903.0 Q 657.0,7903.0 657.0,7906.0 L 657.0,7914.0 Q 657.0,7917.0 660.0,7917.0 Z" fill="#10b981"/>
+  <text x="661.68" y="7911.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. constants/constants.dart
+2. helpers/color_helper.dart
+3. helpers/log_helper.dart</title></g><text x="472.0" y="7904.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">image_helper.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,7931.0 L 668.0,7924.0 Q 671.0,7924.0 671.0,7927.0 L 671.0,7935.0 Q 671.0,7938.0 668.0,7938.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="7932.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">8</text><title>1. panels/side_panel/menu.dart
+2. panels/side_panel/top_menu_and_layers_panel.dart
+3. panels/tools/tool_family_rail.dart
+4. shell_top_bar.dart
+5. widgets/fill_widget.dart
+6. widgets/overlay_control_widgets.dart
+7. widgets/shell_selection_sub_toolbar.dart
+8. widgets/shortcuts_help.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,7942.0 L 660.0,7935.0 Q 657.0,7935.0 657.0,7938.0 L 657.0,7946.0 Q 657.0,7949.0 660.0,7949.0 Z" fill="#10b981"/>
+  <text x="661.68" y="7943.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. helpers/shortcuts_constants.dart</title></g><text x="472.0" y="7936.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">shortcut_tooltip.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,7963.0 L 668.0,7956.0 Q 671.0,7956.0 671.0,7959.0 L 671.0,7967.0 Q 671.0,7970.0 668.0,7970.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="7964.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">9</text><title>1. helpers/image_helper.dart
+2. panels/tools/tools_panel.dart
+3. providers/layer_provider.dart
+4. providers/layers_provider.dart
+5. providers/recent_colors.dart
+6. providers/top_colors_analyzer.dart
+7. widgets/color_picker_dialog.dart
+8. widgets/color_preview.dart
+9. widgets/top_colors.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,7974.0 L 660.0,7967.0 Q 657.0,7967.0 657.0,7970.0 L 657.0,7978.0 Q 657.0,7981.0 660.0,7981.0 Z" fill="#10b981"/>
+  <text x="661.68" y="7975.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. constants/constants.dart</title></g><text x="472.0" y="7968.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">color_helper.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 654.0,7995.0 L 670.0,7987.4 Q 673.0,7987.4 673.0,7990.4 L 673.0,7999.6 Q 673.0,8002.6 670.0,8002.6 Z" fill="#3b82f6"/>
+  <text x="667.28" y="7996.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">10</text><title>1. providers/app_provider.dart
+2. providers/layer_provider.dart
+3. providers/layers_provider.dart
+4. widgets/canvas_gesture_handler.dart
+5. widgets/canvas_panel.dart
+6. widgets/canvas_panel_painter.dart
+7. widgets/fill_preview_overlay.dart
+8. widgets/main_view.dart
+9. widgets/shortcuts.dart
+10. widgets/transform_widget.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,8006.0 L 660.0,7999.0 Q 657.0,7999.0 657.0,8002.0 L 657.0,8010.0 Q 657.0,8013.0 660.0,8013.0 Z" fill="#10b981"/>
+  <text x="661.68" y="8007.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. constants/constants.dart</title></g><text x="472.0" y="8000.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">viewport_transform_helper.dart</text>
+<text x="472.0" y="8032.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">smudge_helper_steps.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,8059.0 L 668.0,8052.0 Q 671.0,8052.0 671.0,8055.0 L 671.0,8063.0 Q 671.0,8066.0 668.0,8066.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="8060.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. recovery/draft_recovery_controller.dart</title></g><text x="472.0" y="8064.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">draft_flusher.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,8091.0 L 668.0,8084.0 Q 671.0,8084.0 671.0,8087.0 L 671.0,8095.0 Q 671.0,8098.0 668.0,8098.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="8092.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. files/file_ora.dart
+2. widgets/color_selector.dart</title></g><text x="472.0" y="8096.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">list_helper.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,8123.0 L 668.0,8116.0 Q 671.0,8116.0 671.0,8119.0 L 671.0,8127.0 Q 671.0,8130.0 668.0,8130.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="8124.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">5</text><title>1. models/fill_model.dart
+2. models/selector_model.dart
+3. providers/layer_provider.dart
+4. widgets/selector_widget.dart</title></g><text x="472.0" y="8128.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">draw_path_helper.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,8155.0 L 668.0,8148.0 Q 671.0,8148.0 671.0,8151.0 L 671.0,8159.0 Q 671.0,8162.0 668.0,8162.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="8156.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">9</text><title>1. helpers/shortcut_tooltip.dart
+2. models/tool_family.dart
+3. panels/side_panel/menu.dart
+4. panels/side_panel/top_menu_and_layers_panel.dart
+5. shell_top_bar.dart
+6. widgets/fill_widget.dart
+7. widgets/overlay_control_widgets.dart
+8. widgets/shell_selection_sub_toolbar.dart
+9. widgets/shortcuts_help.dart</title></g><text x="472.0" y="8160.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">shortcuts_constants.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 654.0,8187.0 L 670.0,8179.4 Q 673.0,8179.4 673.0,8182.4 L 673.0,8191.6 Q 673.0,8194.6 670.0,8194.6 Z" fill="#3b82f6"/>
+  <text x="667.28" y="8188.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">19</text><title>1. files/file_heic.dart
+2. files/file_heic_web.dart
+3. files/file_ora.dart
+4. files/file_psd.dart
+5. files/file_tiff.dart
+6. files/import_files.dart
+7. files/save.dart
+8. files/save_backup.dart
+9. helpers/image_helper.dart
+10. main.dart
+11. panels/side_panel/recent_files_dialog.dart
+12. providers/app_preferences.dart
+13. providers/layers_provider.dart
+14. providers/macos_bookmark_service.dart
+15. providers/undo_provider.dart
+16. recovery/draft_recovery_controller.dart
+17. recovery/storage_io_impl.dart
+18. widgets/app_snackbar.dart
+19. widgets/color_picker_dialog.dart</title></g><text x="472.0" y="8192.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">log_helper.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 654.0,8309.0 L 670.0,8301.4 Q 673.0,8301.4 673.0,8304.4 L 673.0,8313.6 Q 673.0,8316.6 670.0,8316.6 Z" fill="#3b82f6"/>
+  <text x="667.28" y="8310.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">47</text><title>1. files/import_files.dart
+2. files/quit_confirmation.dart
+3. main.dart
+4. models/effect_labels.dart
+5. models/tool_descriptor.dart
+6. models/tool_family.dart
+7. pages/platforms_page.dart
+8. pages/settings_page.dart
+9. panels/layers/blend_mode.dart
+10. panels/layers/layer_selector.dart
+11. panels/side_panel/about.dart
+12. panels/side_panel/canvas_settings.dart
+13. panels/side_panel/image_size_settings.dart
+14. panels/side_panel/menu.dart
+15. panels/side_panel/recent_files_dialog.dart
+16. panels/side_panel/share_panel.dart
+17. panels/side_panel/side_panel.dart
+18. panels/side_panel/top_menu_and_layers_panel.dart
+19. panels/tools/hatch_tool_option.dart
+20. panels/tools/tool_family_rail.dart
+21. panels/tools/tools_panel.dart
+22. shell_top_bar.dart
+23. widgets/brush_intensity_picker.dart
+24. widgets/brush_size_picker.dart
+25. widgets/brush_style_picker.dart
+26. widgets/canvas_gesture_handler.dart
+27. widgets/color_picker_dialog.dart
+28. widgets/confirm_discard_dialog.dart
+29. widgets/effect_intensity_controls.dart
+30. widgets/effect_preview_bottom_sheet.dart
+31. widgets/fill_widget.dart
+32. widgets/gradient_color_list_editor.dart
+33. widgets/halftone_size_picker.dart
+34. widgets/hatch_marks_picker.dart
+35. widgets/hatch_settings_picker.dart
+36. widgets/main_view.dart
+37. widgets/overlay_control_widgets.dart
+38. widgets/selector_widget.dart
+39. widgets/shell_selection_sub_toolbar.dart
+40. widgets/shortcuts_help.dart
+41. widgets/text_alignment_dropdown.dart
+42. widgets/text_attributes_widget.dart
+43. widgets/text_editor.dart
+44. widgets/text_editor_dialog.dart
+45. widgets/tolerance_picker.dart
+46. widgets/top_colors.dart
+47. widgets/transform_widget.dart</title></g><text x="472.0" y="8314.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">app_localizations.dart</text>
 <g class="badge incomingBadge">
   <path d="M 656.0,2419.0 L 668.0,2412.0 Q 671.0,2412.0 671.0,2415.0 L 671.0,2423.0 Q 671.0,2426.0 668.0,2426.0 Z" fill="#3b82f6"/>
   <text x="666.32" y="2420.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. main_screen.dart</title></g><g class="badge outgoingBadge">
@@ -6809,6 +6290,25 @@
 <text x="472.0" y="4760.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">canvas_gesture_handler_rotation.dart</text>
 <text x="472.0" y="4792.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">canvas_gesture_handler_state_methods.dart</text>
 <g class="badge incomingBadge">
+  <path d="M 656.0,2265.0 L 668.0,2258.0 Q 671.0,2258.0 671.0,2261.0 L 671.0,2269.0 Q 671.0,2272.0 668.0,2272.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="2266.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. main.dart
+2. panels/side_panel/menu.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,2276.0 L 660.0,2269.0 Q 657.0,2269.0 657.0,2272.0 L 657.0,2280.0 Q 657.0,2283.0 660.0,2283.0 Z" fill="#10b981"/>
+  <text x="661.68" y="2277.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">6</text><title>1. constants/constants.dart
+2. l10n/app_localizations.dart
+3. models/app_icon_enum.dart
+4. providers/app_preferences.dart
+5. widgets/material_free.dart
+6. widgets/shortcuts.dart</title></g><text x="472.0" y="2270.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">settings_page.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,2297.0 L 668.0,2290.0 Q 671.0,2290.0 671.0,2293.0 L 671.0,2301.0 Q 671.0,2304.0 668.0,2304.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="2298.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. main.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,2308.0 L 660.0,2301.0 Q 657.0,2301.0 657.0,2304.0 L 657.0,2312.0 Q 657.0,2315.0 660.0,2315.0 Z" fill="#10b981"/>
+  <text x="661.68" y="2309.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">4</text><title>1. constants/constants.dart
+2. l10n/app_localizations.dart
+3. models/app_icon_enum.dart
+4. widgets/material_free.dart</title></g><text x="472.0" y="2302.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">platforms_page.dart</text>
+<g class="badge incomingBadge">
   <path d="M 656.0,4909.0 L 668.0,4902.0 Q 671.0,4902.0 671.0,4905.0 L 671.0,4913.0 Q 671.0,4916.0 668.0,4916.0 Z" fill="#3b82f6"/>
   <text x="666.32" y="4910.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. main.dart
 2. widgets/canvas_gesture_handler.dart</title></g><g class="badge outgoingBadge">
@@ -6839,39 +6339,543 @@
 2. recovery/storage_io_impl.dart
 3. recovery/storage_web_impl.dart</title></g><text x="472.0" y="5010.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">draft_recovery_storage.dart</text>
 <g class="badge incomingBadge">
-  <path d="M 656.0,2265.0 L 668.0,2258.0 Q 671.0,2258.0 671.0,2261.0 L 671.0,2269.0 Q 671.0,2272.0 668.0,2272.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="2266.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. main.dart
-2. panels/side_panel/menu.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,2276.0 L 660.0,2269.0 Q 657.0,2269.0 657.0,2272.0 L 657.0,2280.0 Q 657.0,2283.0 660.0,2283.0 Z" fill="#10b981"/>
-  <text x="661.68" y="2277.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">6</text><title>1. constants/constants.dart
-2. l10n/app_localizations.dart
-3. models/app_icon_enum.dart
-4. providers/app_preferences.dart
-5. widgets/material_free.dart
-6. widgets/shortcuts.dart</title></g><text x="472.0" y="2270.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">settings_page.dart</text>
+  <path d="M 632.0,449.0 L 644.0,442.0 Q 647.0,442.0 647.0,445.0 L 647.0,453.0 Q 647.0,456.0 644.0,456.0 Z" fill="#3b82f6"/>
+  <text x="642.32" y="450.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. shell_top_bar.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 650.0,460.0 L 634.0,452.4 Q 631.0,452.4 631.0,455.4 L 631.0,464.6 Q 631.0,467.6 634.0,467.6 Z" fill="#10b981"/>
+  <text x="636.72" y="461.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">21</text><title>1. constants/constants.dart
+2. files/import_files.dart
+3. files/save.dart
+4. helpers/shortcut_tooltip.dart
+5. helpers/shortcuts_constants.dart
+6. l10n/app_localizations.dart
+7. models/app_icon_enum.dart
+8. models/menu_model.dart
+9. pages/settings_page.dart
+10. panels/side_panel/about.dart
+11. panels/side_panel/canvas_settings.dart
+12. panels/side_panel/image_size_settings.dart
+13. panels/side_panel/recent_files_dialog.dart
+14. panels/side_panel/share_panel.dart
+15. providers/app_preferences.dart
+16. providers/app_provider.dart
+17. providers/editor_scopes.dart
+18. providers/shell_provider.dart
+19. widgets/app_icon.dart
+20. widgets/material_free.dart
+21. widgets/shortcuts.dart</title></g><text x="492.0" y="454.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">menu.dart</text>
 <g class="badge incomingBadge">
-  <path d="M 656.0,2297.0 L 668.0,2290.0 Q 671.0,2290.0 671.0,2293.0 L 671.0,2301.0 Q 671.0,2304.0 668.0,2304.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="2298.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. main.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 672.0,2308.0 L 660.0,2301.0 Q 657.0,2301.0 657.0,2304.0 L 657.0,2312.0 Q 657.0,2315.0 660.0,2315.0 Z" fill="#10b981"/>
-  <text x="661.68" y="2309.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">4</text><title>1. constants/constants.dart
+  <path d="M 632.0,481.0 L 644.0,474.0 Q 647.0,474.0 647.0,477.0 L 647.0,485.0 Q 647.0,488.0 644.0,488.0 Z" fill="#3b82f6"/>
+  <text x="642.32" y="482.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. panels/side_panel/menu.dart
+2. shell_top_bar.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 650.0,492.0 L 634.0,484.4 Q 631.0,484.4 631.0,487.4 L 631.0,496.6 Q 631.0,499.6 634.0,499.6 Z" fill="#10b981"/>
+  <text x="636.72" y="493.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">15</text><title>1. constants/constants.dart
+2. files/file_ora.dart
+3. files/file_psd.dart
+4. files/import_files.dart
+5. helpers/image_helper.dart
+6. helpers/log_helper.dart
+7. l10n/app_localizations.dart
+8. models/app_icon_enum.dart
+9. providers/app_preferences.dart
+10. providers/app_provider.dart
+11. providers/macos_bookmark_service.dart
+12. providers/shell_provider.dart
+13. widgets/app_icon.dart
+14. widgets/confirm_discard_dialog.dart
+15. widgets/material_free.dart</title></g><text x="492.0" y="486.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">recent_files_dialog.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 632.0,513.0 L 644.0,506.0 Q 647.0,506.0 647.0,509.0 L 647.0,517.0 Q 647.0,520.0 644.0,520.0 Z" fill="#3b82f6"/>
+  <text x="642.32" y="514.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. panels/side_panel/menu.dart
+2. shell_top_bar.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 650.0,524.0 L 634.0,516.4 Q 631.0,516.4 631.0,519.4 L 631.0,528.6 Q 631.0,531.6 634.0,531.6 Z" fill="#10b981"/>
+  <text x="636.72" y="525.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">14</text><title>1. constants/constants.dart
+2. files/export_file_name.dart
+3. files/file_heic.dart
+4. files/file_heic_web.dart
+5. files/save.dart
+6. helpers/image_helper.dart
+7. l10n/app_localizations.dart
+8. models/app_icon_enum.dart
+9. providers/app_preferences.dart
+10. providers/app_provider.dart
+11. providers/shell_provider.dart
+12. widgets/app_icon.dart
+13. widgets/file_type_icon.dart
+14. widgets/material_free.dart</title></g><text x="492.0" y="518.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">share_panel.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 632.0,545.0 L 644.0,538.0 Q 647.0,538.0 647.0,541.0 L 647.0,549.0 Q 647.0,552.0 644.0,552.0 Z" fill="#3b82f6"/>
+  <text x="642.32" y="546.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. main_screen.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 648.0,556.0 L 636.0,549.0 Q 633.0,549.0 633.0,552.0 L 633.0,560.0 Q 633.0,563.0 636.0,563.0 Z" fill="#10b981"/>
+  <text x="637.68" y="557.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">8</text><title>1. constants/constants.dart
+2. l10n/app_localizations.dart
+3. panels/side_panel/top_menu_and_layers_panel.dart
+4. panels/tools/tools_panel.dart
+5. providers/app_preferences.dart
+6. providers/app_provider.dart
+7. widgets/material_free.dart
+8. widgets/side_panel_header.dart</title></g><text x="492.0" y="550.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">side_panel.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 632.0,577.0 L 644.0,570.0 Q 647.0,570.0 647.0,573.0 L 647.0,581.0 Q 647.0,584.0 644.0,584.0 Z" fill="#3b82f6"/>
+  <text x="642.32" y="578.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel/side_panel.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 650.0,588.0 L 634.0,580.4 Q 631.0,580.4 631.0,583.4 L 631.0,592.6 Q 631.0,595.6 634.0,595.6 Z" fill="#10b981"/>
+  <text x="636.72" y="589.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">10</text><title>1. constants/constants.dart
+2. helpers/shortcut_tooltip.dart
+3. helpers/shortcuts_constants.dart
+4. l10n/app_localizations.dart
+5. models/app_icon_enum.dart
+6. panels/layers/layer_selector.dart
+7. providers/app_provider.dart
+8. providers/shell_provider.dart
+9. widgets/app_buttons.dart
+10. widgets/side_panel_header.dart</title></g><text x="492.0" y="582.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">top_menu_and_layers_panel.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 632.0,609.0 L 644.0,602.0 Q 647.0,602.0 647.0,605.0 L 647.0,613.0 Q 647.0,616.0 644.0,616.0 Z" fill="#3b82f6"/>
+  <text x="642.32" y="610.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel/menu.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 648.0,620.0 L 636.0,613.0 Q 633.0,613.0 633.0,616.0 L 633.0,624.0 Q 633.0,627.0 636.0,627.0 Z" fill="#10b981"/>
+  <text x="637.68" y="621.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">7</text><title>1. constants/constants.dart
+2. l10n/app_localizations.dart
+3. providers/app_provider.dart
+4. providers/shell_provider.dart
+5. widgets/material_free.dart
+6. widgets/nine_grid_selector.dart
+7. widgets/size_fields_row.dart</title></g><text x="492.0" y="614.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">canvas_settings.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 632.0,641.0 L 644.0,634.0 Q 647.0,634.0 647.0,637.0 L 647.0,645.0 Q 647.0,648.0 644.0,648.0 Z" fill="#3b82f6"/>
+  <text x="642.32" y="642.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel/menu.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 648.0,652.0 L 636.0,645.0 Q 633.0,645.0 633.0,648.0 L 633.0,656.0 Q 633.0,659.0 636.0,659.0 Z" fill="#10b981"/>
+  <text x="637.68" y="653.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">6</text><title>1. constants/constants.dart
+2. l10n/app_localizations.dart
+3. providers/app_provider.dart
+4. providers/shell_provider.dart
+5. widgets/material_free.dart
+6. widgets/size_fields_row.dart</title></g><text x="492.0" y="646.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">image_size_settings.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 632.0,673.0 L 644.0,666.0 Q 647.0,666.0 647.0,669.0 L 647.0,677.0 Q 647.0,680.0 644.0,680.0 Z" fill="#3b82f6"/>
+  <text x="642.32" y="674.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel/menu.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 648.0,684.0 L 636.0,677.0 Q 633.0,677.0 633.0,680.0 L 633.0,688.0 Q 633.0,691.0 636.0,691.0 Z" fill="#10b981"/>
+  <text x="637.68" y="685.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">5</text><title>1. constants/constants.dart
+2. l10n/app_localizations.dart
+3. models/version.dart
+4. panels/side_panel/attribution_dialog.dart
+5. widgets/material_free.dart</title></g><text x="492.0" y="678.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">about.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 632.0,705.0 L 644.0,698.0 Q 647.0,698.0 647.0,701.0 L 647.0,709.0 Q 647.0,712.0 644.0,712.0 Z" fill="#3b82f6"/>
+  <text x="642.32" y="706.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel/about.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 648.0,716.0 L 636.0,709.0 Q 633.0,709.0 633.0,712.0 L 633.0,720.0 Q 633.0,723.0 636.0,723.0 Z" fill="#10b981"/>
+  <text x="637.68" y="717.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. constants/constants.dart
+2. models/dependency_versions.dart
+3. widgets/material_free.dart</title></g><text x="492.0" y="710.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">attribution_dialog.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 632.0,827.0 L 644.0,820.0 Q 647.0,820.0 647.0,823.0 L 647.0,831.0 Q 647.0,834.0 644.0,834.0 Z" fill="#3b82f6"/>
+  <text x="642.32" y="828.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel/top_menu_and_layers_panel.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 650.0,838.0 L 634.0,830.4 Q 631.0,830.4 631.0,833.4 L 631.0,842.6 Q 631.0,845.6 634.0,845.6 Z" fill="#10b981"/>
+  <text x="636.72" y="839.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">13</text><title>1. constants/constants.dart
 2. l10n/app_localizations.dart
 3. models/app_icon_enum.dart
-4. widgets/material_free.dart</title></g><text x="472.0" y="2302.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">platforms_page.dart</text>
+4. panels/layers/blend_mode.dart
+5. panels/layers/layer_thumbnail.dart
+6. providers/app_provider.dart
+7. providers/undo_provider.dart
+8. widgets/app_icon.dart
+9. widgets/color_picker_dialog.dart
+10. widgets/color_preview.dart
+11. widgets/container_slider.dart
+12. widgets/material_free.dart
+13. widgets/truncated_text.dart</title></g><text x="492.0" y="832.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">layer_selector.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 632.0,859.0 L 644.0,852.0 Q 647.0,852.0 647.0,855.0 L 647.0,863.0 Q 647.0,866.0 644.0,866.0 Z" fill="#3b82f6"/>
+  <text x="642.32" y="860.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/layers/layer_selector.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 648.0,870.0 L 636.0,863.0 Q 633.0,863.0 633.0,866.0 L 633.0,874.0 Q 633.0,877.0 636.0,877.0 Z" fill="#10b981"/>
+  <text x="637.68" y="871.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">4</text><title>1. constants/constants.dart
+2. providers/layer_provider.dart
+3. widgets/image_painter.dart
+4. widgets/transparent_background.dart</title></g><text x="492.0" y="864.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">layer_thumbnail.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 632.0,891.0 L 644.0,884.0 Q 647.0,884.0 647.0,887.0 L 647.0,895.0 Q 647.0,898.0 644.0,898.0 Z" fill="#3b82f6"/>
+  <text x="642.32" y="892.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/layers/layer_selector.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 648.0,902.0 L 636.0,895.0 Q 633.0,895.0 633.0,898.0 L 633.0,906.0 Q 633.0,909.0 636.0,909.0 Z" fill="#10b981"/>
+  <text x="637.68" y="903.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. l10n/app_localizations.dart
+2. widgets/material_free.dart</title></g><text x="492.0" y="896.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">blend_mode.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 632.0,1013.0 L 644.0,1006.0 Q 647.0,1006.0 647.0,1009.0 L 647.0,1017.0 Q 647.0,1020.0 644.0,1020.0 Z" fill="#3b82f6"/>
+  <text x="642.32" y="1014.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel/side_panel.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 650.0,1024.0 L 634.0,1016.4 Q 631.0,1016.4 631.0,1019.4 L 631.0,1028.6 Q 631.0,1031.6 634.0,1031.6 Z" fill="#10b981"/>
+  <text x="636.72" y="1025.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">25</text><title>1. constants/constants.dart
+2. helpers/color_helper.dart
+3. l10n/app_localizations.dart
+4. models/app_icon_enum.dart
+5. models/fill_model.dart
+6. models/hatch_marks.dart
+7. models/hatch_pattern.dart
+8. models/user_action_drawing.dart
+9. panels/tools/hatch_tool_option.dart
+10. panels/tools/tool_family_rail.dart
+11. providers/app_provider.dart
+12. widgets/app_icon.dart
+13. widgets/brush_intensity_picker.dart
+14. widgets/brush_size_picker.dart
+15. widgets/brush_style_picker.dart
+16. widgets/color_picker_dialog.dart
+17. widgets/color_preview.dart
+18. widgets/color_selector.dart
+19. widgets/gradient_color_list_editor.dart
+20. widgets/halftone_size_picker.dart
+21. widgets/material_free.dart
+22. widgets/text_attributes_widget.dart
+23. widgets/tolerance_picker.dart
+24. widgets/tool_attribute_widget.dart
+25. widgets/top_colors.dart</title></g><text x="492.0" y="1018.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">tools_panel.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 632.0,1045.0 L 644.0,1038.0 Q 647.0,1038.0 647.0,1041.0 L 647.0,1049.0 Q 647.0,1052.0 644.0,1052.0 Z" fill="#3b82f6"/>
+  <text x="642.32" y="1046.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/tools/tools_panel.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 650.0,1056.0 L 634.0,1048.4 Q 631.0,1048.4 631.0,1051.4 L 631.0,1060.6 Q 631.0,1063.6 634.0,1063.6 Z" fill="#10b981"/>
+  <text x="636.72" y="1057.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">12</text><title>1. constants/constants.dart
+2. helpers/shortcut_tooltip.dart
+3. l10n/app_localizations.dart
+4. models/effect_labels.dart
+5. models/selection_effect.dart
+6. models/tool_descriptor.dart
+7. models/user_action_drawing.dart
+8. providers/app_provider.dart
+9. widgets/app_buttons.dart
+10. widgets/app_divider.dart
+11. widgets/app_slider.dart
+12. widgets/side_panel_header.dart</title></g><text x="492.0" y="1050.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">tool_family_rail.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 632.0,1077.0 L 644.0,1070.0 Q 647.0,1070.0 647.0,1073.0 L 647.0,1081.0 Q 647.0,1084.0 644.0,1084.0 Z" fill="#3b82f6"/>
+  <text x="642.32" y="1078.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/tools/tools_panel.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 648.0,1088.0 L 636.0,1081.0 Q 633.0,1081.0 633.0,1084.0 L 633.0,1092.0 Q 633.0,1095.0 636.0,1095.0 Z" fill="#10b981"/>
+  <text x="637.68" y="1089.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">9</text><title>1. constants/constants.dart
+2. l10n/app_localizations.dart
+3. models/app_icon_enum.dart
+4. models/hatch_marks.dart
+5. models/hatch_pattern.dart
+6. widgets/hatch_marks_picker.dart
+7. widgets/hatch_settings_picker.dart
+8. widgets/material_free.dart
+9. widgets/tool_attribute_widget.dart</title></g><text x="492.0" y="1082.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">hatch_tool_option.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,6593.0 L 668.0,6586.0 Q 671.0,6586.0 671.0,6589.0 L 671.0,6597.0 Q 671.0,6600.0 668.0,6600.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="6594.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. providers/layer_provider.dart
+2. providers/layer_provider_storage_export.dart
+3. widgets/fill_preview_overlay.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,6604.0 L 660.0,6597.0 Q 657.0,6597.0 657.0,6600.0 L 657.0,6608.0 Q 657.0,6611.0 660.0,6611.0 Z" fill="#10b981"/>
+  <text x="661.68" y="6605.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">9</text><title>1. constants/constants.dart
+2. models/brush_grain.dart
+3. models/brush_hatch.dart
+4. models/brush_style.dart
+5. models/halftone_fill.dart
+6. models/hatch_marks.dart
+7. models/hatch_marks_renderer.dart
+8. models/hatch_pattern.dart
+9. models/text_object.dart</title></g><text x="472.0" y="6598.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">render_helper.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,6625.0 L 668.0,6618.0 Q 671.0,6618.0 671.0,6621.0 L 671.0,6629.0 Q 671.0,6632.0 668.0,6632.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="6626.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/tools/tool_family_rail.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,6636.0 L 660.0,6629.0 Q 657.0,6629.0 657.0,6632.0 L 657.0,6640.0 Q 657.0,6643.0 660.0,6643.0 Z" fill="#10b981"/>
+  <text x="661.68" y="6637.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">6</text><title>1. l10n/app_localizations.dart
+2. models/app_icon_enum.dart
+3. models/effect_labels.dart
+4. models/selection_effect.dart
+5. models/tool_family.dart
+6. models/user_action_drawing.dart</title></g><text x="472.0" y="6630.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">tool_descriptor.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,6657.0 L 668.0,6650.0 Q 671.0,6650.0 671.0,6653.0 L 671.0,6661.0 Q 671.0,6664.0 668.0,6664.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="6658.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">6</text><title>1. providers/app_provider.dart
+2. providers/selector_geometry_controller.dart
+3. providers/selector_geometry_host.dart
+4. widgets/canvas_gesture_handler.dart
+5. widgets/selector_widget.dart
+6. widgets/shell_selection_sub_toolbar.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,6668.0 L 660.0,6661.0 Q 657.0,6661.0 657.0,6664.0 L 657.0,6672.0 Q 657.0,6675.0 660.0,6675.0 Z" fill="#10b981"/>
+  <text x="661.68" y="6669.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">5</text><title>1. constants/constants.dart
+2. helpers/draw_path_helper.dart
+3. helpers/transform_helper.dart
+4. models/visible_model.dart</title></g><text x="472.0" y="6662.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">selector_model.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,6689.0 L 668.0,6682.0 Q 671.0,6682.0 671.0,6685.0 L 671.0,6693.0 Q 671.0,6696.0 668.0,6696.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="6690.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. providers/app_provider.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,6700.0 L 660.0,6693.0 Q 657.0,6693.0 657.0,6696.0 L 657.0,6704.0 Q 657.0,6707.0 660.0,6707.0 Z" fill="#10b981"/>
+  <text x="661.68" y="6701.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. constants/constants.dart
+2. models/selection_effect.dart
+3. models/visible_model.dart</title></g><text x="472.0" y="6694.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">effect_preview_model.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,6721.0 L 668.0,6714.0 Q 671.0,6714.0 671.0,6717.0 L 671.0,6725.0 Q 671.0,6728.0 668.0,6728.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="6722.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. models/tool_descriptor.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,6732.0 L 660.0,6725.0 Q 657.0,6725.0 657.0,6728.0 L 657.0,6736.0 Q 657.0,6739.0 660.0,6739.0 Z" fill="#10b981"/>
+  <text x="661.68" y="6733.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. helpers/shortcuts_constants.dart
+2. l10n/app_localizations.dart
+3. models/user_action_drawing.dart</title></g><text x="472.0" y="6726.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">tool_family.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,6753.0 L 668.0,6746.0 Q 671.0,6746.0 671.0,6749.0 L 671.0,6757.0 Q 671.0,6760.0 668.0,6760.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="6754.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. providers/app_provider.dart
+2. widgets/main_view.dart
+3. widgets/transform_widget.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,6764.0 L 660.0,6757.0 Q 657.0,6757.0 657.0,6760.0 L 657.0,6768.0 Q 657.0,6771.0 660.0,6771.0 Z" fill="#10b981"/>
+  <text x="661.68" y="6765.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. constants/constants.dart
+2. helpers/transform_helper.dart
+3. models/visible_model.dart</title></g><text x="472.0" y="6758.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">transform_model.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,6785.0 L 668.0,6778.0 Q 671.0,6778.0 671.0,6781.0 L 671.0,6789.0 Q 671.0,6792.0 668.0,6792.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="6786.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">7</text><title>1. panels/tools/tools_panel.dart
+2. providers/app_provider.dart
+3. providers/fill_service.dart
+4. widgets/canvas_gesture_handler.dart
+5. widgets/fill_widget.dart
+6. widgets/gradient_color_list_editor.dart
+7. widgets/main_view.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,6796.0 L 660.0,6789.0 Q 657.0,6789.0 657.0,6792.0 L 657.0,6800.0 Q 657.0,6803.0 660.0,6803.0 Z" fill="#10b981"/>
+  <text x="661.68" y="6797.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. constants/constants.dart
+2. helpers/draw_path_helper.dart
+3. models/visible_model.dart</title></g><text x="472.0" y="6790.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">fill_model.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,6817.0 L 668.0,6810.0 Q 671.0,6810.0 671.0,6813.0 L 671.0,6821.0 Q 671.0,6824.0 668.0,6824.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="6818.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. providers/app_provider.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,6828.0 L 660.0,6821.0 Q 657.0,6821.0 657.0,6824.0 L 657.0,6832.0 Q 657.0,6835.0 660.0,6835.0 Z" fill="#10b981"/>
+  <text x="661.68" y="6829.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. constants/constants.dart
+2. models/selection_effect.dart</title></g><text x="472.0" y="6822.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">effect_brush_model.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,6849.0 L 668.0,6842.0 Q 671.0,6842.0 671.0,6845.0 L 671.0,6853.0 Q 671.0,6856.0 668.0,6856.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="6850.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. providers/app_provider.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,6860.0 L 660.0,6853.0 Q 657.0,6853.0 657.0,6856.0 L 657.0,6864.0 Q 657.0,6867.0 660.0,6867.0 Z" fill="#10b981"/>
+  <text x="661.68" y="6861.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. models/image_placement_layer_restore_state.dart
+2. models/visible_model.dart</title></g><text x="472.0" y="6854.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">image_placement_model.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,6881.0 L 668.0,6874.0 Q 671.0,6874.0 671.0,6877.0 L 671.0,6885.0 Q 671.0,6888.0 668.0,6888.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="6882.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. models/render_helper.dart
+2. providers/app_provider.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,6892.0 L 660.0,6885.0 Q 657.0,6885.0 657.0,6888.0 L 657.0,6896.0 Q 657.0,6899.0 660.0,6899.0 Z" fill="#10b981"/>
+  <text x="661.68" y="6893.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. constants/constants.dart
+2. models/hatch_pattern.dart</title></g><text x="472.0" y="6886.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">brush_hatch.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,6913.0 L 668.0,6906.0 Q 671.0,6906.0 671.0,6909.0 L 671.0,6917.0 Q 671.0,6920.0 668.0,6920.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="6914.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. models/render_helper.dart
+2. providers/layer_provider_storage_export.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,6924.0 L 660.0,6917.0 Q 657.0,6917.0 657.0,6920.0 L 657.0,6928.0 Q 657.0,6931.0 660.0,6931.0 Z" fill="#10b981"/>
+  <text x="661.68" y="6925.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. constants/constants.dart
+2. models/hatch_marks.dart</title></g><text x="472.0" y="6918.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">hatch_marks_renderer.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,6945.0 L 668.0,6938.0 Q 671.0,6938.0 671.0,6941.0 L 671.0,6949.0 Q 671.0,6952.0 668.0,6952.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="6946.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">5</text><title>1. models/tool_descriptor.dart
+2. panels/tools/tool_family_rail.dart
+3. widgets/effect_intensity_controls.dart
+4. widgets/selector_widget.dart
+5. widgets/shell_selection_sub_toolbar.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,6956.0 L 660.0,6949.0 Q 657.0,6949.0 657.0,6952.0 L 657.0,6960.0 Q 657.0,6963.0 660.0,6963.0 Z" fill="#10b981"/>
+  <text x="661.68" y="6957.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. l10n/app_localizations.dart
+2. models/selection_effect.dart</title></g><text x="472.0" y="6950.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">effect_labels.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 654.0,6977.0 L 670.0,6969.4 Q 673.0,6969.4 673.0,6972.4 L 673.0,6981.6 Q 673.0,6984.6 670.0,6984.6 Z" fill="#3b82f6"/>
+  <text x="667.28" y="6978.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">12</text><title>1. models/effect_brush_model.dart
+2. models/effect_labels.dart
+3. models/effect_preview_model.dart
+4. models/tool_descriptor.dart
+5. panels/tools/tool_family_rail.dart
+6. providers/app_provider.dart
+7. providers/selection_effect_preview_state.dart
+8. widgets/effect_intensity_controls.dart
+9. widgets/effect_preview_bottom_sheet.dart
+10. widgets/main_view.dart
+11. widgets/selector_widget.dart
+12. widgets/shell_selection_sub_toolbar.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,6988.0 L 660.0,6981.0 Q 657.0,6981.0 657.0,6984.0 L 657.0,6992.0 Q 657.0,6995.0 660.0,6995.0 Z" fill="#10b981"/>
+  <text x="661.68" y="6989.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. constants/constants.dart
+2. helpers/image_effects.dart
+3. models/app_icon_enum.dart</title></g><text x="472.0" y="6982.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">selection_effect.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,7009.0 L 668.0,7002.0 Q 671.0,7002.0 671.0,7005.0 L 671.0,7013.0 Q 671.0,7016.0 668.0,7016.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="7010.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">5</text><title>1. providers/app_provider.dart
+2. widgets/text_attributes_widget.dart
+3. widgets/text_editor.dart
+4. widgets/text_editor_dialog.dart
+5. widgets/text_style_toggle_buttons.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,7020.0 L 660.0,7013.0 Q 657.0,7013.0 657.0,7016.0 L 657.0,7024.0 Q 657.0,7027.0 660.0,7027.0 Z" fill="#10b981"/>
+  <text x="661.68" y="7021.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. constants/constants.dart
+2. models/text_object.dart</title></g><text x="472.0" y="7014.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">text_tool_state.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,7041.0 L 668.0,7034.0 Q 671.0,7034.0 671.0,7037.0 L 671.0,7045.0 Q 671.0,7048.0 668.0,7048.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="7042.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. models/render_helper.dart
+2. providers/app_provider.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,7052.0 L 660.0,7045.0 Q 657.0,7045.0 657.0,7048.0 L 657.0,7056.0 Q 657.0,7059.0 660.0,7059.0 Z" fill="#10b981"/>
+  <text x="661.68" y="7053.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. constants/constants.dart</title></g><text x="472.0" y="7046.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">brush_grain.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,7073.0 L 668.0,7066.0 Q 671.0,7066.0 671.0,7069.0 L 671.0,7077.0 Q 671.0,7080.0 668.0,7080.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="7074.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. models/image_placement_model.dart
+2. providers/app_provider.dart
+3. providers/pixel_brush_commit.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,7084.0 L 660.0,7077.0 Q 657.0,7077.0 657.0,7080.0 L 657.0,7088.0 Q 657.0,7091.0 660.0,7091.0 Z" fill="#10b981"/>
+  <text x="661.68" y="7085.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. models/layer_state_snapshot.dart</title></g><text x="472.0" y="7078.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">image_placement_layer_restore_state.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,7105.0 L 668.0,7098.0 Q 671.0,7098.0 671.0,7101.0 L 671.0,7109.0 Q 671.0,7112.0 668.0,7112.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="7106.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">4</text><title>1. providers/layers_provider.dart
+2. providers/shell_provider.dart
+3. widgets/nine_grid_selector.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,7116.0 L 660.0,7109.0 Q 657.0,7109.0 657.0,7112.0 L 657.0,7120.0 Q 657.0,7123.0 660.0,7123.0 Z" fill="#10b981"/>
+  <text x="661.68" y="7117.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. constants/constants.dart</title></g><text x="472.0" y="7110.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">canvas_resize.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,7137.0 L 668.0,7130.0 Q 671.0,7130.0 671.0,7133.0 L 671.0,7141.0 Q 671.0,7144.0 668.0,7144.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="7138.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">5</text><title>1. models/image_placement_layer_restore_state.dart
+2. providers/layer_crop_state.dart
+3. providers/layer_provider.dart
+4. providers/layers_provider.dart
+5. providers/pixel_brush_commit.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,7148.0 L 660.0,7141.0 Q 657.0,7141.0 657.0,7144.0 L 657.0,7152.0 Q 657.0,7155.0 660.0,7155.0 Z" fill="#10b981"/>
+  <text x="661.68" y="7149.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. models/user_action_drawing.dart</title></g><text x="472.0" y="7142.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">layer_state_snapshot.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 654.0,7169.0 L 670.0,7161.4 Q 673.0,7161.4 673.0,7164.4 L 673.0,7173.6 Q 673.0,7176.6 670.0,7176.6 Z" fill="#3b82f6"/>
+  <text x="667.28" y="7170.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">18</text><title>1. models/layer_state_snapshot.dart
+2. models/tool_descriptor.dart
+3. models/tool_family.dart
+4. panels/tools/tool_family_rail.dart
+5. panels/tools/tools_panel.dart
+6. providers/app_provider.dart
+7. providers/fill_service.dart
+8. providers/layer_provider.dart
+9. providers/layer_provider_storage_export.dart
+10. providers/layers_provider.dart
+11. providers/pixel_brush_commit.dart
+12. shell_top_bar.dart
+13. widgets/canvas_gesture_handler.dart
+14. widgets/fill_preview_overlay.dart
+15. widgets/main_view.dart
+16. widgets/shell_selection_sub_toolbar.dart
+17. widgets/shortcuts.dart
+18. widgets/text_editor.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,7180.0 L 660.0,7173.0 Q 657.0,7173.0 657.0,7176.0 L 657.0,7184.0 Q 657.0,7187.0 660.0,7187.0 Z" fill="#10b981"/>
+  <text x="661.68" y="7181.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">6</text><title>1. models/app_icon_enum.dart
+2. models/brush_style.dart
+3. models/halftone_fill.dart
+4. models/hatch_pattern.dart
+5. models/text_object.dart</title></g><text x="472.0" y="7174.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">user_action_drawing.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,7201.0 L 668.0,7194.0 Q 671.0,7194.0 671.0,7197.0 L 671.0,7205.0 Q 671.0,7208.0 668.0,7208.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="7202.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">4</text><title>1. models/render_helper.dart
+2. models/user_action_drawing.dart
+3. widgets/brush_style_picker.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,7212.0 L 660.0,7205.0 Q 657.0,7205.0 657.0,7208.0 L 657.0,7216.0 Q 657.0,7219.0 660.0,7219.0 Z" fill="#10b981"/>
+  <text x="661.68" y="7213.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. constants/constants.dart
+2. models/hatch_marks.dart
+3. models/hatch_pattern.dart</title></g><text x="472.0" y="7206.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">brush_style.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,7233.0 L 668.0,7226.0 Q 671.0,7226.0 671.0,7229.0 L 671.0,7237.0 Q 671.0,7240.0 668.0,7240.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="7234.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. models/render_helper.dart
+2. models/user_action_drawing.dart
+3. providers/fill_service.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,7244.0 L 660.0,7237.0 Q 657.0,7237.0 657.0,7240.0 L 657.0,7248.0 Q 657.0,7251.0 660.0,7251.0 Z" fill="#10b981"/>
+  <text x="661.68" y="7245.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. constants/constants.dart</title></g><text x="472.0" y="7238.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">halftone_fill.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,7265.0 L 668.0,7258.0 Q 671.0,7258.0 671.0,7261.0 L 671.0,7269.0 Q 671.0,7272.0 668.0,7272.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="7266.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">7</text><title>1. models/brush_style.dart
+2. models/hatch_marks_renderer.dart
+3. models/render_helper.dart
+4. panels/tools/hatch_tool_option.dart
+5. panels/tools/tools_panel.dart
+6. providers/app_provider.dart
+7. widgets/hatch_marks_picker.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,7276.0 L 660.0,7269.0 Q 657.0,7269.0 657.0,7272.0 L 657.0,7280.0 Q 657.0,7283.0 660.0,7283.0 Z" fill="#10b981"/>
+  <text x="661.68" y="7277.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. constants/constants.dart</title></g><text x="472.0" y="7270.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">hatch_marks.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,7297.0 L 668.0,7290.0 Q 671.0,7290.0 671.0,7293.0 L 671.0,7301.0 Q 671.0,7304.0 668.0,7304.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="7298.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">8</text><title>1. models/render_helper.dart
+2. models/text_tool_state.dart
+3. models/user_action_drawing.dart
+4. providers/app_provider.dart
+5. providers/layer_provider.dart
+6. widgets/canvas_gesture_handler.dart
+7. widgets/text_editor.dart
+8. widgets/text_editor_dialog.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,7308.0 L 660.0,7301.0 Q 657.0,7301.0 657.0,7304.0 L 657.0,7312.0 Q 657.0,7315.0 660.0,7315.0 Z" fill="#10b981"/>
+  <text x="661.68" y="7309.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. constants/constants.dart</title></g><text x="472.0" y="7302.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">text_object.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,7329.0 L 668.0,7322.0 Q 671.0,7322.0 671.0,7325.0 L 671.0,7333.0 Q 671.0,7336.0 668.0,7336.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="7330.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">9</text><title>1. models/brush_hatch.dart
+2. models/brush_style.dart
+3. models/render_helper.dart
+4. models/user_action_drawing.dart
+5. panels/tools/hatch_tool_option.dart
+6. panels/tools/tools_panel.dart
+7. providers/app_provider.dart
+8. providers/fill_service.dart
+9. widgets/hatch_settings_picker.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 672.0,7340.0 L 660.0,7333.0 Q 657.0,7333.0 657.0,7336.0 L 657.0,7344.0 Q 657.0,7347.0 660.0,7347.0 Z" fill="#10b981"/>
+  <text x="661.68" y="7341.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. constants/constants.dart</title></g><text x="472.0" y="7334.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">hatch_pattern.dart</text>
+<text x="472.0" y="7366.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">cut_action.dart</text>
+<text x="472.0" y="7398.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">image_action.dart</text>
+<text x="472.0" y="7430.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">non_rendering_action.dart</text>
+<text x="472.0" y="7462.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">region_action.dart</text>
+<text x="472.0" y="7494.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">stroke_action.dart</text>
+<text x="472.0" y="7526.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">text_action.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,7553.0 L 668.0,7546.0 Q 671.0,7546.0 671.0,7549.0 L 671.0,7557.0 Q 671.0,7560.0 668.0,7560.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="7554.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel/attribution_dialog.dart</title></g><text x="472.0" y="7558.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">dependency_versions.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,7585.0 L 668.0,7578.0 Q 671.0,7578.0 671.0,7581.0 L 671.0,7589.0 Q 671.0,7592.0 668.0,7592.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="7586.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel/menu.dart</title></g><text x="472.0" y="7590.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">menu_model.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,7617.0 L 668.0,7610.0 Q 671.0,7610.0 671.0,7613.0 L 671.0,7621.0 Q 671.0,7624.0 668.0,7624.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="7618.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/side_panel/about.dart</title></g><text x="472.0" y="7622.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">version.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 656.0,7649.0 L 668.0,7642.0 Q 671.0,7642.0 671.0,7645.0 L 671.0,7653.0 Q 671.0,7656.0 668.0,7656.0 Z" fill="#3b82f6"/>
+  <text x="666.32" y="7650.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">5</text><title>1. models/effect_preview_model.dart
+2. models/fill_model.dart
+3. models/image_placement_model.dart
+4. models/selector_model.dart
+5. models/transform_model.dart</title></g><text x="472.0" y="7654.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">visible_model.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 654.0,7681.0 L 670.0,7673.4 Q 673.0,7673.4 673.0,7676.4 L 673.0,7685.6 Q 673.0,7688.6 670.0,7688.6 Z" fill="#3b82f6"/>
+  <text x="667.28" y="7682.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">38</text><title>1. models/selection_effect.dart
+2. models/tool_descriptor.dart
+3. models/user_action_drawing.dart
+4. pages/platforms_page.dart
+5. pages/settings_page.dart
+6. panels/layers/layer_selector.dart
+7. panels/side_panel/menu.dart
+8. panels/side_panel/recent_files_dialog.dart
+9. panels/side_panel/share_panel.dart
+10. panels/side_panel/top_menu_and_layers_panel.dart
+11. panels/tools/hatch_tool_option.dart
+12. panels/tools/tools_panel.dart
+13. shell_top_bar.dart
+14. widgets/app_button_row.dart
+15. widgets/app_buttons.dart
+16. widgets/app_icon.dart
+17. widgets/app_snackbar.dart
+18. widgets/brush_style_picker.dart
+19. widgets/color_picker_dialog.dart
+20. widgets/color_preview.dart
+21. widgets/file_type_icon.dart
+22. widgets/fill_widget.dart
+23. widgets/gradient_color_list_editor.dart
+24. widgets/halftone_size_picker.dart
+25. widgets/hatch_marks_picker.dart
+26. widgets/hatch_settings_picker.dart
+27. widgets/nine_grid_selector.dart
+28. widgets/overlay_control_widgets.dart
+29. widgets/selector_widget.dart
+30. widgets/shell_selection_sub_toolbar.dart
+31. widgets/size_fields_row.dart
+32. widgets/text_attributes_widget.dart
+33. widgets/text_editor_dialog.dart
+34. widgets/text_style_toggle_buttons.dart
+35. widgets/tolerance_picker.dart
+36. widgets/toolbar_icon_button.dart
+37. widgets/top_colors.dart
+38. widgets/transform_widget.dart</title></g><text x="472.0" y="7686.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">app_icon_enum.dart</text>
 <g class="folderTitleLayer">
 <text x="460.0" y="105.0" class="layerTitle">fpaint v2.0.5+1</text>
 <text x="480.0" y="157.0" class="layerTitle">  ...</text>
 <text x="480.0" y="8409.0" class="layerTitle">  constants</text>
 <text x="480.0" y="1225.0" class="layerTitle">  files</text>
+<text x="480.0" y="5105.0" class="layerTitle">  providers</text>
 <text x="480.0" y="7781.0" class="layerTitle">  helpers</text>
 <text x="480.0" y="8287.0" class="layerTitle">  l10n</text>
-<text x="480.0" y="6571.0" class="layerTitle">  models</text>
+<text x="480.0" y="2397.0" class="layerTitle">  widgets</text>
+<text x="480.0" y="2243.0" class="layerTitle">  pages</text>
+<text x="480.0" y="4887.0" class="layerTitle">  recovery</text>
 <text x="480.0" y="375.0" class="layerTitle">  panels</text>
 <text x="500.0" y="427.0" class="layerTitle">    side_panel</text>
 <text x="500.0" y="805.0" class="layerTitle">    layers</text>
 <text x="500.0" y="991.0" class="layerTitle">    tools</text>
-<text x="480.0" y="5105.0" class="layerTitle">  providers</text>
-<text x="480.0" y="2397.0" class="layerTitle">  widgets</text>
-<text x="480.0" y="4887.0" class="layerTitle">  recovery</text>
-<text x="480.0" y="2243.0" class="layerTitle">  pages</text>
+<text x="480.0" y="6571.0" class="layerTitle">  models</text>
 </g>
 </svg>

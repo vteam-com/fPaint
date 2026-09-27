@@ -37,9 +37,21 @@ const MethodChannel _fileChannel = MethodChannel(_fileChannelName);
 /// This variable is initialized in the [main] function and used to access the app's providers.
 late MyApp mainApp;
 
-String? _queuedPlatformFilePath;
+final List<String> _queuedPlatformFilePaths = <String>[];
 bool _isProcessingQueuedPlatformFile = false;
 bool _platformFileHandlingReady = false;
+
+void queuePlatformFileForProcessing(String filePath) {
+  _queuedPlatformFilePaths.add(filePath);
+}
+
+String? dequeueQueuedPlatformFile() {
+  if (_queuedPlatformFilePaths.isEmpty) {
+    return null;
+  }
+
+  return _queuedPlatformFilePaths.removeAt(0);
+}
 
 /// The main function is the entry point of the Flutter application.
 ///
@@ -85,22 +97,18 @@ Future<void> main() async {
       pendingFile = null;
     }
 
-    final String? startupFilePath =
-        _queuedPlatformFilePath ?? (pendingFile == null ? null : _normalizePlatformFilePath(pendingFile));
-    _queuedPlatformFilePath = null;
+    final String? startupFilePath = pendingFile == null ? null : _normalizePlatformFilePath(pendingFile);
+
+    if (startupFilePath != null && startupFilePath.isNotEmpty) {
+      queuePlatformFileForProcessing(startupFilePath);
+    }
 
     _platformFileHandlingReady = true;
 
-    if (startupFilePath == null || startupFilePath.isEmpty) {
+    if (_queuedPlatformFilePaths.isEmpty) {
       await mainApp.draftRecoveryController.restoreDraftIfAvailable(
         appProvider: mainApp.appProvider,
       );
-    }
-
-    if (startupFilePath != null && startupFilePath.isNotEmpty) {
-      _queuedPlatformFilePath = startupFilePath;
-      _scheduleQueuedPlatformFileHandling();
-      return;
     }
 
     _scheduleQueuedPlatformFileHandling();
@@ -109,7 +117,7 @@ Future<void> main() async {
 
 Future<void> _queueOrHandlePlatformFile(String filePath) async {
   if (_platformFileHandlingReady == false || mainApp.navigatorKey.currentContext == null) {
-    _queuedPlatformFilePath = filePath;
+    queuePlatformFileForProcessing(filePath);
     _scheduleQueuedPlatformFileHandling();
     return;
   }
@@ -122,12 +130,12 @@ Future<void> _queueOrHandlePlatformFile(String filePath) async {
 /// This defers file processing until the navigator context exists and ensures
 /// only one queued file is being processed at a time.
 void _scheduleQueuedPlatformFileHandling() {
-  if (_queuedPlatformFilePath == null || _isProcessingQueuedPlatformFile) {
+  if (_queuedPlatformFilePaths.isEmpty || _isProcessingQueuedPlatformFile) {
     return;
   }
 
   WidgetsBinding.instance.addPostFrameCallback((_) async {
-    if (_queuedPlatformFilePath == null || _isProcessingQueuedPlatformFile) {
+    if (_queuedPlatformFilePaths.isEmpty || _isProcessingQueuedPlatformFile) {
       return;
     }
 
@@ -136,15 +144,17 @@ void _scheduleQueuedPlatformFileHandling() {
       return;
     }
 
-    final String filePath = _queuedPlatformFilePath!;
-    _queuedPlatformFilePath = null;
+    final String? filePath = dequeueQueuedPlatformFile();
+    if (filePath == null) {
+      return;
+    }
     _isProcessingQueuedPlatformFile = true;
 
     try {
       await _consumePlatformFile(filePath);
     } finally {
       _isProcessingQueuedPlatformFile = false;
-      if (_queuedPlatformFilePath != null) {
+      if (_queuedPlatformFilePaths.isNotEmpty) {
         _scheduleQueuedPlatformFileHandling();
       }
     }
@@ -159,9 +169,6 @@ Future<void> _consumePlatformFile(String filePath) async {
   try {
     await _handleFileOpened(filePath);
   } finally {
-    if (_queuedPlatformFilePath == filePath) {
-      _queuedPlatformFilePath = null;
-    }
     await _clearPendingPlatformFile();
   }
 }

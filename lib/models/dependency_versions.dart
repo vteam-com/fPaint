@@ -67,7 +67,7 @@ const Map<String, String> dependencyVersions = <String, String>{
   'path_provider_windows': '2.3.0',
   'path_provider': '2.1.6',
   'path': '1.9.1',
-  'petitparser': '7.0.2',
+  'petitparser': '7.1.0',
   'platform': '3.2.0',
   'plugin_platform_interface': '2.1.8',
   'posix': '6.5.2',
