@@ -4,6 +4,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.6] - 2026-09-28
+
+### Add
+
+- Pen pressure for the Brush tool. With a pressure-sensing pen the stroke width now follows how hard you press: the set brush size is what a medium press paints, a light touch paints thinner and a heavy press paints up to twice as wide. A press that fades out tapers all the way down to a 1 px hairline, whatever the brush size, and lifting the pen off a light press ends the committed stroke in that hairline tip, while lifting at a firm press keeps a blunt end. A pressure stroke is drawn as one filled outline, so it stays as responsive as a plain stroke however long it grows and a translucent colour covers it evenly. Pressure applies to the Solid and Soft styles; patterned styles, mouse and finger strokes, and pens that report no pressure paint at a constant width as before.
+- An on-canvas brush size slider. A vertical slider along the left edge of the canvas resizes the brush in the Procreate manner: drag up to grow, down to shrink, on a logarithmic scale so small brushes get as much travel as large ones. Sliding the finger sideways away from the track while dragging slows the change for fine control, and a numeric readout rides beside the thumb while the canvas previews the size ring at its true zoomed diameter. It works the same with touch, pen, mouse and trackpad, grows with the input modality, and shows for every brush-sized tool — pencil, brush, eraser, smudge, blur, line, rectangle and circle — and for an armed effect brush.
+- `[` and `]` shrink and grow the brush, the convention every major paint application shares. Each press scales the size by 20% and moves it at least one unit, so the keys are useful across the whole range. The Ctrl+Alt (Cmd+Opt on macOS) drag and scroll-wheel resize now also work for an armed effect brush, and all brush-size inputs share one range per tool.
+
+### Change
+
+- View rotation moved from `[` / `]` to `4` / `6` (top row or numeric keypad), following Krita, to free the bracket keys for brush size. Resetting the rotation stays folded into the Cmd/Ctrl+0 canvas fit; the Reset Rotation toolbar button no longer advertises a Shift+`[` shortcut that was never bound.
+
+### Fix
+
+- Opening several files at once from the operating system (Finder, Explorer, a file manager) now opens every one of them. The platform file handler kept a single pending path, so each file that arrived while another was still loading overwrote the one before it and only the last survived. Incoming files are now queued and opened one at a time, in order.
+
 ## [2.0.5] - 2026-09-26
 
 ### Add
