@@ -194,6 +194,14 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     }
 
     appProvider.layers.selectedLayer.isUserDrawing = false;
+    // A pen lifting off a fading press ends its Brush stroke in a 1 px tip.
+    // Only a real lift (not a cancel) and only the stroke this pointer drew.
+    if (event is PointerUpEvent &&
+        _activePointerId == event.pointer &&
+        appProvider.selectedAction == ActionType.brush &&
+        !appProvider.effectBrushModel.isArmed) {
+      appProvider.layers.selectedLayer.taperLastPressureStrokeTip();
+    }
     // Pair with beginStrokePreview: release the frozen baseline (no-op for tools
     // that never captured one, e.g. smudge/blur, which use the live preview).
     appProvider.layers.selectedLayer.clearStrokePreview();
@@ -363,7 +371,10 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       } else if (appProvider.selectedAction == ActionType.eraser) {
         appProvider.appendLineFromLastUserAction(adjustedPosition);
       } else if (appProvider.selectedAction == ActionType.brush) {
-        appProvider.layers.selectedLayer.lastActionAppendPosition(position: adjustedPosition);
+        appProvider.layers.selectedLayer.lastActionAppendPosition(
+          position: adjustedPosition,
+          pressure: stylusPressure(event),
+        );
         appProvider.layers.repaintCanvas();
       } else {
         appProvider.updateAction(end: adjustedPosition);
@@ -468,7 +479,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       return;
     }
 
-    _startDrawingPointer(appProvider, adjustedPosition);
+    _startDrawingPointer(appProvider, adjustedPosition, pressure: stylusPressure(event));
   }
 
   /// Begins a selection at [adjustedPosition], applying modifier math and
@@ -706,10 +717,15 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   /// eraser must always erase, and arming it must not mutate the persisted
   /// selected action (which would disturb an armed effect, eyedropper, or wand
   /// selection).
+  ///
+  /// [pressure] is the normalized pen pressure of the pointer-down (null for
+  /// mouse, touch, or a pen without pressure). Only a Brush stroke records it,
+  /// which makes that stroke pressure-sensitive for its whole length.
   void _startDrawingPointer(
     AppProvider appProvider,
     ui.Offset adjustedPosition, {
     ActionType? forcedAction,
+    double? pressure,
   }) {
     final ActionType action = forcedAction ?? appProvider.selectedAction;
     appProvider.layers.selectedLayer.isUserDrawing = true;
@@ -735,6 +751,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     // action each frame instead of replaying the whole stack. Captured before
     // the active action is appended below.
     appProvider.layers.selectedLayer.beginStrokePreview();
+    final bool recordsPressure = action == ActionType.brush && pressure != null;
     appProvider.recordExecuteDrawingActionToSelectedLayer(
       action: StrokeAction(
         action: action,
@@ -747,6 +764,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
           marks: appProvider.hatchMarks,
         ),
         fillColor: appProvider.fillColor,
+        pressures: recordsPressure ? <double>[pressure, pressure] : null,
       ),
     );
   }
