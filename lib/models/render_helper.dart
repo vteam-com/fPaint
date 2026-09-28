@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/stylus_pressure.dart';
 import 'package:fpaint/models/brush_grain.dart';
 import 'package:fpaint/models/brush_hatch.dart';
 import 'package:fpaint/models/brush_style.dart';
@@ -173,12 +174,24 @@ void renderCircle(
 /// The [positions] parameter is the list of points that make up the path.
 /// The [brush] parameter is the brush to use for the stroke.
 /// The [fillColor] parameter is the fill color of the path.
+/// The optional [pressures] (normalized pen pressure per point, parallel to
+/// [positions]) makes a solid or soft stroke vary its width along its length;
+/// patterned styles keep a constant width.
 void renderPath(
   Canvas canvas,
   List<Offset> positions,
   MyBrush brush,
-  Color fillColor,
-) {
+  Color fillColor, {
+  List<double>? pressures,
+}) {
+  if (pressures != null &&
+      pressures.length == positions.length &&
+      positions.isNotEmpty &&
+      (brush.style == BrushStyle.solid || brush.style == BrushStyle.soft)) {
+    _renderPressurePath(canvas, positions, pressures, brush);
+    return;
+  }
+
   final Paint paint = Paint();
   paint.color = fillColor;
   paint.style = PaintingStyle.stroke;
@@ -200,6 +213,85 @@ void renderPath(
   paint.style = PaintingStyle.stroke;
   paint.color = brush.color;
   drawPathWithBrushStyle(canvas, paint, path, brush.style, brush.size, hatch: brush.hatch, marks: brush.marks);
+}
+
+/// Draws a pressure-sensitive solid or soft brush stroke whose width follows
+/// the pen pressure at each point, scaled by [pressureWidthFactor] around the
+/// set brush size, as one filled [pressureStrokeOutline].
+void _renderPressurePath(
+  Canvas canvas,
+  List<Offset> positions,
+  List<double> pressures,
+  MyBrush brush,
+) {
+  final Paint paint = Paint()
+    ..color = brush.color
+    ..style = PaintingStyle.fill;
+  if (brush.style == BrushStyle.soft) {
+    paint.maskFilter = MaskFilter.blur(BlurStyle.normal, softStrokeBlurSigma(brush.size));
+  }
+  canvas.drawPath(pressureStrokeOutline(positions, pressures, brush.size), paint);
+}
+
+/// Builds the filled outline of a variable-width stroke through [positions]:
+/// a disc at every point (radius from its [pressures] sample) joined by a
+/// trapezoid per segment, so the width tapers smoothly between samples.
+///
+/// Everything is wound the same way (screen-clockwise) under
+/// [PathFillType.nonZero], so the overlapping pieces union into one shape.
+/// Drawn with a single [Canvas.drawPath], a translucent colour covers the
+/// stroke evenly and the per-frame cost stays one draw call however long the
+/// stroke grows.
+Path pressureStrokeOutline(List<Offset> positions, List<double> pressures, double brushSize) {
+  final Path outline = Path()..fillType = PathFillType.nonZero;
+  final List<double> radii = <double>[
+    for (final double pressure in pressures) pressureStrokeWidth(brushSize, pressure) / AppMath.pair,
+  ];
+
+  for (int i = AppMath.zero; i < positions.length; i++) {
+    _addClockwiseDisc(outline, positions[i], radii[i]);
+    if (i == AppMath.zero) {
+      continue;
+    }
+    final Offset from = positions[i - AppMath.one];
+    final Offset to = positions[i];
+    final Offset delta = to - from;
+    final double length = delta.distance;
+    if (length <= Tolerance.defaultTolerance.distance) {
+      continue;
+    }
+    final Offset normal = Offset(-delta.dy / length, delta.dx / length);
+    _addClockwisePolygon(outline, <Offset>[
+      from + normal * radii[i - AppMath.one],
+      to + normal * radii[i],
+      to - normal * radii[i],
+      from - normal * radii[i - AppMath.one],
+    ]);
+  }
+  return outline;
+}
+
+/// Adds a disc of [radius] at [center] wound screen-clockwise (two positive
+/// half-turn arcs; positive sweeps run clockwise in y-down canvas space).
+void _addClockwiseDisc(Path path, Offset center, double radius) {
+  final Rect rect = Rect.fromCircle(center: center, radius: radius);
+  path.arcTo(rect, AppMath.zero.toDouble(), math.pi, true);
+  path.arcTo(rect, math.pi, math.pi, false);
+  path.close();
+}
+
+/// Adds the convex polygon [points] wound screen-clockwise, reversing them when
+/// their signed (shoelace) area says they run the other way.
+void _addClockwisePolygon(Path path, List<Offset> points) {
+  double doubledArea = AppMath.zero.toDouble();
+  for (int i = AppMath.zero; i < points.length; i++) {
+    final Offset a = points[i];
+    final Offset b = points[(i + AppMath.one) % points.length];
+    doubledArea += a.dx * b.dy - b.dx * a.dy;
+  }
+  // In y-down canvas space a positive shoelace area is screen-clockwise.
+  final List<Offset> ordered = doubledArea >= AppMath.zero ? points : points.reversed.toList();
+  path.addPolygon(ordered, true);
 }
 
 /// Renders a line on the canvas.

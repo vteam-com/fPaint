@@ -57,6 +57,26 @@ class AppInteraction {
   /// crawl by fractions of a unit per press.
   static const double brushSizeKeyMinStep = 1.0;
 
+  /// Multiple of the brush size a pressure-sensitive Brush stroke paints at the
+  /// lightest pen touch. Zero so a fading press tapers all the way down to
+  /// [brushPressureMinTipWidth], however large the brush is.
+  static const double brushPressureMinWidthFactor = 0.0;
+
+  /// Narrowest a pressure-sensitive Brush stroke gets, in canvas pixels: the
+  /// 1 px hairline a fading or lifting pen tip tapers to.
+  static const double brushPressureMinTipWidth = 1.0;
+
+  /// Pen pressure (0..1) at or below which the last sample of a Brush stroke
+  /// counts as a fading lift-off: on pen-up it is dropped to zero so the
+  /// committed tip tapers to [brushPressureMinTipWidth]. A stroke lifted at a
+  /// firmer press keeps its blunt end.
+  static const double brushPressureTaperThreshold = 0.35;
+
+  /// Multiple of the brush size a pressure-sensitive Brush stroke paints at
+  /// full pen pressure. Above 1 so the set brush size sits mid-range: a light
+  /// touch paints thinner than it and a heavy press paints thicker.
+  static const double brushPressureMaxWidthFactor = 2.0;
+
   /// Horizontal distance the finger/pointer must travel away from the brush
   /// size edge slider to halve its sensitivity (Procreate-style fine scrub).
   static const double brushSizeEdgeSliderFineScrubPixels = 60.0;

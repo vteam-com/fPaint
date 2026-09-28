@@ -8,6 +8,7 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/helpers/stylus_pressure.dart';
 import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/models/layer_state_snapshot.dart';
 import 'package:fpaint/models/render_helper.dart';
@@ -312,9 +313,36 @@ class LayerProvider extends ChangeNotifier {
     return newAction;
   }
 
-  /// Appends a position to the last action.
-  void lastActionAppendPosition({required Offset position}) {
-    actionStack.last.positions.add(position);
+  /// Appends a position to the last action, with its stylus [pressure] when
+  /// that action records pressure.
+  ///
+  /// A pressure stroke keeps one sample per point: a missing [pressure] (e.g.
+  /// a synthesized move) repeats the previous sample so the lists stay aligned.
+  void lastActionAppendPosition({required Offset position, double? pressure}) {
+    final UserActionDrawing last = actionStack.last;
+    last.positions.add(position);
+    if (last is StrokeAction) {
+      final List<double>? pressures = last.pressures;
+      if (pressures != null) {
+        pressures.add(pressure ?? (pressures.isEmpty ? AppMath.one.toDouble() : pressures.last));
+      }
+    }
+  }
+
+  /// On pen lift, tapers the tip of the last action when it is a pressure
+  /// Brush stroke that was fading out (see [taperPressureTip]). The caller
+  /// clears the cache afterwards, so the committed render shows the fine tip.
+  void taperLastPressureStrokeTip() {
+    if (actionStack.isEmpty) {
+      return;
+    }
+    final UserActionDrawing last = actionStack.last;
+    if (last is StrokeAction && last.action == ActionType.brush) {
+      final List<double>? pressures = last.pressures;
+      if (pressures != null) {
+        taperPressureTip(pressures);
+      }
+    }
   }
 
   /// Undoes the last action performed on the layer.
@@ -812,6 +840,7 @@ class LayerProvider extends ChangeNotifier {
             points,
             action.brush,
             fillColor,
+            pressures: action.pressures,
           ),
         );
 
