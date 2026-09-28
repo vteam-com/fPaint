@@ -12,6 +12,7 @@ import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/brush_size_edge_slider.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/canvas_panel.dart';
 import 'package:fpaint/widgets/effect_preview_bottom_sheet.dart';
@@ -254,6 +255,20 @@ class MainViewState extends State<MainView> {
                         ),
                       ),
                     ),
+
+                    // On-canvas brush size slider (Procreate-style edge
+                    // control): the touch-first counterpart of `[` / `]` and
+                    // the Ctrl+Alt drag, usable by mouse and trackpad too.
+                    if (!hasActiveTransformOverlay && appProvider.canAdjustBrushSize)
+                      Positioned(
+                        left: AppSpacing.medium,
+                        top: AppMath.zero.toDouble(),
+                        bottom: AppMath.zero.toDouble(),
+                        child: BrushSizeEdgeSlider(
+                          appProvider: appProvider,
+                          interactionProfile: shellProvider.interactionLayoutProfile,
+                        ),
+                      ),
 
                     if (!hasActiveTransformOverlay && appProvider.selectedTextObject != null) const TextEditor(),
 

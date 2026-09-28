@@ -48,6 +48,19 @@ class AppInteraction {
   /// rather than the jumpy 30 that reusing the drag sensitivity would give.
   static const double brushSizeWheelScrollPixelsPerUnit = 30.0;
 
+  /// Multiplicative change applied by one `[` / `]` brush-size key press. A
+  /// ratio (rather than a fixed step) keeps the keys useful across the whole
+  /// 0.1–500 range: small brushes move gently, large ones move quickly.
+  static const double brushSizeKeyStepRatio = 1.2;
+
+  /// Smallest size change one `[` / `]` press makes, so tiny brushes do not
+  /// crawl by fractions of a unit per press.
+  static const double brushSizeKeyMinStep = 1.0;
+
+  /// Horizontal distance the finger/pointer must travel away from the brush
+  /// size edge slider to halve its sensitivity (Procreate-style fine scrub).
+  static const double brushSizeEdgeSliderFineScrubPixels = 60.0;
+
   /// Horizontal screen pixels dragged per 1 unit of Edge Detection wand
   /// tolerance during the tap-to-sample, drag-to-adjust selection gesture.
   static const double wandToleranceDragPixelsPerUnit = 8.0;

@@ -605,9 +605,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   bool _shouldShowDrawingToolPreview(AppProvider appProvider) {
     // An armed pick-layer gesture already owns the cursor with its loupe, so
     // the brush-size ring stays hidden until the pick commits.
-    return appProvider.selectedAction.isSupported(ActionOptions.brushSize) &&
-        appProvider.selectedAction != ActionType.text &&
-        !appProvider.isLayerPickerActive;
+    return appProvider.canAdjustBrushSize && !appProvider.isLayerPickerActive;
   }
 
   void _showLockedLayerMessage(AppProvider appProvider) {

@@ -134,6 +134,99 @@ void main() {
     });
   });
 
+  group('brushSizeForKeyStep', () {
+    test('] grows and [ shrinks by the step ratio on large brushes', () {
+      final double grown = brushSizeForKeyStep(startSize: 50, increase: true, minSize: 1, maxSize: 500);
+      final double shrunk = brushSizeForKeyStep(startSize: 50, increase: false, minSize: 1, maxSize: 500);
+
+      expect(grown, closeTo(50 * AppInteraction.brushSizeKeyStepRatio, 1e-9));
+      expect(shrunk, closeTo(50 / AppInteraction.brushSizeKeyStepRatio, 1e-9));
+    });
+
+    test('moves at least the minimum step on tiny brushes', () {
+      expect(
+        brushSizeForKeyStep(startSize: 2, increase: true, minSize: 1, maxSize: 100),
+        2 + AppInteraction.brushSizeKeyMinStep,
+      );
+      expect(
+        brushSizeForKeyStep(startSize: 3, increase: false, minSize: 0.1, maxSize: 100),
+        3 - AppInteraction.brushSizeKeyMinStep,
+      );
+    });
+
+    test('clamps to the tool range', () {
+      expect(brushSizeForKeyStep(startSize: 99, increase: true, minSize: 1, maxSize: 100), 100);
+      expect(brushSizeForKeyStep(startSize: 1.5, increase: false, minSize: 1, maxSize: 100), 1);
+    });
+  });
+
+  group('brush size slider fraction', () {
+    test('maps the range ends to 0 and 1', () {
+      expect(brushSizeToSliderFraction(size: 1, minSize: 1, maxSize: 100), 0);
+      expect(brushSizeToSliderFraction(size: 100, minSize: 1, maxSize: 100), closeTo(1, 1e-9));
+    });
+
+    test('is logarithmic: the geometric middle sits at the half-way point', () {
+      expect(brushSizeToSliderFraction(size: 10, minSize: 1, maxSize: 100), closeTo(0.5, 1e-9));
+      expect(brushSizeFromSliderFraction(fraction: 0.5, minSize: 1, maxSize: 100), closeTo(10, 1e-9));
+    });
+
+    test('round-trips a size through the slider position', () {
+      final double fraction = brushSizeToSliderFraction(size: 37, minSize: 0.1, maxSize: 500);
+      expect(brushSizeFromSliderFraction(fraction: fraction, minSize: 0.1, maxSize: 500), closeTo(37, 1e-9));
+    });
+
+    test('clamps out-of-range inputs', () {
+      expect(brushSizeToSliderFraction(size: 1000, minSize: 1, maxSize: 100), closeTo(1, 1e-9));
+      expect(brushSizeFromSliderFraction(fraction: -1, minSize: 1, maxSize: 100), 1);
+      expect(brushSizeFromSliderFraction(fraction: 2, minSize: 1, maxSize: 100), closeTo(100, 1e-9));
+    });
+  });
+
+  group('stepBrushSize', () {
+    late AppProvider appProvider;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final AppPreferences preferences = AppPreferences();
+      await preferences.getPref();
+      appProvider = AppProvider(preferences: preferences);
+    });
+
+    test('adjusts the brush for a sized paint tool', () {
+      appProvider.selectedAction = ActionType.brush;
+      appProvider.brushSize = 20;
+
+      final double? grown = appProvider.stepBrushSize(increase: true);
+
+      expect(grown, closeTo(20 * AppInteraction.brushSizeKeyStepRatio, 1e-9));
+      expect(appProvider.brushSize, grown);
+    });
+
+    test('is a no-op for tools without a brush size', () {
+      appProvider.selectedAction = ActionType.fill;
+      final double before = appProvider.brushSize;
+
+      expect(appProvider.canAdjustBrushSize, isFalse);
+      expect(appProvider.stepBrushSize(increase: true), isNull);
+      expect(appProvider.brushSize, before);
+    });
+
+    test('leaves the text tool alone, which sizes its font separately', () {
+      appProvider.selectedAction = ActionType.text;
+      expect(appProvider.canAdjustBrushSize, isFalse);
+      expect(appProvider.stepBrushSize(increase: false), isNull);
+    });
+
+    test('the slider fraction writes through within the tool range', () {
+      appProvider.selectedAction = ActionType.smudge;
+
+      expect(appProvider.applyBrushSizeSliderFraction(1), closeTo(AppLimits.pixelBrushSizeMax.toDouble(), 1e-9));
+      expect(appProvider.brushSizeSliderFraction, closeTo(1, 1e-9));
+      expect(appProvider.applyBrushSizeSliderFraction(0), appProvider.activeBrushSizeMin);
+    });
+  });
+
   group('applyBrushSizeDrag', () {
     late AppProvider appProvider;
 

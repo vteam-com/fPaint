@@ -508,10 +508,8 @@ List<_ToolbarActionEntry> _buildResponsiveToolbarActionEntries(
     if (appProvider.layers.isRotated)
       _ToolbarActionEntry(
         child: buildToolbarIconButton(
-          tooltip: tooltipWithShortcut(
-            l10n.resetViewRotation,
-            shortcutCombination(<String>[shiftModifierShortcutLabel(), ShortcutKeys.bracketLeft]),
-          )!,
+          // No key of its own: reset is folded into the Cmd/Ctrl+0 canvas fit.
+          tooltip: l10n.resetViewRotation,
           icon: AppIcon.rotateRight,
           interactionProfile: interactionProfile,
           onPressed: () {

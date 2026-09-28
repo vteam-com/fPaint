@@ -75,6 +75,51 @@ double brushSizeForWheelScroll({
   return (startSize + delta).clamp(minSize, maxSize);
 }
 
+/// Returns the brush size after one `[` (shrink) or `]` ([increase]) key
+/// press from [startSize], clamped to [minSize]..[maxSize].
+///
+/// Each press scales the size by [AppInteraction.brushSizeKeyStepRatio] but
+/// always moves at least [AppInteraction.brushSizeKeyMinStep].
+@visibleForTesting
+double brushSizeForKeyStep({
+  required double startSize,
+  required bool increase,
+  required double minSize,
+  required double maxSize,
+}) {
+  final double scaled = increase
+      ? startSize * AppInteraction.brushSizeKeyStepRatio
+      : startSize / AppInteraction.brushSizeKeyStepRatio;
+  final double stepped = increase
+      ? max(scaled, startSize + AppInteraction.brushSizeKeyMinStep)
+      : min(scaled, startSize - AppInteraction.brushSizeKeyMinStep);
+  return stepped.clamp(minSize, maxSize);
+}
+
+/// Maps [size] to a 0..1 slider position on a logarithmic scale over
+/// [minSize]..[maxSize], so small brushes get as much travel as large ones.
+@visibleForTesting
+double brushSizeToSliderFraction({
+  required double size,
+  required double minSize,
+  required double maxSize,
+}) {
+  final double clamped = size.clamp(minSize, maxSize);
+  return log(clamped / minSize) / log(maxSize / minSize);
+}
+
+/// Inverse of [brushSizeToSliderFraction]: maps a 0..1 slider [fraction] back
+/// to a brush size in [minSize]..[maxSize].
+@visibleForTesting
+double brushSizeFromSliderFraction({
+  required double fraction,
+  required double minSize,
+  required double maxSize,
+}) {
+  final double clamped = fraction.clamp(AppMath.zero.toDouble(), AppMath.one.toDouble());
+  return (minSize * pow(maxSize / minSize, clamped)).clamp(minSize, maxSize);
+}
+
 /// Returns whether flood fill should use the active selection path as its region.
 @visibleForTesting
 bool shouldUseSelectionRegionFloodFill({
@@ -161,16 +206,19 @@ extension AppProviderTools on AppProvider {
   }
 
   /// The largest brush size the armed tool accepts. The smudge/blur pixel
-  /// brushes work at much larger radii than the paint tools, matching the range
-  /// their side-panel slider offers.
+  /// brushes and an armed effect brush work at much larger radii than the
+  /// paint tools, matching the range their side-panel slider offers.
   double get activeBrushSizeMax {
-    final bool isPixelBrush = selectedAction == ActionType.smudge || selectedAction == ActionType.blurBrush;
+    final bool isPixelBrush =
+        effectBrushModel.isArmed || selectedAction == ActionType.smudge || selectedAction == ActionType.blurBrush;
     return isPixelBrush ? AppLimits.pixelBrushSizeMax.toDouble() : AppLimits.percentMax.toDouble();
   }
 
-  /// The smallest brush size the armed tool accepts, matching its slider.
-  double get activeBrushSizeMin =>
-      selectedAction == ActionType.pencil ? AppMath.one.toDouble() : AppInteraction.minCanvasScale;
+  /// The smallest brush size the armed tool accepts, matching its slider. An
+  /// armed effect brush overrides the underlying tool's range.
+  double get activeBrushSizeMin => selectedAction == ActionType.pencil && !effectBrushModel.isArmed
+      ? AppMath.one.toDouble()
+      : AppInteraction.minCanvasScale;
 
   /// Applies a computed brush [size] to the armed tool if it differs from the
   /// current one. Returns the applied size.
@@ -205,6 +253,49 @@ extension AppProviderTools on AppProvider {
     final double size = brushSizeForWheelScroll(
       startSize: startSize,
       scrollDy: scrollDy,
+      minSize: activeBrushSizeMin,
+      maxSize: activeBrushSizeMax,
+    );
+    return _applyBrushSize(size);
+  }
+
+  /// Whether the armed tool paints with [brushSize], so the `[` / `]` keys and
+  /// the on-canvas size slider can adjust it: every brush-sized gesture tool
+  /// (pencil, brush, eraser, smudge, blur, line, rectangle, circle) and any
+  /// armed effect brush, whose strokes are [brushSize] wide. Text is excluded
+  /// because it uses its own font size.
+  bool get canAdjustBrushSize =>
+      effectBrushModel.isArmed ||
+      (selectedAction.isSupported(ActionOptions.brushSize) && selectedAction != ActionType.text);
+
+  /// Grows (`]`, [increase]) or shrinks (`[`) the armed tool's brush size by
+  /// one keyboard step. The size HUD ring previews the result at the canvas
+  /// centre. Returns the applied size, or null when the tool has no brush size.
+  double? stepBrushSize({required bool increase}) {
+    if (!canAdjustBrushSize) {
+      return null;
+    }
+    final double size = brushSizeForKeyStep(
+      startSize: brushSize,
+      increase: increase,
+      minSize: activeBrushSizeMin,
+      maxSize: activeBrushSizeMax,
+    );
+    return _applyBrushSize(size);
+  }
+
+  /// The armed tool's brush size as a 0..1 logarithmic slider position.
+  double get brushSizeSliderFraction => brushSizeToSliderFraction(
+    size: brushSize,
+    minSize: activeBrushSizeMin,
+    maxSize: activeBrushSizeMax,
+  );
+
+  /// Sets the armed tool's brush size from a 0..1 logarithmic slider
+  /// [fraction]. Returns the applied size.
+  double applyBrushSizeSliderFraction(double fraction) {
+    final double size = brushSizeFromSliderFraction(
+      fraction: fraction,
       minSize: activeBrushSizeMin,
       maxSize: activeBrushSizeMax,
     );

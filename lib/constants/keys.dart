@@ -19,6 +19,8 @@ class Keys {
   static const Key appScreenshotBoundary = Key('app-screenshot-boundary');
   static const Key mainViewScreenshotBoundary = Key('main-view-screenshot-boundary');
   static const Key brushSizePreviewOverlay = Key('brush-size-preview-overlay');
+  static const Key brushSizeEdgeSlider = Key('brush-size-edge-slider');
+  static const Key brushSizeEdgeSliderReadout = Key('brush-size-edge-slider-readout');
   static const String gradientHandleKeyPrefixText = 'gradient_handle_';
   static const Key layerAddAboveButton = Key('layer-add-above-button');
   static const Key layerPickerToggleButton = Key('layer-picker-toggle-button');

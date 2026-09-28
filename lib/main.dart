@@ -41,10 +41,14 @@ final List<String> _queuedPlatformFilePaths = <String>[];
 bool _isProcessingQueuedPlatformFile = false;
 bool _platformFileHandlingReady = false;
 
+/// Queues a file the platform asked the app to open (Finder, Explorer, share
+/// sheet), so several files opened at once are processed one at a time.
 void queuePlatformFileForProcessing(String filePath) {
   _queuedPlatformFilePaths.add(filePath);
 }
 
+/// Removes and returns the oldest queued platform file path, or null when the
+/// queue is empty.
 String? dequeueQueuedPlatformFile() {
   if (_queuedPlatformFilePaths.isEmpty) {
     return null;

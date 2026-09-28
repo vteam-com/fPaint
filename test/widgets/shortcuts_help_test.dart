@@ -168,6 +168,15 @@ void main() {
       expect(find.textContaining('Reset View Rotation'), findsNothing);
     });
 
+    testWidgets('lists the brush size shortcuts', (WidgetTester tester) async {
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pump();
+
+      expect(find.text(ShortcutActions.decreaseBrushSize), findsOneWidget);
+      expect(find.text(ShortcutActions.increaseBrushSize), findsOneWidget);
+      expect(find.text(ShortcutActions.resizeBrushDrag), findsOneWidget);
+    });
+
     testWidgets('shows Tools category', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
@@ -535,7 +544,7 @@ void main() {
       expect(shellProvider.canvasPlacement, CanvasAutoPlacement.manual);
     });
 
-    testWidgets('bracket keys rotate the view and Shift+[ stays unbound', (WidgetTester tester) async {
+    testWidgets('4 and 6 rotate the view, on the top row and the keypad', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues(<String, Object>{});
       final AppPreferences preferences = AppPreferences();
       await preferences.getPref();
@@ -552,27 +561,53 @@ void main() {
 
       expect(appProvider.canvasRotation, 0);
 
-      await tester.sendKeyEvent(LogicalKeyboardKey.bracketRight);
+      await tester.sendKeyEvent(LogicalKeyboardKey.digit6);
       await tester.pump();
       final double clockwise = appProvider.canvasRotation;
       expect(clockwise, greaterThan(0));
 
-      await tester.sendKeyEvent(LogicalKeyboardKey.bracketLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.digit4);
       await tester.pump();
       expect(appProvider.canvasRotation, lessThan(clockwise));
 
-      // Shift+[ is deliberately not bound: on most layouts it emits "{", so the
-      // activator never matched. The view must stay rotated.
+      await tester.sendKeyEvent(LogicalKeyboardKey.numpad6);
+      await tester.pump();
+      expect(appProvider.canvasRotation, closeTo(clockwise, 1e-9));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.numpad4);
+      await tester.pump();
+      expect(appProvider.layers.isRotated, isFalse);
+    });
+
+    testWidgets('bracket keys resize the brush without rotating the view', (WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final AppPreferences preferences = AppPreferences();
+      await preferences.getPref();
+      final AppProvider appProvider = AppProvider(preferences: preferences);
+      final ShellProvider shellProvider = ShellProvider();
+      appProvider.selectedAction = ActionType.brush;
+      appProvider.brushSize = 20;
+
+      await tester.pumpWidget(
+        buildShortcutHandlerTestWidget(
+          appProvider: appProvider,
+          shellProvider: shellProvider,
+        ),
+      );
+      await tester.pump();
+
       await tester.sendKeyEvent(LogicalKeyboardKey.bracketRight);
       await tester.pump();
-      expect(appProvider.layers.isRotated, isTrue);
+      final double grown = appProvider.brushSize;
+      expect(grown, greaterThan(20));
 
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
       await tester.sendKeyEvent(LogicalKeyboardKey.bracketLeft);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
       await tester.pump();
+      expect(appProvider.brushSize, lessThan(grown));
+      expect(appProvider.layers.isRotated, isFalse);
 
-      expect(appProvider.layers.isRotated, isTrue);
+      // Let the size HUD ring's fade timer run out.
+      await tester.pump(AppDefaults.brushSizePreviewDuration);
     });
 
     testWidgets('Cmd/Ctrl+0 requests a canvas fit like the zoom-value button', (WidgetTester tester) async {
