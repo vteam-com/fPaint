@@ -71,4 +71,13 @@ class AppLayout {
   static const double popupMenuItemHeight = 48.0;
   static const double brushSizePreviewBorderWidth = 2.0;
   static const double brushSizePreviewDashLength = 6.0;
+
+  /// Fraction of the canvas viewport height the brush size edge slider spans.
+  static const double brushSizeEdgeSliderHeightFraction = 0.4;
+
+  /// Longest the brush size edge slider track grows on tall viewports.
+  static const double brushSizeEdgeSliderMaxLength = 320.0;
+
+  /// Visible width of the brush size edge slider's track groove.
+  static const double brushSizeEdgeSliderTrackWidth = 6.0;
 }

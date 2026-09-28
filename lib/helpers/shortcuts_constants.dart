@@ -27,6 +27,10 @@ abstract class ShortcutActions {
   static const String fitCanvasToView = 'Fit Canvas to View';
   static const String rotateViewCounterClockwise = 'Rotate View Counter-Clockwise';
   static const String rotateViewClockwise = 'Rotate View Clockwise';
+  static const String decreaseBrushSize = 'Decrease Brush Size';
+  static const String increaseBrushSize = 'Increase Brush Size';
+  static const String resizeBrushDrag = 'Resize Brush';
+  static const String dragOrScroll = 'Drag or scroll';
   static const String rotateViewTwist = 'Rotate View (trackpad or touch)';
   static const String rotateViewDrag = 'Rotate View (mouse)';
   static const String twoFingerTwist = 'Two-finger twist';
@@ -86,6 +90,8 @@ abstract class ShortcutKeys {
   static const String tab = 'Tab';
   static const String bracketLeft = '[';
   static const String bracketRight = ']';
+  static const String four = '4';
+  static const String six = '6';
   static const String b = 'B';
   static const String c = 'C';
   static const String d = 'D';

@@ -94,6 +94,12 @@ Widget shortCutsForMainApp(
           return null;
         },
       ),
+      BrushSizeDecreaseIntent: CallbackAction<BrushSizeDecreaseIntent>(
+        onInvoke: (BrushSizeDecreaseIntent _) => appProvider.stepBrushSize(increase: false),
+      ),
+      BrushSizeIncreaseIntent: CallbackAction<BrushSizeIncreaseIntent>(
+        onInvoke: (BrushSizeIncreaseIntent _) => appProvider.stepBrushSize(increase: true),
+      ),
       SaveIntent: CallbackAction<SaveIntent>(
         onInvoke: (SaveIntent _) async => await onSave(),
       ),
@@ -382,6 +388,18 @@ class RotateViewClockwiseIntent extends Intent {
   const RotateViewClockwiseIntent();
 }
 
+/// An [Intent] that shrinks the armed tool's brush by one keyboard step.
+class BrushSizeDecreaseIntent extends Intent {
+  /// Creates a [BrushSizeDecreaseIntent].
+  const BrushSizeDecreaseIntent();
+}
+
+/// An [Intent] that grows the armed tool's brush by one keyboard step.
+class BrushSizeIncreaseIntent extends Intent {
+  /// Creates a [BrushSizeIncreaseIntent].
+  const BrushSizeIncreaseIntent();
+}
+
 /// An [Intent] that triggers the save action.
 class SaveIntent extends Intent {
   /// Creates a [SaveIntent].
@@ -543,11 +561,18 @@ Map<ShortcutActivator, Intent> _buildShortcuts() {
   shortcuts[const SingleActivator(LogicalKeyboardKey.numpadSubtract, meta: true)] = const ZoomOutIntent();
   shortcuts[const SingleActivator(LogicalKeyboardKey.numpadSubtract, control: true)] = const ZoomOutIntent();
 
+  // Brush size: bare `[` / `]`, the convention every major paint app shares.
+  shortcuts[const SingleActivator(LogicalKeyboardKey.bracketLeft)] = const BrushSizeDecreaseIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.bracketRight)] = const BrushSizeIncreaseIntent();
+
+  // View rotation: Krita's modifier-free `4` / `6` nudge, on both the top-row
+  // digits and the numeric keypad. Reset stays folded into the Cmd/Ctrl+0 fit.
+  shortcuts[const SingleActivator(LogicalKeyboardKey.digit4)] = const RotateViewCounterClockwiseIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.numpad4)] = const RotateViewCounterClockwiseIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.digit6)] = const RotateViewClockwiseIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.numpad6)] = const RotateViewClockwiseIntent();
+
   // Reset zoom (Cmd/Ctrl + '0').
-  // Bare bracket keys: rotation is a view nudge used mid-stroke, so it stays
-  // modifier-free like a brush-size change.
-  shortcuts[const SingleActivator(LogicalKeyboardKey.bracketLeft)] = const RotateViewCounterClockwiseIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.bracketRight)] = const RotateViewClockwiseIntent();
   shortcuts[const SingleActivator(LogicalKeyboardKey.digit0, meta: true)] = const ResetZoomIntent();
   shortcuts[const SingleActivator(LogicalKeyboardKey.digit0, control: true)] = const ResetZoomIntent();
   shortcuts[const SingleActivator(LogicalKeyboardKey.numpad0, meta: true)] = const ResetZoomIntent();

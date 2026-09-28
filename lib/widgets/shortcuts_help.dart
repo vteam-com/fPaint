@@ -69,8 +69,8 @@ class ShortcutsHelpDialog extends StatelessWidget {
           _shortcutEntry(<String>[mod, ShortcutKeys.plus], ShortcutActions.zoomIn),
           _shortcutEntry(<String>[mod, ShortcutKeys.minus], ShortcutActions.zoomOut),
           _shortcutEntry(<String>[mod, ShortcutKeys.zero], ShortcutActions.fitCanvasToView),
-          _shortcutEntry(<String>[ShortcutKeys.bracketLeft], ShortcutActions.rotateViewCounterClockwise),
-          _shortcutEntry(<String>[ShortcutKeys.bracketRight], ShortcutActions.rotateViewClockwise),
+          _shortcutEntry(<String>[ShortcutKeys.four], ShortcutActions.rotateViewCounterClockwise),
+          _shortcutEntry(<String>[ShortcutKeys.six], ShortcutActions.rotateViewClockwise),
           _shortcutEntry(
             <String>[],
             ShortcutActions.rotateViewTwist,
@@ -97,6 +97,13 @@ class ShortcutsHelpDialog extends StatelessWidget {
           _shortcutEntry(<String>[ShortcutKeys.s], ShortcutActions.selectionTool),
           _shortcutEntry(<String>[ShortcutKeys.f], ShortcutActions.fillTool),
           _shortcutEntry(<String>[ShortcutKeys.t], ShortcutActions.textTool),
+          _shortcutEntry(<String>[ShortcutKeys.bracketLeft], ShortcutActions.decreaseBrushSize),
+          _shortcutEntry(<String>[ShortcutKeys.bracketRight], ShortcutActions.increaseBrushSize),
+          _shortcutEntry(
+            <String>[mod, secondaryModifierShortcutLabel()],
+            ShortcutActions.resizeBrushDrag,
+            gesture: ShortcutActions.dragOrScroll,
+          ),
         ],
       ),
       (
