@@ -1,5 +1,3 @@
-// ignore: fcheck_magic_numbers
-
 /// Shared scale tokens.
 class AppVisual {
   static const double full = 1.0;

@@ -67,21 +67,44 @@ class _ReorderableLayerList extends StatefulWidget {
 class _ReorderableLayerListState extends State<_ReorderableLayerList> {
   int? _draggedIndex;
 
+  /// The selected index last revealed, so unrelated layer notifications
+  /// (thumbnails, opacity, …) never move the list.
+  int? _revealedIndex;
+
+  /// Scrolls the list to keep the selected layer in view.
+  final ScrollController _scrollController = ScrollController();
   @override
   void initState() {
     super.initState();
     widget.layers.thumbnailsVisible = true;
+    widget.layers.addListener(_onLayersChanged);
+    // Reveal the initial selection too, e.g. a reopened file's remembered layer.
+    _onLayersChanged();
   }
 
   @override
   void dispose() {
+    widget.layers.removeListener(_onLayersChanged);
     widget.layers.thumbnailsVisible = false;
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant _ReorderableLayerList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.layers, widget.layers)) {
+      oldWidget.layers.removeListener(_onLayersChanged);
+      widget.layers.addListener(_onLayersChanged);
+      _revealedIndex = null;
+      _onLayersChanged();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      controller: _scrollController,
       itemCount: widget.layers.length,
       itemBuilder: (BuildContext _, int index) {
         final LayerProvider layer = widget.layers.get(index);
@@ -103,19 +126,22 @@ class _ReorderableLayerListState extends State<_ReorderableLayerList> {
           },
         );
 
-        final Widget dropTarget = DragTarget<int>(
-          onWillAcceptWithDetails: (DragTargetDetails<int> details) => details.data != index,
-          onAcceptWithDetails: (DragTargetDetails<int> details) {
-            final int oldIndex = details.data;
-            final int newIndex = index;
-            widget.layers.reorderLayer(fromIndex: oldIndex, toIndex: newIndex);
-          },
-          builder: (BuildContext _, List<int?> _, List<dynamic> _) {
-            return Opacity(
-              opacity: _draggedIndex == index ? AppVisual.low : AppVisual.full,
-              child: child,
-            );
-          },
+        final Widget dropTarget = KeyedSubtree(
+          key: _rowKeyFor(layer),
+          child: DragTarget<int>(
+            onWillAcceptWithDetails: (DragTargetDetails<int> details) => details.data != index,
+            onAcceptWithDetails: (DragTargetDetails<int> details) {
+              final int oldIndex = details.data;
+              final int newIndex = index;
+              widget.layers.reorderLayer(fromIndex: oldIndex, toIndex: newIndex);
+            },
+            builder: (BuildContext _, List<int?> _, List<dynamic> _) {
+              return Opacity(
+                opacity: _draggedIndex == index ? AppVisual.low : AppVisual.full,
+                child: child,
+              );
+            },
+          ),
         );
 
         if (_useImmediateDrag) {
@@ -143,6 +169,66 @@ class _ReorderableLayerListState extends State<_ReorderableLayerList> {
     );
   }
 
+  /// Schedules a reveal when the selected layer changed, from any source: the
+  /// on-canvas layer picker, a new layer, undo, or a panel tap.
+  void _onLayersChanged() {
+    final int selectedIndex = widget.layers.selectedLayerIndex;
+    if (selectedIndex == _revealedIndex) {
+      return;
+    }
+    _revealedIndex = selectedIndex;
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _revealSelectedLayer(jumpsLeft: AppInteraction.layerRevealMaxJumps),
+    );
+  }
+
+  /// Scrolls just enough to bring the selected layer's row fully into view,
+  /// leaving the list alone when it already is.
+  ///
+  /// The lazy list only builds rows near the viewport, and rows vary in
+  /// height, so an unbuilt row is approached by jumping to its proportional
+  /// offset and retrying once that frame has built it.
+  Future<void> _revealSelectedLayer({required int jumpsLeft}) async {
+    if (!mounted || !_scrollController.hasClients || !widget.layers.isIndexInRange(widget.layers.selectedLayerIndex)) {
+      return;
+    }
+
+    final int index = widget.layers.selectedLayerIndex;
+    final BuildContext? row = _rowKeyFor(widget.layers.get(index)).currentContext;
+    if (row != null) {
+      // Each policy is a no-op unless the row overflows its edge, so applying
+      // both scrolls only in the direction the row is clipped.
+      for (final ScrollPositionAlignmentPolicy policy in const <ScrollPositionAlignmentPolicy>[
+        ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+        ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      ]) {
+        if (!row.mounted) {
+          return;
+        }
+        await Scrollable.ensureVisible(
+          row,
+          alignmentPolicy: policy,
+          duration: AppDefaults.layerRevealScrollDuration,
+          curve: Curves.easeOut,
+        );
+      }
+      return;
+    }
+
+    if (jumpsLeft <= 0) {
+      return;
+    }
+    final ScrollPosition position = _scrollController.position;
+    final double contentExtent = position.maxScrollExtent + position.viewportDimension;
+    final double estimate = contentExtent * index / widget.layers.length;
+    _scrollController.jumpTo(estimate.clamp(position.minScrollExtent, position.maxScrollExtent));
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _revealSelectedLayer(jumpsLeft: jumpsLeft - 1),
+    );
+  }
+
+  /// The key locating [layer]'s row, by layer identity so it follows reorders.
+  GlobalObjectKey _rowKeyFor(LayerProvider layer) => GlobalObjectKey(layer);
   bool get _useImmediateDrag {
     return defaultTargetPlatform == TargetPlatform.linux ||
         defaultTargetPlatform == TargetPlatform.macOS ||

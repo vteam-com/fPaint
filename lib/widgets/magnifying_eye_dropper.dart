@@ -1,9 +1,7 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/magnifier_loupe.dart';
+import 'package:fpaint/widgets/magnifier_sampling.dart';
 
 /// A widget that displays a magnifying eye dropper for selecting colors from an image.
 class MagnifyingEyeDropper extends StatefulWidget {
@@ -33,70 +31,35 @@ class MagnifyingEyeDropper extends StatefulWidget {
 }
 
 /// The state for [MagnifyingEyeDropper].
-class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
-  /// Monotonic id used to ignore stale async color-sampling results.
-  int _colorSampleRequestId = 0;
-
+class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> with MagnifierSampling<MagnifyingEyeDropper> {
   /// The selected color.
   Color? _selectedColor;
-
-  /// The size of the region.
-  final double regionSize = AppLayout.previewRegionSize;
-
-  @override
-  void initState() {
-    super.initState();
-    _updateColor();
-  }
-
   @override
   void didUpdateWidget(covariant MagnifyingEyeDropper oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.pixelPosition != widget.pixelPosition || oldWidget.layers.cachedImage != widget.layers.cachedImage) {
-      _updateColor();
+    if (oldWidget.pixelPosition != widget.pixelPosition) {
+      requestSample();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final ui.Image? sourceImage = widget.layers.cachedImage;
-    if (sourceImage == null) {
-      return const SizedBox();
-    }
-
     return MagnifierLoupe(
-      sourceImage: sourceImage,
+      magnifiedRegion: magnifiedRegion,
       pointerPosition: widget.pointerPosition,
-      pixelPosition: widget.pixelPosition,
       sampledColor: _selectedColor,
     );
   }
 
-  /// Updates the selected color.
-  void _updateColor() async {
-    if (widget.layers.cachedImage == null) {
-      if (mounted && _selectedColor != null) {
-        setState(() {
-          _selectedColor = null;
-        });
-      }
-      return;
-    }
-
-    final int requestId = ++_colorSampleRequestId;
-
-    final Color? color = await widget.layers.getColorAtOffset(
-      widget.pixelPosition,
-      useCachedImage: true,
-    );
-
-    if (!mounted || requestId != _colorSampleRequestId || color == _selectedColor) {
-      return;
-    }
-
-    setState(() {
-      _selectedColor = color;
-    });
+  @override
+  Future<VoidCallback> sampleCaption(Offset pixelPosition) async {
+    final Color? color = await widget.layers.getColorAtOffset(pixelPosition);
+    return () => _selectedColor = color;
   }
+
+  @override
+  LayersProvider get samplingLayers => widget.layers;
+  @override
+  Offset get samplingPixelPosition => widget.pixelPosition;
 }

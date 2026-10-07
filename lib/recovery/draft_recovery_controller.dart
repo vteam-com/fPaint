@@ -177,7 +177,10 @@ class DraftRecoveryController with WidgetsBindingObserver implements DraftFlushe
       do {
         _needsReconcile = false;
         if (layers.hasChanged) {
-          final Uint8List bytes = Uint8List.fromList(await _encoder(layers));
+          // The encoder already hands back a byte buffer; copying the whole
+          // archive again would double the autosave's peak memory.
+          final List<int> encoded = await _encoder(layers);
+          final Uint8List bytes = encoded is Uint8List ? encoded : Uint8List.fromList(encoded);
           await _storage.writeDraft(bytes);
           _hasWrittenDraftThisSession = true;
           await preferences.setRecoveryDraftSourceFilePath(_currentSourceFilePath);

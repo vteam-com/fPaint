@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/trackpad_pressure.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -110,6 +111,26 @@ class _SettingsPageState extends State<SettingsPage> {
                           });
                         },
                       ),
+                      if (TrackpadPressure.isSupported) ...<Widget>[
+                        const AppDivider(),
+                        AppListTile(
+                          title: AppText(l10n.trackpadPressureTitle),
+                          subtitle: AppText(l10n.trackpadPressureSubtitle, variant: AppTextVariant.subtitle),
+                          trailing: AppToggleSwitch(
+                            value: appPreferences.trackpadPressure,
+                            onChanged: (bool value) {
+                              setState(() {
+                                appPreferences.setTrackpadPressure(value);
+                              });
+                            },
+                          ),
+                          onTap: () {
+                            setState(() {
+                              appPreferences.setTrackpadPressure(!appPreferences.trackpadPressure);
+                            });
+                          },
+                        ),
+                      ],
                       if (!kIsWeb) ...<Widget>[
                         const AppDivider(),
                         AppListTile(

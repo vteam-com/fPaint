@@ -1,5 +1,3 @@
-// ignore: fcheck_magic_numbers
-
 /// Shared spacing tokens used across dialogs, panels, and controls.
 class AppSpacing {
   static const double thin = 2.0;

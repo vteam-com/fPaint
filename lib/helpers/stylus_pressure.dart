@@ -21,6 +21,24 @@ double? stylusPressure(PointerEvent event) {
   return ((event.pressure - event.pressureMin) / range).clamp(AppMath.zero.toDouble(), AppMath.one.toDouble());
 }
 
+/// Grows [pressures] (one sample per stroke point, or null for a pressure-less
+/// stroke) to [pointCount] samples after a point was appended with [pressure].
+///
+/// A missing [pressure] (e.g. a synthesized move) repeats the previous sample
+/// so the lists stay aligned. An empty list marks a stroke awaiting its first
+/// pressure (the Force Touch trackpad reports it just after the click): it
+/// stays empty, painting at constant width, until a sample arrives, which is
+/// then back-filled over every point drawn so far.
+void alignPressureSamples(List<double>? pressures, int pointCount, double? pressure) {
+  if (pressures == null || (pressure == null && pressures.isEmpty)) {
+    return;
+  }
+  final double sample = pressure ?? pressures.last;
+  while (pressures.length < pointCount) {
+    pressures.add(sample);
+  }
+}
+
 /// Returns the stroke width, in canvas pixels, a [brushSize] brush paints at a
 /// normalized [pressure], never narrower than the
 /// [AppInteraction.brushPressureMinTipWidth] hairline.

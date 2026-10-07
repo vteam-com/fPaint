@@ -724,6 +724,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get trackpadPressureSubtitle =>
+      'Press harder on a Force Touch trackpad to paint wider Brush strokes. The Pencil keeps a constant width.';
+
+  @override
+  String get trackpadPressureTitle => 'Trackpad pressure';
+
+  @override
   String get transform => 'Transform';
 
   @override

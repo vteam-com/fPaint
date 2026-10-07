@@ -10,9 +10,11 @@ class AppDefaults {
   static const int tolerance = 6;
   static const bool penOnlyDrawing = false;
   static const bool keepSaveBackups = false;
+  static const bool trackpadPressure = true;
   static const Duration brushSizePreviewDuration = Duration(milliseconds: 700);
   static const Duration buttonTapAnimationDuration = Duration(milliseconds: 100);
   static const Duration toolPanelRevealAnimationDuration = Duration(milliseconds: 140);
+  static const Duration layerRevealScrollDuration = Duration(milliseconds: 220);
   static const Duration debounceDuration = Duration(seconds: 1);
 
   /// Idle period before a layer rebuilds its thumbnail/raster cache.

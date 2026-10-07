@@ -1424,6 +1424,18 @@ abstract class AppLocalizations {
   /// **'Top {count} colors'**
   String topColors(Object count);
 
+  /// No description provided for @trackpadPressureSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Press harder on a Force Touch trackpad to paint wider Brush strokes. The Pencil keeps a constant width.'**
+  String get trackpadPressureSubtitle;
+
+  /// No description provided for @trackpadPressureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trackpad pressure'**
+  String get trackpadPressureTitle;
+
   /// No description provided for @transform.
   ///
   /// In en, this message translates to:

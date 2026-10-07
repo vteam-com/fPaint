@@ -1,6 +1,8 @@
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/trackpad_pressure.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -150,5 +152,84 @@ void main() {
     final StrokeAction stroke = lastStroke();
     expect(stroke.action, ActionType.pencil);
     expect(stroke.pressures, isNull);
+  });
+
+  group('Force Touch trackpad (macOS)', () {
+    final TargetPlatformVariant macOS = TargetPlatformVariant.only(TargetPlatform.macOS);
+
+    tearDown(TrackpadPressure.instance.reset);
+
+    Future<void> pushTrackpadPressure(double? value) {
+      return TrackpadPressure.instance.handleMethodCall(MethodCall('pressure', value));
+    }
+
+    testWidgets('a held trackpad click makes a Brush stroke pressure-sensitive', (WidgetTester tester) async {
+      final Offset center = await pumpCanvas(tester, ActionType.brush);
+      await pushTrackpadPressure(1.0);
+
+      await _pressureStroke(tester, center, PointerDeviceKind.mouse, <double>[0.5, 0.5, 0.5]);
+
+      final StrokeAction stroke = lastStroke();
+      expect(stroke.pressures, isNotNull);
+      expect(stroke.pressures!.length, stroke.positions.length);
+      expect(stroke.pressures!.every((double p) => p == 1), isTrue);
+    }, variant: macOS);
+
+    testWidgets('pressure arriving after the click is back-filled over the start', (WidgetTester tester) async {
+      final Offset center = await pumpCanvas(tester, ActionType.brush);
+      tester.binding.handlePointerEvent(
+        PointerDownEvent(pointer: _pointer, kind: PointerDeviceKind.mouse, position: center),
+      );
+      await tester.pump();
+      expect(lastStroke().pressures, isEmpty);
+
+      await pushTrackpadPressure(1.0);
+      tester.binding.handlePointerEvent(
+        PointerMoveEvent(
+          pointer: _pointer,
+          kind: PointerDeviceKind.mouse,
+          position: center + const Offset(30, 0),
+          delta: const Offset(30, 0),
+          buttons: kPrimaryButton,
+        ),
+      );
+      await tester.pump();
+      tester.binding.handlePointerEvent(
+        PointerUpEvent(pointer: _pointer, kind: PointerDeviceKind.mouse, position: center + const Offset(30, 0)),
+      );
+      await tester.pump(AppDefaults.thumbnailDebounceDuration);
+
+      final StrokeAction stroke = lastStroke();
+      expect(stroke.pressures, <double>[1, 1, 1]);
+    }, variant: macOS);
+
+    testWidgets('a plain mouse never sends pressure and keeps constant width', (WidgetTester tester) async {
+      final Offset center = await pumpCanvas(tester, ActionType.brush);
+
+      await _pressureStroke(tester, center, PointerDeviceKind.mouse, <double>[0.5, 0.5, 0.5]);
+
+      expect(lastStroke().pressures, isEmpty);
+    }, variant: macOS);
+
+    testWidgets('the setting turns trackpad pressure off', (WidgetTester tester) async {
+      await preferences.setTrackpadPressure(false);
+      final Offset center = await pumpCanvas(tester, ActionType.brush);
+      await pushTrackpadPressure(1.0);
+
+      await _pressureStroke(tester, center, PointerDeviceKind.mouse, <double>[0.5, 0.5, 0.5]);
+
+      expect(lastStroke().pressures, isNull);
+    }, variant: macOS);
+
+    testWidgets('the Pencil ignores trackpad pressure', (WidgetTester tester) async {
+      final Offset center = await pumpCanvas(tester, ActionType.pencil);
+      await pushTrackpadPressure(1.0);
+
+      await _pressureStroke(tester, center, PointerDeviceKind.mouse, <double>[0.5, 0.5, 0.5]);
+
+      final StrokeAction stroke = lastStroke();
+      expect(stroke.action, ActionType.pencil);
+      expect(stroke.pressures, isNull);
+    }, variant: macOS);
   });
 }

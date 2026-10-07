@@ -258,6 +258,18 @@ void main() {
       expect(stroke.pressures, isNull);
     });
 
+    test('an awaiting stroke stays empty until its first sample, then back-fills', () {
+      final LayerProvider layer = LayerProvider(name: 'test', size: const Size(100, 100), onThumbnailChanged: () {});
+      final StrokeAction stroke = brushStroke(pressures: <double>[]);
+      layer.appendDrawingAction(stroke);
+
+      layer.lastActionAppendPosition(position: const Offset(10, 0));
+      expect(stroke.pressures, isEmpty);
+
+      layer.lastActionAppendPosition(position: const Offset(20, 0), pressure: 0.4);
+      expect(stroke.pressures, <double>[0.4, 0.4, 0.4, 0.4]);
+    });
+
     test('rotate/flip copies keep the pressure samples', () {
       final StrokeAction stroke = brushStroke(pressures: <double>[0.1, 0.9]);
       final StrokeAction moved = stroke.copyWith(positions: <Offset>[const Offset(5, 5), const Offset(6, 6)]);

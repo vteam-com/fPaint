@@ -17,6 +17,14 @@ private let hapticChannelName = "com.vteam.fpaint/haptic"
 private let createBookmarkMethod = "createBookmark"
 private let replaceFileWithBackupMethod = "replaceFileWithBackup"
 private let resolveBookmarkMethod = "resolveBookmark"
+private let trackpadChannelName = "com.vteam.fpaint/trackpad"
+private let trackpadPressureMethod = "pressure"
+/// Force Touch stage of an ordinary click; stage 2 is the deeper force click.
+private let trackpadClickStage = 1
+/// Pressure reported once the press passes the click stage (force click).
+private let trackpadFullPressure = 1.0
+/// Pressure of the lightest held click.
+private let trackpadNoPressure = 0.0
 private let releaseBookmarkMethod = "releaseBookmark"
 
 /// Tracks security-scoped URLs currently being accessed, keyed by path.
@@ -26,6 +34,8 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
   var editChannel: FlutterMethodChannel?
   var fileChannel: FlutterMethodChannel?
   private var hapticChannel: FlutterMethodChannel?
+  private var trackpadChannel: FlutterMethodChannel?
+  private var trackpadPressureMonitor: Any?
 
   /// Routes the red close button through the app's quit confirmation.
   ///
@@ -82,6 +92,7 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
 
     RegisterGeneratedPlugins(registry: flutterViewController)
     configureChannels(with: flutterViewController)
+    configureTrackpadPressure(with: flutterViewController)
   }
 
   private func configureChannels(with flutterViewController: FlutterViewController) {
@@ -199,6 +210,38 @@ class MainFlutterWindow: NSWindow, NSWindowDelegate {
         result(FlutterMethodNotImplemented)
       }
     }
+  }
+
+  /// Forwards Force Touch trackpad pressure to Flutter, whose desktop embedder
+  /// drops pointer pressure. Mouse-up also reports so a missed release never
+  /// leaves a stale pressure behind for the next (possibly plain mouse) click.
+  private func configureTrackpadPressure(with flutterViewController: FlutterViewController) {
+    trackpadChannel = FlutterMethodChannel(
+      name: trackpadChannelName,
+      binaryMessenger: flutterViewController.engine.binaryMessenger
+    )
+    trackpadPressureMonitor = NSEvent.addLocalMonitorForEvents(matching: [.pressure, .leftMouseUp]) {
+      [weak self] event in
+      if let self, event.window === self {
+        self.trackpadChannel?.invokeMethod(
+          trackpadPressureMethod,
+          arguments: MainFlutterWindow.trackpadPressure(for: event)
+        )
+      }
+      return event
+    }
+  }
+
+  /// Normalized 0...1 pressure of a held trackpad click, or nil when the
+  /// event is not a pressure event or the trackpad is no longer clicked.
+  static func trackpadPressure(for event: NSEvent) -> Double? {
+    guard event.type == .pressure, event.stage >= trackpadClickStage else {
+      return nil
+    }
+    if event.stage > trackpadClickStage {
+      return trackpadFullPressure
+    }
+    return min(max(Double(event.pressure), trackpadNoPressure), trackpadFullPressure)
   }
 
   static func editMethod(forKeyEquivalentEvent event: NSEvent) -> String? {

@@ -44,6 +44,12 @@ extension LayerProviderStorageExport on LayerProvider {
   }
 
   /// Renders the layer directly into [bounds] for cropped export snapshots.
+  ///
+  /// The canvas is clipped to [bounds], which also bound the layer's composite.
+  /// A recorder canvas is otherwise unclipped, so a layer without a full-res
+  /// cache (the norm once the display-res projection replaces it) would open
+  /// a full-canvas `saveLayer` however small the exported crop is — on every
+  /// autosave, for every layer.
   ui.Image toImageForStorageBounds(ui.Rect bounds) {
     final ui.Rect normalizedBounds = _normalizeStorageBounds(bounds);
     return renderCanvasImageSync(
@@ -51,7 +57,8 @@ extension LayerProviderStorageExport on LayerProvider {
       height: max(normalizedBounds.height.ceil(), AppMath.one),
       draw: (ui.Canvas canvas) {
         canvas.translate(-normalizedBounds.left, -normalizedBounds.top);
-        renderLayer(canvas);
+        canvas.clipRect(normalizedBounds);
+        renderLayer(canvas, compositeBounds: normalizedBounds);
       },
     );
   }

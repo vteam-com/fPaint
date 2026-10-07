@@ -1,4 +1,3 @@
-// ignore: fcheck_magic_numbers
 import 'dart:ui' show Color;
 
 /// Raw color palette and semantic color constants for consistent theming.
