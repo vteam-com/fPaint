@@ -16,7 +16,7 @@ import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/macos_bookmark_service.dart';
+import 'package:fpaint/providers/security_scoped_file_service.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/confirm_discard_dialog.dart';
@@ -320,7 +320,7 @@ Future<void> _openRecentFile(
     return;
   }
 
-  final bool success = await MacOsBookmarkService.withResolvedBookmark(
+  final bool success = await SecurityScopedFileService.withResolvedBookmark(
     bookmarkBase64: bookmark,
     fallbackPath: path,
     action: (String resolvedPath) => openFileFromPath(
@@ -357,7 +357,7 @@ Future<void> _addRecentAsLayer(
     return;
   }
 
-  await MacOsBookmarkService.withResolvedBookmark(
+  await SecurityScopedFileService.withResolvedBookmark(
     bookmarkBase64: bookmark,
     fallbackPath: path,
     action: (String resolvedPath) => addFileAsLayer(context: context, layers: layers, path: resolvedPath),
@@ -522,7 +522,7 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
     }
 
     try {
-      await MacOsBookmarkService.withResolvedBookmark(
+      await SecurityScopedFileService.withResolvedBookmark(
         bookmarkBase64: widget.bookmark,
         fallbackPath: widget.path,
         action: (String resolvedPath) async {
@@ -583,7 +583,7 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
     }
 
     try {
-      await MacOsBookmarkService.withResolvedBookmark(
+      await SecurityScopedFileService.withResolvedBookmark(
         bookmarkBase64: widget.bookmark,
         fallbackPath: widget.path,
         action: (String resolvedPath) async {

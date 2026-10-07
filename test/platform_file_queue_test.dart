@@ -14,4 +14,17 @@ void main() {
     expect(dequeueQueuedPlatformFile(), 'second.png');
     expect(dequeueQueuedPlatformFile(), isNull);
   });
+
+  test('platform file queue ignores a path that is already waiting', () {
+    while (dequeueQueuedPlatformFile() != null) {
+      // Clear any leftovers from earlier runs.
+    }
+
+    // At launch iOS delivers the same file as fileOpened and as the pending file.
+    queuePlatformFileForProcessing('opened.png');
+    queuePlatformFileForProcessing('opened.png');
+
+    expect(dequeueQueuedPlatformFile(), 'opened.png');
+    expect(dequeueQueuedPlatformFile(), isNull);
+  });
 }

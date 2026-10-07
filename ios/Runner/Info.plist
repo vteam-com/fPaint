@@ -92,7 +92,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
-	<false/>
+	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>fPaint opens images from your photo library so you can edit them.</string>
 	<key>UIApplicationSceneManifest</key>

@@ -16,6 +16,7 @@ import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/inherited_provider.dart' show InheritedControllerScope;
 import 'package:fpaint/providers/inherited_scope.dart';
+import 'package:fpaint/providers/security_scoped_file_service.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/recovery/draft_recovery_controller.dart';
@@ -44,7 +45,13 @@ bool _platformFileHandlingReady = false;
 
 /// Queues a file the platform asked the app to open (Finder, Explorer, share
 /// sheet), so several files opened at once are processed one at a time.
+///
+/// A path already waiting is not queued again: at launch the same file can
+/// arrive both as a `fileOpened` call and as the pending file.
 void queuePlatformFileForProcessing(String filePath) {
+  if (_queuedPlatformFilePaths.contains(filePath)) {
+    return;
+  }
   _queuedPlatformFilePaths.add(filePath);
 }
 
@@ -253,11 +260,18 @@ Future<void> _handleFileOpened(String filePath) async {
     }
   }
 
+  // An iOS document opened in place from the Files app comes with a bookmark;
+  // opening through it grants access, and keeping it lets Save write back.
+  final String? bookmark = await SecurityScopedFileService.openedFileBookmark(filePath);
   mainApp.appProvider.layers.clear();
-  final bool success = await openFileFromPath(
-    context: mainApp.navigatorKey.currentContext!,
-    layers: mainApp.appProvider.layers,
-    path: filePath,
+  final bool success = await SecurityScopedFileService.withResolvedBookmark<bool>(
+    bookmarkBase64: bookmark,
+    fallbackPath: filePath,
+    action: (String resolvedPath) => openFileFromPath(
+      context: mainApp.navigatorKey.currentContext!,
+      layers: mainApp.appProvider.layers,
+      path: resolvedPath,
+    ),
   );
 
   // Update the shell provider with the file name if successful
@@ -265,7 +279,7 @@ Future<void> _handleFileOpened(String filePath) async {
     mainApp.shellProvider.loadedFileName = filePath;
     await AppPreferences.of(
       mainApp.navigatorKey.currentContext!,
-    ).addRecentFile(filePath);
+    ).addRecentFile(filePath, bookmark: bookmark);
   }
 }
 

@@ -251,6 +251,92 @@ void main() {
     });
   });
 
+  group('saveFile in-place documents on iOS', () {
+    late Directory tempDirectory;
+    late String filePath;
+    late AppPreferences preferences;
+    late ShellProvider shellProvider;
+    late LayersProvider layers;
+    late TargetPlatform? previousPlatform;
+    late List<String> methodCalls;
+    late List<String> coordinatedSourcePaths;
+
+    Future<void> setUpPreferences({required bool withBookmark}) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        AppPreferences.keyKeepSaveBackups: true,
+        AppPreferences.keyRecentFiles: <String>[filePath],
+        AppPreferences.keyRecentFileBookmarks: <String>[if (withBookmark) _bookmarkValue else ''],
+      });
+      preferences = AppPreferences();
+      await preferences.getPref();
+    }
+
+    setUp(() async {
+      previousPlatform = debugDefaultTargetPlatformOverride;
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+      tempDirectory = await Directory.systemTemp.createTemp('fpaint_save_in_place_test');
+      filePath = '${tempDirectory.path}/drawing.ora';
+      methodCalls = <String>[];
+      coordinatedSourcePaths = <String>[];
+      shellProvider = ShellProvider()..loadedFileName = filePath;
+      layers = LayersProvider();
+
+      await File(filePath).writeAsBytes(<int>[7, 8, 9]);
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        _fileChannel,
+        (MethodCall methodCall) async {
+          methodCalls.add(methodCall.method);
+          switch (methodCall.method) {
+            case 'writeFileCoordinated':
+              final Map<Object?, Object?> arguments = methodCall.arguments as Map<Object?, Object?>;
+              final String sourcePath = arguments['sourcePath']! as String;
+              coordinatedSourcePaths.add(sourcePath);
+              await File(sourcePath).copy(arguments['targetPath']! as String);
+              return null;
+            case 'resolveBookmark':
+              return filePath;
+            default:
+              return null;
+          }
+        },
+      );
+    });
+
+    tearDown(() async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        _fileChannel,
+        null,
+      );
+      debugDefaultTargetPlatformOverride = previousPlatform;
+      if (await tempDirectory.exists()) {
+        await tempDirectory.delete(recursive: true);
+      }
+    });
+
+    test('writes back to the original through a coordinated write', () async {
+      await setUpPreferences(withBookmark: true);
+
+      await saveFile(shellProvider, layers, preferences);
+
+      expect(methodCalls, <String>['resolveBookmark', 'writeFileCoordinated', 'releaseBookmark']);
+      expect(await File(filePath).readAsBytes(), isNot(<int>[7, 8, 9]));
+      expect(await File(coordinatedSourcePaths.single).exists(), isFalse);
+      // The provider's single-file grant allows no sibling backups.
+      expect(await tempDirectory.list().toList(), hasLength(1));
+    });
+
+    test('saves app-local files without a bookmark directly', () async {
+      await setUpPreferences(withBookmark: false);
+
+      await saveFile(shellProvider, layers, preferences);
+
+      expect(methodCalls, isEmpty);
+      expect(await File(filePath).readAsBytes(), isNot(<int>[7, 8, 9]));
+    });
+  });
+
   group('saveFile backups', () {
     late Directory tempDirectory;
     late String filePath;
