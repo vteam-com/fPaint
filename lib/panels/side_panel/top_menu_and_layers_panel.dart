@@ -29,7 +29,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
           children: <Widget>[
             SidePanelHeader(
               title: l10n.sidePanelLayersSection,
-              trailing: const _LayerPickerToggle(),
+              trailing: const _LayersHeaderActions(),
             ),
             ListenableBuilder(
               listenable: layers.layerListStructureListenable,
@@ -233,6 +233,50 @@ class _ReorderableLayerListState extends State<_ReorderableLayerList> {
     return defaultTargetPlatform == TargetPlatform.linux ||
         defaultTargetPlatform == TargetPlatform.macOS ||
         defaultTargetPlatform == TargetPlatform.windows;
+  }
+}
+
+/// Layers header actions: the "All layers" scope toggle beside the
+/// pick-layer button.
+class _LayersHeaderActions extends StatelessWidget {
+  const _LayersHeaderActions();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        _AllLayersToggle(),
+        _LayerPickerToggle(),
+      ],
+    );
+  }
+}
+
+/// Sticky "All layers" scope toggle: when on, the wand samples the merged
+/// composite, transform/cut/copy act on every visible, unlocked layer, and
+/// the eraser erases them all.
+class _AllLayersToggle extends StatelessWidget {
+  const _AllLayersToggle();
+
+  @override
+  Widget build(BuildContext context) {
+    final AppProvider appProvider = AppProvider.of(context);
+    final AppLocalizations l10n = context.l10n;
+
+    return ListenableBuilder(
+      listenable: appProvider.toolOptionsRepaintListenable,
+      builder: (BuildContext _, Widget? _) {
+        final bool isOn = appProvider.selectorModel.allLayers;
+        return AppButtonIcon(
+          key: Keys.layersAllLayersToggleButton,
+          tooltip: tooltipWithShortcut(l10n.selectionAllLayers, primaryModifierShortcutLabel()),
+          icon: AppIcon.layers,
+          isSelected: isOn,
+          onPressed: () => appProvider.setSelectorAllLayers(!isOn),
+        );
+      },
+    );
   }
 }
 
