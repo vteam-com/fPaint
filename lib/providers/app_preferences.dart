@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
-import 'package:fpaint/providers/macos_bookmark_service.dart';
+import 'package:fpaint/providers/security_scoped_file_service.dart';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -235,9 +235,10 @@ class AppPreferences extends ChangeNotifier {
   /// Adds a file path to the recent files list.
   ///
   /// The path is moved to the front if already present. The list is capped at
-  /// [AppLimits.maxRecentFiles]. On macOS a security-scoped bookmark is created
-  /// and stored so the file can be re-opened across sessions.
-  Future<void> addRecentFile(String path) async {
+  /// [AppLimits.maxRecentFiles]. A security-scoped [bookmark] is stored so the
+  /// file can be re-opened and saved across sessions; when none is given, one
+  /// is created on macOS.
+  Future<void> addRecentFile(String path, {String? bookmark}) async {
     _recentFiles.remove(path);
     _recentFiles.insert(0, path);
     if (_recentFiles.length > AppLimits.maxRecentFiles) {
@@ -246,10 +247,10 @@ class AppPreferences extends ChangeNotifier {
     _pruneRecentFileBookmarks();
     final SharedPreferences prefs = await getPref();
     await prefs.setStringList(keyRecentFiles, _recentFiles);
-    // Store a security-scoped bookmark for macOS sandbox support.
-    final String? bookmark = await MacOsBookmarkService.createBookmark(path);
-    if (bookmark != null) {
-      _recentFileBookmarks[path] = bookmark;
+    // Store a security-scoped bookmark for sandboxed file access.
+    final String? resolvedBookmark = bookmark ?? await SecurityScopedFileService.createBookmark(path);
+    if (resolvedBookmark != null) {
+      _recentFileBookmarks[path] = resolvedBookmark;
     }
     await _persistRecentFileBookmarks(prefs);
     notifyListeners();

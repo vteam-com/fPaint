@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/providers/app_preferences.dart';
-import 'package:fpaint/providers/macos_bookmark_service.dart';
+import 'package:fpaint/providers/security_scoped_file_service.dart';
 import 'package:logging/logging.dart';
 
 final Logger _log = Logger(logNameSaveBackup);
@@ -19,15 +19,39 @@ Future<void> saveWithOptionalBackupAndResolvedFileAccess({
   required AppPreferences? preferences,
   required Future<void> Function(String) saveAction,
 }) async {
-  await MacOsBookmarkService.withResolvedBookmark<void>(
+  // An iOS document opened in place lives in a File Provider (iCloud Drive,
+  // Synology Drive, …). Only a coordinated write makes the provider sync it,
+  // and its single-file grant does not allow sibling backup files.
+  final bool isInPlaceDocument = SecurityScopedFileService.supportsInPlaceDocuments && bookmarkBase64 != null;
+  await SecurityScopedFileService.withResolvedBookmark<void>(
     bookmarkBase64: bookmarkBase64,
     fallbackPath: filePath,
-    action: (String resolvedFilePath) => saveWithOptionalBackup(
-      filePath: resolvedFilePath,
-      preferences: preferences,
-      saveAction: saveAction,
-    ),
+    action: (String resolvedFilePath) => isInPlaceDocument
+        ? _saveInPlaceDocument(filePath: resolvedFilePath, saveAction: saveAction)
+        : saveWithOptionalBackup(
+            filePath: resolvedFilePath,
+            preferences: preferences,
+            saveAction: saveAction,
+          ),
   );
+}
+
+/// Renders into a temporary file, then copies it over the in-place document
+/// at [filePath] through a coordinated write.
+Future<void> _saveInPlaceDocument({
+  required String filePath,
+  required Future<void> Function(String) saveAction,
+}) async {
+  final File temporaryFile = _buildTemporarySaveFile(File(filePath), DateTime.now());
+  try {
+    await saveAction(temporaryFile.path);
+    await SecurityScopedFileService.writeFileCoordinated(
+      targetPath: filePath,
+      sourcePath: temporaryFile.path,
+    );
+  } finally {
+    await _deleteTemporarySaveFileIfPresent(temporaryFile);
+  }
 }
 
 /// Saves [filePath], optionally rotating the existing file into a backup first.
@@ -83,7 +107,7 @@ Future<bool> _trySaveWithSecurityScopedBackupReplacement({
   required File targetFile,
   required Future<void> Function(String) saveAction,
 }) async {
-  if (!MacOsBookmarkService.supportsReplaceFileWithBackup) {
+  if (!SecurityScopedFileService.supportsReplaceFileWithBackup) {
     return false;
   }
 
@@ -91,7 +115,7 @@ Future<bool> _trySaveWithSecurityScopedBackupReplacement({
   final File temporaryFile = _buildTemporarySaveFile(targetFile, timestamp);
   try {
     await saveAction(temporaryFile.path);
-    return await MacOsBookmarkService.replaceFileWithBackup(
+    return await SecurityScopedFileService.replaceFileWithBackup(
       targetPath: targetFile.path,
       replacementPath: temporaryFile.path,
       backupFileName: _buildBackupFileName(targetFile, timestamp),

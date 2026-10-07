@@ -6,7 +6,7 @@ import 'package:fpaint/files/save_file_format.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/layers_provider.dart';
-import 'package:fpaint/providers/macos_bookmark_service.dart';
+import 'package:fpaint/providers/security_scoped_file_service.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:logging/logging.dart';
 
@@ -94,7 +94,7 @@ Future<void> _saveWithResolvedFileAccess({
   required Future<void> Function(String) saveAction,
 }) async {
   final String? existingBookmark = preferences.getBookmark(fileName);
-  final String? bookmark = existingBookmark ?? await MacOsBookmarkService.createBookmark(fileName);
+  final String? bookmark = existingBookmark ?? await SecurityScopedFileService.createBookmark(fileName);
 
   await saveWithOptionalBackupAndResolvedFileAccess(
     filePath: fileName,

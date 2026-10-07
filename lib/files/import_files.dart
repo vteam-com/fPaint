@@ -17,6 +17,7 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/security_scoped_file_service.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/confirm_discard_dialog.dart';
 import 'package:fpaint/widgets/material_free.dart';
@@ -158,6 +159,20 @@ Future<void> onFileOpen(BuildContext context) async {
     return;
   }
 
+  if (!context.mounted) {
+    return;
+  }
+
+  if (SecurityScopedFileService.supportsInPlaceDocuments) {
+    await _openInPlaceDocument(
+      context: context,
+      shellProvider: shellProvider,
+      layers: layers,
+      preferences: preferences,
+    );
+    return;
+  }
+
   try {
     final PlatformFile? result = await FilePicker.pickFile(
       dialogTitle: l10n.fpaintLoadImage,
@@ -218,6 +233,43 @@ Future<void> onFileOpen(BuildContext context) async {
   } catch (e) {
     // Handle any errors that occur during file picking/loading
     _log.severe('Error opening file', e);
+  }
+}
+
+/// Picks a document in place (iOS) and opens it.
+///
+/// The `file_picker` plugin imports a private copy of the picked file, so
+/// saving would never reach the original in iCloud Drive, Synology Drive or
+/// any other File Provider. Opening in place keeps the original path, and its
+/// bookmark lets Save write back to it.
+Future<void> _openInPlaceDocument({
+  required BuildContext context,
+  required ShellProvider shellProvider,
+  required LayersProvider layers,
+  required AppPreferences preferences,
+}) async {
+  try {
+    final InPlaceDocument? document = await SecurityScopedFileService.pickDocumentInPlace();
+    if (document == null || !context.mounted) {
+      return;
+    }
+    shellProvider.loadedFileName = document.path;
+    await SecurityScopedFileService.withResolvedBookmark<bool>(
+      bookmarkBase64: document.bookmark,
+      fallbackPath: document.path,
+      action: (String resolvedPath) => openFileFromPath(
+        context: context,
+        layers: layers,
+        path: resolvedPath,
+        preferences: preferences,
+      ),
+    );
+    shellProvider.loadedFileName = document.path;
+    await preferences.addRecentFile(document.path, bookmark: document.bookmark);
+    layers.clearHasChanged();
+    shellProvider.requestCanvasFit();
+  } catch (e) {
+    _log.severe('Error opening file in place', e);
   }
 }
 

@@ -8,7 +8,7 @@ import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/files/save_backup.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/layers_provider.dart';
-import 'package:fpaint/providers/macos_bookmark_service.dart';
+import 'package:fpaint/providers/security_scoped_file_service.dart';
 
 /// Saves the current painter content as a PNG image file.
 Future<void> saveAsPng(
@@ -99,7 +99,7 @@ Future<void> _exportWithFilePicker({
   if (filePath != null && filePath.isNotEmpty) {
     final String selectedFilePath = resolveRecentFilePath == null ? filePath : resolveRecentFilePath(filePath);
     final String? bookmark =
-        preferences?.getBookmark(selectedFilePath) ?? await MacOsBookmarkService.createBookmark(selectedFilePath);
+        preferences?.getBookmark(selectedFilePath) ?? await SecurityScopedFileService.createBookmark(selectedFilePath);
 
     await saveWithOptionalBackupAndResolvedFileAccess(
       filePath: selectedFilePath,
