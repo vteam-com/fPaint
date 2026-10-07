@@ -55,6 +55,33 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     return true;
   }
 
+  /// Whether a stroke of [action] erases every visible, unlocked layer: the
+  /// eraser (or the pen's eraser end, [isForced]) under the sticky "All
+  /// layers" scope. An armed effect brush still wins over a non-forced stroke.
+  bool _isCrossLayerEraserStroke(
+    AppProvider appProvider,
+    ActionType action, {
+    bool isForced = false,
+  }) {
+    return action == ActionType.eraser &&
+        (isForced || !appProvider.effectBrushModel.isArmed) &&
+        appProvider.isCrossLayerEraserScope;
+  }
+
+  /// Returns whether a stroke of [action] may start. A cross-layer erase only
+  /// needs some visible, unlocked layer; when none exists the selected layer
+  /// is hidden or locked too, so its message explains why nothing happens.
+  bool _canStartDrawing(
+    AppProvider appProvider,
+    ActionType action, {
+    bool isForced = false,
+  }) {
+    if (_isCrossLayerEraserStroke(appProvider, action, isForced: isForced) && appProvider.hasCrossLayerEditTargets) {
+      return true;
+    }
+    return _canStartDrawingOnSelectedLayer(appProvider);
+  }
+
   void _clearSelectionTapTracking() {
     _lastSelectionTapTimestamp = null;
     _lastSelectionTapCanvasPosition = null;
@@ -170,6 +197,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   void _cancelActiveTouchInteraction(AppProvider appProvider) {
     appProvider.layers.selectedLayer.isUserDrawing = false;
     appProvider.layers.selectedLayer.clearStrokePreview();
+    appProvider.endCrossLayerEraserStroke();
     appProvider.hideDrawingToolPreview();
     appProvider.hideWandToleranceHud();
     appProvider.hideFillTolerancePreview();
@@ -208,6 +236,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     // Pair with beginStrokePreview: release the frozen baseline (no-op for tools
     // that never captured one, e.g. smudge/blur, which use the live preview).
     appProvider.layers.selectedLayer.clearStrokePreview();
+    appProvider.endCrossLayerEraserStroke();
     final bool isSelectionActive = _isSelectionGesture(appProvider);
 
     if (_activePointerId == event.pointer) {
@@ -320,6 +349,14 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     }
 
     if ((event.buttons & kPrimaryButton) != 0 && _activePointerId == event.pointer) {
+      // An "All layers" erase (eraser tool or pen eraser end) grows one stroke
+      // shared by every target layer, whichever tool dispatch follows.
+      if (appProvider.crossLayerEraser.isActive) {
+        _updateDrawingToolPreview(appProvider, event.localPosition);
+        appProvider.extendCrossLayerEraserStroke(adjustedPosition);
+        return;
+      }
+
       // The Surface pen eraser (invertedStylus) extends its erase stroke here
       // regardless of the selected tool. It must not fall through into the
       // selection / fill / pixel-brush / armed-effect dispatch below.
@@ -418,7 +455,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     if (isPenEraser) {
       _activePointerId = event.pointer;
       _updateDrawingToolPreview(appProvider, event.localPosition);
-      if (_canStartDrawingOnSelectedLayer(appProvider)) {
+      if (_canStartDrawing(appProvider, ActionType.eraser, isForced: true)) {
         _startDrawingPointer(appProvider, adjustedPosition, forcedAction: ActionType.eraser);
       }
       return;
@@ -457,7 +494,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
 
     _updateDrawingToolPreview(appProvider, event.localPosition);
 
-    if (!_canStartDrawingOnSelectedLayer(appProvider)) {
+    if (!_canStartDrawing(appProvider, appProvider.selectedAction)) {
       return;
     }
 
@@ -719,6 +756,15 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     bool awaitsPressure = false,
   }) {
     final ActionType action = forcedAction ?? appProvider.selectedAction;
+
+    // Checked before flagging the selected layer as drawing: under "All
+    // layers" it may be locked and untouched, and each target layer manages
+    // its own drawing flag and stroke preview instead.
+    if (_isCrossLayerEraserStroke(appProvider, action, isForced: forcedAction != null)) {
+      appProvider.startCrossLayerEraserStroke(adjustedPosition);
+      return;
+    }
+
     appProvider.layers.selectedLayer.isUserDrawing = true;
 
     // An armed effect is a brush too, but a forced (pen-eraser) stroke always
