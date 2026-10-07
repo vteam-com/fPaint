@@ -9,6 +9,8 @@ import 'package:fpaint/providers/shell_provider.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../helpers/painting_test_helpers.dart';
+
 /// Enough layers that the list overflows [_panelSize] several times over.
 const int _layerCount = 30;
 
@@ -74,6 +76,18 @@ void main() {
     final Rect rowRect = tester.getRect(row);
     return rowRect.top >= viewport.top && rowRect.bottom <= viewport.bottom;
   }
+
+  testWidgets('header All layers toggle flips the sticky scope', (WidgetTester tester) async {
+    await pumpPanel(tester);
+    expect(find.byKey(Keys.layerPickerToggleButton), findsOneWidget);
+
+    await tapByKey(tester, Keys.layersAllLayersToggleButton);
+    expect(appProvider.selectorModel.allLayers, isTrue);
+
+    await tapByKey(tester, Keys.layersAllLayersToggleButton);
+    expect(appProvider.selectorModel.allLayers, isFalse);
+    await settle(tester);
+  });
 
   testWidgets('scrolls an off-screen selected layer into view', (WidgetTester tester) async {
     for (int i = 1; i < _layerCount; i++) {

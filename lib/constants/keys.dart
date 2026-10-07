@@ -23,6 +23,7 @@ class Keys {
   static const Key brushSizeEdgeSliderReadout = Key('brush-size-edge-slider-readout');
   static const String gradientHandleKeyPrefixText = 'gradient_handle_';
   static const Key layerAddAboveButton = Key('layer-add-above-button');
+  static const Key layersAllLayersToggleButton = Key('layers-all-layers-toggle');
   static const Key layerPickerToggleButton = Key('layer-picker-toggle-button');
   static const Key layerModifyButton = Key('layer-modify-button');
   static const Key layerToggleLockButton = Key('layer-toggle-lock-button');
@@ -71,7 +72,6 @@ class Keys {
   static const Key toolSelectorCancel = Key('tool-selector-cancel');
   static const Key toolSelectorCopy = Key('tool-selector-copy');
   static const Key toolSelectorCut = Key('tool-selector-cut');
-  static const Key toolSelectorAllLayers = Key('tool-selector-all-layers');
 
   static const Key toolPanelTopColorsToggle = Key('tool-panel-top-colors-toggle');
   static const Key toolPanelFillColor = Key('toolPanelFillColor');

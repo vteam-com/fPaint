@@ -137,20 +137,6 @@ Widget buildSelectionSubToolbar({
         });
       },
     ),
-    // Sticky scope toggle: with "All layers" on, the wand samples the merged
-    // composite and transform/cut/copy act on every visible, unlocked layer.
-    buildToolbarIconButton(
-      key: Keys.toolSelectorAllLayers,
-      tooltip: tooltipWithShortcut(l10n.selectionAllLayers, primaryModifierShortcutLabel()),
-      icon: AppIcon.layers,
-      interactionProfile: interactionProfile,
-      isSelected: appProvider.selectorModel.allLayers,
-      onPressed: () {
-        Future<void>.microtask(
-          () => appProvider.setSelectorAllLayers(!appProvider.selectorModel.allLayers),
-        );
-      },
-    ),
   ];
 
   if (hasVisibleSelection) {
