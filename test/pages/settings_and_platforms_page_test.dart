@@ -10,6 +10,31 @@ import 'package:material_ui/material_ui.dart';
 import '../helpers/recovery_test_helpers.dart';
 
 void main() {
+  testWidgets('SettingsPage toggles trackpad pressure on macOS', (WidgetTester tester) async {
+    final AppPreferences preferences = await createRecoveryTestPreferences();
+
+    await tester.pumpWidget(
+      InheritedControllerScope<AppPreferences>(
+        controller: preferences,
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: SettingsPage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(preferences.trackpadPressure, isTrue);
+    await tester.tap(find.text('Trackpad pressure'));
+    await tester.pumpAndSettle();
+    expect(preferences.trackpadPressure, isFalse);
+
+    await tester.tap(find.byType(AppToggleSwitch).at(1));
+    await tester.pumpAndSettle();
+    expect(preferences.trackpadPressure, isTrue);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
   testWidgets('SettingsPage updates preferences and opens shortcuts help', (WidgetTester tester) async {
     final AppPreferences preferences = await createRecoveryTestPreferences();
 

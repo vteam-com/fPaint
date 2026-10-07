@@ -593,7 +593,7 @@ void main() {
       expect(color, isNotNull);
     });
 
-    test('uses cached image snapshot when requested', () async {
+    test('samples the live layers, not a stale cached composite', () async {
       final ui.PictureRecorder recorder = ui.PictureRecorder();
       final Canvas canvas = Canvas(recorder);
       canvas.drawRect(
@@ -611,24 +611,61 @@ void main() {
         _cachedImageSampleSize,
       );
 
-      final Color? color = await layersProvider.getColorAtOffset(
-        _cachedImageSampleOffset,
-        useCachedImage: true,
-      );
+      final Color? color = await layersProvider.getColorAtOffset(_cachedImageSampleOffset);
 
       expect(color, isNotNull);
-      expect(color!.toARGB32(), Colors.red.toARGB32());
+      expect(color!.toARGB32(), Colors.white.toARGB32());
     });
   });
 
-  group('findTopmostOpaqueLayerAt', () {
+  group('captureCompositeRegion', () {
+    test('renders only the requested region of the visible composite', () async {
+      final LayerProvider topLayer = layersProvider.addTop(name: 'Top');
+      topLayer.actionStack.add(
+        RegionAction(
+          positions: <Offset>[],
+          path: ui.Path()..addRect(const Rect.fromLTWH(0, 0, 10, 10)),
+          fillColor: Colors.red,
+        ),
+      );
+
+      final ui.Image region = await layersProvider.captureCompositeRegion(const Rect.fromLTWH(5, 5, 11, 11));
+      try {
+        expect(region.width, 11);
+        expect(region.height, 11);
+        final ByteData? bytes = await region.toByteData(format: ui.ImageByteFormat.rawRgba);
+        // Top-left of the region is canvas (5, 5): inside the red square.
+        expect(bytes!.getUint8(0), (Colors.red.r * AppLimits.rgbChannelMax).round());
+      } finally {
+        region.dispose();
+      }
+    });
+  });
+
+  group('pickPixelAt', () {
     test('returns null for an offset outside the canvas', () async {
-      final LayerProvider? owner = await layersProvider.findTopmostOpaqueLayerAt(const Offset(-1, -1));
-      expect(owner, isNull);
+      final LayerPixelPick pick = await layersProvider.pickPixelAt(const Offset(-1, -1));
+      expect(pick.owningLayer, isNull);
+      expect(pick.color, isNull);
+    });
+
+    test('returns the composited color of the picked pixel', () async {
+      final LayerProvider topLayer = layersProvider.addTop(name: 'Top');
+      topLayer.actionStack.add(
+        RegionAction(
+          positions: <Offset>[],
+          path: ui.Path()..addRect(const Rect.fromLTWH(0, 0, 10, 10)),
+          fillColor: Colors.red,
+        ),
+      );
+
+      final LayerPixelPick pick = await layersProvider.pickPixelAt(const Offset(5, 5));
+      expect(pick.owningLayer, topLayer);
+      expect(pick.color!.toARGB32(), Colors.red.toARGB32());
     });
 
     test('returns the opaque background layer when nothing is stacked above it', () async {
-      final LayerProvider? owner = await layersProvider.findTopmostOpaqueLayerAt(const Offset(10, 10));
+      final LayerProvider? owner = (await layersProvider.pickPixelAt(const Offset(10, 10))).owningLayer;
       expect(owner, layersProvider.get(0));
     });
 
@@ -642,10 +679,10 @@ void main() {
         ),
       );
 
-      final LayerProvider? ownerInsideRegion = await layersProvider.findTopmostOpaqueLayerAt(const Offset(5, 5));
+      final LayerProvider? ownerInsideRegion = (await layersProvider.pickPixelAt(const Offset(5, 5))).owningLayer;
       expect(ownerInsideRegion, topLayer);
 
-      final LayerProvider? ownerOutsideRegion = await layersProvider.findTopmostOpaqueLayerAt(const Offset(50, 50));
+      final LayerProvider? ownerOutsideRegion = (await layersProvider.pickPixelAt(const Offset(50, 50))).owningLayer;
       expect(ownerOutsideRegion, layersProvider.get(1));
     });
 
@@ -674,11 +711,11 @@ void main() {
       );
 
       // Where the ink is actually drawn it owns the pixel.
-      expect(await layersProvider.findTopmostOpaqueLayerAt(const Offset(5, 5)), inkLayer);
+      expect((await layersProvider.pickPixelAt(const Offset(5, 5))).owningLayer, inkLayer);
       // Where it multiplies to nothing, the colour beneath owns the pixel.
-      expect(await layersProvider.findTopmostOpaqueLayerAt(const Offset(45, 45)), colorLayer);
+      expect((await layersProvider.pickPixelAt(const Offset(45, 45))).owningLayer, colorLayer);
       // And bare paper still resolves to the background layer.
-      expect(await layersProvider.findTopmostOpaqueLayerAt(const Offset(90, 90)), layersProvider.get(2));
+      expect((await layersProvider.pickPixelAt(const Offset(90, 90))).owningLayer, layersProvider.get(2));
     });
 
     test('skips a hidden layer even though it is painted at that offset', () async {
@@ -692,7 +729,7 @@ void main() {
       );
       hiddenTopLayer.isVisible = false;
 
-      final LayerProvider? owner = await layersProvider.findTopmostOpaqueLayerAt(const Offset(5, 5));
+      final LayerProvider? owner = (await layersProvider.pickPixelAt(const Offset(5, 5))).owningLayer;
       expect(owner, layersProvider.get(1));
     });
   });

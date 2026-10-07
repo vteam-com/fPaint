@@ -323,6 +323,8 @@
       "count": {}
     }
   },
+  "trackpadPressureSubtitle": "Press harder on a Force Touch trackpad to paint wider Brush strokes. The Pencil keeps a constant width.",
+  "trackpadPressureTitle": "Trackpad pressure",
   "transform": "Transform",
   "translate": "Translate",
   "unsavedChanges": "Unsaved Changes",

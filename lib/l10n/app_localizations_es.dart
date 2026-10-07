@@ -722,6 +722,13 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get trackpadPressureSubtitle =>
+      'Presione mas fuerte en un trackpad Force Touch para pintar trazos de Pincel mas anchos. El Lápiz mantiene un ancho constante.';
+
+  @override
+  String get trackpadPressureTitle => 'Presion del trackpad';
+
+  @override
   String get transform => 'Transformar';
 
   @override

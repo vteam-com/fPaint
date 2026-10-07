@@ -33,6 +33,10 @@ class AppInteraction {
   static const Duration viewportRotationHudLinger = Duration(milliseconds: 900);
 
   static const Duration selectionDoubleTapTimeout = Duration(milliseconds: 300);
+
+  /// Estimated jumps the layers panel makes toward an off-screen selected row
+  /// before giving up; the lazy list only builds rows near the viewport.
+  static const int layerRevealMaxJumps = 3;
   static const double selectionDoubleTapSlop = 24.0;
 
   /// Horizontal screen pixels dragged per 1 unit of brush size during the
@@ -76,6 +80,12 @@ class AppInteraction {
   /// full pen pressure. Above 1 so the set brush size sits mid-range: a light
   /// touch paints thinner than it and a heavy press paints thicker.
   static const double brushPressureMaxWidthFactor = 2.0;
+
+  /// Exponent applied to Force Touch trackpad pressure (0..1 between the click
+  /// and the force-click thresholds) before it drives the Brush width. Below 1
+  /// so an ordinary held click already paints near the set brush size instead
+  /// of a hairline; pressing harder still widens the stroke.
+  static const double trackpadPressureCurveExponent = 0.5;
 
   /// Horizontal distance the finger/pointer must travel away from the brush
   /// size edge slider to halve its sensitivity (Procreate-style fine scrub).

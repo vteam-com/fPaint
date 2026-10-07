@@ -316,6 +316,8 @@
       "count": {}
     }
   },
+  "trackpadPressureSubtitle": "Appuyez plus fort sur un trackpad Force Touch pour peindre des traits de Pinceau plus larges. Le Crayon garde une largeur constante.",
+  "trackpadPressureTitle": "Pression du trackpad",
   "transform": "Transformer",
   "translate": "Deplacer",
   "unsavedChanges": "Modifications non enregistrees",

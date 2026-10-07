@@ -16,20 +16,8 @@ extension _CanvasGestureHandlerStateEyedropperMethods on _CanvasGestureHandlerSt
     }
 
     final Offset canvasPosition = appProvider.toCanvas(screenPosition);
-    unawaited(
-      appProvider.layers.getColorAtOffset(canvasPosition, useCachedImage: true).then<void>((Color? color) {
-        if (color != null) {
-          if (isBrushDrop) {
-            appProvider.brushColor = color;
-          } else {
-            appProvider.fillColor = color;
-          }
-          appProvider.update();
-        }
-      }),
-    );
+    unawaited(_adoptEyeDropColor(appProvider, canvasPosition, isBrushDrop: isBrushDrop));
 
-    unawaited(appProvider.layers.capturePainterToImage().then<void>((_) => appProvider.repaintMainView()));
     return true;
   }
 
@@ -47,20 +35,28 @@ extension _CanvasGestureHandlerStateEyedropperMethods on _CanvasGestureHandlerSt
     }
 
     final Offset canvasPosition = appProvider.toCanvas(screenPosition);
-    unawaited(
-      appProvider.layers.getColorAtOffset(canvasPosition, useCachedImage: true).then<void>((Color? color) {
-        if (color != null) {
-          if (isBrushDrop) {
-            appProvider.brushColor = color;
-          } else {
-            appProvider.fillColor = color;
-          }
-          appProvider.update();
-        }
-      }),
-    );
+    unawaited(_adoptEyeDropColor(appProvider, canvasPosition, isBrushDrop: isBrushDrop));
 
     return true;
+  }
+
+  /// Samples the composited color at [canvasPosition] and adopts it as the
+  /// brush color, or as the fill color when [isBrushDrop] is false.
+  Future<void> _adoptEyeDropColor(
+    AppProvider appProvider,
+    ui.Offset canvasPosition, {
+    required bool isBrushDrop,
+  }) async {
+    final Color? color = await appProvider.layers.getColorAtOffset(canvasPosition);
+    if (color == null) {
+      return;
+    }
+    if (isBrushDrop) {
+      appProvider.brushColor = color;
+    } else {
+      appProvider.fillColor = color;
+    }
+    appProvider.update();
   }
 
   /// Starts a flood fill at [adjustedPosition], honouring an active selection,

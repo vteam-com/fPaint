@@ -42,6 +42,10 @@ void main() {
       expect(preferences.keepSaveBackups, AppDefaults.keepSaveBackups);
     });
 
+    test('trackpadPressure defaults to on', () {
+      expect(preferences.trackpadPressure, isTrue);
+    });
+
     test('languageCode defaults to null', () {
       expect(preferences.languageCode, isNull);
     });
@@ -133,6 +137,18 @@ void main() {
       await preferences.setKeepSaveBackups(true);
       final SharedPreferences prefs = await preferences.getPref();
       expect(prefs.getBool(AppPreferences.keyKeepSaveBackups), isTrue);
+    });
+  });
+
+  group('setTrackpadPressure', () {
+    test('updates, notifies, and persists trackpadPressure', () async {
+      int notifyCount = 0;
+      preferences.addListener(() => notifyCount++);
+      await preferences.setTrackpadPressure(false);
+      expect(preferences.trackpadPressure, isFalse);
+      expect(notifyCount, 1);
+      final SharedPreferences prefs = await preferences.getPref();
+      expect(prefs.getBool(AppPreferences.keyTrackpadPressure), isFalse);
     });
   });
 
@@ -249,6 +265,15 @@ void main() {
       final AppPreferences prefs2 = AppPreferences();
       await prefs2.getPref();
       expect(prefs2.keepSaveBackups, isTrue);
+    });
+
+    test('loads saved trackpadPressure on re-init', () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        AppPreferences.keyTrackpadPressure: false,
+      });
+      final AppPreferences prefs2 = AppPreferences();
+      await prefs2.getPref();
+      expect(prefs2.trackpadPressure, isFalse);
     });
 
     test('loads saved recentFiles on re-init', () async {

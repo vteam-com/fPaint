@@ -7,16 +7,21 @@ import 'package:fpaint/widgets/magnifier_loupe.dart';
 import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
 import 'package:material_ui/material_ui.dart';
 
-// Fake that overrides only the members used by the widget under test.
+// Fake that overrides only the members used by the widget under test. It
+// deliberately does not answer [LayersProvider.capturePainterToImage]: the
+// eyedropper must never render or read back a full-canvas composite.
 class FakeLayersProvider extends Fake implements LayersProvider {
-  @override
-  ui.Image? cachedImage;
+  /// The regions the loupe asked to magnify, in call order.
+  final List<Rect> capturedRegions = <Rect>[];
 
   @override
-  Future<Color?> getColorAtOffset(
-    Offset offset, {
-    bool useCachedImage = false,
-  }) async {
+  Future<ui.Image> captureCompositeRegion(Rect region) async {
+    capturedRegions.add(region);
+    return createMockImageSync(region.width.toInt(), region.height.toInt());
+  }
+
+  @override
+  Future<Color?> getColorAtOffset(Offset offset) async {
     return Colors.red;
   }
 }
@@ -29,31 +34,7 @@ void main() {
       fakeLayersProvider = FakeLayersProvider();
     });
 
-    testWidgets('renders nothing when cachedImage is null', (WidgetTester tester) async {
-      fakeLayersProvider.cachedImage = null;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: MagnifyingEyeDropper(
-            layers: fakeLayersProvider,
-            pointerPosition: const Offset(100, 100),
-            pixelPosition: const Offset(50, 50),
-          ),
-        ),
-      );
-
-      expect(find.byType(MagnifyingEyeDropper), findsOneWidget);
-      // Should render as SizedBox when no image
-      expect(find.byType(SizedBox), findsOneWidget);
-    });
-
-    testWidgets('renders magnifying eye dropper when cachedImage exists', (WidgetTester tester) async {
-      // Create a mock image
-      final ui.Image mockImage = await createMockImage(100, 100);
-      fakeLayersProvider.cachedImage = mockImage;
-
+    testWidgets('magnifies only the region around the sampled pixel', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -73,14 +54,11 @@ void main() {
       // Wait for async color update
       await tester.pump();
 
-      expect(find.byType(MagnifyingEyeDropper), findsOneWidget);
-      expect(find.byType(CustomPaint), findsWidgets);
+      expect(find.byType(MagnifierLoupe), findsOneWidget);
+      expect(fakeLayersProvider.capturedRegions, <Rect>[MagnifierLoupe.regionAround(const Offset(50, 50))]);
     });
 
     testWidgets('positions widget centered on pointer position', (WidgetTester tester) async {
-      final ui.Image mockImage = await createMockImage(100, 100);
-      fakeLayersProvider.cachedImage = mockImage;
-
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -110,9 +88,6 @@ void main() {
     });
 
     testWidgets('displays magnified image in custom paint', (WidgetTester tester) async {
-      final ui.Image mockImage = await createMockImage(100, 100);
-      fakeLayersProvider.cachedImage = mockImage;
-
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -142,9 +117,6 @@ void main() {
     });
 
     testWidgets('shows selected color in dashed rectangle', (WidgetTester tester) async {
-      final ui.Image mockImage = await createMockImage(100, 100);
-      fakeLayersProvider.cachedImage = mockImage;
-
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -208,4 +180,12 @@ Future<ui.Image> createMockImage(int width, int height) async {
 
   final ui.Picture picture = recorder.endRecording();
   return picture.toImage(width, height);
+}
+
+// A synchronously rendered image, safe to create inside the fake-async zone.
+ui.Image createMockImageSync(int width, int height) {
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas canvas = ui.Canvas(recorder);
+  canvas.drawRect(Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()), ui.Paint()..color = Colors.blue);
+  return recorder.endRecording().toImageSync(width, height);
 }

@@ -228,8 +228,13 @@ extension LayerDisplayCache on LayerProvider {
   /// When `_cachedImage` is already set this is a no-op. Otherwise the layer is
   /// rendered once and the result cached, so subsequent [renderLayer] calls take
   /// the fast [Canvas.drawImage] path rather than replaying the full action stack.
+  ///
+  /// Past [AppLimits.fullResolutionCacheMaxPixels] nothing is primed, matching
+  /// [updateThumbnail]: a large canvas deliberately keeps no full-res cache per
+  /// layer, and priming every visible layer (composite capture, thumbnails,
+  /// cross-layer lifts) held gigabytes and crashed iPad on memory.
   Future<void> ensureCachePrimed() async {
-    if (_cachedImage != null) {
+    if (_cachedImage != null || size.width * size.height > AppLimits.fullResolutionCacheMaxPixels) {
       return;
     }
     _cachedImage = await renderCanvasImage(

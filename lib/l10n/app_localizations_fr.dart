@@ -726,6 +726,13 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get trackpadPressureSubtitle =>
+      'Appuyez plus fort sur un trackpad Force Touch pour peindre des traits de Pinceau plus larges. Le Crayon garde une largeur constante.';
+
+  @override
+  String get trackpadPressureTitle => 'Pression du trackpad';
+
+  @override
   String get transform => 'Transformer';
 
   @override

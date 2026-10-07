@@ -6,6 +6,7 @@ import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/files/quit_confirmation.dart';
 import 'package:fpaint/files/save.dart';
 import 'package:fpaint/helpers/log_helper.dart';
+import 'package:fpaint/helpers/trackpad_pressure.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/main_screen.dart';
@@ -86,6 +87,7 @@ Future<void> main() async {
     return null;
   });
   _editChannel.setMethodCallHandler(handlePlatformEditMethodCall);
+  TrackpadPressure.instance.listen();
 
   runApp(mainApp);
 

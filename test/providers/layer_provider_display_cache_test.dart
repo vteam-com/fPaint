@@ -297,6 +297,18 @@ void main() {
       expect(layer.size, _canvasSize);
     });
 
+    test('ensureCachePrimed keeps no full-res cache past the pixel limit', () async {
+      // Just over the limit: priming every layer of a canvas this size is what
+      // held gigabytes on iPad, so the layer must stay on the replay path.
+      final LayerProvider layer = _layer(size: const Size(5000, 4000));
+      layer.actionStack.add(_imageAction(await _solid(const Color(0xFF00FF00))));
+
+      await layer.ensureCachePrimed();
+
+      expect(layer.size.width * layer.size.height, greaterThan(AppLimits.fullResolutionCacheMaxPixels));
+      expect(layer.cachedImage, isNull);
+    });
+
     test('buildDisplayCache caps the projection scale for very large canvases', () async {
       // longestSide (3000) * requiredScale (1.0) exceeds the display-cache side
       // budget, so the builder must clamp instead of caching at full res.

@@ -1,6 +1,9 @@
 part of 'canvas_gesture_handler.dart';
 
 extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
+  /// Whether Brush strokes follow Force Touch trackpad pressure (Settings).
+  bool get _trackpadPressureEnabled => AppPreferences.of(context).trackpadPressure;
+
   /// Reads the current keyboard modifier state and temporarily overrides
   /// [selectorModel.math] for the upcoming selection gesture:
   ///   Shift + Option/Alt -> intersect
@@ -303,18 +306,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
         appProvider.eyeDropPositionForFill = event.localPosition;
       }
       if (appProvider.isEyeDropShortcutActive && (event.buttons & kPrimaryButton) != 0) {
-        unawaited(
-          appProvider.layers.getColorAtOffset(adjustedPosition, useCachedImage: true).then<void>((Color? color) {
-            if (color != null) {
-              if (isBrushDrop) {
-                appProvider.brushColor = color;
-              } else {
-                appProvider.fillColor = color;
-              }
-              appProvider.update();
-            }
-          }),
-        );
+        unawaited(_adoptEyeDropColor(appProvider, adjustedPosition, isBrushDrop: isBrushDrop));
       }
       appProvider.repaintMainView();
       return;
@@ -373,7 +365,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       } else if (appProvider.selectedAction == ActionType.brush) {
         appProvider.layers.selectedLayer.lastActionAppendPosition(
           position: adjustedPosition,
-          pressure: stylusPressure(event),
+          pressure: brushPointerPressure(event, trackpadPressureEnabled: _trackpadPressureEnabled),
         );
         appProvider.layers.repaintCanvas();
       } else {
@@ -479,7 +471,13 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       return;
     }
 
-    _startDrawingPointer(appProvider, adjustedPosition, pressure: stylusPressure(event));
+    final bool trackpadPressureEnabled = _trackpadPressureEnabled;
+    _startDrawingPointer(
+      appProvider,
+      adjustedPosition,
+      pressure: brushPointerPressure(event, trackpadPressureEnabled: trackpadPressureEnabled),
+      awaitsPressure: usesTrackpadPressure(event, enabled: trackpadPressureEnabled),
+    );
   }
 
   /// Begins a selection at [adjustedPosition], applying modifier math and
@@ -633,11 +631,12 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     AppProvider appProvider,
     ui.Offset canvasPosition,
   ) async {
-    final LayerProvider? owningLayer = await appProvider.layers.findTopmostOpaqueLayerAt(canvasPosition);
+    final LayerPixelPick pick = await appProvider.layers.pickPixelAt(canvasPosition);
     if (!mounted) {
       return;
     }
 
+    final LayerProvider? owningLayer = pick.owningLayer;
     if (owningLayer == null) {
       context.showSnackBarMessage(context.l10n.layerPickerNoLayerFound);
       return;
@@ -646,29 +645,17 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     appProvider.layers.selectedLayerIndex = appProvider.layers.getLayerIndex(owningLayer);
     HapticFeedback.selectionClick();
     context.showSnackBarMessage(context.l10n.layerPickerSelected(owningLayer.name));
-    appProvider.update();
 
     // The pick doubles as an eyedrop: the pixel that identified the layer also
     // becomes the active paint color, so one gesture answers both "which layer
     // is this?" and "what color is this?".
-    await _adoptColorAtPixel(appProvider, canvasPosition);
-  }
-
-  /// Adopts the color at canvas [canvasPosition] as the active paint color,
-  /// routing it to the fill color when the fill tool is armed.
-  Future<void> _adoptColorAtPixel(
-    AppProvider appProvider,
-    ui.Offset canvasPosition,
-  ) async {
-    final Color? color = await appProvider.layers.getColorAtOffset(canvasPosition, useCachedImage: true);
-    if (!mounted || color == null) {
-      return;
-    }
-
-    if (appProvider.selectedAction == ActionType.fill) {
-      appProvider.fillColor = color;
-    } else {
-      appProvider.brushColor = color;
+    final Color? color = pick.color;
+    if (color != null) {
+      if (appProvider.selectedAction == ActionType.fill) {
+        appProvider.fillColor = color;
+      } else {
+        appProvider.brushColor = color;
+      }
     }
     appProvider.update();
   }
@@ -721,11 +708,15 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   /// [pressure] is the normalized pen pressure of the pointer-down (null for
   /// mouse, touch, or a pen without pressure). Only a Brush stroke records it,
   /// which makes that stroke pressure-sensitive for its whole length.
+  /// [awaitsPressure] marks a trackpad Brush stroke whose pressure may only
+  /// arrive after the click: it starts with no samples and back-fills them
+  /// from the first one (see [LayerProvider.lastActionAppendPosition]).
   void _startDrawingPointer(
     AppProvider appProvider,
     ui.Offset adjustedPosition, {
     ActionType? forcedAction,
     double? pressure,
+    bool awaitsPressure = false,
   }) {
     final ActionType action = forcedAction ?? appProvider.selectedAction;
     appProvider.layers.selectedLayer.isUserDrawing = true;
@@ -751,7 +742,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     // action each frame instead of replaying the whole stack. Captured before
     // the active action is appended below.
     appProvider.layers.selectedLayer.beginStrokePreview();
-    final bool recordsPressure = action == ActionType.brush && pressure != null;
+    final bool isBrush = action == ActionType.brush;
     appProvider.recordExecuteDrawingActionToSelectedLayer(
       action: StrokeAction(
         action: action,
@@ -764,7 +755,11 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
           marks: appProvider.hatchMarks,
         ),
         fillColor: appProvider.fillColor,
-        pressures: recordsPressure ? <double>[pressure, pressure] : null,
+        pressures: !isBrush
+            ? null
+            : pressure != null
+            ? <double>[pressure, pressure]
+            : (awaitsPressure ? <double>[] : null),
       ),
     );
   }

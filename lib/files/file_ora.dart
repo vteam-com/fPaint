@@ -60,6 +60,12 @@ const String _oraLayerImageEntrySuffix = '.png';
 const String _oraLayerMetaParentGroupName = 'parentGroupName';
 const int _oraParallelLayerExportCap = AppMath.four;
 
+/// Most layer pixels exported concurrently. Each in-flight layer holds a GPU
+/// render, a CPU readback for the PNG encoder and the PNG itself, so on a large
+/// canvas the CPU-count cap alone overran iOS's per-app memory limit during
+/// draft autosave.
+const int _oraParallelLayerExportPixelBudget = 16000000;
+
 const List<String> _oraPreviewEntries = <String>[
   _oraThumbnailEntry,
   _oraThumbnailEntryLowercase,
@@ -617,6 +623,7 @@ Future<List<int>> createOraArchive(
 
   final List<_OraLayerExportResult> exportResults = await _exportOraLayersInBatches(
     requests: exportRequests,
+    pixelsPerLayer: (layers.size.width * layers.size.height).ceil(),
   );
 
   for (final _OraLayerExportResult result in exportResults) {
@@ -732,15 +739,22 @@ class _OraLayerExportResult {
 ///
 /// Batch processing keeps memory pressure predictable while still overlapping
 /// async PNG encoding across several layers to reduce total save latency.
+///
+/// [pixelsPerLayer] is the worst-case export size of one layer (the canvas
+/// area); it bounds how many layers are rendered and encoded at once.
 Future<List<_OraLayerExportResult>> _exportOraLayersInBatches({
   required List<_OraLayerExportRequest> requests,
+  required int pixelsPerLayer,
 }) async {
   if (requests.isEmpty) {
     return <_OraLayerExportResult>[];
   }
 
   final List<_OraLayerExportResult> results = <_OraLayerExportResult>[];
-  final int batchSize = _computeOraLayerExportBatchSize(requestCount: requests.length);
+  final int batchSize = _computeOraLayerExportBatchSize(
+    requestCount: requests.length,
+    pixelsPerLayer: pixelsPerLayer,
+  );
 
   for (int start = AppMath.zero; start < requests.length; start += batchSize) {
     final int end = math.min(start + batchSize, requests.length);
@@ -753,10 +767,14 @@ Future<List<_OraLayerExportResult>> _exportOraLayersInBatches({
   return results;
 }
 
-int _computeOraLayerExportBatchSize({required int requestCount}) {
+int _computeOraLayerExportBatchSize({
+  required int requestCount,
+  required int pixelsPerLayer,
+}) {
   final int processorCount = math.max(Platform.numberOfProcessors, AppMath.one);
   final int boundedByCpu = math.min(processorCount, _oraParallelLayerExportCap);
-  return math.max(AppMath.one, math.min(requestCount, boundedByCpu));
+  final int boundedByMemory = _oraParallelLayerExportPixelBudget ~/ math.max(pixelsPerLayer, AppMath.one);
+  return math.max(AppMath.one, math.min(requestCount, math.min(boundedByCpu, boundedByMemory)));
 }
 
 /// Exports one ORA layer image.

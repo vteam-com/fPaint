@@ -314,6 +314,8 @@
       "count": {}
     }
   },
+  "trackpadPressureSubtitle": "Presione mas fuerte en un trackpad Force Touch para pintar trazos de Pincel mas anchos. El Lápiz mantiene un ancho constante.",
+  "trackpadPressureTitle": "Presion del trackpad",
   "transform": "Transformar",
   "translate": "Mover",
   "unsavedChanges": "Cambios no guardados",

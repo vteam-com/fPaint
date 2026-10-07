@@ -1,5 +1,3 @@
-// ignore: fcheck_magic_numbers
-
 /// Shared geometry and math helpers for repeated factors.
 class AppMath {
   /// Offset for red channel in RGBA pixel data.

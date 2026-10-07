@@ -38,6 +38,7 @@ class AppPreferences extends ChangeNotifier {
   // Keep the legacy token so existing installations retain their preference.
   static const String keyPenOnlyDrawing = 'keyUseApplePencil';
   static const String keyKeepSaveBackups = 'keyKeepSaveBackups';
+  static const String keyTrackpadPressure = 'keyTrackpadPressure';
   static const String keyLanguageCode = 'keyLanguageCode';
   static const String keyRecoveryDraftSourceFilePath = 'keyRecoveryDraftSourceFilePath';
   static const String keyRecentFiles = 'keyRecentFiles';
@@ -62,6 +63,7 @@ class AppPreferences extends ChangeNotifier {
   Color _fillColor = AppColors.blue;
   bool _penOnlyDrawing = true;
   bool _keepSaveBackups = AppDefaults.keepSaveBackups;
+  bool _trackpadPressure = AppDefaults.trackpadPressure;
   String? _languageCode;
   List<String> _recentFiles = <String>[];
 
@@ -98,6 +100,9 @@ class AppPreferences extends ChangeNotifier {
 
   /// Gets whether overwriting saves should keep timestamped backups.
   bool get keepSaveBackups => _keepSaveBackups;
+
+  /// Gets whether Brush strokes follow Force Touch trackpad pressure (macOS).
+  bool get trackpadPressure => _trackpadPressure;
 
   /// Gets the preferred app language code.
   ///
@@ -179,6 +184,15 @@ class AppPreferences extends ChangeNotifier {
   ) async {
     _keepSaveBackups = value;
     await (await getPref()).setBool(keyKeepSaveBackups, value);
+    notifyListeners();
+  }
+
+  /// Sets whether Brush strokes follow Force Touch trackpad pressure.
+  Future<void> setTrackpadPressure(
+    bool value,
+  ) async {
+    _trackpadPressure = value;
+    await (await getPref()).setBool(keyTrackpadPressure, value);
     notifyListeners();
   }
 
@@ -368,6 +382,8 @@ class AppPreferences extends ChangeNotifier {
     _penOnlyDrawing = _prefs!.getBool(keyPenOnlyDrawing) ?? AppDefaults.penOnlyDrawing;
 
     _keepSaveBackups = _prefs!.getBool(keyKeepSaveBackups) ?? AppDefaults.keepSaveBackups;
+
+    _trackpadPressure = _prefs!.getBool(keyTrackpadPressure) ?? AppDefaults.trackpadPressure;
 
     _languageCode = _prefs!.getString(keyLanguageCode);
 

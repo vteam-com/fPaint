@@ -314,18 +314,12 @@ class LayerProvider extends ChangeNotifier {
   }
 
   /// Appends a position to the last action, with its stylus [pressure] when
-  /// that action records pressure.
-  ///
-  /// A pressure stroke keeps one sample per point: a missing [pressure] (e.g.
-  /// a synthesized move) repeats the previous sample so the lists stay aligned.
+  /// that action records pressure (aligned by [alignPressureSamples]).
   void lastActionAppendPosition({required Offset position, double? pressure}) {
     final UserActionDrawing last = actionStack.last;
     last.positions.add(position);
     if (last is StrokeAction) {
-      final List<double>? pressures = last.pressures;
-      if (pressures != null) {
-        pressures.add(pressure ?? (pressures.isEmpty ? AppMath.one.toDouble() : pressures.last));
-      }
+      alignPressureSamples(last.pressures, last.positions.length, pressure);
     }
   }
 

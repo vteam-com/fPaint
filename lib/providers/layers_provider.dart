@@ -23,12 +23,28 @@ import 'package:logging/logging.dart';
 export 'package:fpaint/providers/layer_provider.dart';
 
 part 'layers_provider_canvas_geometry.dart';
+part 'layers_provider_hit_test.dart';
 part 'layers_provider_image_resize.dart';
 
 final Logger _log = Logger(logNameLayersProvider);
 
 const String _defaultBackgroundName = 'Background';
 const String _defaultLayerPrefix = 'Layer';
+
+/// What one pick-from-canvas resolves at a pixel: the visible layer that owns
+/// it (null when none does) and the composited color the artist sees there
+/// (null when it cannot be read).
+typedef LayerPixelPick = ({LayerProvider? owningLayer, Color? color});
+
+/// Reads the RGBA pixel starting at byte [pixelIndex] of [rgba] as a [Color].
+Color _colorAtPixelIndex(ByteData rgba, int pixelIndex) {
+  return Color.fromARGB(
+    rgba.getUint8(pixelIndex + AppMath.triple),
+    rgba.getUint8(pixelIndex),
+    rgba.getUint8(pixelIndex + 1),
+    rgba.getUint8(pixelIndex + AppMath.pair),
+  );
+}
 
 /// Manages a collection of [LayerProvider] objects, providing methods to interact with and manipulate the layers.
 ///
@@ -310,8 +326,6 @@ class LayersProvider extends ChangeNotifier {
 
   /// The cached image of the canvas.
   ui.Image? cachedImage;
-  ByteData? _cachedImageRawRgba;
-  ui.Image? _cachedImageRawRgbaSource;
 
   //-------------------------------------------
   // Canvas Resize position
@@ -792,8 +806,6 @@ class LayersProvider extends ChangeNotifier {
     // image.
     this.cachedImage?.dispose();
     this.cachedImage = compositeImage;
-    _cachedImageRawRgba = null;
-    _cachedImageRawRgbaSource = null;
 
     return this.cachedImage!;
   }
@@ -804,20 +816,14 @@ class LayersProvider extends ChangeNotifier {
   /// smearing composite colours.
   Future<ui.Image> captureLayerRegion(int layerIndex, ui.Rect region) {
     final LayerProvider layer = get(layerIndex.clamp(0, length - 1));
-    return renderCanvasImage(
-      width: region.width.toInt(),
-      height: region.height.toInt(),
-      draw: (ui.Canvas canvas) {
-        canvas.translate(-region.left, -region.top);
-        layer.renderLayer(canvas);
-      },
-    );
+    return this._renderLayersInRegion(region, <LayerProvider>[layer]);
   }
 
-  /// Finds the topmost visible layer that visibly contributes to the
-  /// composited pixel at canvas [offset], i.e. the layer that "owns" what the
-  /// artist actually sees there. Returns null when [offset] is outside the
-  /// canvas or no visible layer changes that pixel.
+  /// Resolves the pick-from-canvas gesture at canvas [offset]: the topmost
+  /// visible layer that visibly contributes to the composited pixel there (the
+  /// layer that "owns" what the artist sees), plus that pixel's composited
+  /// color. Both are null when [offset] is outside the canvas; the layer is
+  /// also null when no visible layer changes that pixel.
   ///
   /// Contribution, not alpha, is the test. A layer can be fully opaque at a
   /// pixel and still be invisible there: a Multiply layer whose raster carries
@@ -827,62 +833,16 @@ class LayersProvider extends ChangeNotifier {
   /// hand back the ink layer for every pixel on the canvas. The composite below
   /// the layer is therefore compared against the composite including it, and
   /// the layer owns the pixel only when the two differ.
-  Future<LayerProvider?> findTopmostOpaqueLayerAt(Offset offset) async {
-    if (offset.dx < 0 || offset.dy < 0 || offset.dx >= size.width || offset.dy >= size.height) {
-      return null;
-    }
-
-    final ui.Rect samplePixel = ui.Rect.fromLTWH(
-      offset.dx.floorToDouble(),
-      offset.dy.floorToDouble(),
-      AppMath.one.toDouble(),
-      AppMath.one.toDouble(),
-    );
-
-    // Walking bottom-up keeps this to one composite per layer: the stack below
-    // layer i is exactly the stack below layer i+1 plus layer i+1 itself, so
-    // each result is reused as the next comparison's baseline.
-    int? topmostContributingIndex;
-    int? previousPixel = await _compositePixelBelow(length, samplePixel);
-    for (int i = length - 1; i >= 0; i--) {
-      if (!get(i).isVisible) {
-        continue;
-      }
-      final int? pixelIncludingLayer = await _compositePixelBelow(i, samplePixel);
-      if (pixelIncludingLayer != previousPixel) {
-        topmostContributingIndex = i;
-      }
-      previousPixel = pixelIncludingLayer;
-    }
-
-    return topmostContributingIndex == null ? null : get(topmostContributingIndex);
-  }
-
-  /// Composites every visible layer below [index] (exclusive) over [region] and
-  /// returns the resulting pixel as packed RGBA, or null when it cannot be read.
   ///
-  /// [_list] is ordered top-first, so "below [index]" is indices after it.
-  /// Passing [length] composites nothing and yields the empty pixel.
-  Future<int?> _compositePixelBelow(int index, ui.Rect region) async {
-    final ui.Image sample = await renderCanvasImage(
-      width: region.width.toInt(),
-      height: region.height.toInt(),
-      draw: (ui.Canvas canvas) {
-        canvas.translate(-region.left, -region.top);
-        for (int i = length - 1; i >= index; i--) {
-          final LayerProvider layer = get(i);
-          if (layer.isVisible) {
-            layer.renderLayer(canvas);
-          }
-        }
-      },
-    );
-    try {
-      final ByteData? byteData = await sample.toByteData(format: ui.ImageByteFormat.rawRgba);
-      return byteData?.getUint32(0);
-    } finally {
-      sample.dispose();
+  /// Every comparison is rendered into one strip image with a single readback
+  /// (see `_pickPixelInOnePass`), and the color is the strip's last column —
+  /// the full visible composite at that pixel.
+  Future<LayerPixelPick> pickPixelAt(Offset offset) async {
+    if (offset.dx < 0 || offset.dy < 0 || offset.dx >= size.width || offset.dy >= size.height) {
+      return (owningLayer: null, color: null);
     }
+
+    return this._pickPixelInOnePass(this._pixelRectAt(offset));
   }
 
   /// Captures the canvas panel to an image and returns the image bytes.
@@ -896,60 +856,30 @@ class LayersProvider extends ChangeNotifier {
     return byteData!.buffer.asUint8List();
   }
 
-  /// Gets the color at the given offset.
+  /// Gets the composited color at canvas [offset], clamped into the canvas.
   ///
-  /// When [useCachedImage] is true, the current [cachedImage] snapshot is used
-  /// directly and its RGBA bytes are cached for subsequent samples.
-  Future<Color?> getColorAtOffset(
-    Offset offset, {
-    bool useCachedImage = false,
-  }) async {
+  /// Only that one pixel is composited and read back. Reading a full-canvas
+  /// composite back to the Dart heap to sample one pixel — and rendering that
+  /// composite first, which primed a full-res cache per layer — is what
+  /// exhausted memory on large canvases during eyedropper use.
+  Future<Color?> getColorAtOffset(Offset offset) async {
+    final Offset clamped = Offset(
+      offset.dx.clamp(AppMath.zero.toDouble(), size.width - AppMath.one),
+      offset.dy.clamp(AppMath.zero.toDouble(), size.height - AppMath.one),
+    );
     try {
-      final ui.Image image = useCachedImage && cachedImage != null ? cachedImage! : await capturePainterToImage();
-
-      // Ensure coordinates are within bounds
-      final int x = offset.dx.clamp(0, image.width - 1).toInt();
-      final int y = offset.dy.clamp(0, image.height - 1).toInt();
-
-      final ByteData? byteData = await _getRawRgbaBytes(
-        image: image,
-        cacheBytes: useCachedImage && identical(image, cachedImage),
-      );
-
-      if (byteData == null) {
-        return null;
-      }
-
-      // Calculate pixel index (4 bytes per pixel: RGBA)
-      final int pixelIndex = (y * image.width + x) * AppMath.bytesPerPixel;
-
-      // Extract RGBA values
-      final int r = byteData.getUint8(pixelIndex);
-      final int g = byteData.getUint8(pixelIndex + 1);
-      final int b = byteData.getUint8(pixelIndex + AppMath.pair);
-      final int a = byteData.getUint8(pixelIndex + AppMath.triple);
-
-      return Color.fromARGB(a, r, g, b);
+      return await this._compositePixelBelow(AppMath.zero, this._pixelRectAt(clamped));
     } catch (e, stackTrace) {
       _log.warning('Failed to read pixel color', e, stackTrace);
       return null;
     }
   }
 
-  /// Returns RGBA bytes for [image], reusing the cached snapshot bytes when requested.
-  Future<ByteData?> _getRawRgbaBytes({
-    required ui.Image image,
-    required bool cacheBytes,
-  }) async {
-    if (cacheBytes && identical(_cachedImageRawRgbaSource, image) && _cachedImageRawRgba != null) {
-      return _cachedImageRawRgba;
-    }
-
-    final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-    if (cacheBytes && byteData != null) {
-      _cachedImageRawRgba = byteData;
-      _cachedImageRawRgbaSource = image;
-    }
-    return byteData;
+  /// Composites every visible layer over [region] (canvas coordinates) into a
+  /// region-sized image the caller owns and must dispose. This is what the
+  /// on-canvas loupes magnify: a few pixels around the crosshair, never a
+  /// full-canvas composite.
+  Future<ui.Image> captureCompositeRegion(ui.Rect region) {
+    return this._renderLayersInRegion(region, this._visibleLayersBottomFirst());
   }
 }
