@@ -4,6 +4,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.7] - 2026-10-07
+
+### Add
+
+- Trackpad pressure on macOS. With a Force Touch trackpad, pressing harder while dragging paints wider Brush strokes, the same way pen pressure does. Turn it on or off in Settings under "Trackpad pressure". The Pencil and a plain mouse still paint at a constant width.
+- Erasing across all layers. With the "All layers" toggle on, the Eraser erases every unlocked layer in one stroke, not only the selected layer. Locked layers are left alone.
+- Open in place on iOS and iPadOS. Files opened from the Files app, iCloud Drive or another File Provider (such as Synology Drive) save back to the original document, not to an imported copy. iOS now also recognizes OpenRaster (`.ora`) files, so "Open in fPaint" offers them as well.
+
+### Change
+
+- The "All layers" toggle moved from the selection sub-toolbar to the header of the Layers panel, next to the layers it affects.
+- The Layers panel now scrolls to keep the selected layer in view when the selection changes, whether from the on-canvas layer picker, a new layer, undo, or reopening a file that remembers its last layer.
+
+### Fix
+
+- The layer picker puck and the eyedropper loupe now show the actual pixels under the crosshair on any canvas size and appear immediately. Before, they could take seconds to appear on documents with many layers. The picker now reads every layer at the target pixel in one pass.
+- Memory use on large canvases on iPad. Draft autosave and ORA export now limit how many layers they process at once based on canvas size, and a large canvas no longer keeps a full-resolution copy of every layer. Both had caused crashes on large documents.
+
 ## [2.0.6] - 2026-09-28
 
 ### Add
