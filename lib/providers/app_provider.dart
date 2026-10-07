@@ -45,6 +45,7 @@ import 'package:fpaint/providers/wand_source_sampler.dart';
 export 'package:fpaint/providers/layers_provider.dart';
 
 part 'app_provider_canvas.dart';
+part 'app_provider_cross_layer_eraser.dart';
 part 'app_provider_hatch.dart';
 part 'app_provider_pixel_brush.dart';
 part 'app_provider_selection.dart';
@@ -952,6 +953,9 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
 
   /// Owns the in-progress pixel-brush/effect stroke and smudge source cache.
   final PixelBrushStrokeSession pixelBrushSession = PixelBrushStrokeSession();
+
+  /// Owns the in-progress "All layers" eraser stroke.
+  final CrossLayerEraserStroke crossLayerEraser = CrossLayerEraserStroke();
 
   /// The selected text object.
   TextObject? selectedTextObject;
