@@ -9,6 +9,7 @@ class Keys {
   static const Key floatActionZoomIn = Key('floating_action_zoom_in');
   static const Key floatActionZoomOut = Key('floating_action_zoom_out');
   static const Key floatActionCenter = Key('floating_action_center');
+  static const Key floatActionResetRotation = Key('floating_action_reset_rotation');
   static const Key floatActionToggle = Key('floating_action_toggle');
   static const Key floatActionPaste = Key('floating_action_paste');
   static const Key mainMenuButton = Key('main-menu-button');

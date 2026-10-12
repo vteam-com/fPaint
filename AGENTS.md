@@ -14,7 +14,7 @@
   - Dependency Inversion: Depend on abstractions, not concretions.
 
 - Never introduce new magic numbers in code.
-- Use named constants in `lib/helpers/constants.dart` (or the most relevant constants file) instead of inline numeric literals.
+- Use named constants in `lib/constants/constants.dart` (or the most relevant domain constants file, e.g. `lib/files/tiff_constants.dart`, `lib/files/psd_constants.dart`, `lib/helpers/shortcuts_constants.dart`) instead of inline numeric literals.
 - If a numeric literal appears only once, still define a clearly named constant for it when it affects behavior, style, layout, timing, opacity, sizing, or thresholds.
 - Before finalizing changes, scan modified files for inline numeric literals and replace them with constants.
 - Never introduce new hardcoded strings in executable code.
@@ -50,11 +50,6 @@
   bipolar-effect no-op commit guard — a strength-0 effect returns the same image
   instance, so any commit that disposes its source must check
   `identical(processed, source)` before drawing).
-
-## Current Lint Context
-
-- Magic number currently reported: `lib/main.dart` line 108 value `0.35`.
-- Do not add similar inline values in future edits.
 
 ## Quality Gate
 

@@ -189,38 +189,38 @@ Widget _buildResponsiveToolbarActions(
             appProvider,
             interactionProfile,
           );
-          final List<_ToolbarActionEntry> filteredPrimaryActions = _filterToolbarActionsForViewport(
-            actions: primaryActions,
-            shellProvider: shellProvider,
-          );
-          final List<_ToolbarActionEntry> actions = _filterToolbarActionsForViewport(
-            actions: _buildResponsiveToolbarActionEntries(
-              context,
-              shellProvider,
-              appProvider,
-              interactionProfile,
-            ),
-            shellProvider: shellProvider,
-          );
-          final double fullToolbarWidth =
-              _estimateToolbarActionWidth(actions, interactionProfile.buttonSpacing) + AppSpacing.large;
-
-          if (shellProvider.deviceSizeSmall == false && constraints.maxWidth >= fullToolbarWidth) {
-            return _buildWideDesktopToolbarActions(
-              context: context,
-              shellProvider: shellProvider,
-              appProvider: appProvider,
-              primaryActions: primaryActions,
-            );
-          }
-
-          final List<_ResolvedToolbarActionGroup> visibleGroups = _selectResponsiveToolbarActionGroups(
-            groups: _buildResponsiveToolbarActionGroups(
+          if (shellProvider.deviceSizeSmall == false) {
+            final List<_ToolbarActionGroup> wideGroups = _buildToolbarActionGroups(
               context: context,
               shellProvider: shellProvider,
               appProvider: appProvider,
               interactionProfile: interactionProfile,
-              primaryActions: filteredPrimaryActions,
+              primaryActions: primaryActions,
+              selectionLayout: _SelectionGroupLayout.fixed,
+            );
+            final double fullToolbarWidth =
+                _estimateToolbarActionWidth(
+                  wideGroups.expand((_ToolbarActionGroup group) => group.actions).toList(),
+                  interactionProfile.buttonSpacing,
+                ) +
+                AppSpacing.large;
+
+            if (constraints.maxWidth >= fullToolbarWidth) {
+              return _buildWideToolbarRow(wideGroups);
+            }
+          }
+
+          final List<_ToolbarActionGroup> visibleGroups = _selectResponsiveToolbarActionGroups(
+            groups: _buildToolbarActionGroups(
+              context: context,
+              shellProvider: shellProvider,
+              appProvider: appProvider,
+              interactionProfile: interactionProfile,
+              primaryActions: _filterToolbarActionsForViewport(
+                actions: primaryActions,
+                shellProvider: shellProvider,
+              ),
+              selectionLayout: _SelectionGroupLayout.scrollable,
             ),
             maxWidth: constraints.maxWidth,
             groupSpacing: interactionProfile.buttonSpacing,
@@ -238,7 +238,7 @@ Widget _buildResponsiveToolbarActions(
               spacing: interactionProfile.buttonSpacing,
               children: visibleGroups
                   .map<Widget>(
-                    (_ResolvedToolbarActionGroup group) => _buildResponsiveToolbarGroupWidget(group),
+                    (_ToolbarActionGroup group) => _buildResponsiveToolbarGroupWidget(group),
                   )
                   .toList(),
             ),
@@ -251,13 +251,8 @@ Widget _buildResponsiveToolbarActions(
 
 /// Builds one responsive toolbar domain, allowing configured domains to scroll
 /// horizontally instead of overflowing the overall toolbar row.
-Widget _buildResponsiveToolbarGroupWidget(_ResolvedToolbarActionGroup group) {
-  final Widget groupWidget = group.usesCustomSurface
-      ? group.actions.single.child
-      : _buildToolbarButtonGroup(
-          children: group.actions.map((_ToolbarActionEntry entry) => entry.child).toList(),
-          spacing: group.spacing,
-        );
+Widget _buildResponsiveToolbarGroupWidget(_ToolbarActionGroup group) {
+  final Widget groupWidget = _buildToolbarGroupSurface(group);
 
   if (group.isHorizontallyScrollable == false) {
     return groupWidget;
@@ -370,19 +365,11 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
   ];
 }
 
-/// Builds the wide desktop toolbar using the dedicated canvas toolbar dock.
-Widget _buildWideDesktopToolbarActions({
-  required BuildContext context,
-  required ShellProvider shellProvider,
-  required AppProvider appProvider,
-  required List<_ToolbarActionEntry> primaryActions,
-}) {
-  return buildCanvasToolbarActions(
-    context,
-    shellProvider,
-    appProvider,
-    distributeWideGroups: true,
-    primaryActionButtons: primaryActions.map((_ToolbarActionEntry entry) => entry.child).toList(),
+/// Builds the wide desktop toolbar with every group spread across the strip.
+Widget _buildWideToolbarRow(List<_ToolbarActionGroup> groups) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: groups.map<Widget>(_buildToolbarGroupSurface).toList(),
   );
 }
 
@@ -400,143 +387,6 @@ List<_ToolbarActionEntry> _filterToolbarActionsForViewport({
         (_ToolbarActionEntry entry) => entry.importance.index <= _ToolbarActionImportance.medium.index,
       )
       .toList();
-}
-
-/// Builds top-toolbar actions with explicit importance for narrow layouts.
-List<_ToolbarActionEntry> _buildResponsiveToolbarActionEntries(
-  BuildContext context,
-  ShellProvider shellProvider,
-  AppProvider appProvider,
-  InteractionLayoutProfile interactionProfile,
-) {
-  final List<_ToolbarActionEntry> primaryActions = _buildPrimaryToolbarActionEntries(
-    context,
-    shellProvider,
-    appProvider,
-    interactionProfile,
-  );
-  final AppLocalizations l10n = context.l10n;
-  final bool hasActiveSelection =
-      appProvider.selectedAction == ActionType.selector || appProvider.selectorModel.isVisible;
-  final bool canUndo = appProvider.undoProvider.canUndo;
-  final bool canRedo = appProvider.undoProvider.canRedo;
-  final bool showSelectionSubToolbar = shouldShowSelectionSubToolbar(appProvider);
-
-  return <_ToolbarActionEntry>[
-    ...primaryActions,
-    _ToolbarActionEntry(
-      child: _buildUndoRedoButton(
-        interactionProfile: interactionProfile,
-        enabled: canUndo,
-        key: Keys.floatActionUndo,
-        icon: AppIcon.undo,
-        historyLabel: appProvider.undoProvider.getHistoryStringForUndo(),
-        shortcutKey: ShortcutKeys.z,
-        action: appProvider.undoAction,
-      ),
-      estimatedWidth: _toolbarIconActionEstimatedWidth,
-      importance: _ToolbarActionImportance.critical,
-    ),
-    _ToolbarActionEntry(
-      child: _buildUndoRedoButton(
-        interactionProfile: interactionProfile,
-        enabled: canRedo,
-        key: Keys.floatActionRedo,
-        icon: AppIcon.redo,
-        historyLabel: appProvider.undoProvider.getHistoryStringForRedo(),
-        shortcutKey: ShortcutKeys.y,
-        action: appProvider.redoAction,
-      ),
-      estimatedWidth: _toolbarIconActionEstimatedWidth,
-      importance: _ToolbarActionImportance.medium,
-    ),
-    if (!showSelectionSubToolbar)
-      _ToolbarActionEntry(
-        child: _buildSelectorToggleButton(
-          appProvider: appProvider,
-          l10n: l10n,
-          hasActiveSelection: hasActiveSelection,
-          interactionProfile: interactionProfile,
-        ),
-        estimatedWidth: _toolbarIconActionEstimatedWidth,
-        importance: _ToolbarActionImportance.critical,
-      ),
-    if (showSelectionSubToolbar)
-      _ToolbarActionEntry(
-        child: buildSelectionSubToolbar(
-          context: context,
-          shellProvider: shellProvider,
-          appProvider: appProvider,
-          interactionProfile: interactionProfile,
-          trailingToggleButton: _buildSelectorToggleButton(
-            appProvider: appProvider,
-            l10n: l10n,
-            hasActiveSelection: hasActiveSelection,
-            interactionProfile: interactionProfile,
-          ),
-        ),
-        estimatedWidth: estimateSelectionSubToolbarWidth(
-          _toolbarIconActionEstimatedWidth,
-          hasVisibleSelection: appProvider.selectorModel.isVisible,
-          includeToggleButton: true,
-        ),
-        importance: _ToolbarActionImportance.critical,
-      ),
-    _ToolbarActionEntry(
-      child: _buildZoomButton(
-        key: Keys.floatActionZoomOut,
-        shellProvider: shellProvider,
-        appProvider: appProvider,
-        interactionProfile: interactionProfile,
-        tooltip: tooltipWithShortcut(
-          ShortcutActions.zoomOut,
-          primaryModifiedShortcut(ShortcutKeys.minus),
-        )!,
-        icon: AppIcon.zoomOut,
-        scaleDelta: AppVisual.shrink,
-      ),
-      estimatedWidth: _toolbarIconActionEstimatedWidth,
-      importance: _ToolbarActionImportance.medium,
-    ),
-    _ToolbarActionEntry(
-      child: _buildCenterAndDimensionButton(shellProvider, appProvider),
-      estimatedWidth: _toolbarCenterActionEstimatedWidth,
-      importance: _ToolbarActionImportance.medium,
-    ),
-    // Only offered while the view is actually rotated: free rotation is easy to
-    // enter by accident and otherwise hard to leave by hand.
-    if (appProvider.layers.isRotated)
-      _ToolbarActionEntry(
-        child: buildToolbarIconButton(
-          // No key of its own: reset is folded into the Cmd/Ctrl+0 canvas fit.
-          tooltip: l10n.resetViewRotation,
-          icon: AppIcon.rotateRight,
-          interactionProfile: interactionProfile,
-          onPressed: () {
-            shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-            appProvider.resetCanvasRotation();
-          },
-        ),
-        estimatedWidth: _toolbarIconActionEstimatedWidth,
-        importance: _ToolbarActionImportance.medium,
-      ),
-    _ToolbarActionEntry(
-      child: _buildZoomButton(
-        key: Keys.floatActionZoomIn,
-        shellProvider: shellProvider,
-        appProvider: appProvider,
-        interactionProfile: interactionProfile,
-        tooltip: tooltipWithShortcut(
-          ShortcutActions.zoomIn,
-          primaryModifiedShortcut(ShortcutKeys.plus),
-        )!,
-        icon: AppIcon.zoomIn,
-        scaleDelta: AppVisual.enlarge,
-      ),
-      estimatedWidth: _toolbarIconActionEstimatedWidth,
-      importance: _ToolbarActionImportance.medium,
-    ),
-  ];
 }
 
 /// Estimates the width of [actions] including inter-button spacing.
@@ -569,147 +419,15 @@ int _indexOfLeastImportantAction(List<_ToolbarActionEntry> actions) {
   return removalIndex;
 }
 
-/// Builds the canvas actions shown on the right side of the top toolbar.
-///
-/// The [context] parameter is the [BuildContext] used to access the application's providers.
-/// The [shellProvider] parameter is the [ShellProvider] instance used to manage the application's shell.
-/// The [appProvider] parameter is the [AppProvider] instance used to manage the application's state.
-Widget buildCanvasToolbarActions(
-  BuildContext context,
-  ShellProvider shellProvider,
-  AppProvider appProvider, {
-  bool distributeWideGroups = false,
-  List<Widget>? primaryActionButtons,
-}) {
-  // One subscription to the pre-merged toolbar listenable (viewport + app
-  // state + undo) instead of three nested builders re-running per channel.
-  return ListenableBuilder(
-    listenable: appProvider.toolbarActionsListenable,
-    builder: (BuildContext _, Widget? _) {
-      final AppLocalizations l10n = context.l10n;
-      final InteractionLayoutProfile interactionProfile = shellProvider.interactionLayoutProfile;
-      final bool hasActiveSelection =
-          appProvider.selectedAction == ActionType.selector || appProvider.selectorModel.isVisible;
-      final bool canUndo = appProvider.undoProvider.canUndo;
-      final bool canRedo = appProvider.undoProvider.canRedo;
+/// Wraps one toolbar group in its shared surface, unless it brings its own.
+Widget _buildToolbarGroupSurface(_ToolbarActionGroup group) {
+  if (group.usesCustomSurface) {
+    return group.actions.single.child;
+  }
 
-      final Widget selectorToggleButton = _buildSelectorToggleButton(
-        appProvider: appProvider,
-        l10n: l10n,
-        hasActiveSelection: hasActiveSelection,
-        interactionProfile: interactionProfile,
-      );
-      final Widget undoButton = _buildUndoRedoButton(
-        interactionProfile: interactionProfile,
-        enabled: canUndo,
-        key: Keys.floatActionUndo,
-        icon: AppIcon.undo,
-        historyLabel: appProvider.undoProvider.getHistoryStringForUndo(),
-        shortcutKey: ShortcutKeys.z,
-        action: appProvider.undoAction,
-      );
-      final Widget redoButton = _buildUndoRedoButton(
-        interactionProfile: interactionProfile,
-        enabled: canRedo,
-        key: Keys.floatActionRedo,
-        icon: AppIcon.redo,
-        historyLabel: appProvider.undoProvider.getHistoryStringForRedo(),
-        shortcutKey: ShortcutKeys.y,
-        action: appProvider.redoAction,
-      );
-      final Widget zoomOutButton = _buildZoomButton(
-        key: Keys.floatActionZoomOut,
-        shellProvider: shellProvider,
-        appProvider: appProvider,
-        interactionProfile: interactionProfile,
-        tooltip: tooltipWithShortcut(
-          ShortcutActions.zoomOut,
-          primaryModifiedShortcut(ShortcutKeys.minus),
-        )!,
-        icon: AppIcon.zoomOut,
-        scaleDelta: AppVisual.shrink,
-      );
-      final Widget centerButton = _buildCenterAndDimensionButton(shellProvider, appProvider);
-      final Widget zoomInButton = _buildZoomButton(
-        key: Keys.floatActionZoomIn,
-        shellProvider: shellProvider,
-        appProvider: appProvider,
-        interactionProfile: interactionProfile,
-        tooltip: tooltipWithShortcut(
-          ShortcutActions.zoomIn,
-          primaryModifiedShortcut(ShortcutKeys.plus),
-        )!,
-        icon: AppIcon.zoomIn,
-        scaleDelta: AppVisual.enlarge,
-      );
-      final Widget? shellToggleButton = shellProvider.deviceSizeSmall
-          ? _buildSmallScreenShellToggleButton(
-              shellProvider: shellProvider,
-              tooltip: l10n.menuTooltip,
-              interactionProfile: interactionProfile,
-            )
-          : null;
-
-      if (distributeWideGroups) {
-        final List<Widget> resolvedPrimaryActionButtons = primaryActionButtons ?? const <Widget>[];
-        final List<Widget> leadingPrimaryActions = resolvedPrimaryActionButtons.take(AppMath.four).toList();
-        final List<Widget> trailingPrimaryActions = resolvedPrimaryActionButtons.skip(AppMath.four).toList();
-        final bool showSubToolbar = shouldShowSelectionSubToolbar(appProvider);
-
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            _buildToolbarButtonGroup(
-              children: leadingPrimaryActions,
-              spacing: AppSpacing.small,
-            ),
-            _buildToolbarButtonGroup(
-              children: trailingPrimaryActions,
-              spacing: AppSpacing.small,
-            ),
-            _buildToolbarButtonGroup(
-              children: <Widget>[undoButton, redoButton],
-              spacing: interactionProfile.buttonSpacing,
-            ),
-            showSubToolbar
-                ? buildSelectionSubToolbar(
-                    context: context,
-                    shellProvider: shellProvider,
-                    appProvider: appProvider,
-                    interactionProfile: interactionProfile,
-                    trailingToggleButton: selectorToggleButton,
-                  )
-                : _buildToolbarButtonGroup(
-                    children: <Widget>[selectorToggleButton],
-                    spacing: interactionProfile.buttonSpacing,
-                  ),
-            _buildToolbarButtonGroup(
-              children: <Widget>[zoomOutButton, centerButton, zoomInButton],
-              spacing: interactionProfile.buttonSpacing,
-            ),
-          ],
-        );
-      }
-
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        spacing: interactionProfile.buttonSpacing,
-        children: <Widget>[
-          _buildToolbarButtonGroup(
-            children: <Widget>[undoButton, redoButton],
-            spacing: interactionProfile.buttonSpacing,
-          ),
-          _buildToolbarButtonGroup(
-            children: <Widget>[selectorToggleButton, ?shellToggleButton],
-            spacing: interactionProfile.buttonSpacing,
-          ),
-          _buildToolbarButtonGroup(
-            children: <Widget>[zoomOutButton, centerButton, zoomInButton],
-            spacing: interactionProfile.buttonSpacing,
-          ),
-        ],
-      );
-    },
+  return _buildToolbarButtonGroup(
+    children: group.actions.map((_ToolbarActionEntry entry) => entry.child).toList(),
+    spacing: group.spacing,
   );
 }
 
@@ -728,23 +446,6 @@ Widget _buildToolbarButtonGroup({
       spacing: spacing,
       children: children,
     ),
-  );
-}
-
-/// Builds the small-screen shell control that toggles between hidden and full.
-Widget _buildSmallScreenShellToggleButton({
-  required ShellProvider shellProvider,
-  required String tooltip,
-  required InteractionLayoutProfile interactionProfile,
-}) {
-  return buildToolbarIconButton(
-    key: Keys.floatActionToggle,
-    tooltip: tooltip,
-    icon: shellProvider.shellMode == ShellMode.hidden ? AppIcon.menu : AppIcon.close,
-    interactionProfile: interactionProfile,
-    onPressed: () {
-      Future<void>.microtask(() => _toggleSmallScreenShellState(shellProvider));
-    },
   );
 }
 
@@ -876,17 +577,6 @@ Widget _buildCenterAndDimensionButton(
       ),
     ),
   );
-}
-
-/// Toggles the small-screen shell action between hidden and full states.
-void _toggleSmallScreenShellState(ShellProvider shellProvider) {
-  switch (shellProvider.shellMode) {
-    case ShellMode.hidden:
-      shellProvider.shellMode = ShellMode.full;
-      break;
-    default:
-      shellProvider.shellMode = ShellMode.hidden;
-  }
 }
 
 /// Widget preview entry for [ShellTopBar].

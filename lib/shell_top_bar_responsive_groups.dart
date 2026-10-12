@@ -2,6 +2,15 @@ part of 'shell_top_bar.dart';
 
 const double _toolbarGroupHorizontalPadding = AppSpacing.small * 2;
 
+/// How the selection group presents itself in a given toolbar layout.
+enum _SelectionGroupLayout {
+  /// The sub-toolbar at full width when a selection is active (wide layout).
+  fixed,
+
+  /// The sub-toolbar scrolling horizontally when width is short (responsive layout).
+  scrollable,
+}
+
 /// Responsive toolbar domain that keeps related actions inside one shared surface.
 class _ToolbarActionGroup {
   const _ToolbarActionGroup({
@@ -19,21 +28,6 @@ class _ToolbarActionGroup {
   final bool usesCustomSurface;
 }
 
-/// Concrete responsive group after lower-priority actions have been trimmed.
-class _ResolvedToolbarActionGroup {
-  const _ResolvedToolbarActionGroup({
-    required this.actions,
-    required this.spacing,
-    required this.isHorizontallyScrollable,
-    required this.usesCustomSurface,
-  });
-
-  final List<_ToolbarActionEntry> actions;
-  final double spacing;
-  final bool isHorizontallyScrollable;
-  final bool usesCustomSurface;
-}
-
 /// Lowest-priority action that can still be removed from a responsive group.
 class _ToolbarActionRemovalCandidate {
   const _ToolbarActionRemovalCandidate({
@@ -47,13 +41,17 @@ class _ToolbarActionRemovalCandidate {
   final _ToolbarActionEntry action;
 }
 
-/// Builds the responsive toolbar domains that must stay visually grouped.
-List<_ToolbarActionGroup> _buildResponsiveToolbarActionGroups({
+/// Builds every top-toolbar group: the single source of toolbar buttons for
+/// both the wide and the responsive layouts.
+///
+/// [selectionLayout] picks how the selection group fits the caller's layout.
+List<_ToolbarActionGroup> _buildToolbarActionGroups({
   required BuildContext context,
   required ShellProvider shellProvider,
   required AppProvider appProvider,
   required InteractionLayoutProfile interactionProfile,
   required List<_ToolbarActionEntry> primaryActions,
+  required _SelectionGroupLayout selectionLayout,
 }) {
   final AppLocalizations l10n = context.l10n;
   final bool hasActiveSelection =
@@ -61,6 +59,7 @@ List<_ToolbarActionGroup> _buildResponsiveToolbarActionGroups({
   final bool canUndo = appProvider.undoProvider.canUndo;
   final bool canRedo = appProvider.undoProvider.canRedo;
   final bool showSelectionSubToolbar = shouldShowSelectionSubToolbar(appProvider);
+  final bool selectionScrollable = selectionLayout == _SelectionGroupLayout.scrollable;
   final Widget selectorToggleButton = _buildSelectorToggleButton(
     appProvider: appProvider,
     l10n: l10n,
@@ -118,7 +117,7 @@ List<_ToolbarActionGroup> _buildResponsiveToolbarActionGroups({
                   shellProvider: shellProvider,
                   appProvider: appProvider,
                   interactionProfile: interactionProfile,
-                  horizontallyScrollable: true,
+                  horizontallyScrollable: selectionScrollable,
                   trailingToggleButton: selectorToggleButton,
                 )
               : selectorToggleButton,
@@ -134,7 +133,7 @@ List<_ToolbarActionGroup> _buildResponsiveToolbarActionGroups({
       ],
       spacing: interactionProfile.buttonSpacing,
       minimumVisibleActions: AppMath.one,
-      isHorizontallyScrollable: showSelectionSubToolbar,
+      isHorizontallyScrollable: selectionScrollable && showSelectionSubToolbar,
       usesCustomSurface: showSelectionSubToolbar,
     ),
     _ToolbarActionGroup(
@@ -160,6 +159,23 @@ List<_ToolbarActionGroup> _buildResponsiveToolbarActionGroups({
           estimatedWidth: _toolbarCenterActionEstimatedWidth,
           importance: _ToolbarActionImportance.critical,
         ),
+        // Only offered while the view is actually rotated: free rotation is easy to
+        // enter by accident and otherwise hard to leave by hand.
+        if (appProvider.layers.isRotated)
+          _ToolbarActionEntry(
+            child: buildToolbarIconButton(
+              key: Keys.floatActionResetRotation,
+              tooltip: l10n.resetViewRotation,
+              icon: AppIcon.rotateRight,
+              interactionProfile: interactionProfile,
+              onPressed: () {
+                shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+                appProvider.resetCanvasRotation();
+              },
+            ),
+            estimatedWidth: _toolbarIconActionEstimatedWidth,
+            importance: _ToolbarActionImportance.medium,
+          ),
         _ToolbarActionEntry(
           child: _buildZoomButton(
             key: Keys.floatActionZoomIn,
@@ -184,13 +200,13 @@ List<_ToolbarActionGroup> _buildResponsiveToolbarActionGroups({
 }
 
 /// Selects grouped toolbar domains and prunes only inside each domain when space is tight.
-List<_ResolvedToolbarActionGroup> _selectResponsiveToolbarActionGroups({
+List<_ToolbarActionGroup> _selectResponsiveToolbarActionGroups({
   required List<_ToolbarActionGroup> groups,
   required double maxWidth,
   required double groupSpacing,
 }) {
   if (maxWidth <= AppMath.zero) {
-    return const <_ResolvedToolbarActionGroup>[];
+    return const <_ToolbarActionGroup>[];
   }
 
   final List<List<_ToolbarActionEntry>> visibleActionsByGroup = groups
@@ -222,7 +238,7 @@ List<_ResolvedToolbarActionGroup> _selectResponsiveToolbarActionGroups({
     );
   }
 
-  final List<_ResolvedToolbarActionGroup> resolvedGroups = <_ResolvedToolbarActionGroup>[];
+  final List<_ToolbarActionGroup> resolvedGroups = <_ToolbarActionGroup>[];
   for (int index = AppMath.zero; index < groups.length; index++) {
     final List<_ToolbarActionEntry> visibleActions = visibleActionsByGroup[index];
     if (visibleActions.isEmpty) {
@@ -230,7 +246,7 @@ List<_ResolvedToolbarActionGroup> _selectResponsiveToolbarActionGroups({
     }
 
     resolvedGroups.add(
-      _ResolvedToolbarActionGroup(
+      _ToolbarActionGroup(
         actions: visibleActions,
         spacing: groups[index].spacing,
         isHorizontallyScrollable: groups[index].isHorizontallyScrollable,

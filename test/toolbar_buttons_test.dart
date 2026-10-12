@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
@@ -23,6 +24,9 @@ const double _selectionOverflowToolbarWidth = 627.0;
 const double _wideToolbarDistributedGapLowerBound = AppLayout.toolbarButtonSize + AppSpacing.large;
 const double _wideToolbarPrimaryGroupGapLowerBound = AppSpacing.large;
 const double _wideToolbarHistorySelectorGroupGapLowerBound = AppSpacing.large;
+const double _roomyToolbarWidth = 1400.0;
+const double _roomyToolbarViewHeight = 600.0;
+const double _testViewRotationDegrees = 30.0;
 
 Future<ui.Image> _createTestImage() async {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
@@ -84,14 +88,6 @@ void main() {
     return matchingAncestor;
   }
 
-  Widget fabUnderTest() {
-    return Builder(
-      builder: (BuildContext context) {
-        return buildCanvasToolbarActions(context, shellProvider, appProvider);
-      },
-    );
-  }
-
   Widget shellTopBarUnderTest({required double width}) {
     return InheritedControllerScope<ShellProvider>(
       controller: shellProvider,
@@ -103,6 +99,27 @@ void main() {
             appProvider: appProvider,
             shellProvider: shellProvider,
           ),
+        ),
+      ),
+    );
+  }
+
+  /// Widens the test view so a [_roomyToolbarWidth] top bar stays on-screen.
+  void useRoomyTestView(WidgetTester tester) {
+    tester.view.physicalSize = const Size(_roomyToolbarWidth, _roomyToolbarViewHeight);
+    tester.view.devicePixelRatio = AppMath.one.toDouble();
+    addTearDown(tester.view.reset);
+  }
+
+  Widget shellTopBarApp({required double width}) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: MediaQueryData(size: Size(width, AppLayout.toolbarButtonSize)),
+        child: Localizations(
+          locale: const Locale('en'),
+          delegates: AppLocalizations.localizationsDelegates,
+          child: shellTopBarUnderTest(width: width),
         ),
       ),
     );
@@ -120,11 +137,7 @@ void main() {
       shellProvider.showMenu = showMenu;
     }
 
-    await tester.pumpWidget(
-      buildTestWidget(
-        child: fabUnderTest(),
-      ),
-    );
+    await tester.pumpWidget(shellTopBarApp(width: _wideToolbarWidth));
     await tester.pump();
   }
 
@@ -141,23 +154,11 @@ void main() {
       shellProvider.showMenu = showMenu;
     }
 
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: MediaQueryData(size: Size(width, AppLayout.toolbarButtonSize)),
-          child: Localizations(
-            locale: const Locale('en'),
-            delegates: AppLocalizations.localizationsDelegates,
-            child: shellTopBarUnderTest(width: width),
-          ),
-        ),
-      ),
-    );
+    await tester.pumpWidget(shellTopBarApp(width: width));
     await tester.pump();
   }
 
-  group('buildCanvasToolbarActions - toolbar layout', () {
+  group('ShellTopBar - canvas actions', () {
     testWidgets('renders undo button dimmed when undo is unavailable', (WidgetTester tester) async {
       await pumpFloatingButtons(tester, isSmall: false);
 
@@ -297,13 +298,7 @@ void main() {
       shellProvider.deviceSizeSmall = false;
 
       await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
+        shellTopBarApp(width: _wideToolbarWidth),
       );
       await tester.pump();
 
@@ -314,13 +309,7 @@ void main() {
       shellProvider.deviceSizeSmall = false;
 
       await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
+        shellTopBarApp(width: _wideToolbarWidth),
       );
       await tester.pump();
 
@@ -363,49 +352,18 @@ void main() {
       shellProvider.deviceSizeSmall = false;
 
       await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
+        shellTopBarApp(width: _wideToolbarWidth),
       );
       await tester.pump();
 
       expect(find.byKey(Keys.floatActionCenter), findsOneWidget);
     });
 
-    testWidgets('does not render desktop shell toggle button in canvas toolbar', (
-      WidgetTester tester,
-    ) async {
-      shellProvider.deviceSizeSmall = false;
-
-      await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
-      );
-      await tester.pump();
-
-      expect(find.byKey(Keys.floatActionToggle), findsNothing);
-    });
-
     testWidgets('center button displays only zoom percentage', (WidgetTester tester) async {
       shellProvider.deviceSizeSmall = false;
 
       await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
+        shellTopBarApp(width: _wideToolbarWidth),
       );
       await tester.pump();
 
@@ -425,13 +383,7 @@ void main() {
       appProvider.selectedAction = ActionType.brush;
 
       await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
+        shellTopBarApp(width: _wideToolbarWidth),
       );
       await tester.pump();
 
@@ -444,17 +396,12 @@ void main() {
     testWidgets('selector cancel tap restores previous tool when selector is active without marquee', (
       WidgetTester tester,
     ) async {
+      useRoomyTestView(tester);
       shellProvider.deviceSizeSmall = false;
       appProvider.selectedAction = ActionType.pencil;
 
       await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
+        shellTopBarApp(width: _roomyToolbarWidth),
       );
       await tester.pump();
 
@@ -473,18 +420,13 @@ void main() {
     testWidgets('selector button clears active selection without changing active tool', (
       WidgetTester tester,
     ) async {
+      useRoomyTestView(tester);
       shellProvider.deviceSizeSmall = false;
       appProvider.selectedAction = ActionType.pencil;
       appProvider.selectorModel.isVisible = true;
 
       await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
+        shellTopBarApp(width: _roomyToolbarWidth),
       );
       await tester.pump();
 
@@ -499,13 +441,7 @@ void main() {
       shellProvider.deviceSizeSmall = false;
 
       await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
+        shellTopBarApp(width: _wideToolbarWidth),
       );
       await tester.pump();
 
@@ -519,13 +455,7 @@ void main() {
 
       appProvider.selectorModel.isVisible = true;
       await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
+        shellTopBarApp(width: _wideToolbarWidth),
       );
       await tester.pump();
 
@@ -553,13 +483,7 @@ void main() {
       appProvider.undoProvider.undo();
 
       await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
+        shellTopBarApp(width: _wideToolbarWidth),
       );
       await tester.pump();
 
@@ -584,13 +508,7 @@ void main() {
       shellProvider.canvasPlacement = CanvasAutoPlacement.fit;
 
       await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
+        shellTopBarApp(width: _wideToolbarWidth),
       );
       await tester.pump();
 
@@ -605,13 +523,7 @@ void main() {
       shellProvider.canvasPlacement = CanvasAutoPlacement.fit;
 
       await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
+        shellTopBarApp(width: _wideToolbarWidth),
       );
       await tester.pump();
 
@@ -626,13 +538,7 @@ void main() {
       shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
 
       await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
+        shellTopBarApp(width: _wideToolbarWidth),
       );
       await tester.pump();
 
@@ -648,13 +554,7 @@ void main() {
       shellProvider.deviceSizeSmall = false;
 
       await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
+        shellTopBarApp(width: _wideToolbarWidth),
       );
       await tester.pump();
 
@@ -682,7 +582,7 @@ void main() {
     });
   });
 
-  group('buildCanvasToolbarActions - small-screen layout', () {
+  group('ShellTopBar - small-screen canvas actions', () {
     testWidgets('renders Row layout when deviceSizeSmall is true', (WidgetTester tester) async {
       await pumpFloatingButtons(tester, isSmall: true, showMenu: false);
 
@@ -720,70 +620,15 @@ void main() {
       expect(find.byKey(Keys.floatActionSelector), findsOneWidget);
     });
 
-    testWidgets('shows shell toggle button on small screens', (WidgetTester tester) async {
-      await pumpFloatingButtons(tester, isSmall: true, showMenu: false);
-
-      expect(find.byKey(Keys.floatActionToggle), findsOneWidget);
-    });
-
-    testWidgets('small-screen shell toggle hides shell on tap', (WidgetTester tester) async {
-      shellProvider.deviceSizeSmall = true;
-      shellProvider.shellMode = ShellMode.full;
-
-      await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
-      );
-      await tester.pump();
-
-      await tester.tap(find.byKey(Keys.floatActionToggle));
-      await tester.pump();
-
-      expect(shellProvider.shellMode, ShellMode.hidden);
-    });
-
-    testWidgets('small-screen shell toggle restores shell when it is hidden', (
-      WidgetTester tester,
-    ) async {
-      shellProvider.deviceSizeSmall = true;
-      shellProvider.shellMode = ShellMode.hidden;
-
-      await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
-      );
-      await tester.pump();
-
-      await tester.tap(find.byKey(Keys.floatActionToggle));
-      await tester.pump();
-
-      expect(shellProvider.shellMode, ShellMode.full);
-    });
-
     testWidgets('selector button enables selector mode and clears active selection on small screens', (
       WidgetTester tester,
     ) async {
+      useRoomyTestView(tester);
       shellProvider.deviceSizeSmall = true;
       appProvider.selectedAction = ActionType.brush;
 
       await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
+        shellTopBarApp(width: _roomyToolbarWidth),
       );
       await tester.pump();
 
@@ -794,13 +639,7 @@ void main() {
       appProvider.selectedAction = ActionType.pencil;
       appProvider.selectorModel.isVisible = true;
       await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
+        shellTopBarApp(width: _roomyToolbarWidth),
       );
       await tester.pump();
 
@@ -820,13 +659,7 @@ void main() {
       appProvider.undoProvider.undo();
 
       await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
+        shellTopBarApp(width: _wideToolbarWidth),
       );
       await tester.pump();
 
@@ -849,13 +682,7 @@ void main() {
       appProvider.undoProvider.undo();
 
       await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (BuildContext context) {
-              return buildCanvasToolbarActions(context, shellProvider, appProvider);
-            },
-          ),
-        ),
+        shellTopBarApp(width: _wideToolbarWidth),
       );
       await tester.pump();
 
@@ -1016,6 +843,57 @@ void main() {
       expect(find.byKey(Keys.floatActionCenter), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('hides reset-rotation while the view is not rotated', (WidgetTester tester) async {
+      useRoomyTestView(tester);
+      await pumpShellTopBar(
+        tester,
+        width: _roomyToolbarWidth,
+        isSmall: false,
+        showMenu: false,
+      );
+
+      expect(find.byKey(Keys.floatActionResetRotation), findsNothing);
+    });
+
+    testWidgets('wide desktop toolbar offers reset-rotation inside the zoom group', (WidgetTester tester) async {
+      useRoomyTestView(tester);
+      appProvider.applyRotationToCanvas(rotationDelta: degreesToRadians(_testViewRotationDegrees));
+
+      await pumpShellTopBar(
+        tester,
+        width: _roomyToolbarWidth,
+        isSmall: false,
+        showMenu: false,
+      );
+
+      final Finder resetFinder = find.byKey(Keys.floatActionResetRotation);
+      expect(resetFinder, findsOneWidget);
+      expect(
+        findOverlaySurfaceAncestor(tester, resetFinder),
+        same(findOverlaySurfaceAncestor(tester, find.byKey(Keys.floatActionZoomOut))),
+      );
+
+      await tester.tap(resetFinder);
+      await tester.pump();
+
+      expect(appProvider.layers.isRotated, isFalse);
+      expect(shellProvider.canvasPlacement, CanvasAutoPlacement.manual);
+      expect(find.byKey(Keys.floatActionResetRotation), findsNothing);
+    });
+
+    testWidgets('responsive toolbar offers reset-rotation when the view is rotated', (WidgetTester tester) async {
+      appProvider.applyRotationToCanvas(rotationDelta: degreesToRadians(_testViewRotationDegrees));
+
+      await pumpShellTopBar(
+        tester,
+        width: _selectionOverflowToolbarWidth,
+        isSmall: false,
+        showMenu: false,
+      );
+
+      expect(find.byKey(Keys.floatActionResetRotation), findsOneWidget);
+    });
   });
 
   Widget buildFloatingIconButtonForTest({
@@ -1073,7 +951,6 @@ void main() {
 
       expect(find.byKey(Keys.floatActionSelector), findsOneWidget);
       expect(find.byKey(Keys.floatActionZoomIn), findsOneWidget);
-      expect(find.byKey(Keys.floatActionToggle), findsNothing);
     });
     testWidgets('renders with icon', (WidgetTester tester) async {
       await tester.pumpWidget(
