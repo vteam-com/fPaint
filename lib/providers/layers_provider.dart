@@ -15,6 +15,7 @@ import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/layer_provider.dart';
 import 'package:fpaint/providers/recent_colors.dart';
+import 'package:fpaint/providers/stroke_composite_controller.dart';
 import 'package:fpaint/providers/top_colors_analyzer.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:logging/logging.dart';
@@ -71,6 +72,10 @@ class LayersProvider extends ChangeNotifier {
   final Map<LayerProvider, double> _deferredDisplayCacheScales = <LayerProvider, double>{};
   bool _displayCacheRebuildsSuspended = false;
 
+  /// Flattened above/below layers for the stroke in progress (see
+  /// [StrokeCompositeController]); resolved by the canvas painter every frame.
+  late final StrokeCompositeController strokeComposite = StrokeCompositeController(onReady: repaintCanvas);
+
   /// Whether a live pan or pinch should prioritize frame rate over sampling quality.
   bool get isInteractiveViewportChange => _displayCacheRebuildsSuspended;
 
@@ -109,6 +114,7 @@ class LayersProvider extends ChangeNotifier {
     if (identical(_undoProvider.onRecordsDropped, _disposeDroppedRecordImages)) {
       _undoProvider.onRecordsDropped = null;
     }
+    strokeComposite.release();
     _canvasRepaintNotifier.dispose();
     _layerListStructureNotifier.dispose();
     _topColorsNotifier.dispose();

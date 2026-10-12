@@ -101,6 +101,37 @@ Future<int> _minDisplayAlpha(LayerProvider layer, double scale) async {
   return minAlpha;
 }
 
+/// Layer opacity used by the translucent-layer tests.
+const double _halfOpacity = 0.5;
+
+/// Expected alpha byte of an opaque pixel composited at [_halfOpacity].
+const int _halfAlpha = 127;
+
+/// Rounding slack for the alpha comparisons.
+const int _alphaTolerance = 1;
+
+/// Renders [layer] through the full-resolution viewport path (no display
+/// cache) and returns the minimum alpha byte.
+Future<int> _minViewportAlpha(LayerProvider layer) async {
+  final ui.Image out = await renderCanvasImage(
+    width: _canvasWidth,
+    height: _canvasHeight,
+    draw: (ui.Canvas canvas) => layer.renderLayerInViewport(
+      canvas,
+      viewportBounds: Rect.fromLTWH(0, 0, _canvasWidth.toDouble(), _canvasHeight.toDouble()),
+      viewport: ViewportTransform.identity(),
+      visibleCanvasBounds: Rect.fromLTWH(0, 0, _canvasWidth.toDouble(), _canvasHeight.toDouble()),
+    ),
+  );
+  final ByteData? bytes = await out.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
+  out.dispose();
+  int minAlpha = _fullyOpaqueAlpha;
+  for (int i = 3; i < bytes!.lengthInBytes; i += 4) {
+    minAlpha = minAlpha < bytes.getUint8(i) ? minAlpha : bytes.getUint8(i);
+  }
+  return minAlpha;
+}
+
 /// Folds an opaque patch covering [patchBounds] into a fully opaque layer's
 /// display cache (built at [scale]) and returns the minimum alpha of the
 /// re-rendered display. A fully opaque layer + opaque patch must stay opaque
@@ -123,16 +154,49 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('LayerDisplayCache', () {
-    test('supportsIncrementalPixelBrushCache reflects opacity and blend mode', () {
+    test('a translucent layer is served from its display cache with opacity applied once', () async {
       final LayerProvider layer = _layer();
-      expect(layer.supportsIncrementalPixelBrushCache, isTrue);
+      layer.actionStack.add(_imageAction(await _solid(const Color(0xFF00FF00))));
+      layer.opacity = _halfOpacity;
+      await layer.buildDisplayCache(_displayScale);
 
-      layer.opacity = 0.5;
-      expect(layer.supportsIncrementalPixelBrushCache, isFalse);
+      expect(await _renderForDisplay(layer, _displayScale), 0);
+      expect(await _minDisplayAlpha(layer, _displayScale), closeTo(_halfAlpha, _alphaTolerance));
+    });
 
-      layer.opacity = 1.0;
-      layer.blendMode = ui.BlendMode.multiply;
-      expect(layer.supportsIncrementalPixelBrushCache, isFalse);
+    test('the full-res cache holds raw content so opacity is not applied twice', () async {
+      final LayerProvider layer = _layer();
+      layer.actionStack.add(_imageAction(await _solid(const Color(0xFF00FF00))));
+      layer.opacity = _halfOpacity;
+      final int uncachedAlpha = await _minViewportAlpha(layer);
+
+      await layer.updateThumbnail();
+
+      expect(layer.cachedImage, isNotNull);
+      expect(await _minViewportAlpha(layer), uncachedAlpha);
+    });
+
+    test('a build that races an edit is discarded instead of pinning stale pixels', () async {
+      // A file load paints the empty layer (starting a build), then appends its
+      // image before that build lands. The stale empty projection must not win.
+      final LayerProvider layer = _layer();
+      final ui.Image decoded = await _solid(const Color(0xFF00FF00));
+      final Future<bool> build = layer.buildDisplayCache(_displayScale);
+      layer.addImage(imageToAdd: decoded);
+
+      expect(await build, isTrue);
+      expect(await _minDisplayAlpha(layer, _displayScale), _fullyOpaqueAlpha);
+    });
+
+    test('changing opacity keeps the display cache', () async {
+      final LayerProvider layer = _layer();
+      layer.actionStack.add(_imageAction(await _solid(const Color(0xFF00FF00))));
+      await layer.buildDisplayCache(_displayScale);
+
+      layer.opacity = _halfOpacity;
+
+      expect(layer.hasDisplayCache, isTrue);
+      expect(await _minDisplayAlpha(layer, _displayScale), closeTo(_halfAlpha, _alphaTolerance));
     });
 
     test('a sufficient display cache is drawn without requesting a rebuild', () async {

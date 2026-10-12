@@ -39,6 +39,36 @@ extension LayerDisplayCache on LayerProvider {
     return scale;
   }
 
+  /// The paint that composites this layer's raw content onto the layers below
+  /// it, carrying the layer opacity and blend mode.
+  ///
+  /// Every raster cache ([_cachedImage], the display projection, stroke
+  /// baselines) holds raw content, so this is applied exactly once, when the
+  /// layer is composited.
+  Paint compositePaint() => Paint()
+    ..color = AppColors.black.withAlpha((AppLimits.rgbChannelMax * opacity).toInt())
+    ..blendMode = blendMode;
+
+  /// The scale [_displayCache] was rendered at, or 0 when there is none.
+  double get displayCacheScale => _displayCacheScale;
+
+  /// Composites the display cache (stretched to the layer's canvas-space
+  /// bounds, opacity/blend applied) onto [canvas]. Returns false, drawing
+  /// nothing, when there is no cache.
+  bool drawDisplayCache(Canvas canvas, {required FilterQuality filterQuality}) {
+    final ui.Image? cache = _displayCache;
+    if (cache == null) {
+      return false;
+    }
+    canvas.drawImageRect(
+      cache,
+      Rect.fromLTWH(0, 0, cache.width.toDouble(), cache.height.toDouble()),
+      Offset.zero & size,
+      compositePaint()..filterQuality = filterQuality,
+    );
+    return true;
+  }
+
   /// Whether the current display cache is sharp enough for [requiredScale].
   bool _displayCacheSufficientFor(double requiredScale) =>
       _displayCache != null && _displayCacheScale + _displayScaleEpsilon >= _targetDisplayScale(requiredScale);
@@ -68,27 +98,14 @@ extension LayerDisplayCache on LayerProvider {
     required FilterQuality filterQuality,
   }) {
     final bool cacheEligible =
-        _livePreviewBaseline == null &&
-        !isUserDrawing &&
-        _strokeBaseline == null &&
-        supportsIncrementalPixelBrushCache &&
-        !_hasTextContent;
-    final ui.Image? cache = _displayCache;
-    if (cacheEligible && cache != null) {
+        _livePreviewBaseline == null && !isUserDrawing && _strokeBaseline == null && !_hasTextContent;
+    if (cacheEligible && _displayCache != null) {
       canvas.save();
       // Rotation enters here, at composite time. The cache itself stays in
       // unrotated canvas space, so a rotate gesture never invalidates it.
       canvas.transform(viewport.matrix.storage);
       canvas.clipRect(visibleCanvasBounds, doAntiAlias: false);
-      canvas.drawImageRect(
-        cache,
-        Rect.fromLTWH(0, 0, cache.width.toDouble(), cache.height.toDouble()),
-        Rect.fromLTWH(0, 0, size.width, size.height),
-        Paint()
-          ..color = AppColors.black.withAlpha((AppLimits.rgbChannelMax * opacity).toInt())
-          ..blendMode = blendMode
-          ..filterQuality = filterQuality,
-      );
+      drawDisplayCache(canvas, filterQuality: filterQuality);
       canvas.restore();
       if (!_displayCacheSufficientFor(requiredScale)) {
         requestRebuild();
@@ -111,7 +128,7 @@ extension LayerDisplayCache on LayerProvider {
   /// Samples the full-res content once; cheap to draw thereafter. No-op if
   /// already sufficient or a build is already in flight.
   Future<bool> buildDisplayCache(double requiredScale) async {
-    if (_displayCacheBuilding || !supportsIncrementalPixelBrushCache) {
+    if (_displayCacheBuilding) {
       return false;
     }
     if (_displayCacheSufficientFor(requiredScale)) {
@@ -127,21 +144,32 @@ extension LayerDisplayCache on LayerProvider {
     final int targetHeight = max(AppMath.one, (canvasHeight * scale).round());
 
     _displayCacheBuilding = true;
+    final int revision = _displayCacheRevision;
+    final ui.Image built;
     try {
-      final ui.Image built = await renderCanvasImage(
+      built = await renderCanvasImage(
         width: targetWidth,
         height: targetHeight,
         draw: (ui.Canvas canvas) {
           canvas.scale(targetWidth / size.width, targetHeight / size.height);
-          renderLayer(canvas);
+          // Raw content: opacity/blend are applied when the cache is drawn.
+          _renderLayerContents(canvas);
         },
       );
-      _displayCache?.dispose();
-      _displayCache = built;
-      _displayCacheScale = targetWidth / size.width;
     } finally {
       _displayCacheBuilding = false;
     }
+    // The content changed while rendering (e.g. a file load appended the
+    // layer's image after the painter started building the empty layer).
+    // Installing it would pin the stale pixels until the next edit, so drop it
+    // and build again from the current content.
+    if (revision != _displayCacheRevision) {
+      built.dispose();
+      return buildDisplayCache(requiredScale);
+    }
+    _displayCache?.dispose();
+    _displayCache = built;
+    _displayCacheScale = targetWidth / size.width;
     return true;
   }
 
@@ -155,7 +183,7 @@ extension LayerDisplayCache on LayerProvider {
     required Rect patchBounds,
   }) async {
     final ui.Image? base = _displayCache;
-    if (base == null || !supportsIncrementalPixelBrushCache) {
+    if (base == null) {
       return;
     }
     final double scale = _displayCacheScale;
@@ -192,11 +220,14 @@ extension LayerDisplayCache on LayerProvider {
       return;
     }
     _displayCache = next;
+    // A build already in flight may predate this patch; make it start over.
+    _displayCacheRevision++;
     base.dispose();
   }
 
   /// Drops the display-res projection (its content changed and must be rebuilt).
   void invalidateDisplayCache() {
+    _displayCacheRevision++;
     _displayCache?.dispose();
     _displayCache = null;
     _displayCacheScale = 0.0;
@@ -212,15 +243,6 @@ extension LayerDisplayCache on LayerProvider {
     _cachedImage?.dispose();
     _cachedImage = null;
   }
-
-  /// Whether this layer can use the display-resolution projection cache.
-  ///
-  /// The display cache stores *raw* layer content (opacity/blend applied when
-  /// it's drawn). That only equals a full render when the layer's group composite
-  /// is an identity — otherwise a non-trivial opacity/blend would be applied
-  /// twice. Non-default layers therefore render full-res for display (correct,
-  /// and uncommon).
-  bool get supportsIncrementalPixelBrushCache => opacity == AppMath.one.toDouble() && blendMode == ui.BlendMode.srcOver;
 
   /// Ensures the per-layer full-res render cache is populated so compositing is
   /// fast.
@@ -240,7 +262,7 @@ extension LayerDisplayCache on LayerProvider {
     _cachedImage = await renderCanvasImage(
       width: size.width.toInt(),
       height: size.height.toInt(),
-      draw: renderLayer,
+      draw: _renderLayerContents,
     );
   }
 
@@ -275,7 +297,7 @@ extension LayerDisplayCache on LayerProvider {
     final ui.Image fullImage = await renderCanvasImage(
       width: size.width.toInt(),
       height: size.height.toInt(),
-      draw: renderLayer,
+      draw: _renderLayerContents,
     );
     // Dispose old textures before replacing; ui.Images are not GC-freed.
     _cachedImage?.dispose();
@@ -315,7 +337,8 @@ extension LayerDisplayCache on LayerProvider {
           source,
           Rect.fromLTWH(0, 0, source.width.toDouble(), source.height.toDouble()),
           Rect.fromLTWH(0, 0, thumbnailWidth.toDouble(), thumbnailHeight.toDouble()),
-          Paint()..filterQuality = FilterQuality.medium,
+          // [source] is raw content; apply opacity/blend like the direct path.
+          compositePaint()..filterQuality = FilterQuality.medium,
         );
       },
     );

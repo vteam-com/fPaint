@@ -38,6 +38,7 @@ class CanvasPanel extends StatelessWidget {
         displayScale: displayScale,
         visibleCanvasBounds: visibleCanvasBounds,
         onNeedsDisplayCache: layers.scheduleDisplayCacheRebuild,
+        resolveStrokeComposite: layers.strokeComposite.resolve,
         isInteractiveViewportChange: () => layers.isInteractiveViewportChange,
         repaint: layers.canvasPainterRepaint,
       ),

@@ -213,7 +213,15 @@ class LayerProvider extends ChangeNotifier {
       return;
     }
     _opacity = value;
-    clearCache();
+    // Opacity is applied at composite time ([compositePaint]); every cache holds
+    // raw content and stays valid. Only the thumbnail shows the opacity, so
+    // refresh it from the small projection instead of dropping the caches (which
+    // forced a full-canvas replay per slider tick on large canvases).
+    if (hasDisplayCache) {
+      refreshThumbnailFromDisplayCache();
+    } else {
+      clearCache();
+    }
   }
 
   /// Gets the number of actions in the action stack.
@@ -430,6 +438,10 @@ class LayerProvider extends ChangeNotifier {
   /// (layer_provider_display_cache.dart).
   bool _displayCacheBuilding = false;
 
+  /// Bumped whenever the display cache is invalidated, so a build that was
+  /// rendering stale content (an edit landed mid-build) is discarded.
+  int _displayCacheRevision = 0;
+
   /// Clears the cached image and refreshes the thumbnail.
   void clearCache() {
     // Free the full-res render cache now — it is only read inside renderLayer,
@@ -498,7 +510,7 @@ class LayerProvider extends ChangeNotifier {
 
     // Prefer the small on-screen projection. Taking ownership keeps
     // appendDrawingAction/clearCache from disposing it immediately afterwards.
-    if (_displayCache != null && supportsIncrementalPixelBrushCache) {
+    if (_displayCache != null) {
       _strokeBaselineDisplay = _displayCache;
       _displayCache = null;
       _displayCacheScale = 0.0;
@@ -508,7 +520,7 @@ class LayerProvider extends ChangeNotifier {
     // Reuse the committed raster when no display projection is available.
     // Taking ownership keeps
     // appendDrawingAction/clearCache from disposing it immediately afterwards.
-    if (_cachedImage != null && supportsIncrementalPixelBrushCache) {
+    if (_cachedImage != null) {
       _strokeBaseline = _cachedImage;
       _cachedImage = null;
       return;
@@ -627,11 +639,7 @@ class LayerProvider extends ChangeNotifier {
     Canvas canvas, {
     Rect? compositeBounds,
   }) {
-    final Paint layerPaint = Paint()
-      ..color = AppColors.black.withAlpha(
-        (AppLimits.rgbChannelMax * opacity).toInt(),
-      )
-      ..blendMode = blendMode;
+    final Paint layerPaint = compositePaint();
 
     // Fast path: when the layer is just its cached raster (not mid-stroke, no
     // live preview), draw it directly with opacity/blend baked into the paint.
@@ -674,13 +682,7 @@ class LayerProvider extends ChangeNotifier {
     required ViewportTransform viewport,
     required Rect visibleCanvasBounds,
   }) {
-    final Paint layerPaint = Paint()
-      ..color = AppColors.black.withAlpha(
-        (AppLimits.rgbChannelMax * opacity).toInt(),
-      )
-      ..blendMode = blendMode;
-
-    canvas.saveLayer(viewportBounds, layerPaint);
+    canvas.saveLayer(viewportBounds, compositePaint());
     canvas.transform(viewport.matrix.storage);
     canvas.clipRect(visibleCanvasBounds, doAntiAlias: false);
     _renderLayerContents(canvas);

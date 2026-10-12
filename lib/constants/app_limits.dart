@@ -56,4 +56,9 @@ class AppLimits {
   /// layer cache. Above this the render target alone is hundreds of MB, which
   /// Impeller cannot allocate reliably, so the display projection is used.
   static const int fullResolutionCacheMaxPixels = 16000000;
+
+  /// Fewest visible layers above or below the painted layer that are worth
+  /// flattening into one stroke-composite image. A single layer is already one
+  /// blit, so flattening it would only add a render.
+  static const int strokeCompositeMinLayers = 2;
 }
