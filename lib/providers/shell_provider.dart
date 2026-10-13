@@ -1,6 +1,7 @@
 // Imports
 import 'dart:core';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/canvas_resize.dart';
@@ -115,7 +116,7 @@ class ShellProvider extends ChangeNotifier {
     });
   }
 
-  InteractionInputModality _interactionInputModality = InteractionInputModality.mouse;
+  InteractionInputModality _interactionInputModality = defaultInteractionInputModality(defaultTargetPlatform);
 
   /// Current dominant input modality used to scale interactive controls.
   InteractionInputModality get interactionInputModality => _interactionInputModality;
@@ -193,4 +194,14 @@ class ShellProvider extends ChangeNotifier {
     _canvasFitRequestNotifier.dispose();
     super.dispose();
   }
+}
+
+/// The input a device most likely starts with, before any pointer has been
+/// seen: touch on phones and tablets, so they never open with desktop-dense
+/// controls, and mouse on desktop.
+InteractionInputModality defaultInteractionInputModality(TargetPlatform platform) {
+  return switch (platform) {
+    TargetPlatform.iOS || TargetPlatform.android || TargetPlatform.fuchsia => InteractionInputModality.touch,
+    TargetPlatform.macOS || TargetPlatform.windows || TargetPlatform.linux => InteractionInputModality.mouse,
+  };
 }

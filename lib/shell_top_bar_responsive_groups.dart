@@ -88,7 +88,7 @@ List<_ToolbarActionGroup> _buildToolbarActionGroups({
             shortcutKey: ShortcutKeys.z,
             action: appProvider.undoAction,
           ),
-          estimatedWidth: _toolbarIconActionEstimatedWidth,
+          estimatedWidth: _iconActionWidth(interactionProfile),
           importance: _ToolbarActionImportance.critical,
         ),
         _ToolbarActionEntry(
@@ -101,7 +101,7 @@ List<_ToolbarActionGroup> _buildToolbarActionGroups({
             shortcutKey: ShortcutKeys.y,
             action: appProvider.redoAction,
           ),
-          estimatedWidth: _toolbarIconActionEstimatedWidth,
+          estimatedWidth: _iconActionWidth(interactionProfile),
           importance: _ToolbarActionImportance.medium,
         ),
       ],
@@ -123,11 +123,11 @@ List<_ToolbarActionGroup> _buildToolbarActionGroups({
               : selectorToggleButton,
           estimatedWidth: showSelectionSubToolbar
               ? estimateSelectionSubToolbarWidth(
-                  _toolbarIconActionEstimatedWidth,
+                  _iconActionWidth(interactionProfile),
                   hasVisibleSelection: appProvider.selectorModel.isVisible,
                   includeToggleButton: true,
                 )
-              : _toolbarIconActionEstimatedWidth,
+              : _iconActionWidth(interactionProfile),
           importance: _ToolbarActionImportance.critical,
         ),
       ],
@@ -151,7 +151,7 @@ List<_ToolbarActionGroup> _buildToolbarActionGroups({
             icon: AppIcon.zoomOut,
             scaleDelta: AppVisual.shrink,
           ),
-          estimatedWidth: _toolbarIconActionEstimatedWidth,
+          estimatedWidth: _iconActionWidth(interactionProfile),
           importance: _ToolbarActionImportance.medium,
         ),
         _ToolbarActionEntry(
@@ -173,7 +173,7 @@ List<_ToolbarActionGroup> _buildToolbarActionGroups({
                 appProvider.resetCanvasRotation();
               },
             ),
-            estimatedWidth: _toolbarIconActionEstimatedWidth,
+            estimatedWidth: _iconActionWidth(interactionProfile),
             importance: _ToolbarActionImportance.medium,
           ),
         _ToolbarActionEntry(
@@ -189,7 +189,7 @@ List<_ToolbarActionGroup> _buildToolbarActionGroups({
             icon: AppIcon.zoomIn,
             scaleDelta: AppVisual.enlarge,
           ),
-          estimatedWidth: _toolbarIconActionEstimatedWidth,
+          estimatedWidth: _iconActionWidth(interactionProfile),
           importance: _ToolbarActionImportance.medium,
         ),
       ],

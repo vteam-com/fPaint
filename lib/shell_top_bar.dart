@@ -25,9 +25,12 @@ const String _canvasZoomFormat = '{zoom}%';
 const String _placeholderZoom = '{zoom}';
 const String _placeholderWidth = '{width}';
 const String _placeholderHeight = '{height}';
-const double _toolbarIconActionEstimatedWidth = AppLayout.iconSize + AppSpacing.medium + AppSpacing.medium;
 const double _toolbarCenterActionEstimatedWidth = AppLayout.toolbarButtonWidth;
 const double _shellTopBarPreviewWidth = AppLayout.sidePanelExpandedMin;
+
+/// Estimated width of one icon action at [profile]'s icon size, so the
+/// responsive toolbar keeps more actions at denser (mouse) sizing.
+double _iconActionWidth(InteractionLayoutProfile profile) => profile.iconSize + AppSpacing.medium + AppSpacing.medium;
 
 enum _ToolbarActionImportance {
   critical,
@@ -112,7 +115,12 @@ class ShellTopBar extends StatelessWidget {
           leadingToolbarButton,
           Expanded(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: interactionProfile.buttonSpacing),
+              // A thin vertical inset keeps the grouped surfaces off the bar
+              // edges, like native desktop toolbars.
+              padding: EdgeInsets.symmetric(
+                horizontal: interactionProfile.buttonSpacing,
+                vertical: AppSpacing.thin,
+              ),
               child: _buildResponsiveToolbarActions(
                 context,
                 shellProvider,
@@ -278,7 +286,7 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
         interactionProfile: interactionProfile,
         onPressed: () => onFileNew(context),
       ),
-      estimatedWidth: _toolbarIconActionEstimatedWidth,
+      estimatedWidth: _iconActionWidth(interactionProfile),
       importance: _ToolbarActionImportance.lowest,
     ),
     _ToolbarActionEntry(
@@ -293,7 +301,7 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
           },
         ),
       ),
-      estimatedWidth: _toolbarIconActionEstimatedWidth,
+      estimatedWidth: _iconActionWidth(interactionProfile),
       importance: _ToolbarActionImportance.low,
     ),
     _ToolbarActionEntry(
@@ -304,7 +312,7 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
         interactionProfile: interactionProfile,
         onPressed: () => sharePanel(context),
       ),
-      estimatedWidth: _toolbarIconActionEstimatedWidth,
+      estimatedWidth: _iconActionWidth(interactionProfile),
       importance: _ToolbarActionImportance.low,
     ),
     _ToolbarActionEntry(
@@ -320,7 +328,7 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
           Future<void>.microtask(() => appProvider.paste());
         },
       ),
-      estimatedWidth: _toolbarIconActionEstimatedWidth,
+      estimatedWidth: _iconActionWidth(interactionProfile),
       importance: _ToolbarActionImportance.low,
     ),
     _ToolbarActionEntry(
@@ -333,7 +341,7 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
           shellProvider.requestCanvasFit();
         },
       ),
-      estimatedWidth: _toolbarIconActionEstimatedWidth,
+      estimatedWidth: _iconActionWidth(interactionProfile),
       importance: _ToolbarActionImportance.lowest,
     ),
     _ToolbarActionEntry(
@@ -346,7 +354,7 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
           shellProvider.requestCanvasFit();
         },
       ),
-      estimatedWidth: _toolbarIconActionEstimatedWidth,
+      estimatedWidth: _iconActionWidth(interactionProfile),
       importance: _ToolbarActionImportance.lowest,
     ),
     _ToolbarActionEntry(
@@ -359,7 +367,7 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
           shellProvider.requestCanvasFit();
         },
       ),
-      estimatedWidth: _toolbarIconActionEstimatedWidth,
+      estimatedWidth: _iconActionWidth(interactionProfile),
       importance: _ToolbarActionImportance.lowest,
     ),
   ];

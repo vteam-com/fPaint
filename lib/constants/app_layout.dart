@@ -26,6 +26,10 @@ class AppLayout {
   static const double toolbarButtonSize = 50.0;
   static const double toolbarButtonWidth = 60.0;
   static const double iconSize = 24.0;
+
+  /// Icon size for mouse-driven desktop density, matching the 16–18 pt glyphs
+  /// of native desktop toolbars (Finder, Xcode) rather than touch targets.
+  static const double iconSizeDense = 18.0;
   static const double recentFileMissingIconSize = 32.0;
   static const double sliderHeight = 30.0;
   static const double gridSelectorSize = 120.0;

@@ -82,7 +82,8 @@ void main() {
       expect(providerNotifications, 1);
       expect(mainScreenLayoutNotifications, 0);
 
-      provider.interactionInputModality = InteractionInputModality.touch;
+      // Pen differs from every platform's starting modality, so this is a real change.
+      provider.interactionInputModality = InteractionInputModality.pen;
 
       expect(providerNotifications, 2);
       expect(mainScreenLayoutNotifications, 0);

@@ -5,14 +5,16 @@ import 'package:fpaint/constants/interaction_layout_profile.dart';
 
 /// Shared interaction profiles for desktop mouse and tablet touch/pen flows.
 class AppInteractionProfiles {
+  /// Desktop density: compact icons and tight spacing like native desktop
+  /// toolbars, since a mouse pointer needs no finger-sized targets.
   static const InteractionLayoutProfile mouse = InteractionLayoutProfile(
     buttonSize: AppInteraction.imagePlacementButtonSize,
-    buttonSpacing: AppInteraction.imagePlacementButtonSpacing,
+    buttonSpacing: AppInteraction.denseButtonSpacing,
     dragHandleSize: AppInteraction.selectionHandleSize,
     edgeHandleSize: AppInteraction.transformEdgeHandleSize,
     imagePlacementHandleSize: AppInteraction.imagePlacementHandleSize,
     floatingButtonSize: AppLayout.toolbarButtonSize,
-    iconSize: AppLayout.iconSize,
+    iconSize: AppLayout.iconSizeDense,
   );
 
   static const double _tabletButtonSize = 42.0;

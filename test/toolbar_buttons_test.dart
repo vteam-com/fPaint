@@ -844,6 +844,21 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('mouse input gets desktop-dense icon buttons, touch keeps larger targets', (
+      WidgetTester tester,
+    ) async {
+      shellProvider.interactionInputModality = InteractionInputModality.mouse;
+      await pumpShellTopBar(tester, width: _wideToolbarWidth, isSmall: false, showMenu: false);
+      final double mouseButtonHeight = tester.getSize(find.byKey(Keys.floatActionUndo)).height;
+
+      shellProvider.interactionInputModality = InteractionInputModality.touch;
+      await pumpShellTopBar(tester, width: _wideToolbarWidth, isSmall: false, showMenu: false);
+      final double touchButtonHeight = tester.getSize(find.byKey(Keys.floatActionUndo)).height;
+
+      expect(mouseButtonHeight, AppLayout.iconSizeDense + AppSpacing.small * 2);
+      expect(touchButtonHeight, greaterThan(mouseButtonHeight));
+    });
+
     testWidgets('hides reset-rotation while the view is not rotated', (WidgetTester tester) async {
       useRoomyTestView(tester);
       await pumpShellTopBar(

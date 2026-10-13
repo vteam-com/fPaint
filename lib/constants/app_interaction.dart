@@ -177,6 +177,9 @@ class AppInteraction {
   static const double selectionToolbarMargin = 50.0;
   static const double imagePlacementHandleSize = 14.0;
   static const double imagePlacementButtonSpacing = 8.0;
+
+  /// Gap between neighbouring controls at mouse-driven desktop density.
+  static const double denseButtonSpacing = 4.0;
   static const double imagePlacementButtonSize = 36.0;
   static const double imagePlacementMinScale = 0.1;
   static const double imagePlacementMaxScale = 5.0;

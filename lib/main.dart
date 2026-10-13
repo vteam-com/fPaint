@@ -20,6 +20,7 @@ import 'package:fpaint/providers/security_scoped_file_service.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/recovery/draft_recovery_controller.dart';
+import 'package:fpaint/widgets/interaction_density.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/shortcuts.dart';
 
@@ -395,9 +396,17 @@ class MyApp extends StatelessWidget {
                           '/platforms': (_) => const PlatformsPage(),
                         },
                         builder: (BuildContext _, Widget? child) {
-                          return DefaultTextStyle(
-                            style: const TextStyle(fontFamily: appFontFamily),
-                            child: child ?? const SizedBox.shrink(),
+                          // Above the navigator, so pages, dialogs, and popups
+                          // all follow the input modality's control density.
+                          return ListenableBuilder(
+                            listenable: shellProvider,
+                            builder: (BuildContext _, Widget? _) => InteractionDensity(
+                              profile: shellProvider.interactionLayoutProfile,
+                              child: DefaultTextStyle(
+                                style: const TextStyle(fontFamily: appFontFamily),
+                                child: child ?? const SizedBox.shrink(),
+                              ),
+                            ),
                           );
                         },
                       ),
