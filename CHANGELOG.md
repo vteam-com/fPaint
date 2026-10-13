@@ -4,6 +4,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.0] - 2026-10-13
+
+### Add
+
+- Quick menu on the canvas. Right-click, press the pen's barrel button, or touch and hold one finger on the canvas to open a radial menu right where you are working. The ring holds your six most recently used tools plus Select and Undo, an inner arc holds your recent colors, and the centre puck changes the brush size when dragged sideways (and an armed effect's strength when dragged up or down). With a pen or finger, slide toward a slot and lift to pick it; lift without aiming and the menu stays open for taps. Tap outside the menu or press Escape to close it.
+- Select and Undo open a second, outer ring next to themselves. Select offers the five selection modes, Add and Remove (toggles that keep the ring open so you can pick a mode next), Invert and Cancel selection. Undo steps back once and shows Undo and Redo, which stay open so you can keep stepping. The quick menu is listed in the keyboard shortcuts help.
+
+### Change
+
+- Painting on documents with many layers is faster. While you paint, the layers above and below the one you are painting on are each merged into one image and drawn once, instead of every layer being redrawn each frame.
+- Updated dependencies, including `archive` 4.5.1 and `image` 4.12.0.
+
+### Fix
+
+- The "Reset Rotation" button now appears in the top toolbar whenever the view is rotated, at every window width. Before, it was never shown, so the only way back to an upright view was Cmd/Ctrl+0.
+- Layers could appear blank on the canvas after opening a file or restoring a draft, even though their thumbnails were correct. A layer whose content changes while its on-screen image is being prepared is now redrawn.
+
 ## [2.0.7] - 2026-10-07
 
 ### Add
