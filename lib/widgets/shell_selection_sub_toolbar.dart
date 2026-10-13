@@ -7,6 +7,7 @@ import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
+import 'package:fpaint/models/selector_mode_display.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -17,7 +18,16 @@ import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:fpaint/widgets/toolbar_icon_button.dart';
 
-const int _selectionModeButtonCount = AppMath.four + AppMath.one;
+/// Widget keys for the selection-mode buttons, in [SelectorMode] order.
+const Map<SelectorMode, Key> _selectorModeKeys = <SelectorMode, Key>{
+  SelectorMode.rectangle: Keys.toolSelectorModeRectangle,
+  SelectorMode.circle: Keys.toolSelectorModeCircle,
+  SelectorMode.line: Keys.toolSelectorModeLine,
+  SelectorMode.lasso: Keys.toolSelectorModeLasso,
+  SelectorMode.wand: Keys.toolSelectorModeWand,
+};
+
+final int _selectionModeButtonCount = SelectorMode.values.length;
 const int _selectionScopeButtonCount = AppMath.one;
 const int _selectionClipboardButtonCount = AppMath.pair;
 const int _selectionMathButtonCount = AppMath.triple;
@@ -69,74 +79,17 @@ Widget buildSelectionSubToolbar({
   final bool isSelectionToolActive = appProvider.selectedAction == ActionType.selector;
 
   final List<Widget> buttons = <Widget>[
-    buildToolbarIconButton(
-      key: Keys.toolSelectorModeRectangle,
-      tooltip: l10n.toolRectangle,
-      icon: AppIcon.selectorSquare,
-      interactionProfile: interactionProfile,
-      isSelected: isSelectionToolActive && appProvider.selectorModel.mode == SelectorMode.rectangle,
-      onPressed: () {
-        Future<void>.microtask(() {
-          appProvider.activateSelectionAction();
-          appProvider.setSelectorMode(SelectorMode.rectangle);
-        });
-      },
-    ),
-    buildToolbarIconButton(
-      key: Keys.toolSelectorModeCircle,
-      tooltip: l10n.toolCircle,
-      icon: AppIcon.selectorCircle,
-      interactionProfile: interactionProfile,
-      isSelected: isSelectionToolActive && appProvider.selectorModel.mode == SelectorMode.circle,
-      onPressed: () {
-        Future<void>.microtask(() {
-          appProvider.activateSelectionAction();
-          appProvider.setSelectorMode(SelectorMode.circle);
-        });
-      },
-    ),
-    buildToolbarIconButton(
-      key: Keys.toolSelectorModeLine,
-      tooltip: l10n.toolLine,
-      icon: AppIcon.selectorPolygon,
-      interactionProfile: interactionProfile,
-      isSelected: isSelectionToolActive && appProvider.selectorModel.mode == SelectorMode.line,
-      onPressed: () {
-        Future<void>.microtask(() {
-          appProvider.activateSelectionAction();
-          appProvider.setSelectorMode(SelectorMode.line);
-        });
-      },
-    ),
-    buildToolbarIconButton(
-      key: Keys.toolSelectorModeLasso,
-      tooltip: l10n.toolLasso,
-      icon: AppIcon.selectorLasso,
-      interactionProfile: interactionProfile,
-      isSelected: isSelectionToolActive && appProvider.selectorModel.mode == SelectorMode.lasso,
-      onPressed: () {
-        Future<void>.microtask(() {
-          appProvider.activateSelectionAction();
-          appProvider.setSelectorMode(SelectorMode.lasso);
-        });
-      },
-    ),
-    buildToolbarIconButton(
-      key: Keys.toolSelectorModeWand,
-      tooltip: l10n.toolMagic,
-      icon: AppIcon.selectorWand,
-      interactionProfile: interactionProfile,
-      isSelected: isSelectionToolActive && appProvider.selectorModel.mode == SelectorMode.wand,
-      onPressed: () {
-        Future<void>.microtask(() {
-          appProvider.activateSelectionAction();
-          appProvider.setSelectorMode(SelectorMode.wand);
-          // Warm the source cache now so the first tap-and-drag is live, not
-          // stalled on the first sample's layer render + readback.
-          appProvider.prewarmWandSourceCache();
-        });
-      },
-    ),
+    for (final SelectorMode mode in SelectorMode.values)
+      buildToolbarIconButton(
+        key: _selectorModeKeys[mode],
+        tooltip: mode.label(l10n),
+        icon: mode.icon,
+        interactionProfile: interactionProfile,
+        isSelected: isSelectionToolActive && appProvider.selectorModel.mode == mode,
+        onPressed: () {
+          Future<void>.microtask(() => appProvider.activateSelectorMode(mode));
+        },
+      ),
   ];
 
   if (hasVisibleSelection) {
@@ -176,10 +129,7 @@ Widget buildSelectionSubToolbar({
         interactionProfile: interactionProfile,
         isSelected: appProvider.selectorModel.math == SelectorMath.add,
         onPressed: () {
-          final SelectorMath next = appProvider.selectorModel.math == SelectorMath.add
-              ? SelectorMath.replace
-              : SelectorMath.add;
-          Future<void>.microtask(() => appProvider.setSelectorMath(next));
+          Future<void>.microtask(() => appProvider.toggleSelectorMath(SelectorMath.add));
         },
       ),
       buildToolbarIconButton(
@@ -188,10 +138,7 @@ Widget buildSelectionSubToolbar({
         interactionProfile: interactionProfile,
         isSelected: appProvider.selectorModel.math == SelectorMath.remove,
         onPressed: () {
-          final SelectorMath next = appProvider.selectorModel.math == SelectorMath.remove
-              ? SelectorMath.replace
-              : SelectorMath.remove;
-          Future<void>.microtask(() => appProvider.setSelectorMath(next));
+          Future<void>.microtask(() => appProvider.toggleSelectorMath(SelectorMath.remove));
         },
       ),
       buildToolbarIconButton(
@@ -199,17 +146,7 @@ Widget buildSelectionSubToolbar({
         icon: AppIcon.selectorMathInvert,
         interactionProfile: interactionProfile,
         onPressed: () {
-          Future<void>.microtask(() {
-            appProvider.selectorModel.invert(
-              Rect.fromLTWH(
-                AppMath.zero.toDouble(),
-                AppMath.zero.toDouble(),
-                appProvider.layers.size.width,
-                appProvider.layers.size.height,
-              ),
-            );
-            appProvider.update();
-          });
+          Future<void>.microtask(appProvider.invertSelection);
         },
       ),
       buildToolbarIconButton(

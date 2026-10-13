@@ -7,6 +7,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/quick_menu_geometry.dart';
 import 'package:fpaint/helpers/smudge_helper.dart';
 import 'package:fpaint/helpers/trackpad_pressure.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
@@ -14,6 +15,8 @@ import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/quick_menu_model.dart';
+import 'package:fpaint/models/quick_menu_slot.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
@@ -27,6 +30,7 @@ import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
 
 part 'canvas_gesture_handler_eyedropper.dart';
+part 'canvas_gesture_handler_quick_menu.dart';
 part 'canvas_gesture_handler_rotation.dart';
 part 'canvas_gesture_handler_state_methods.dart';
 
@@ -84,8 +88,22 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   /// Non-null only during a modifier-driven selection gesture.
   SelectorMath? _previousSelectorMath;
 
+  /// Where a lone finger went down; the quick-menu hold cancels once it moves
+  /// past the draw slop from here.
+  Offset? _quickMenuHoldOrigin;
+
+  /// Fires the touch-and-hold that opens the quick menu.
+  Timer? _quickMenuHoldTimer;
+
+  /// Pointer that opened the quick menu and is still down, or -1 for none.
+  int _quickMenuPointer = -1;
+
   /// Fades out the live angle readout once twisting stops.
   Timer? _rotationHudTimer;
+
+  /// Where the current right-button press went down; null once it has moved
+  /// far enough to be a pan rather than a click.
+  Offset? _secondaryPressPosition;
 
   /// Canvas-space sample anchor re-sampled / re-previewed on every drag step.
   Offset? _toleranceDragAnchorCanvas;
@@ -106,6 +124,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   @override
   void dispose() {
     _rotationHudTimer?.cancel();
+    _quickMenuHoldTimer?.cancel();
     super.dispose();
   }
 
@@ -247,6 +266,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             if (!_activePointers.contains(event.pointer)) {
               _activePointers.add(event.pointer);
             }
+            _updateQuickMenuHoldForTouchDown(appProvider, event);
 
             if (_activePointers.length >= AppMath.pair) {
               if (_activePointers.length == AppMath.pair) {
@@ -268,8 +288,14 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
               }
             }
           } else {
+            // A pen landing means any resting finger is a palm, not a hold.
+            _cancelQuickMenuHold();
+            if (_startQuickMenuFromStylusButton(appProvider, event)) {
+              return;
+            }
             if (event.kind == PointerDeviceKind.mouse && event.buttons == kSecondaryMouseButton) {
               _panningPointerId = event.pointer;
+              _secondaryPressPosition = event.localPosition;
               // A mouse cannot twist, so Shift turns the existing right-drag
               // navigation gesture into a rotate.
               _isMouseRotateDrag = HardwareKeyboard.instance.isShiftPressed;
@@ -281,8 +307,12 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         },
         onPointerMove: (PointerMoveEvent event) {
           _registerInputModality(shellProvider, event.kind);
+          if (_trackQuickMenuPointer(appProvider, event)) {
+            return;
+          }
           if (event.kind == PointerDeviceKind.touch) {
             _pointerPositions[event.pointer] = event.localPosition;
+            _cancelQuickMenuHoldIfMoved(event);
 
             if (_shouldProcessMultiTouchUpdate(event.pointer)) {
               _handleMultiTouchUpdate(
@@ -306,6 +336,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             }
           } else {
             if (_panningPointerId == event.pointer) {
+              _forgetSecondaryClickIfMoved(event.localPosition);
               if (_isMouseRotateDrag) {
                 _handleMouseRotateDrag(appProvider, shellProvider, event);
                 return;
@@ -321,6 +352,9 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
           }
         },
         onPointerUp: (PointerUpEvent event) {
+          if (_releaseQuickMenuPointer(appProvider, event, pickHighlighted: true)) {
+            return;
+          }
           if (event.kind == PointerDeviceKind.touch) {
             final bool wasMultiTouch = _activePointers.length >= AppMath.pair;
             _pointerPositions.remove(event.pointer);
@@ -352,6 +386,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             }
           } else {
             if (_panningPointerId == event.pointer) {
+              _openQuickMenuOnSecondaryClick(appProvider, event.localPosition);
               _panningPointerId = -1;
               _isMouseRotateDrag = false;
               _resetGestureTwist();
@@ -361,6 +396,9 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
           }
         },
         onPointerCancel: (PointerCancelEvent event) {
+          if (_releaseQuickMenuPointer(appProvider, event, pickHighlighted: false)) {
+            return;
+          }
           if (event.kind == PointerDeviceKind.touch) {
             final bool wasMultiTouch = _activePointers.length >= AppMath.pair;
             _pointerPositions.remove(event.pointer);
@@ -389,6 +427,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             appProvider.endTolerancePointerLock();
           } else {
             if (_panningPointerId == event.pointer) {
+              _secondaryPressPosition = null;
               _panningPointerId = -1;
               _isMouseRotateDrag = false;
               _resetGestureTwist();

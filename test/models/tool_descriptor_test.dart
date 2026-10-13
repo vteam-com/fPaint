@@ -177,4 +177,19 @@ void main() {
       expect(tooltipWithShortcut(null, ShortcutKeys.b), isNull);
     });
   });
+
+  group('equality', () {
+    test('descriptors for the same tool are equal and hash alike', () {
+      expect(const ToolDescriptor.gesture(ActionType.brush), const ToolDescriptor.gesture(ActionType.brush));
+      expect(
+        const ToolDescriptor.adjust(SelectionEffect.blur).hashCode,
+        const ToolDescriptor.adjust(SelectionEffect.blur).hashCode,
+      );
+    });
+
+    test('descriptors for different tools are not equal', () {
+      expect(const ToolDescriptor.gesture(ActionType.brush), isNot(const ToolDescriptor.gesture(ActionType.eraser)));
+      expect(const ToolDescriptor.adjust(SelectionEffect.blur), isNot(const ToolDescriptor.gesture(ActionType.brush)));
+    });
+  });
 }

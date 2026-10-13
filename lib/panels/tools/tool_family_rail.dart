@@ -133,7 +133,7 @@ class ToolFamilyRail extends StatelessWidget {
       return AppButtonIcon(
         key: ValueKey<SelectionEffect>(effect),
         icon: descriptor.icon,
-        isSelected: armedEffect == effect,
+        isSelected: appProvider.activeTool == descriptor,
         tooltip: descriptor.label(l10n),
         constraints: constraints,
         padding: padding,
@@ -146,11 +146,11 @@ class ToolFamilyRail extends StatelessWidget {
       key: _gestureToolKey(action),
       icon: descriptor.icon,
       // Suppressed while an effect brush is armed — only one tool is active.
-      isSelected: appProvider.selectedAction == action && armedEffect == null,
+      isSelected: appProvider.activeTool == descriptor,
       tooltip: tooltipWithShortcut(descriptor.label(l10n), descriptor.shortcut),
       constraints: constraints,
       padding: padding,
-      onPressed: () => appProvider.selectedAction = action,
+      onPressed: () => appProvider.activateTool(descriptor),
     );
   }
 

@@ -184,4 +184,16 @@ class AppInteraction {
   static const double transformScaleFactorMin = 0.1;
   static const double transformScaleFactorMax = 10.0;
   static const int transformGridSubdivisions = 10;
+
+  /// How long a single finger must rest on the canvas, without moving past
+  /// [singleTouchDrawSlop], before the on-canvas quick menu opens.
+  static const Duration quickMenuHoldDelay = Duration(milliseconds: 450);
+
+  /// Furthest a right-click may drift (screen pixels) and still open the
+  /// quick menu; past it the press is a right-drag pan.
+  static const double quickMenuClickSlop = 6.0;
+
+  /// Vertical screen pixels dragged on the quick menu puck per 1.0 of armed
+  /// effect strength.
+  static const double quickMenuStrengthDragPixelsPerUnit = 150.0;
 }

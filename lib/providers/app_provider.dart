@@ -21,10 +21,13 @@ import 'package:fpaint/models/hatch_marks.dart';
 import 'package:fpaint/models/hatch_pattern.dart';
 import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/image_placement_model.dart';
+import 'package:fpaint/models/quick_menu_model.dart';
+import 'package:fpaint/models/quick_menu_slot.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/text_tool_state.dart';
+import 'package:fpaint/models/tool_descriptor.dart';
 import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -48,6 +51,7 @@ part 'app_provider_canvas.dart';
 part 'app_provider_cross_layer_eraser.dart';
 part 'app_provider_hatch.dart';
 part 'app_provider_pixel_brush.dart';
+part 'app_provider_quick_menu.dart';
 part 'app_provider_selection.dart';
 part 'app_provider_selection_commit.dart';
 part 'app_provider_selection_crop.dart';
@@ -212,6 +216,7 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
     _toolOptionsNotifier.dispose();
     _viewportRepaintNotifier.dispose();
     _selectedActionNotifier.dispose();
+    quickMenuModel.dispose();
     super.dispose();
   }
 
@@ -938,6 +943,9 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
 
   /// The paint-mode state for brushing an Adjust effect onto the canvas.
   final EffectBrushModel effectBrushModel = EffectBrushModel();
+
+  /// The on-canvas quick menu (recent tools, colors, size puck).
+  final QuickMenuModel quickMenuModel = QuickMenuModel();
 
   /// Monotonic token that invalidates stale async effect preview renders.
   int effectPreviewRenderVersion = 0;

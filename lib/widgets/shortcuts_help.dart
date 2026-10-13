@@ -104,6 +104,11 @@ class ShortcutsHelpDialog extends StatelessWidget {
             ShortcutActions.resizeBrushDrag,
             gesture: ShortcutActions.dragOrScroll,
           ),
+          _shortcutEntry(
+            <String>[],
+            ShortcutActions.quickMenu,
+            gesture: ShortcutActions.rightClickOrHold,
+          ),
         ],
       ),
       (

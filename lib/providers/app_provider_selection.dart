@@ -16,6 +16,29 @@ extension AppProviderSelection on AppProvider {
     prewarmWandSourceCache();
   }
 
+  /// Toggles [math] (add / remove) for the next selection: turning on one
+  /// turns the other off, and tapping the active one returns to replace.
+  void toggleSelectorMath(SelectorMath math) {
+    setSelectorMath(selectorModel.math == math ? SelectorMath.replace : math);
+  }
+
+  /// Inverts the visible selection against the whole canvas.
+  void invertSelection() {
+    selectorModel.invert(
+      Rect.fromLTWH(AppMath.zero.toDouble(), AppMath.zero.toDouble(), layers.size.width, layers.size.height),
+    );
+    update();
+  }
+
+  /// Switches to the selection tool in [mode]. Picking Edge Detection warms
+  /// its source cache right away, so the first tap-and-drag is live rather
+  /// than stalled on the first sample's layer render + readback.
+  void activateSelectorMode(SelectorMode mode) {
+    activateSelectionAction();
+    setSelectorMode(mode);
+    prewarmWandSourceCache();
+  }
+
   /// Warms the wand source-pixel cache (layer render + readback) as soon as Edge
   /// Detection becomes active, so the first tap-and-drag is responsive instead of
   /// stalling ~half a second while the first sample builds the cache. No-ops when

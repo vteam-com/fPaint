@@ -1,4 +1,5 @@
 import 'package:fpaint/constants/app_interaction.dart';
+import 'package:fpaint/constants/app_math.dart';
 
 /// Shared layout and sizing tokens.
 class AppLayout {
@@ -80,4 +81,30 @@ class AppLayout {
 
   /// Visible width of the brush size edge slider's track groove.
   static const double brushSizeEdgeSliderTrackWidth = 6.0;
+
+  /// Distance from the quick menu centre to the centre of each tool slot.
+  static const double quickMenuRingRadius = 112.0;
+
+  /// Distance from the quick menu centre to the centre of each color swatch.
+  static const double quickMenuColorRadius = 62.0;
+
+  /// Diameter of one recent-color swatch in the quick menu.
+  static const double quickMenuSwatchSize = 26.0;
+
+  /// Diameter of the quick menu's centre puck (size / strength scrub).
+  static const double quickMenuPuckSize = 56.0;
+
+  /// Diameter of the backdrop disc drawn behind the quick menu slots.
+  static const double quickMenuDiscSize = (quickMenuRingRadius + toolbarButtonSize) * AppMath.two;
+
+  /// Distance from the quick menu centre to the outer sub-ring (history,
+  /// selection modes) that a Select or Undo slot expands.
+  static const double quickMenuOuterRingRadius = 174.0;
+
+  /// Arc distance between neighbouring outer sub-ring slots.
+  static const double quickMenuSubmenuSpacing = 56.0;
+
+  /// Furthest any quick menu slot reaches from the centre; the menu is kept
+  /// this far inside the viewport so an expanded sub-ring is never cut off.
+  static const double quickMenuReach = quickMenuOuterRingRadius + toolbarButtonSize / AppMath.two;
 }

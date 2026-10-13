@@ -208,7 +208,7 @@ class ToolsPanel extends StatelessWidget {
           child: TopColors(
             colorUsages: paletteColors,
             onRefresh: layers.evaluateTopColor,
-            onColorPicked: (Color color) => _applyPaletteColor(appProvider, color),
+            onColorPicked: appProvider.applyPaletteColor,
             minimal: minimal,
             showHeader: false,
             autoRefreshOnIdle: true,
@@ -657,17 +657,6 @@ class ToolsPanel extends StatelessWidget {
     final BrushStyle style = next.crossed ? BrushStyle.crossHatch : BrushStyle.hatch;
     if (appProvider.brushStyle != style) {
       appProvider.brushStyle = style;
-    }
-  }
-
-  /// Applies a palette color to the active tool and records it as recent.
-  void _applyPaletteColor(AppProvider appProvider, Color color) {
-    if (appProvider.selectedAction == ActionType.rectangle ||
-        appProvider.selectedAction == ActionType.circle ||
-        appProvider.selectedAction == ActionType.fill) {
-      appProvider.fillColor = color;
-    } else {
-      appProvider.brushColor = color;
     }
   }
 }

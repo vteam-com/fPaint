@@ -199,6 +199,30 @@ capture an un-applied preview — commit or Apply first.
 
 ---
 
+## Quick menu (accelerator, not a section)
+
+Right-click, a pen barrel-button press, or a touch-and-hold on the canvas opens
+a radial **quick menu** at the pointer: the six most recently used rail tools
+plus **Select** and **Undo** on the ring, recent colors on an inner arc, and a
+centre puck that scrubs brush size (and, with an effect armed, strength — drag
+up / down). A pen or finger that opened it can flick toward a slot and lift to
+pick it.
+
+Select and Undo each fan out an **outer sub-ring** beside themselves rather
+than acting alone: Select shows the selection modes (picking one arms the
+selector in that mode) followed by **Add / Remove** (toggles that keep the ring
+open so a mode can be picked next), **Invert**, and **Cancel selection** — the
+same calls the on-canvas selection sub-toolbar makes. Undo steps back once and
+shows Undo / Redo, which stay open for further steps. Redo is rare, so it lives only on that sub-ring.
+
+It is an **accelerator**, like the B / E / S keys — not a third section and not
+a second home for any capability. It only offers tools that already live in
+the rail, and activates them through the same `activateTool` path, so the
+one-active-tool rule, highlights, and options panel stay in agreement. Do not
+add a capability that exists *only* in the quick menu.
+
+---
+
 ## Design rules for contributors
 
 These are the invariants. Breaking one is a design regression, not just a code
@@ -261,6 +285,8 @@ change.
 | Effect display labels | [lib/models/effect_labels.dart](lib/models/effect_labels.dart) |
 | Armed effect-brush state | [lib/models/effect_brush_model.dart](lib/models/effect_brush_model.dart) |
 | Gesture actions | [lib/models/user_action_drawing.dart](lib/models/user_action_drawing.dart) |
+| Shared tool activation (`activeTool`, `activateTool`) + quick menu actions | [lib/providers/app_provider_quick_menu.dart](lib/providers/app_provider_quick_menu.dart) |
+| Quick menu overlay / gestures | [lib/widgets/quick_menu.dart](lib/widgets/quick_menu.dart), [lib/widgets/canvas_gesture_handler_quick_menu.dart](lib/widgets/canvas_gesture_handler_quick_menu.dart) |
 | Paint commit, overlay preview flow, selection clipping | [lib/providers/app_provider_selection_effects.dart](lib/providers/app_provider_selection_effects.dart) |
 | Fill preview builders (solid tolerance-drag + gradient) | [lib/providers/app_provider_tools.dart](lib/providers/app_provider_tools.dart) |
 | Fill preview lifecycle (`commitFillPreview` / apply / cancel) | [lib/providers/app_provider.dart](lib/providers/app_provider.dart) |

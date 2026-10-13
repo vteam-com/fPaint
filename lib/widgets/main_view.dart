@@ -22,6 +22,7 @@ import 'package:fpaint/widgets/layer_picker_puck.dart';
 import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
+import 'package:fpaint/widgets/quick_menu.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 import 'package:fpaint/widgets/text_editor.dart';
 import 'package:fpaint/widgets/transform_widget.dart';
@@ -292,6 +293,16 @@ class MainViewState extends State<MainView> {
                           showSnackBarIfMounted(this.context, duplicateMessage);
                         },
                         onCancel: () => appProvider.cancelTransform(),
+                      ),
+
+                    // On-canvas quick menu (recent tools, colors, size puck),
+                    // topmost so it sits over every other overlay while open.
+                    if (!hasActiveTransformOverlay)
+                      Positioned.fill(
+                        child: QuickMenu(
+                          appProvider: appProvider,
+                          interactionProfile: shellProvider.interactionLayoutProfile,
+                        ),
                       ),
                   ],
                 );

@@ -63,6 +63,12 @@ class ToolDescriptor {
   ///
   /// Effects are armed from the rail only, so they never carry a key.
   String? get shortcut => effect != null ? null : toolShortcutLabel(action!);
+
+  @override
+  bool operator ==(Object other) => other is ToolDescriptor && other.action == action && other.effect == effect;
+
+  @override
+  int get hashCode => Object.hash(action, effect);
 }
 
 /// The **Brush** section: the freehand painters ([kBrushToolOrder]) followed by

@@ -61,4 +61,7 @@ class AppLimits {
   /// flattening into one stroke-composite image. A single layer is already one
   /// blit, so flattening it would only add a render.
   static const int strokeCompositeMinLayers = 2;
+
+  /// Recently used tools offered on the quick menu ring.
+  static const int quickMenuRecentToolCount = 6;
 }

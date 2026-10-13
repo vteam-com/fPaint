@@ -35,6 +35,8 @@ abstract class ShortcutActions {
   static const String rotateViewDrag = 'Rotate View (mouse)';
   static const String twoFingerTwist = 'Two-finger twist';
   static const String rightDragSelection = 'Right-drag';
+  static const String quickMenu = 'Quick Menu (tools, colors, size)';
+  static const String rightClickOrHold = 'Right-click or touch-and-hold';
 
   /// Trailing gesture noun for a modifier chord completed by a canvas click.
   static const String clickCanvas = 'Click';

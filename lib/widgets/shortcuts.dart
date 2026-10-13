@@ -204,6 +204,11 @@ Widget shortCutsForMainApp(
       // Escape current action
       EscapeIntent: CallbackAction<EscapeIntent>(
         onInvoke: (EscapeIntent _) async {
+          // An open quick menu is the innermost thing to back out of.
+          if (appProvider.quickMenuModel.isOpen) {
+            appProvider.quickMenuModel.close();
+            return null;
+          }
           // Discard any live gradient-fill session before restoring the tool, so
           // Escape backs out of the fill (no undo entry) rather than applying it.
           appProvider.cancelGradientPreview();

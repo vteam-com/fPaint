@@ -23,6 +23,12 @@ class Keys {
   static const Key brushSizeEdgeSlider = Key('brush-size-edge-slider');
   static const Key brushSizeEdgeSliderReadout = Key('brush-size-edge-slider-readout');
   static const String gradientHandleKeyPrefixText = 'gradient_handle_';
+  static const Key quickMenu = Key('quick-menu');
+  static const Key quickMenuBarrier = Key('quick-menu-barrier');
+  static const Key quickMenuPuck = Key('quick-menu-puck');
+  static const String quickMenuSlotKeyPrefixText = 'quick-menu-slot-';
+  static const String quickMenuColorKeyPrefixText = 'quick-menu-color-';
+  static const String quickMenuSubmenuKeyPrefixText = 'quick-menu-submenu-';
   static const Key layerAddAboveButton = Key('layer-add-above-button');
   static const Key layersAllLayersToggleButton = Key('layers-all-layers-toggle');
   static const Key layerPickerToggleButton = Key('layer-picker-toggle-button');
