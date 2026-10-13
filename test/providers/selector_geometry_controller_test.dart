@@ -9,6 +9,9 @@ import 'package:material_ui/material_ui.dart';
 
 /// Records what the controller asks of its host, so the geometry can be
 /// exercised without an AppProvider.
+/// Brush width the fake host reports for selection-brush strokes.
+const double _testBrushSize = 20;
+
 class _FakeHost implements SelectorGeometryHost {
   _FakeHost({this.canvasScale = 1.0, this.canvasRotation = 0.0});
 
@@ -17,6 +20,9 @@ class _FakeHost implements SelectorGeometryHost {
 
   @override
   final double canvasScale;
+
+  @override
+  double brushSize = _testBrushSize;
 
   /// Viewport rotation in radians used to convert screen deltas.
   final double canvasRotation;
@@ -268,5 +274,16 @@ void main() {
       expect(host.appliedTolerance, isNull);
       expect(host.wandRequests, isEmpty);
     });
+  });
+
+  test('a selection-brush stroke takes its width from the host brush size', () {
+    final _FakeHost host = _FakeHost();
+    final SelectorGeometryController controller = SelectorGeometryController(host);
+    host.selectorModel.mode = SelectorMode.brush;
+
+    controller.creationStart(const Offset(40, 40));
+
+    expect(host.selectorModel.brushWidth, _testBrushSize);
+    expect(host.selectorModel.path1!.getBounds().width, closeTo(_testBrushSize, 0.5));
   });
 }

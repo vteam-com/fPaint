@@ -82,6 +82,7 @@ enum AppIcon {
   rotate90DegreesCw('assets/icons/rotate_90_degrees_cw.svg'),
   rotateRight('assets/icons/rotate_right.svg'),
 
+  selectorBrush('assets/icons/selector_brush.svg'),
   selectorCancel('assets/icons/selector_cancel.svg'),
   selectorSquare('assets/icons/selector_square.svg'),
   selectorCircle('assets/icons/selector_circle.svg'),

@@ -266,7 +266,12 @@ extension AppProviderTools on AppProvider {
   /// because it uses its own font size.
   bool get canAdjustBrushSize =>
       effectBrushModel.isArmed ||
+      isSelectionBrushActive ||
       (selectedAction.isSupported(ActionOptions.brushSize) && selectedAction != ActionType.text);
+
+  /// Whether the selection tool is painting its selection with a brush, so
+  /// the brush size (slider, `[` / `]`, size ring) sets the band width.
+  bool get isSelectionBrushActive => selectedAction == ActionType.selector && selectorModel.mode == SelectorMode.brush;
 
   /// Grows (`]`, [increase]) or shrinks (`[`) the armed tool's brush size by
   /// one keyboard step. The size HUD ring previews the result at the canvas

@@ -306,6 +306,7 @@
   "toolRemove": "Retirer",
   "toolSectionBrush": "Pinceau",
   "toolSectionElements": "Éléments",
+  "toolSelectionBrush": "Pinceau de sélection",
   "toolSelector": "Sélecteur",
   "toolSmudge": "Estomper",
   "toolSolid": "Uni",

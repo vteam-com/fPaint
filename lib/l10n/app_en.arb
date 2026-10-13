@@ -313,6 +313,7 @@
   "toolRemove": "Remove",
   "toolSectionBrush": "Brush",
   "toolSectionElements": "Elements",
+  "toolSelectionBrush": "Selection Brush",
   "toolSelector": "Selector",
   "toolSmudge": "Smudge",
   "toolSolid": "Solid",

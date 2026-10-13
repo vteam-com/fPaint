@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
@@ -29,6 +31,10 @@ class SelectorModel extends VisibleModel {
   bool allLayers = false;
 
   List<Offset> points = <Offset>[];
+
+  /// Width, in canvas pixels, of the band a [SelectorMode.brush] stroke paints.
+  double brushWidth = AppDefaults.brushSize;
+
   Path? path1;
   Path? path2; // use when Selector.math is not Selector.replace
 
@@ -142,6 +148,13 @@ class SelectorModel extends VisibleModel {
 
         break;
 
+      case SelectorMode.brush:
+        points
+          ..clear()
+          ..add(p1);
+        _setWorkingPath(Path()..addOval(Rect.fromCircle(center: p1, radius: _brushRadius)));
+        break;
+
       case SelectorMode.wand:
         break;
     }
@@ -195,9 +208,33 @@ class SelectorModel extends VisibleModel {
           }
           break;
 
+        case SelectorMode.brush:
+          _extendBrushStroke(p2);
+          break;
+
         case SelectorMode.wand:
           break;
       }
+    }
+  }
+
+  double get _brushRadius => brushWidth / AppMath.two;
+
+  /// Paints the brush band on to [point]: unions one round-ended segment from
+  /// the last sample into the working path. Samples closer than a fraction of
+  /// the radius are skipped, bounding the path-boolean work per stroke.
+  void _extendBrushStroke(Offset point) {
+    final Offset last = points.last;
+    if ((point - last).distance < _brushRadius * AppInteraction.selectionBrushSampleSpacing) {
+      return;
+    }
+    points.add(point);
+
+    final Path segment = _roundedSegmentPath(last, point, _brushRadius);
+    final Path? working = math == SelectorMath.replace ? path1 : path2;
+    final Path? merged = working == null ? segment : _combinePathsSafely(PathOperation.union, working, segment);
+    if (merged != null) {
+      _setWorkingPath(merged);
     }
   }
 
@@ -390,12 +427,36 @@ class SelectorModel extends VisibleModel {
   }
 }
 
+/// One closed outline of a [radius]-wide band from [start] to [end] with round
+/// ends (a stadium). A single contour, so it never self-overlaps the way a
+/// rectangle plus end circles would, and unions cleanly into a selection.
+Path _roundedSegmentPath(Offset start, Offset end, double radius) {
+  final Offset delta = end - start;
+  final Offset direction = delta / delta.distance;
+  // Left-hand normal: the direction rotated a quarter turn.
+  final Offset normal = Offset(-direction.dy, direction.dx) * radius;
+  final double normalAngle = math.atan2(normal.dy, normal.dx);
+
+  return Path()
+    ..moveTo(start.dx + normal.dx, start.dy + normal.dy)
+    ..lineTo(end.dx + normal.dx, end.dy + normal.dy)
+    // Half turns sweeping back through the travel direction (then its reverse)
+    // bulge each cap outward, away from the band.
+    ..arcTo(Rect.fromCircle(center: end, radius: radius), normalAngle, -math.pi, false)
+    ..lineTo(start.dx - normal.dx, start.dy - normal.dy)
+    ..arcTo(Rect.fromCircle(center: start, radius: radius), normalAngle + math.pi, -math.pi, false)
+    ..close();
+}
+
 /// Enum that represents the selector mode.
 enum SelectorMode {
   rectangle,
   circle,
   line,
   lasso,
+
+  /// Paint the selection: the swept band of a brush-sized stroke is selected.
+  brush,
   wand,
 }
 

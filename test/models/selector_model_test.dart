@@ -513,7 +513,7 @@ void main() {
 
   group('SelectorMode enum', () {
     test('has all expected values', () {
-      expect(SelectorMode.values.length, 5);
+      expect(SelectorMode.values.length, 6);
       expect(
         SelectorMode.values,
         containsAll(<SelectorMode>[
@@ -521,6 +521,7 @@ void main() {
           SelectorMode.circle,
           SelectorMode.line,
           SelectorMode.lasso,
+          SelectorMode.brush,
           SelectorMode.wand,
         ]),
       );
@@ -539,6 +540,78 @@ void main() {
           SelectorMath.intersect,
         ]),
       );
+    });
+  });
+
+  group('SelectorMode.brush', () {
+    const double width = 20;
+    const double radius = width / 2;
+    const Offset start = Offset(50, 50);
+    const Offset end = Offset(150, 50);
+
+    setUp(() {
+      model.mode = SelectorMode.brush;
+      model.brushWidth = width;
+    });
+
+    test('a single dab selects a brush-sized disc', () {
+      model.addP1(start);
+
+      expect(model.isVisible, isTrue);
+      expect(model.path1!.contains(start + const Offset(radius - 1, 0)), isTrue);
+      expect(model.path1!.contains(start + const Offset(radius + 1, 0)), isFalse);
+    });
+
+    test('a stroke selects the round-ended band it sweeps, and nothing wider', () {
+      model.addP1(start);
+      model.addP2(const Offset(100, 50));
+      model.addP2(end);
+
+      final Path path = model.path1!;
+      expect(path.contains(const Offset(100, 50 + radius - 1)), isTrue, reason: 'inside the band');
+      expect(path.contains(const Offset(100, 50 + radius + 1)), isFalse, reason: 'just outside the band');
+      expect(path.contains(end + const Offset(radius - 1, 0)), isTrue, reason: 'round end cap');
+      expect(path.contains(start - const Offset(radius - 1, 0)), isTrue, reason: 'round start cap');
+    });
+
+    test('a stroke that doubles back still yields one clean region', () {
+      model.addP1(start);
+      model.addP2(end);
+      model.addP2(const Offset(100, 50));
+
+      expect(model.path1!.contains(const Offset(120, 50)), isTrue);
+      expect(model.path1!.computeMetrics().length, 1, reason: 'the union leaves a single outline');
+    });
+
+    test('samples closer than the spacing threshold are skipped', () {
+      model.addP1(start);
+      model.addP2(start + const Offset(0.5, 0));
+
+      expect(model.points, hasLength(1));
+    });
+
+    test('in add mode the stroke joins the existing selection on release', () {
+      model.path1 = Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20));
+      model.math = SelectorMath.add;
+
+      model.addP1(start);
+      model.addP2(end);
+      model.applyMath();
+
+      expect(model.path1!.contains(const Offset(10, 10)), isTrue);
+      expect(model.path1!.contains(const Offset(100, 50)), isTrue);
+    });
+
+    test('in remove mode the stroke carves out of the existing selection', () {
+      model.path1 = Path()..addRect(const Rect.fromLTWH(0, 0, 200, 100));
+      model.math = SelectorMath.remove;
+
+      model.addP1(start);
+      model.addP2(end);
+      model.applyMath();
+
+      expect(model.path1!.contains(const Offset(100, 50)), isFalse);
+      expect(model.path1!.contains(const Offset(100, 90)), isTrue);
     });
   });
 }

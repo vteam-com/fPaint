@@ -11,6 +11,7 @@ extension SelectorModeDisplay on SelectorMode {
     SelectorMode.circle => AppIcon.selectorCircle,
     SelectorMode.line => AppIcon.selectorPolygon,
     SelectorMode.lasso => AppIcon.selectorLasso,
+    SelectorMode.brush => AppIcon.selectorBrush,
     SelectorMode.wand => AppIcon.selectorWand,
   };
 
@@ -20,6 +21,7 @@ extension SelectorModeDisplay on SelectorMode {
     SelectorMode.circle => l10n.toolCircle,
     SelectorMode.line => l10n.toolLine,
     SelectorMode.lasso => l10n.toolLasso,
+    SelectorMode.brush => l10n.toolSelectionBrush,
     SelectorMode.wand => l10n.toolMagic,
   };
 }

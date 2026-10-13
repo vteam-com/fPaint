@@ -10,6 +10,10 @@ abstract class SelectorGeometryHost {
   /// The selection being edited.
   SelectorModel get selectorModel;
 
+  /// Current brush size in canvas pixels; a selection-brush stroke paints a
+  /// band this wide.
+  double get brushSize;
+
   /// Current canvas zoom, used to convert screen deltas to canvas space.
   double get canvasScale;
 

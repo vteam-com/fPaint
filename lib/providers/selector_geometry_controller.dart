@@ -47,6 +47,7 @@ class SelectorGeometryController {
     }
 
     _model.isDrawing = true;
+    _model.brushWidth = _host.brushSize;
     _model.addP1(position);
     _host.repaintToolOptions();
     _host.update();

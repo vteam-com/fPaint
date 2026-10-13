@@ -178,6 +178,10 @@ class AppInteraction {
   static const double imagePlacementHandleSize = 14.0;
   static const double imagePlacementButtonSpacing = 8.0;
 
+  /// Minimum travel, as a fraction of the brush radius, between samples that a
+  /// selection-brush stroke merges in; closer samples add nothing visible.
+  static const double selectionBrushSampleSpacing = 0.25;
+
   /// Gap between neighbouring controls at mouse-driven desktop density.
   static const double denseButtonSpacing = 4.0;
   static const double imagePlacementButtonSize = 36.0;

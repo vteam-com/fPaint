@@ -1394,6 +1394,12 @@ abstract class AppLocalizations {
   /// **'Elements'**
   String get toolSectionElements;
 
+  /// No description provided for @toolSelectionBrush.
+  ///
+  /// In en, this message translates to:
+  /// **'Selection Brush'**
+  String get toolSelectionBrush;
+
   /// No description provided for @toolSelector.
   ///
   /// In en, this message translates to:

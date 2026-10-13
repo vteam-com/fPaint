@@ -370,6 +370,10 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
         if (appProvider.selectorModel.mode == SelectorMode.wand) {
           _updateWandToleranceFromDrag(appProvider, event.localPosition);
         } else {
+          // The size ring rides along a selection-brush stroke like any brush.
+          if (appProvider.isSelectionBrushActive) {
+            _updateDrawingToolPreview(appProvider, event.localPosition);
+          }
           appProvider.selectorCreationAdditionalPoint(adjustedPosition);
         }
         return;

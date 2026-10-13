@@ -303,6 +303,26 @@ void main() {
     });
   });
 
+  group('selection brush', () {
+    test('the brush size applies while the selector paints with a brush', () {
+      appProvider.activateSelectorMode(SelectorMode.lasso);
+      expect(appProvider.isSelectionBrushActive, isFalse);
+      expect(appProvider.canAdjustBrushSize, isFalse);
+
+      appProvider.activateSelectorMode(SelectorMode.brush);
+
+      expect(appProvider.isSelectionBrushActive, isTrue);
+      expect(appProvider.canAdjustBrushSize, isTrue);
+    });
+
+    test('the selection ring offers the selection brush', () {
+      expect(
+        appProvider.quickMenuSubmenuSlots(QuickMenuSubmenu.selection).map((QuickMenuSlot slot) => slot.selectorMode),
+        contains(SelectorMode.brush),
+      );
+    });
+  });
+
   group('applyEffectStrengthDrag', () {
     test('dragging up strengthens the armed effect', () {
       appProvider.activateTool(_blur);

@@ -24,6 +24,7 @@ const Map<SelectorMode, Key> _selectorModeKeys = <SelectorMode, Key>{
   SelectorMode.circle: Keys.toolSelectorModeCircle,
   SelectorMode.line: Keys.toolSelectorModeLine,
   SelectorMode.lasso: Keys.toolSelectorModeLasso,
+  SelectorMode.brush: Keys.toolSelectorModeBrush,
   SelectorMode.wand: Keys.toolSelectorModeWand,
 };
 

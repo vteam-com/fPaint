@@ -433,7 +433,8 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
   //-------------------------
   // Line Weight
 
-  /// Gets the brush size.
+  /// Gets the brush size. Part of [SelectorGeometryHost].
+  @override
   double get brushSize => preferences.brushSize;
 
   /// Gets whether the live brush-size preview overlay is visible.
