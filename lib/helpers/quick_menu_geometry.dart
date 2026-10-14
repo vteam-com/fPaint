@@ -4,7 +4,7 @@ import 'package:flutter/painting.dart';
 import 'package:fpaint/constants/constants.dart';
 
 /// Angle of the first ring slot: straight up, so the ring reads like a clock.
-const double _firstSlotAngle = -math.pi / AppMath.two;
+const double _firstSlotAngle = -math.pi / AppMath.pair;
 
 /// Distance from the centre beyond which a still-pressed pointer points at a
 /// ring slot. Inside it (puck and color swatches) nothing is highlighted, so a
@@ -35,7 +35,7 @@ Offset quickMenuSubmenuSlotCenter({
 }) {
   const double step = AppLayout.quickMenuSubmenuSpacing / AppLayout.quickMenuOuterRingRadius;
   final double parentAngle = _firstSlotAngle + parentIndex * _slotSweep(parentCount);
-  final double angle = parentAngle + (index - (count - AppMath.one) / AppMath.two) * step;
+  final double angle = parentAngle + (index - (count - AppMath.one) / AppMath.pair) * step;
   return center + Offset(math.cos(angle), math.sin(angle)) * AppLayout.quickMenuOuterRingRadius;
 }
 
@@ -56,8 +56,8 @@ int? quickMenuSlotAt({
 
   final double sweep = _slotSweep(count);
   // Shift by half a sweep so each slot owns the wedge centred on it.
-  final double angleFromFirst = math.atan2(delta.dy, delta.dx) - _firstSlotAngle + sweep / AppMath.two;
-  final double fullTurn = math.pi * AppMath.two;
+  final double angleFromFirst = math.atan2(delta.dy, delta.dx) - _firstSlotAngle + sweep / AppMath.pair;
+  final double fullTurn = math.pi * AppMath.pair;
   final double normalized = (angleFromFirst % fullTurn + fullTurn) % fullTurn;
   return normalized ~/ sweep % count;
 }
@@ -73,10 +73,10 @@ Offset clampQuickMenuAnchor(Offset anchor, Size viewport) {
 }
 
 double _clampAxis(double value, double margin, double extent) {
-  if (extent <= margin * AppMath.two) {
-    return extent / AppMath.two;
+  if (extent <= margin * AppMath.pair) {
+    return extent / AppMath.pair;
   }
   return value.clamp(margin, extent - margin);
 }
 
-double _slotSweep(int count) => math.pi * AppMath.two / count;
+double _slotSweep(int count) => math.pi * AppMath.pair / count;

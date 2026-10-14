@@ -7,7 +7,7 @@ import 'package:fpaint/models/brush_hatch.dart';
 import 'package:fpaint/models/hatch_pattern.dart';
 
 int _alphaAt(Uint8List pixels, int size, int x, int y) =>
-    pixels[(y * size + x) * AppMath.bytesPerPixel + AppMath.rgbaAlphaOffset];
+    pixels[(y * size + x) * AppMath.bytesPerPixel + AppMath.rgbChannelAlpha];
 
 void main() {
   group('BrushHatch.buildTilePixels', () {
@@ -24,7 +24,7 @@ void main() {
         expect(_alphaAt(pixels, 8, x, 7), 0);
       }
       // Line texels are white so a srcIn tint gives them the brush colour.
-      expect(pixels[(3 * 8) * AppMath.bytesPerPixel + AppMath.rgbaRedOffset], AppLimits.rgbChannelMax);
+      expect(pixels[(3 * 8) * AppMath.bytesPerPixel + AppMath.rgbChannelRed], AppLimits.rgbChannelMax);
     });
 
     test('an odd line width anti-aliases its half-covered rows', () {

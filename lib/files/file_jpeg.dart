@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
+import 'package:fpaint/files/package_image_bridge.dart';
 import 'package:image/image.dart' as img;
 
 const String _errorFailedToGetJpegRgbaBytes = 'Failed to get raw RGBA bytes for JPEG conversion.';
@@ -22,14 +22,10 @@ Future<Uint8List> convertToJpg(ui.Image image) async {
     exceptionBuilder: JpegConversionException.new,
   );
 
-  final img.Image packageImage = img.Image.fromBytes(
-    width: image.width,
-    height: image.height,
-    bytes: byteData.buffer,
-    bytesOffset: byteData.offsetInBytes,
-    rowStride: image.width * AppMath.bytesPerPixel,
-    numChannels: AppMath.bytesPerPixel,
-    order: img.ChannelOrder.rgba,
+  final img.Image packageImage = packageImageFromRgbaBytes(
+    byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+    image.width,
+    image.height,
   );
 
   final Uint8List outputBytes = img.encodeJpg(packageImage);

@@ -4,6 +4,7 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/version.dart';
 import 'package:fpaint/panels/side_panel/attribution_dialog.dart';
+import 'package:fpaint/widgets/app_logo_image.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -28,12 +29,7 @@ void showAboutBox(BuildContext context) {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Image.asset(
-              'assets/app_icon.png',
-              width: AppLayout.appIconSize,
-              height: AppLayout.appIconSize,
-              package: 'fpaint_assets',
-            ),
+            const AppLogoImage(size: AppLayout.appIconSize),
             const SizedBox(height: AppSpacing.medium),
             const AppText(AppConfig.applicationCopyright),
             const SizedBox(height: AppSpacing.large),

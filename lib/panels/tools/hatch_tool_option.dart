@@ -8,7 +8,7 @@ import 'package:fpaint/models/hatch_pattern.dart';
 import 'package:fpaint/widgets/hatch_marks_picker.dart';
 import 'package:fpaint/widgets/hatch_settings_picker.dart';
 import 'package:fpaint/widgets/material_free.dart';
-import 'package:fpaint/widgets/tool_attribute_widget.dart';
+import 'package:fpaint/widgets/picker_slider_tool_option.dart';
 
 /// Builds the **Hatching** option row shared by the hatch brush styles and the
 /// hatch paint-bucket pattern: an icon button that opens the full settings
@@ -33,39 +33,33 @@ Widget buildHatchToolOption({
   final AppLocalizations l10n = context.l10n;
   final bool isActive = enabled ?? true;
 
-  return ToolAttributeWidget(
+  return PickerSliderToolOption(
     compact: compact,
     name: l10n.toolHatching,
     enabled: enabled,
     onEnabledChanged: onEnabledChanged,
     enabledToggleKey: enabledToggleKey,
-    childLeft: AppButtonIcon(
-      key: buttonKey,
-      icon: AppIcon.hatch,
-      isSelected: enabled ?? false,
-      constraints: compact ? const BoxConstraints() : null,
-      padding: EdgeInsets.all(compact ? AppSpacing.thin : AppSpacing.small),
-      tooltip: l10n.toolHatching,
-      onPressed: () {
-        showHatchSettingsPicker(
-          context: context,
-          pattern: pattern,
-          onChanged: onChanged,
-        );
-      },
+    buttonKey: buttonKey,
+    icon: AppIcon.hatch,
+    isSelected: enabled ?? false,
+    tooltip: l10n.toolHatching,
+    onOpenPicker: () {
+      showHatchSettingsPicker(
+        context: context,
+        pattern: pattern,
+        onChanged: onChanged,
+      );
+    },
+    inlineControl: AppSlider(
+      key: sliderKey,
+      label: l10n.hatchSpacing,
+      valueLabel: l10n.pixelsValue(pattern.spacing),
+      value: pattern.spacing.toDouble(),
+      min: AppHatch.minSpacing.toDouble(),
+      max: AppHatch.maxSpacing.toDouble(),
+      divisions: AppHatch.maxSpacing - AppHatch.minSpacing,
+      onChanged: isActive ? (double value) => onChanged(pattern.copyWith(spacing: value.round())) : null,
     ),
-    childRight: compact
-        ? null
-        : AppSlider(
-            key: sliderKey,
-            label: l10n.hatchSpacing,
-            valueLabel: l10n.pixelsValue(pattern.spacing),
-            value: pattern.spacing.toDouble(),
-            min: AppHatch.minSpacing.toDouble(),
-            max: AppHatch.maxSpacing.toDouble(),
-            divisions: AppHatch.maxSpacing - AppHatch.minSpacing,
-            onChanged: isActive ? (double value) => onChanged(pattern.copyWith(spacing: value.round())) : null,
-          ),
   );
 }
 
@@ -82,34 +76,28 @@ Widget buildHatchMarksToolOption({
 }) {
   final AppLocalizations l10n = context.l10n;
 
-  return ToolAttributeWidget(
+  return PickerSliderToolOption(
     compact: compact,
     name: l10n.toolHatchMarks,
-    childLeft: AppButtonIcon(
-      key: buttonKey,
-      icon: AppIcon.hatch,
-      constraints: compact ? const BoxConstraints() : null,
-      padding: EdgeInsets.all(compact ? AppSpacing.thin : AppSpacing.small),
-      tooltip: l10n.toolHatchMarks,
-      onPressed: () {
-        showHatchMarksPicker(
-          context: context,
-          marks: marks,
-          onChanged: onChanged,
-        );
-      },
+    buttonKey: buttonKey,
+    icon: AppIcon.hatch,
+    tooltip: l10n.toolHatchMarks,
+    onOpenPicker: () {
+      showHatchMarksPicker(
+        context: context,
+        marks: marks,
+        onChanged: onChanged,
+      );
+    },
+    inlineControl: AppSlider(
+      key: sliderKey,
+      label: l10n.hatchLength,
+      valueLabel: l10n.pixelsValue(marks.length),
+      value: marks.length.toDouble(),
+      min: AppHatchMarks.minLength.toDouble(),
+      max: AppHatchMarks.maxLength.toDouble(),
+      divisions: AppHatchMarks.maxLength - AppHatchMarks.minLength,
+      onChanged: (double value) => onChanged(marks.copyWith(length: value.round())),
     ),
-    childRight: compact
-        ? null
-        : AppSlider(
-            key: sliderKey,
-            label: l10n.hatchLength,
-            valueLabel: l10n.pixelsValue(marks.length),
-            value: marks.length.toDouble(),
-            min: AppHatchMarks.minLength.toDouble(),
-            max: AppHatchMarks.maxLength.toDouble(),
-            divisions: AppHatchMarks.maxLength - AppHatchMarks.minLength,
-            onChanged: (double value) => onChanged(marks.copyWith(length: value.round())),
-          ),
   );
 }

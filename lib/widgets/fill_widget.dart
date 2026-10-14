@@ -1,12 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
-import 'package:fpaint/helpers/shortcut_tooltip.dart';
-import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
-import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/fill_model.dart';
-import 'package:fpaint/widgets/app_buttons.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
@@ -98,9 +94,9 @@ class _FillWidgetState extends State<FillWidget> {
       final Offset midPoint = widget.fillModel.centerPoint;
       const double centerDot = AppSpacing.small;
       stackChildren.add(
-        Positioned(
-          left: midPoint.dx - (centerDot / AppMath.pair),
-          top: midPoint.dy - (centerDot / AppMath.pair),
+        centeredPositioned(
+          center: midPoint,
+          size: const Size.square(centerDot),
           child: Container(
             width: centerDot,
             height: centerDot,
@@ -142,9 +138,9 @@ class _FillWidgetState extends State<FillWidget> {
     );
     final bool isInnerHandle = handleIndex > 0 && handleIndex < handleCount - 1;
 
-    return Positioned(
-      left: handleOffset.dx - (handleSize / AppMath.pair),
-      top: handleOffset.dy - (handleSize / AppMath.pair),
+    return centeredPositioned(
+      center: handleOffset,
+      size: Size.square(handleSize.toDouble()),
       child: GestureDetector(
         key: key,
         onPanUpdate: canDragEndpoint
@@ -237,26 +233,12 @@ class _FillWidgetState extends State<FillWidget> {
     return Positioned(
       left: anchor.dx - AppInteraction.fillControlsHalfWidth,
       top: anchor.dy + AppInteraction.fillControlsVerticalOffset,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        spacing: AppInteraction.imagePlacementButtonSpacing,
-        children: <Widget>[
-          buildOverlayCircleButton(
-            key: Keys.fillApply,
-            tooltip: l10n.apply,
-            icon: AppIcon.check,
-            cursor: SystemMouseCursors.click,
-            onTap: widget.onApply,
-          ),
-          buildOverlayCircleButton(
-            key: Keys.fillCancel,
-            tooltip: tooltipWithShortcut(l10n.cancel, singleKeyShortcut(ShortcutKeys.escape))!,
-            icon: AppIcon.close,
-            contentSemantic: AppButtonContentSemantic.dangerous,
-            cursor: SystemMouseCursors.click,
-            onTap: widget.onCancel,
-          ),
-        ],
+      child: buildOverlayConfirmCancelButtons(
+        l10n: l10n,
+        onConfirm: widget.onApply,
+        onCancel: widget.onCancel,
+        confirmKey: Keys.fillApply,
+        cancelKey: Keys.fillCancel,
       ),
     );
   }

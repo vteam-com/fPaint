@@ -37,43 +37,23 @@ extension LayersProviderImageResize on LayersProvider {
       scaledImages[layer] = await _resampleLayer(layer, oldSize, newSize);
     }
 
-    // Textures the record can resurrect: each scaled result (re-added by
-    // forward on redo) plus the original action/redo images (restored on undo).
-    // Listing them defers disposal until the record leaves history — the same
-    // protocol crop, merge and the pixel brush use.
-    final List<ui.Image> retainedImages = <ui.Image>[
-      ...scaledImages.values,
-      for (final LayerStateSnapshot snapshot in snapshots.values) ...<ui.Image>[
-        for (final UserActionDrawing action in snapshot.actions)
-          if (action.image != null) action.image!,
-        for (final UserActionDrawing action in snapshot.redoActions)
-          if (action.image != null) action.image!,
-      ],
-    ];
+    final LayerRasterReplacement replacement = LayerRasterReplacement(
+      oldSize: oldSize,
+      newSize: newSize,
+      snapshots: snapshots,
+      // The fill of a replaced layer is baked into its resampled raster.
+      images: scaledImages,
+    );
 
     await _undoProvider.executeActionAsync(
       name: 'Resize Image',
-      retainedImages: retainedImages,
+      retainedImages: replacement.retainedImages,
       forward: () {
-        size = newSize;
-        for (final LayerProvider layer in _list) {
-          final ui.Image? scaled = scaledImages[layer];
-          if (scaled == null) {
-            continue;
-          }
-          layer.actionStack.clear();
-          layer.redoStack.clear();
-          // The fill was baked into the resampled raster.
-          layer.backgroundColor = null;
-          layer.addImage(imageToAdd: scaled);
-        }
+        replacement.apply(this);
         update();
       },
       backward: () {
-        size = oldSize;
-        for (final LayerProvider layer in _list) {
-          layer.restoreFromSnapshot(snapshots[layer]!);
-        }
+        replacement.revert(this);
         update();
       },
     );

@@ -46,9 +46,8 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       return false;
     }
 
-    if (appProvider.isSelectedLayerLocked) {
+    if (!guardSelectedLayerUnlocked(context, appProvider)) {
       _activePointerId = -1;
-      _showLockedLayerMessage(appProvider);
       return false;
     }
 
@@ -85,35 +84,6 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   void _clearSelectionTapTracking() {
     _lastSelectionTapTimestamp = null;
     _lastSelectionTapCanvasPosition = null;
-  }
-
-  /// Returns the distance between the two contacts controlling touch navigation.
-  double _getDistanceBetweenTouchPoints() {
-    if (_activePointers.length < AppMath.pair) {
-      return 0.0;
-    }
-    final Offset? firstPosition = _pointerPositions[_activePointers[AppMath.zero]];
-    final Offset? secondPosition = _pointerPositions[_activePointers[AppMath.one]];
-    if (firstPosition == null || secondPosition == null) {
-      return 0.0;
-    }
-    return (secondPosition - firstPosition).distance;
-  }
-
-  /// Returns the midpoint between the first two active touch pointers.
-  Offset? _getMultiTouchFocalPoint() {
-    if (_activePointers.length < AppMath.pair) {
-      return null;
-    }
-    final Offset? firstPosition = _pointerPositions[_activePointers[AppMath.zero]];
-    final Offset? secondPosition = _pointerPositions[_activePointers[AppMath.one]];
-    if (firstPosition == null || secondPosition == null) {
-      return null;
-    }
-    return Offset(
-      (firstPosition.dx + secondPosition.dx) / AppMath.pair,
-      (firstPosition.dy + secondPosition.dy) / AppMath.pair,
-    );
   }
 
   /// Allows a navigation update only after both controlling contacts advance.
@@ -198,11 +168,18 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     appProvider.layers.selectedLayer.isUserDrawing = false;
     appProvider.layers.selectedLayer.clearStrokePreview();
     appProvider.endCrossLayerEraserStroke();
+    appProvider.clearPixelBrushGesture();
+    _resetTransientPointerState(appProvider);
+  }
+
+  /// Hides the per-gesture HUDs and previews, releases the tolerance pointer
+  /// lock and drag anchor, drops any uncommitted pixel-brush stroke, and
+  /// releases the active pointer. Shared by pointer-up and touch-cancel.
+  void _resetTransientPointerState(AppProvider appProvider) {
     appProvider.hideDrawingToolPreview();
     appProvider.hideWandToleranceHud();
     appProvider.hideFillTolerancePreview();
     appProvider.endTolerancePointerLock();
-    appProvider.clearPixelBrushGesture();
     _clearToleranceDragAnchor();
     appProvider.cancelPixelBrushStroke();
     _activePointerId = -1;
@@ -280,13 +257,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       } else {
         _clearSelectionTapTracking();
       }
-      appProvider.hideDrawingToolPreview();
-      appProvider.hideWandToleranceHud();
-      appProvider.hideFillTolerancePreview();
-      appProvider.endTolerancePointerLock();
-      _clearToleranceDragAnchor();
-      _activePointerId = -1;
-      appProvider.cancelPixelBrushStroke();
+      _resetTransientPointerState(appProvider);
       appProvider.layers.selectedLayer.clearCache();
       if (!mounted) {
         return;
@@ -326,14 +297,8 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       return;
     }
 
-    final bool isBrushDrop = appProvider.eyeDropPositionForBrush != null;
-    final bool isFillDrop = appProvider.eyeDropPositionForFill != null;
-    if (isBrushDrop || isFillDrop) {
-      if (isBrushDrop) {
-        appProvider.eyeDropPositionForBrush = event.localPosition;
-      } else {
-        appProvider.eyeDropPositionForFill = event.localPosition;
-      }
+    final bool? isBrushDrop = appProvider.moveActiveEyeDrop(event.localPosition);
+    if (isBrushDrop != null) {
       if (appProvider.isEyeDropShortcutActive && (event.buttons & kPrimaryButton) != 0) {
         unawaited(_adoptEyeDropColor(appProvider, adjustedPosition, isBrushDrop: isBrushDrop));
       }
@@ -538,15 +503,14 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     if (appProvider.selectorModel.mode == SelectorMode.wand) {
       // Anchor the sample tap so a subsequent drag can grow/shrink the selection
       // live (Edge Detection = tap to sample, drag on canvas to adjust).
-      _toleranceDragAnchorScreen = event.localPosition;
-      _toleranceDragAnchorCanvas = adjustedPosition;
-      _toleranceDragStartTolerance = appProvider.tolerance;
-      _toleranceDragSampleAllLayers = sampleAllLayers;
-      _toleranceDragLastApplied = appProvider.tolerance;
-      appProvider.showWandToleranceHud(tolerance: appProvider.tolerance, position: event.localPosition);
-      // Pin the pointer at the sample tap: the horizontal scrub adjusts tolerance
-      // in place instead of dragging the cursor across the canvas.
-      appProvider.beginTolerancePointerLock(event.localPosition);
+      _beginToleranceDrag(
+        appProvider,
+        event.localPosition,
+        adjustedPosition,
+        sampleAllLayers: sampleAllLayers,
+        showFeedback: () =>
+            appProvider.showWandToleranceHud(tolerance: appProvider.tolerance, position: event.localPosition),
+      );
     }
     appProvider.selectorCreationStart(
       adjustedPosition,
@@ -656,12 +620,6 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     // An armed pick-layer gesture already owns the cursor with its loupe, so
     // the brush-size ring stays hidden until the pick commits.
     return appProvider.canAdjustBrushSize && !appProvider.isLayerPickerActive;
-  }
-
-  void _showLockedLayerMessage(AppProvider appProvider) {
-    context.showSnackBarMessage(
-      context.l10n.layerLockedForEditing(appProvider.layers.selectedLayer.name),
-    );
   }
 
   /// Selects the topmost visible layer owning the pixel at canvas
@@ -797,13 +755,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       action: StrokeAction(
         action: action,
         positions: <ui.Offset>[adjustedPosition, adjustedPosition],
-        brush: MyBrush(
-          color: appProvider.brushColor,
-          size: appProvider.brushSize,
-          style: appProvider.brushStyle,
-          hatch: appProvider.hatchPattern,
-          marks: appProvider.hatchMarks,
-        ),
+        brush: appProvider.currentBrush,
         fillColor: appProvider.fillColor,
         pressures: !isBrush
             ? null
@@ -844,14 +796,8 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
           adjustedPosition,
         ],
         action: ActionType.eraser,
-        brush: MyBrush(
-          color: appProvider.brushColor,
-          size: appProvider.brushSize,
-          style: appProvider.brushStyle,
-          hatch: appProvider.hatchPattern,
-          marks: appProvider.hatchMarks,
-        ),
-        clipPath: appProvider.selectorModel.isVisible ? appProvider.selectorModel.path1 : null,
+        brush: appProvider.currentBrush,
+        clipPath: appProvider.selectorModel.activeClipPath,
       ),
     );
   }

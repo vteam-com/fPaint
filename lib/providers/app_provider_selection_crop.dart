@@ -73,49 +73,30 @@ extension AppProviderSelectionCrop on AppProvider {
       state.croppedImage.dispose();
     }
 
-    // Textures the Crop record can resurrect: each layer's committed crop result
-    // (re-added by forward on redo) plus the original action/redo images that
-    // backward restores on undo. Listing them defers disposal until the record
-    // leaves history (the reachability check prevents any use-after-free) instead
-    // of stranding these full-canvas textures — the same protocol merge and the
-    // pixel brush already use.
-    final List<ui.Image> retainedImages = <ui.Image>[
-      for (final LayerProvider layer in layers.list) ...<ui.Image>[
-        cropStates[layer]!.finalImage,
-        for (final UserActionDrawing action in cropStates[layer]!.layerState.actions)
-          if (action.image != null) action.image!,
-        for (final UserActionDrawing action in cropStates[layer]!.layerState.redoActions)
-          if (action.image != null) action.image!,
-      ],
-    ];
+    final LayerRasterReplacement replacement = LayerRasterReplacement(
+      oldSize: originalSize,
+      newSize: Size(effectiveBounds.width, effectiveBounds.height),
+      snapshots: <LayerProvider, LayerStateSnapshot>{
+        for (final LayerProvider layer in layers.list) layer: cropStates[layer]!.layerState,
+      },
+      images: <LayerProvider, ui.Image>{
+        for (final LayerProvider layer in layers.list) layer: cropStates[layer]!.finalImage,
+      },
+    );
 
+    // Listing the replacement's textures defers their disposal until the
+    // record leaves history (the reachability check prevents any
+    // use-after-free) — the same protocol merge and the pixel brush use.
     undoProvider.executeAction(
       name: 'Crop',
-      retainedImages: retainedImages,
+      retainedImages: replacement.retainedImages,
       forward: () {
-        layers.size = Size(effectiveBounds.width, effectiveBounds.height);
-
-        for (final LayerProvider layer in layers.list) {
-          layer.actionStack.clear();
-          layer.redoStack.clear();
-          layer.backgroundColor = null;
-          layer.addImage(
-            imageToAdd: cropStates[layer]!.finalImage,
-            offset: Offset.zero,
-          );
-        }
-
+        replacement.apply(layers);
         selectorModel.clear();
-        repaintToolOptions();
-        update();
+        updateWithToolOptions();
       },
       backward: () {
-        layers.size = originalSize;
-
-        for (final LayerProvider layer in layers.list) {
-          layer.restoreFromSnapshot(cropStates[layer]!.layerState);
-        }
-
+        replacement.revert(layers);
         update();
       },
     );
@@ -155,26 +136,12 @@ extension AppProviderSelectionCrop on AppProvider {
     required int height,
   }) async {
     final ui.Image layerImage = layer.renderImageWH(width, height);
-
-    final ui.Image maskedImage = await renderCanvasImage(
-      width: width,
-      height: height,
-      draw: (ui.Canvas canvas) {
-        canvas.save();
-        canvas.clipPath(cropPath);
-        canvas.drawImage(layerImage, Offset.zero, ui.Paint());
-        canvas.restore();
-      },
-    );
-    // maskedImage is fully rasterized (awaited), so the full-canvas source raster
-    // is no longer needed — release it instead of stranding a texture per layer.
-    layerImage.dispose();
-
-    final ui.Image cropped = cropImage(maskedImage, bounds);
-    // cropImage's picture samples maskedImage; the engine ref-counts the texture
-    // for the pending raster, so releasing this full-canvas intermediate now is
-    // safe (same invariant the GPU brush relies on).
-    maskedImage.dispose();
-    return cropped;
+    try {
+      return await clipImageToPath(layerImage, cropPath, bounds);
+    } finally {
+      // The clipped result is fully rasterized once awaited, so the
+      // full-canvas source raster is no longer needed.
+      layerImage.dispose();
+    }
   }
 }

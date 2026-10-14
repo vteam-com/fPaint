@@ -234,7 +234,7 @@
   "pencilSize": "Tamaño del lápiz",
   "penOnlyDrawingSubtitle": "Si esta activado, las herramientas de dibujo solo aceptan el lapiz digital; el tacto sigue disponible para navegar por el lienzo.",
   "penOnlyDrawingTitle": "Dibujar solo con lapiz digital",
-  "percentageValue": "Escala: {value}%",
+  "percentageValue": "{value} %",
   "@percentageValue": {
     "placeholders": {
       "value": {}

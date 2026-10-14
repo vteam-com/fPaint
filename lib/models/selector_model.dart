@@ -19,6 +19,17 @@ bool _hasFinitePathBounds(Path path) {
   return bounds.left.isFinite && bounds.top.isFinite && bounds.right.isFinite && bounds.bottom.isFinite;
 }
 
+/// A restorable copy of a [SelectorModel]'s selection state; see
+/// [SelectorModel.snapshot] and [SelectorModel.restore].
+typedef SelectionStateSnapshot = ({
+  bool isVisible,
+  bool isDrawing,
+  Path? path1,
+  Path? path2,
+  List<Offset> points,
+  SelectorMath math,
+});
+
 /// A class that represents the selector model.
 class SelectorModel extends VisibleModel {
   SelectorMode mode = SelectorMode.rectangle;
@@ -38,6 +49,18 @@ class SelectorModel extends VisibleModel {
   Path? path1;
   Path? path2; // use when Selector.math is not Selector.replace
 
+  /// The selection path that clips edits, or null when no selection is shown.
+  ///
+  /// Shared by reference; use [copyActiveClipPath] when the caller keeps it
+  /// beyond later selection edits.
+  Path? get activeClipPath => isVisible ? path1 : null;
+
+  /// An independent copy of [activeClipPath], or null when no selection clips.
+  Path? copyActiveClipPath() {
+    final Path? clip = activeClipPath;
+    return clip == null ? null : Path.from(clip);
+  }
+
   /// Returns the bounding rectangle of the path.
   Rect get boundingRect => path1?.getBounds() ?? Rect.zero;
 
@@ -50,6 +73,43 @@ class SelectorModel extends VisibleModel {
     this.path2 = null;
     this.points.clear();
     this.math = SelectorMath.replace;
+  }
+
+  /// Replaces the selection with the single committed [path]: visible, not
+  /// drawing, no pending math operand or points, and math reset to replace.
+  void replacePath(Path path) {
+    this.isVisible = true;
+    this.isDrawing = false;
+    this.path1 = path;
+    this.path2 = null;
+    this.points.clear();
+    this.math = SelectorMath.replace;
+  }
+
+  /// Captures the current selection state, copying paths and points so later
+  /// edits cannot alter the snapshot.
+  SelectionStateSnapshot snapshot() {
+    return (
+      isVisible: isVisible,
+      isDrawing: isDrawing,
+      path1: path1 == null ? null : Path.from(path1!),
+      path2: path2 == null ? null : Path.from(path2!),
+      points: List<Offset>.from(points),
+      math: math,
+    );
+  }
+
+  /// Restores a state captured by [snapshot], copying its paths so the
+  /// snapshot stays reusable.
+  void restore(SelectionStateSnapshot state) {
+    this.isVisible = state.isVisible;
+    this.isDrawing = state.isDrawing;
+    this.path1 = state.path1 == null ? null : Path.from(state.path1!);
+    this.path2 = state.path2 == null ? null : Path.from(state.path2!);
+    this.points
+      ..clear()
+      ..addAll(state.points);
+    this.math = state.math;
   }
 
   /// Inverts the selection.
@@ -93,25 +153,29 @@ class SelectorModel extends VisibleModel {
 
   /// Rotates the selection around its center by [angleRadians].
   void rotate(double angleRadians) {
-    if (this.path1 != null) {
-      this.path1 = rotatePathAroundCenter(this.path1!, angleRadians);
-      if (this.path2 != null) {
-        this.path2 = rotatePathAroundCenter(this.path2!, angleRadians);
-      }
-    }
+    _transformPaths((Path path) => rotatePathAroundCenter(path, angleRadians));
   }
 
   /// Scales the selection uniformly around its center by [factor].
   void scaleUniform(double factor) {
-    if (this.path1 != null) {
-      final double clampedFactor = factor.clamp(
-        AppInteraction.transformScaleFactorMin,
-        AppInteraction.transformScaleFactorMax,
-      );
-      this.path1 = scalePathAroundCenter(this.path1!, clampedFactor, null);
-      if (this.path2 != null) {
-        this.path2 = scalePathAroundCenter(this.path2!, clampedFactor, null);
-      }
+    final double clampedFactor = factor.clamp(
+      AppInteraction.transformScaleFactorMin,
+      AppInteraction.transformScaleFactorMax,
+    );
+    _transformPaths((Path path) => scalePathAroundCenter(path, clampedFactor, null));
+  }
+
+  /// Replaces the selection path (and any pending math operand) with its
+  /// [transform]ed copy; a no-op without a selection.
+  void _transformPaths(Path Function(Path) transform) {
+    final Path? selection = path1;
+    if (selection == null) {
+      return;
+    }
+    path1 = transform(selection);
+    final Path? operand = path2;
+    if (operand != null) {
+      path2 = transform(operand);
     }
   }
 
@@ -170,20 +234,12 @@ class SelectorModel extends VisibleModel {
       switch (mode) {
         case SelectorMode.rectangle:
           // We only need 2 points for the rectangle
-          if (math == SelectorMath.replace) {
-            this.path1 = Path()..addRect(Rect.fromPoints(points.first, p2));
-          } else {
-            this.path2 = Path()..addRect(Rect.fromPoints(points.first, p2));
-          }
+          _setWorkingPath(Path()..addRect(Rect.fromPoints(points.first, p2)));
           break;
 
         case SelectorMode.circle:
-          // We only need 2 points for the rectangle
-          if (math == SelectorMath.replace) {
-            this.path1 = Path()..addOval(Rect.fromPoints(points.first, p2));
-          } else {
-            this.path2 = Path()..addOval(Rect.fromPoints(points.first, p2));
-          }
+          // We only need 2 points for the ellipse's bounding box
+          _setWorkingPath(Path()..addOval(Rect.fromPoints(points.first, p2)));
           break;
 
         case SelectorMode.line:
@@ -191,21 +247,7 @@ class SelectorModel extends VisibleModel {
 
         case SelectorMode.lasso:
           points.add(p2);
-          if (math == SelectorMath.replace) {
-            this.path1 = Path();
-            path1!.moveTo(points.first.dx, points.first.dy);
-            for (final Offset point in points.skip(1)) {
-              path1!.lineTo(point.dx, point.dy);
-            }
-            path1!.close();
-          } else {
-            this.path2 = Path();
-            path2!.moveTo(points.first.dx, points.first.dy);
-            for (final Offset point in points.skip(1)) {
-              path2!.lineTo(point.dx, point.dy);
-            }
-            path2!.close();
-          }
+          _setWorkingPath(_buildStraightLineRegionPath(closePath: true));
           break;
 
         case SelectorMode.brush:
@@ -218,7 +260,7 @@ class SelectorModel extends VisibleModel {
     }
   }
 
-  double get _brushRadius => brushWidth / AppMath.two;
+  double get _brushRadius => brushWidth / AppMath.pair;
 
   /// Paints the brush band on to [point]: unions one round-ended segment from
   /// the last sample into the working path. Samples closer than a fraction of
@@ -249,49 +291,20 @@ class SelectorModel extends VisibleModel {
       return;
     }
 
-    switch (math) {
-      case SelectorMath.replace:
-        // this should already have been take care by addP2() function
-        break;
-      case SelectorMath.add:
-        if (path2 != null) {
-          final Path? combinedPath = _combinePathsSafely(
-            PathOperation.union,
-            path1!,
-            path2!,
-          );
-          if (combinedPath != null) {
-            path1 = combinedPath;
-          }
-          path2 = null;
-        }
-        break;
-      case SelectorMath.remove:
-        if (path2 != null) {
-          final Path? combinedPath = _combinePathsSafely(
-            PathOperation.difference,
-            path1!,
-            path2!,
-          );
-          if (combinedPath != null) {
-            path1 = combinedPath;
-          }
-          path2 = null;
-        }
-        break;
-      case SelectorMath.intersect:
-        if (path2 != null) {
-          final Path? combinedPath = _combinePathsSafely(
-            PathOperation.intersect,
-            path1!,
-            path2!,
-          );
-          if (combinedPath != null) {
-            path1 = combinedPath;
-          }
-          path2 = null;
-        }
-        break;
+    // Replace needs no combine: addP2() already wrote the working path.
+    final PathOperation? operation = switch (math) {
+      SelectorMath.replace => null,
+      SelectorMath.add => PathOperation.union,
+      SelectorMath.remove => PathOperation.difference,
+      SelectorMath.intersect => PathOperation.intersect,
+    };
+    final Path? operand = path2;
+    if (operation != null && operand != null) {
+      final Path? combinedPath = _combinePathsSafely(operation, path1!, operand);
+      if (combinedPath != null) {
+        path1 = combinedPath;
+      }
+      path2 = null;
     }
     this.points.clear();
   }

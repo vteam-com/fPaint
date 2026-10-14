@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -7,6 +9,63 @@ import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
+  group('overlay mode handle math', () {
+    test('overlayModeHandleCenter steps one button plus spacing per index', () {
+      final Offset first = overlayModeHandleCenter(
+        rowLeft: 10,
+        rowTop: 20,
+        buttonSize: 40,
+        spacing: 4,
+        buttonIndex: overlayTranslateButtonIndex,
+      );
+      final Offset third = overlayModeHandleCenter(
+        rowLeft: 10,
+        rowTop: 20,
+        buttonSize: 40,
+        spacing: 4,
+        buttonIndex: overlayRotateButtonIndex,
+      );
+      expect(first, const Offset(30, 40));
+      expect(third, const Offset(118, 40));
+    });
+
+    test('scaleFactorForHandleDrag returns the distance ratio, or null on the pivot', () {
+      expect(
+        scaleFactorForHandleDrag(handleCenter: const Offset(10, 0), pivot: Offset.zero, dragDelta: const Offset(10, 0)),
+        closeTo(2, 1e-9),
+      );
+      expect(
+        scaleFactorForHandleDrag(handleCenter: Offset.zero, pivot: Offset.zero, dragDelta: const Offset(10, 0)),
+        isNull,
+      );
+    });
+
+    test('angleDeltaForHandleDrag returns the swept angle around the pivot', () {
+      final double angle = angleDeltaForHandleDrag(
+        handleCenter: const Offset(10, 0),
+        pivot: Offset.zero,
+        dragDelta: const Offset(-10, 10),
+      );
+      expect(angle, closeTo(pi / 2, 1e-9));
+    });
+
+    test('overlayControlGroupContentWidth counts gaps between buttons only', () {
+      expect(overlayControlGroupContentWidth(buttonSize: 40, spacing: 4, buttonCount: 3), 128);
+      expect(overlayControlGroupContentWidth(buttonSize: 40, spacing: 4, buttonCount: 0), 0);
+    });
+
+    test('centeredPositioned pins the top-left so the child is centred', () {
+      final Positioned positioned = centeredPositioned(
+        center: const Offset(50, 60),
+        size: const Size(20, 10),
+        child: const SizedBox(),
+      );
+      expect(positioned.left, 40);
+      expect(positioned.top, 55);
+      expect(positioned.width, isNull);
+    });
+  });
+
   testWidgets('overlay controls render feedback and semantic button states', (WidgetTester tester) async {
     int tapCount = 0;
 

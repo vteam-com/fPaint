@@ -1,9 +1,10 @@
-import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/files/decoded_layer_document.dart';
+import 'package:fpaint/files/decoded_raster_layer.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
 import 'package:fpaint/files/psd_constants.dart';
 import 'package:fpaint/helpers/log_helper.dart';
@@ -18,40 +19,6 @@ const String _errorPsdReadFilePrefix = 'Failed to read PSD file:';
 const String _errorInvalidPsdData = 'Invalid PSD data or unable to read PSD info.';
 const String _errorNoDecodedPsdLayers = 'No layers could be decoded from PSD file.';
 
-/// One PSD layer resolved into everything the canvas needs to rebuild it.
-class _DecodedPsdLayer {
-  const _DecodedPsdLayer({
-    required this.image,
-    required this.name,
-    required this.offset,
-    required this.opacity,
-    required this.blendMode,
-    required this.visible,
-  });
-
-  /// The layer's own pixels, sized to its PSD bounding box (not the canvas).
-  final img.Image image;
-
-  final String name;
-
-  /// Top-left position of [image] on the canvas.
-  final Offset offset;
-
-  final double opacity;
-  final ui.BlendMode blendMode;
-  final bool visible;
-}
-
-/// A validated PSD document ready to be applied to the canvas.
-class _DecodedPsdDocument {
-  const _DecodedPsdDocument({required this.size, required this.layers});
-
-  final Size size;
-
-  /// Decoded layers ordered bottom-to-top, matching PSD storage order.
-  final List<_DecodedPsdLayer> layers;
-}
-
 /// Decodes PSD bytes and populates [layers] with one layer per PSD layer.
 ///
 /// Layer name, opacity, blend mode, visibility and canvas position are restored
@@ -65,18 +32,9 @@ Future<void> readPsdFileFromBytes(
   LayersProvider layers,
   Uint8List bytes,
 ) async {
-  final _DecodedPsdDocument document = _decodePsdDocument(bytes);
-
-  await layers.replaceAll(
-    canvasSize: document.size,
-    addLayers: () async {
-      // PSD stores layers bottom-first; addTop stacks each new layer above the
-      // previous one, so walking in storage order preserves the PSD z-order.
-      for (final _DecodedPsdLayer layer in document.layers) {
-        await _appendDecodedPsdLayer(layers, layer);
-      }
-    },
-  );
+  // PSD stores layers bottom-first, the order applyDecodedDocument stacks
+  // them in, so the PSD z-order is preserved. PSD has no selected-layer marker.
+  await applyDecodedDocument(layers, _decodePsdDocument(bytes));
 }
 
 /// Loads a PSD file from disk and decodes it into [layers].
@@ -112,14 +70,14 @@ img.PsdImage? _decodePsdBytes(Uint8List bytes) {
 ///
 /// Throws a [PsdFileException] when the payload is not a readable PSD or
 /// contains no usable pixels.
-_DecodedPsdDocument _decodePsdDocument(Uint8List bytes) {
+DecodedRasterDocument _decodePsdDocument(Uint8List bytes) {
   final img.PsdImage? psd = _decodePsdBytes(bytes);
 
   if (psd == null || !psd.isValid) {
     throw const PsdFileException(_errorInvalidPsdData);
   }
 
-  final List<_DecodedPsdLayer> decodedLayers = _decodePsdLayers(psd.layers);
+  final List<DecodedRasterLayer> decodedLayers = _decodePsdLayers(psd.layers);
 
   final Size canvasSize = Size(psd.width.toDouble(), psd.height.toDouble());
 
@@ -132,7 +90,7 @@ _DecodedPsdDocument _decodePsdDocument(Uint8List bytes) {
     decodedLayers.add(_decodeMergedPsd(psd));
   }
 
-  return _DecodedPsdDocument(size: canvasSize, layers: decodedLayers);
+  return DecodedRasterDocument(size: canvasSize, layers: decodedLayers);
 }
 
 /// Flattens PSD layer records into canvas-ready layers, bottom-to-top.
@@ -141,8 +99,8 @@ _DecodedPsdDocument _decodePsdDocument(Uint8List bytes) {
 /// children become ordinary layers. A group's own visibility still has to be
 /// honoured: hiding a group in Photoshop hides everything inside it, so a
 /// hidden group's children are imported hidden. Groups nest, hence the stack.
-List<_DecodedPsdLayer> _decodePsdLayers(List<img.PsdLayer> psdLayers) {
-  final List<_DecodedPsdLayer> decoded = <_DecodedPsdLayer>[];
+List<DecodedRasterLayer> _decodePsdLayers(List<img.PsdLayer> psdLayers) {
+  final List<DecodedRasterLayer> decoded = <DecodedRasterLayer>[];
   // Index of each open group's folder record, innermost last. The folder record
   // closes the group but carries its visibility flag, so a layer's enclosing
   // groups can only be resolved by looking ahead to them.
@@ -160,7 +118,7 @@ List<_DecodedPsdLayer> _decodePsdLayers(List<img.PsdLayer> psdLayers) {
           openGroupFolderIndices.removeLast();
         }
       default:
-        final _DecodedPsdLayer? pixelLayer = _decodePsdPixelLayer(
+        final DecodedRasterLayer? pixelLayer = _decodePsdPixelLayer(
           layer,
           enclosingGroupsVisible: openGroupFolderIndices.every(
             (int folderIndex) => folderIndex < 0 || psdLayers[folderIndex].isVisible(),
@@ -206,7 +164,7 @@ List<int> _matchGroupFolderRecords(List<img.PsdLayer> psdLayers) {
 /// Returns null when the record carries no usable pixels (an empty or
 /// zero-sized layer, such as an adjustment or text layer the decoder could not
 /// rasterize).
-_DecodedPsdLayer? _decodePsdPixelLayer(
+DecodedRasterLayer? _decodePsdPixelLayer(
   img.PsdLayer layer, {
   required bool enclosingGroupsVisible,
 }) {
@@ -215,7 +173,7 @@ _DecodedPsdLayer? _decodePsdPixelLayer(
     return null;
   }
 
-  return _DecodedPsdLayer(
+  return DecodedRasterLayer(
     image: image,
     name: _resolveLayerName(layer.name),
     offset: Offset((layer.left ?? 0).toDouble(), (layer.top ?? 0).toDouble()),
@@ -229,12 +187,12 @@ _DecodedPsdLayer? _decodePsdPixelLayer(
 ///
 /// Used for flattened PSDs and for files whose layer records cannot be
 /// rendered, so the document still opens with its visible artwork.
-_DecodedPsdLayer _decodeMergedPsd(img.PsdImage psd) {
+DecodedRasterLayer _decodeMergedPsd(img.PsdImage psd) {
   // renderImage() composites the (possibly empty) stack and caches the result
   // in mergedImage, so it always yields a canvas-sized image.
   final img.Image merged = psd.mergedImage ?? psd.renderImage();
 
-  return _DecodedPsdLayer(
+  return DecodedRasterLayer(
     image: merged,
     name: PsdConstants.mergedLayerName,
     offset: Offset.zero,
@@ -248,25 +206,6 @@ _DecodedPsdLayer _decodeMergedPsd(img.PsdImage psd) {
 String _resolveLayerName(String? name) {
   final String trimmed = name?.trim() ?? '';
   return trimmed.isEmpty ? PsdConstants.unnamedLayerName : trimmed;
-}
-
-/// Appends one decoded PSD layer to the canvas, preserving its placement.
-Future<void> _appendDecodedPsdLayer(
-  LayersProvider layers,
-  _DecodedPsdLayer decoded,
-) async {
-  final LayerProvider newLayer = layers.addTop(name: decoded.name);
-  newLayer.opacity = decoded.opacity;
-  newLayer.blendMode = decoded.blendMode;
-  newLayer.isVisible = decoded.visible;
-
-  final Uint8List pngBytes = img.encodePng(decoded.image);
-  final ui.Image uiLayerImage = await _decodeImageFromList(pngBytes);
-
-  newLayer.addImage(
-    imageToAdd: uiLayerImage,
-    offset: decoded.offset,
-  );
 }
 
 /// Returns the embedded PSD composite as PNG bytes, for previews/thumbnails.
@@ -284,13 +223,4 @@ Future<Uint8List?> extractPsdPreviewPngBytes(Uint8List bytes) async {
     _log.warning('Failed to extract PSD preview', error);
     return null;
   }
-}
-
-/// Private helper to convert Uint8List to ui.Image
-Future<ui.Image> _decodeImageFromList(Uint8List list) {
-  final Completer<ui.Image> completer = Completer<ui.Image>();
-  ui.decodeImageFromList(list, (ui.Image image) {
-    completer.complete(image);
-  });
-  return completer.future;
 }

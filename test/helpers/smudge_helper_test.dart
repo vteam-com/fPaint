@@ -441,4 +441,10 @@ void main() {
     expect(green, AppMath.zero, reason: 'no white bleed into green');
     expect(blue, AppMath.zero, reason: 'no white bleed into blue');
   });
+
+  test('resolvePixelBrushRadius halves the size with a minimum radius', () {
+    expect(resolvePixelBrushRadius(40), 20);
+    expect(resolvePixelBrushRadius(0), AppInteraction.smudgeMinimumRadius);
+    expect(resolvePixelBrushPadding(3.2), 4 + AppInteraction.smudgeBoundsPadding);
+  });
 }

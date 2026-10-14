@@ -256,13 +256,42 @@ extension LayerDisplayCache on LayerProvider {
   /// layer, and priming every visible layer (composite capture, thumbnails,
   /// cross-layer lifts) held gigabytes and crashed iPad on memory.
   Future<void> ensureCachePrimed() async {
-    if (_cachedImage != null || size.width * size.height > AppLimits.fullResolutionCacheMaxPixels) {
+    if (_cachedImage != null || _exceedsFullResBudget) {
       return;
     }
-    _cachedImage = await renderCanvasImage(
+    _cachedImage = await _renderFullResContents();
+  }
+
+  /// Whether the canvas is past [AppLimits.fullResolutionCacheMaxPixels], where
+  /// no per-layer full-res cache is kept (see [updateThumbnail]).
+  bool get _exceedsFullResBudget => size.width * size.height > AppLimits.fullResolutionCacheMaxPixels;
+
+  /// Renders the layer's raw contents at full canvas resolution.
+  Future<ui.Image> _renderFullResContents() {
+    return renderCanvasImage(
       width: size.width.toInt(),
       height: size.height.toInt(),
       draw: _renderLayerContents,
+    );
+  }
+
+  /// Installs [thumbnail] as the panel thumbnail and refreshes the palette.
+  ///
+  /// Disposes the previous thumbnail and assigns the replacement in one
+  /// synchronous step, so no frame can observe a freed texture.
+  void _installThumbnail(ui.Image thumbnail) {
+    _cachedThumbnailImage?.dispose();
+    _cachedThumbnailImage = thumbnail;
+    _cacheTopColorsUsed();
+  }
+
+  /// The panel thumbnail's pixel size: the canvas scaled to
+  /// [AppLayout.thumbnailMaxHeight], at least one pixel on each axis.
+  ({int width, int height}) get _thumbnailPixelSize {
+    final Size thumbnailSize = scaleSizeTo(size, maxHeight: AppLayout.thumbnailMaxHeight);
+    return (
+      width: max(AppMath.one, thumbnailSize.width.round()),
+      height: max(AppMath.one, thumbnailSize.height.round()),
     );
   }
 
@@ -276,7 +305,7 @@ extension LayerDisplayCache on LayerProvider {
   Future<void> updateThumbnail() async {
     final bool thumbnailWanted = isThumbnailVisible?.call() ?? true;
 
-    if (size.width * size.height > AppLimits.fullResolutionCacheMaxPixels) {
+    if (_exceedsFullResBudget) {
       // The thumbnail is the only product here, so a hidden panel means there
       // is no work worth doing at all.
       if (!thumbnailWanted) {
@@ -284,31 +313,23 @@ extension LayerDisplayCache on LayerProvider {
         return;
       }
       final ui.Image thumbnail = await renderThumbnailDirect();
-      _cachedThumbnailImage?.dispose();
-      _cachedThumbnailImage = thumbnail;
+      _installThumbnail(thumbnail);
       thumbnailNeedsRebuild = false;
-      _cacheTopColorsUsed();
       onThumbnailChanged();
       return;
     }
 
     // The full-resolution raster also feeds renderLayer's fast path, so it is
     // still built when the panel is hidden; only the thumbnail is deferred.
-    final ui.Image fullImage = await renderCanvasImage(
-      width: size.width.toInt(),
-      height: size.height.toInt(),
-      draw: _renderLayerContents,
-    );
+    final ui.Image fullImage = await _renderFullResContents();
     // Dispose old textures before replacing; ui.Images are not GC-freed.
     _cachedImage?.dispose();
     _cachedImage = fullImage;
 
     if (thumbnailWanted) {
       final ui.Image thumbnail = await _renderThumbnailFromImage(fullImage);
-      _cachedThumbnailImage?.dispose();
-      _cachedThumbnailImage = thumbnail;
+      _installThumbnail(thumbnail);
       thumbnailNeedsRebuild = false;
-      _cacheTopColorsUsed();
     } else {
       thumbnailNeedsRebuild = true;
     }
@@ -326,9 +347,9 @@ extension LayerDisplayCache on LayerProvider {
   /// upload). A medium-quality downscale into a 64 px target is perceptually
   /// identical at thumbnail size and an order of magnitude cheaper.
   Future<ui.Image> _renderThumbnailFromImage(ui.Image source) {
-    final Size thumbnailSize = scaleSizeTo(size, maxHeight: AppLayout.thumbnailMaxHeight);
-    final int thumbnailWidth = max(AppMath.one, thumbnailSize.width.round());
-    final int thumbnailHeight = max(AppMath.one, thumbnailSize.height.round());
+    final ({int width, int height}) pixelSize = _thumbnailPixelSize;
+    final int thumbnailWidth = pixelSize.width;
+    final int thumbnailHeight = pixelSize.height;
     return renderCanvasImage(
       width: thumbnailWidth,
       height: thumbnailHeight,
@@ -348,9 +369,9 @@ extension LayerDisplayCache on LayerProvider {
   /// Unlike [_renderThumbnailFromImage] this never materializes a
   /// full-resolution intermediate, so its cost is independent of canvas size.
   Future<ui.Image> renderThumbnailDirect() {
-    final Size thumbnailSize = scaleSizeTo(size, maxHeight: AppLayout.thumbnailMaxHeight);
-    final int thumbnailWidth = max(AppMath.one, thumbnailSize.width.round());
-    final int thumbnailHeight = max(AppMath.one, thumbnailSize.height.round());
+    final ({int width, int height}) pixelSize = _thumbnailPixelSize;
+    final int thumbnailWidth = pixelSize.width;
+    final int thumbnailHeight = pixelSize.height;
     return renderCanvasImage(
       width: thumbnailWidth,
       height: thumbnailHeight,
@@ -374,9 +395,7 @@ extension LayerDisplayCache on LayerProvider {
         return;
       }
       final ui.Image thumbnail = await _renderThumbnailFromImage(source);
-      _cachedThumbnailImage?.dispose();
-      _cachedThumbnailImage = thumbnail;
-      _cacheTopColorsUsed();
+      _installThumbnail(thumbnail);
       onThumbnailChanged();
       update();
     });

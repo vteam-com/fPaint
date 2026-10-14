@@ -23,7 +23,7 @@ extension AppProviderPixelBrush on AppProvider {
     pixelBrushSession.mode = mode;
     pixelBrushSession.intensity = brushIntensity;
     pixelBrushSession.layerRestoreState = _captureSelectedLayerRestoreState();
-    pixelBrushSession.clipPath = _activeSelectionClipPath();
+    pixelBrushSession.clipPath = selectorModel.copyActiveClipPath();
     pixelBrushSession.patchBounds = null;
     extendPixelBrushStroke(position);
   }
@@ -34,7 +34,7 @@ extension AppProviderPixelBrush on AppProvider {
   void startEffectBrushStroke(Offset position) {
     pixelBrushSession.clearStroke();
     pixelBrushSession.isEffectBrushStroke = true;
-    pixelBrushSession.clipPath = _activeSelectionClipPath();
+    pixelBrushSession.clipPath = selectorModel.copyActiveClipPath();
     extendPixelBrushStroke(position);
   }
 
@@ -62,11 +62,6 @@ extension AppProviderPixelBrush on AppProvider {
     } else {
       await _commitPixelBrushStroke();
     }
-  }
-
-  /// The active selection path to clip the stroke to, if any.
-  ui.Path? _activeSelectionClipPath() {
-    return selectorModel.isVisible && selectorModel.path1 != null ? ui.Path.from(selectorModel.path1!) : null;
   }
 
   /// Commits the active paint-mode effect stroke through
@@ -116,25 +111,22 @@ extension AppProviderPixelBrush on AppProvider {
     final ui.Path? clipPath = session.clipPath;
     final List<Offset> strokePoints = List<Offset>.of(session.strokePoints);
     final int selectedLayerIndex = layers.selectedLayerIndex;
-    final int canvasWidth = layers.size.width.toInt();
-    final int canvasHeight = layers.size.height.toInt();
+    final ui.Size canvasSize = layers.size;
 
-    final double radius = max(
-      AppInteraction.smudgeMinimumRadius,
-      strokeBrushSize * AppInteraction.smudgeBrushRadiusFactor,
-    );
+    final double radius = resolvePixelBrushRadius(strokeBrushSize);
 
     // Region to process: the footprint inflated by one radius (so every source
     // pixel a dab samples is inside it), integer-aligned and clamped.
-    final int cropLeft = max(AppMath.zero, (patchBounds.left - radius).floor());
-    final int cropTop = max(AppMath.zero, (patchBounds.top - radius).floor());
-    final int cropRight = min(canvasWidth, (patchBounds.right + radius).ceil());
-    final int cropBottom = min(canvasHeight, (patchBounds.bottom + radius).ceil());
-    final int cropWidth = cropRight - cropLeft;
-    final int cropHeight = cropBottom - cropTop;
-    if (cropWidth <= AppMath.zero || cropHeight <= AppMath.zero) {
+    final ui.Rect? cropRect = inflateClampToCanvas(patchBounds, radius, canvasSize);
+    if (cropRect == null) {
       return;
     }
+    final int cropLeft = cropRect.left.toInt();
+    final int cropTop = cropRect.top.toInt();
+    final int cropRight = cropRect.right.toInt();
+    final int cropBottom = cropRect.bottom.toInt();
+    final int cropWidth = cropRight - cropLeft;
+    final int cropHeight = cropBottom - cropTop;
 
     // Ensure the source cache covers this stroke's crop. The cache holds only a
     // region of the composite (not the whole 62 MP canvas), so a cold/invalidated
@@ -149,19 +141,18 @@ extension AppProviderPixelBrush on AppProvider {
       cropBottom: cropBottom,
     );
     if (!cacheValid) {
-      final int margin = AppInteraction.smudgeSourceCacheMargin.round();
-      final int regionLeft = max(AppMath.zero, cropLeft - margin);
-      final int regionTop = max(AppMath.zero, cropTop - margin);
-      final int regionRight = min(canvasWidth, cropRight + margin);
-      final int regionBottom = min(canvasHeight, cropBottom + margin);
-      final int regionWidth = regionRight - regionLeft;
-      final int regionHeight = regionBottom - regionTop;
-      final ui.Rect regionRect = ui.Rect.fromLTWH(
-        regionLeft.toDouble(),
-        regionTop.toDouble(),
-        regionWidth.toDouble(),
-        regionHeight.toDouble(),
-      );
+      // The crop is non-empty, so its margin-inflated region is too.
+      final ui.Rect regionRect =
+          inflateClampToCanvas(
+            cropRect,
+            AppInteraction.smudgeSourceCacheMargin.roundToDouble(),
+            canvasSize,
+          ) ??
+          cropRect;
+      final int regionLeft = regionRect.left.toInt();
+      final int regionTop = regionRect.top.toInt();
+      final int regionWidth = regionRect.width.toInt();
+      final int regionHeight = regionRect.height.toInt();
 
       // Sample only the SELECTED layer (colour + alpha), not the composite
       // through it. Smudge/blur then affect just this layer — preserving its
@@ -193,7 +184,7 @@ extension AppProviderPixelBrush on AppProvider {
 
     // Crop the stroke's region out of the cached region bytes (region-local
     // coordinates) and build the region-local clip mask if a selection is active.
-    final Uint8List regionBytes = copyPixelBrushRect(
+    final Uint8List regionBytes = copyRgbaRect(
       pixels: sourceBytes,
       imageWidth: regionStride,
       left: cropLeft - regionLeft,
@@ -236,16 +227,15 @@ extension AppProviderPixelBrush on AppProvider {
     // upload and GPU-upscaled back — smudge/blur are soft enough that the loss is
     // invisible. The live display is served by the layer's display cache, updated
     // below; this full-res patch is only materialized for on-demand full-res use.
-    final int fpLeft = max(AppMath.zero, patchBounds.left.floor());
-    final int fpTop = max(AppMath.zero, patchBounds.top.floor());
-    final int fpRight = min(canvasWidth, patchBounds.right.ceil());
-    final int fpBottom = min(canvasHeight, patchBounds.bottom.ceil());
-    final int fpWidth = fpRight - fpLeft;
-    final int fpHeight = fpBottom - fpTop;
-    if (fpWidth <= AppMath.zero || fpHeight <= AppMath.zero) {
+    final ui.Rect? footprintRect = inflateClampToCanvas(patchBounds, AppMath.zero.toDouble(), canvasSize);
+    if (footprintRect == null) {
       return;
     }
-    final Uint8List footprintBytes = copyPixelBrushRect(
+    final int fpLeft = footprintRect.left.toInt();
+    final int fpTop = footprintRect.top.toInt();
+    final int fpWidth = footprintRect.width.toInt();
+    final int fpHeight = footprintRect.height.toInt();
+    final Uint8List footprintBytes = copyRgbaRect(
       pixels: result.pixels,
       imageWidth: cropWidth,
       left: fpLeft - cropLeft,
@@ -298,12 +288,7 @@ extension AppProviderPixelBrush on AppProvider {
       return;
     }
 
-    final ui.Rect committedBounds = ui.Rect.fromLTRB(
-      fpLeft.toDouble(),
-      fpTop.toDouble(),
-      fpRight.toDouble(),
-      fpBottom.toDouble(),
-    );
+    final ui.Rect committedBounds = footprintRect;
 
     // Fold the patch into the layer's display-resolution projection (a small,
     // display-res blit) so the commit shows immediately with NO full-canvas GPU
@@ -386,10 +371,7 @@ extension AppProviderPixelBrush on AppProvider {
     // full-canvas texture leak without risking a use-after-free.
     final List<ui.Image> retainedImages = <ui.Image>[
       committedPatch.image,
-      for (final UserActionDrawing action in layerRestoreState.layerState.actions)
-        if (action.image != null) action.image!,
-      for (final UserActionDrawing action in layerRestoreState.layerState.redoActions)
-        if (action.image != null) action.image!,
+      ...layerRestoreState.layerState.images,
     ];
 
     undoProvider.executeAction(

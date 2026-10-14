@@ -230,20 +230,9 @@ Widget buildOverlayFeedbackBubble({required String label}) {
       horizontal: AppSpacing.small,
       vertical: AppSpacing.small,
     ),
-    decoration: BoxDecoration(
-      color: AppColors.surface.withValues(alpha: _overlayControlSurfaceAlpha),
-      borderRadius: BorderRadius.circular(AppRadius.medium),
-      border: Border.all(
-        color: AppColors.white.withValues(alpha: _overlayControlBorderAlpha),
-        width: AppStroke.thin,
-      ),
-      boxShadow: <BoxShadow>[
-        BoxShadow(
-          color: AppColors.black.withValues(alpha: _overlayControlShadowAlpha),
-          blurRadius: AppSpacing.large,
-          offset: const Offset(0, AppSpacing.small),
-        ),
-      ],
+    decoration: _overlayPanelDecoration(
+      color: AppColors.surface,
+      radius: AppRadius.medium,
     ),
     child: AppText(
       label,
@@ -253,26 +242,35 @@ Widget buildOverlayFeedbackBubble({required String label}) {
   );
 }
 
+/// The translucent rounded panel (hairline light border + soft drop shadow)
+/// shared by overlay feedback bubbles and control surfaces.
+BoxDecoration _overlayPanelDecoration({required Color color, required double radius}) {
+  return BoxDecoration(
+    color: color.withValues(alpha: _overlayControlSurfaceAlpha),
+    borderRadius: BorderRadius.circular(radius),
+    border: Border.all(
+      color: AppColors.white.withValues(alpha: _overlayControlBorderAlpha),
+      width: AppStroke.thin,
+    ),
+    boxShadow: <BoxShadow>[
+      BoxShadow(
+        color: AppColors.black.withValues(alpha: _overlayControlShadowAlpha),
+        blurRadius: AppSpacing.large,
+        offset: const Offset(0, AppSpacing.small),
+      ),
+    ],
+  );
+}
+
 /// Wraps overlay actions in a shared surface so related controls scan as one unit.
 Widget buildOverlayControlSurface({
   required Widget child,
   EdgeInsetsGeometry padding = const EdgeInsets.all(AppSpacing.small),
 }) {
   return DecoratedBox(
-    decoration: BoxDecoration(
-      color: AppColors.overlayDark.withValues(alpha: _overlayControlSurfaceAlpha),
-      borderRadius: BorderRadius.circular(AppRadius.large),
-      border: Border.all(
-        color: AppColors.white.withValues(alpha: _overlayControlBorderAlpha),
-        width: AppStroke.thin,
-      ),
-      boxShadow: <BoxShadow>[
-        BoxShadow(
-          color: AppColors.black.withValues(alpha: _overlayControlShadowAlpha),
-          blurRadius: AppSpacing.large,
-          offset: const Offset(0, AppSpacing.small),
-        ),
-      ],
+    decoration: _overlayPanelDecoration(
+      color: AppColors.overlayDark,
+      radius: AppRadius.large,
     ),
     child: Padding(
       padding: padding,
@@ -313,7 +311,8 @@ Widget buildPositionedOverlayControls({
 }
 
 /// Builds the standard Apply (green check) and Cancel (red X) button row
-/// used by canvas overlays such as transform, image placement, and eye dropper.
+/// used by canvas overlays such as transform, image placement, eye dropper and
+/// the gradient-fill session. [confirmKey] / [cancelKey] key the two buttons.
 Widget buildOverlayConfirmCancelButtons({
   required AppLocalizations l10n,
   required VoidCallback onConfirm,
@@ -321,12 +320,15 @@ Widget buildOverlayConfirmCancelButtons({
   double buttonSize = AppInteraction.imagePlacementButtonSize,
   double spacing = AppInteraction.imagePlacementButtonSpacing,
   double iconSize = AppLayout.iconSize,
+  Key? confirmKey,
+  Key? cancelKey,
 }) {
   return Row(
     mainAxisSize: MainAxisSize.min,
     spacing: spacing,
     children: <Widget>[
       buildOverlayCircleButton(
+        key: confirmKey,
         tooltip: l10n.apply,
         icon: AppIcon.check,
         contentSemantic: AppButtonContentSemantic.enabled,
@@ -336,6 +338,7 @@ Widget buildOverlayConfirmCancelButtons({
         onTap: onConfirm,
       ),
       buildOverlayCircleButton(
+        key: cancelKey,
         tooltip: tooltipWithShortcut(l10n.cancel, singleKeyShortcut(ShortcutKeys.escape))!,
         icon: AppIcon.close,
         contentSemantic: AppButtonContentSemantic.dangerous,
@@ -346,6 +349,95 @@ Widget buildOverlayConfirmCancelButtons({
       ),
     ],
   );
+}
+
+/// Returns a [Positioned] that places a [size]d [child] centred on [center].
+///
+/// Only the top-left corner is pinned (via [Rect.fromCenter]); the child keeps
+/// its own size and loose constraints, exactly like a hand-written
+/// `Positioned(left: center.dx - width / 2, top: center.dy - height / 2)`.
+Positioned centeredPositioned({
+  required Offset center,
+  required Size size,
+  required Widget child,
+  Key? key,
+}) {
+  final Rect bounds = Rect.fromCenter(center: center, width: size.width, height: size.height);
+  return Positioned(
+    key: key,
+    left: bounds.left,
+    top: bounds.top,
+    child: child,
+  );
+}
+
+/// Index of the translate (move) button in an overlay mode-button row.
+const int overlayTranslateButtonIndex = AppMath.zero;
+
+/// Index of the uniform-scale button in an overlay mode-button row.
+const int overlayScaleButtonIndex = AppMath.one;
+
+/// Index of the rotate button in an overlay mode-button row.
+const int overlayRotateButtonIndex = AppMath.pair;
+
+/// Returns the content width of an overlay row of [buttonCount] buttons of
+/// [buttonSize] separated by [spacing] (no surface padding).
+double overlayControlGroupContentWidth({
+  required double buttonSize,
+  required double spacing,
+  required int buttonCount,
+}) {
+  final int gapCount = max(AppMath.zero, buttonCount - AppMath.one);
+  return (buttonSize * buttonCount) + (spacing * gapCount);
+}
+
+/// Returns the screen-space centre of the mode button at [buttonIndex] in a
+/// row whose first button's top-left corner is at ([rowLeft], [rowTop]).
+///
+/// Drag-to-scale and drag-to-rotate mode buttons use this centre as the
+/// virtual handle their drag deltas are applied to.
+Offset overlayModeHandleCenter({
+  required double rowLeft,
+  required double rowTop,
+  required double buttonSize,
+  required double spacing,
+  required int buttonIndex,
+}) {
+  return Offset(
+    rowLeft + (buttonSize + spacing) * buttonIndex + buttonSize / AppMath.pair,
+    rowTop + buttonSize / AppMath.pair,
+  );
+}
+
+/// Returns the uniform scale factor produced by dragging the virtual handle at
+/// [handleCenter] by [dragDelta] relative to [pivot].
+///
+/// Returns `null` when the handle sits on the pivot (distance at or below
+/// [AppMath.tinyPercentage]) so callers skip the degenerate update.
+double? scaleFactorForHandleDrag({
+  required Offset handleCenter,
+  required Offset pivot,
+  required Offset dragDelta,
+}) {
+  final double previousDistance = (handleCenter - pivot).distance;
+  if (previousDistance <= AppMath.tinyPercentage) {
+    return null;
+  }
+  final double currentDistance = (handleCenter + dragDelta - pivot).distance;
+  return currentDistance / previousDistance;
+}
+
+/// Returns the rotation (radians) produced by dragging the virtual handle at
+/// [handleCenter] by [dragDelta] around [pivot].
+double angleDeltaForHandleDrag({
+  required Offset handleCenter,
+  required Offset pivot,
+  required Offset dragDelta,
+}) {
+  final Offset pointer = handleCenter + dragDelta;
+  final double previousAngle = atan2(handleCenter.dy - pivot.dy, handleCenter.dx - pivot.dx);
+  final double currentAngle = atan2(pointer.dy - pivot.dy, pointer.dx - pivot.dx);
+  return currentAngle - previousAngle;
 }
 
 /// A draggable handle that shows X/Y coordinates while being dragged.
@@ -400,9 +492,9 @@ class OverlayDragHandle extends StatelessWidget {
   Widget build(BuildContext context) {
     final double activeSize = size * AppVisual.previewTextScale;
 
-    return Positioned(
-      left: position.dx - activeSize / AppMath.pair,
-      top: position.dy - activeSize / AppMath.pair,
+    return centeredPositioned(
+      center: position,
+      size: Size.square(activeSize),
       child: GestureDetector(
         onPanStart: onPanStart,
         onPanUpdate: onPanUpdate,

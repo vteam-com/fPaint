@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/dependency_versions.dart';
+import 'package:fpaint/widgets/app_logo_image.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
 const double _attributionIconSize = AppLayout.appIconSize;
@@ -141,12 +142,7 @@ Future<void> showAttributionDialog(BuildContext context) async {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Image.asset(
-                      'assets/app_icon.png',
-                      width: _attributionIconSize,
-                      height: _attributionIconSize,
-                      package: 'fpaint_assets',
-                    ),
+                    const AppLogoImage(size: _attributionIconSize),
                     const SizedBox(height: AppSpacing.large),
                     for (final _AttributionSection attribution in attributions) ...<Widget>[
                       () {

@@ -54,31 +54,32 @@ Future<Uint8List> encodeToHeic(Uint8List pngBytes) async {
 
   final Directory tempDir = await Directory.systemTemp.createTemp(_tempDirPrefix);
   try {
-    final File pngFile = File('${tempDir.path}/$_tempInputFileName');
-    final File heicFile = File('${tempDir.path}/$_tempOutputFileName');
-    await pngFile.writeAsBytes(pngBytes);
+    return await wrapFileOperation<HeicConversionException, Uint8List>(
+      message: _errorEncodePrefix,
+      exceptionBuilder: HeicConversionException.new,
+      operation: () async {
+        final File pngFile = File('${tempDir.path}/$_tempInputFileName');
+        final File heicFile = File('${tempDir.path}/$_tempOutputFileName');
+        await pngFile.writeAsBytes(pngBytes);
 
-    final ProcessResult result = await Process.run(_sipsCommand, <String>[
-      _sipsFormatFlag,
-      _sipsFormatProperty,
-      _sipsFormatHeic,
-      pngFile.path,
-      _sipsOutputFlag,
-      heicFile.path,
-    ]);
+        final ProcessResult result = await Process.run(_sipsCommand, <String>[
+          _sipsFormatFlag,
+          _sipsFormatProperty,
+          _sipsFormatHeic,
+          pngFile.path,
+          _sipsOutputFlag,
+          heicFile.path,
+        ]);
 
-    if (result.exitCode != 0) {
-      throw HeicConversionException(
-        '$_errorEncodeSipsFailedPrefix ${result.stderr}',
-      );
-    }
+        if (result.exitCode != 0) {
+          throw HeicConversionException(
+            '$_errorEncodeSipsFailedPrefix ${result.stderr}',
+          );
+        }
 
-    return await heicFile.readAsBytes();
-  } catch (e) {
-    if (e is HeicConversionException) {
-      rethrow;
-    }
-    throw HeicConversionException(_errorEncodePrefix, cause: e);
+        return heicFile.readAsBytes();
+      },
+    );
   } finally {
     try {
       await tempDir.delete(recursive: true);
@@ -94,16 +95,16 @@ Future<Uint8List> encodeToHeic(Uint8List pngBytes) async {
 Future<Uint8List> _decodeHeicBytesWithImagePackage(
   Uint8List heicBytes,
 ) async {
-  try {
-    final img.Image? decodedImage = img.decodeImage(heicBytes);
-    if (decodedImage == null) {
-      throw const HeicConversionException(_errorConvertPrefix);
-    }
+  return wrapFileOperation<HeicConversionException, Uint8List>(
+    message: _errorConvertPrefix,
+    exceptionBuilder: HeicConversionException.new,
+    operation: () async {
+      final img.Image? decodedImage = img.decodeImage(heicBytes);
+      if (decodedImage == null) {
+        throw const HeicConversionException(_errorConvertPrefix);
+      }
 
-    return Uint8List.fromList(img.encodePng(decodedImage));
-  } on HeicConversionException {
-    rethrow;
-  } catch (e) {
-    throw HeicConversionException(_errorConvertPrefix, cause: e);
-  }
+      return Uint8List.fromList(img.encodePng(decodedImage));
+    },
+  );
 }

@@ -1,10 +1,10 @@
-import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/hatch_pattern.dart';
 
 /// Cache key for one hatch tile: everything that changes the tile's pixels.
@@ -23,7 +23,7 @@ typedef HatchTileKey = ({int spacing, int lineWidth, bool crossed});
 /// Tiles are tiny (at most `maxSpacing²` texels) and never evicted: a committed
 /// action re-renders through the same cache on undo replay and export, and a
 /// missing tile would silently bake as a solid stroke. Generation is async
-/// ([ui.decodeImageFromPixels]); until [prewarm] completes the style falls back
+/// ([imageFromPixelsDecode]); until [prewarm] completes the style falls back
 /// to a solid stroke, so callers prewarm whenever the settings change.
 class BrushHatch {
   BrushHatch._();
@@ -74,9 +74,7 @@ class BrushHatch {
 
   Future<void> _generate(HatchTileKey key) async {
     final Uint8List pixels = buildTilePixels(key);
-    final Completer<ui.Image> completer = Completer<ui.Image>();
-    ui.decodeImageFromPixels(pixels, key.spacing, key.spacing, ui.PixelFormat.rgba8888, completer.complete);
-    _tiles[key] = await completer.future;
+    _tiles[key] = await imageFromPixelsDecode(pixels, key.spacing, key.spacing);
     _pending.remove(key);
   }
 
@@ -96,10 +94,10 @@ class BrushHatch {
         final double columnCoverage = key.crossed ? _coverage(x, lineCenter, lineHalfWidth) : AppMath.zero.toDouble();
         final double coverage = rowCoverage + columnCoverage - rowCoverage * columnCoverage;
         final int offset = (y * size + x) * AppMath.bytesPerPixel;
-        pixels[offset + AppMath.rgbaRedOffset] = AppLimits.rgbChannelMax;
-        pixels[offset + AppMath.rgbaGreenOffset] = AppLimits.rgbChannelMax;
-        pixels[offset + AppMath.rgbaBlueOffset] = AppLimits.rgbChannelMax;
-        pixels[offset + AppMath.rgbaAlphaOffset] = (coverage * AppLimits.rgbChannelMax).round();
+        pixels[offset + AppMath.rgbChannelRed] = AppLimits.rgbChannelMax;
+        pixels[offset + AppMath.rgbChannelGreen] = AppLimits.rgbChannelMax;
+        pixels[offset + AppMath.rgbChannelBlue] = AppLimits.rgbChannelMax;
+        pixels[offset + AppMath.rgbChannelAlpha] = (coverage * AppLimits.rgbChannelMax).round();
       }
     }
     return pixels;

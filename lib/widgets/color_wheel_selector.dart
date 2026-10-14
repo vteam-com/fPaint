@@ -3,8 +3,8 @@ import 'dart:ui' show BlendMode, FilterQuality, VertexMode, Vertices;
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
-import 'package:fpaint/widgets/material_free.dart';
-import 'package:fpaint/widgets/transparent_background.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
+import 'package:fpaint/widgets/color_selector.dart';
 
 enum _ColorWheelDragTarget {
   ring,
@@ -97,48 +97,26 @@ class _ColorWheelSelectorState extends State<ColorWheelSelector> {
             ),
           ),
         ),
-        SizedBox(
-          height: AppLayout.sliderHeight,
-          child: Stack(
-            alignment: AlignmentDirectional.center,
-            children: <Widget>[
-              const TransparentPaper(patternSize: AppMath.bytesPerPixel),
-              CustomPaint(
-                painter: _WheelAlphaGradientPainter(
-                  alpha: _alpha,
-                  hue: _hue,
-                  saturation: _saturation,
-                  value: _value,
-                ),
-                child: AppSlider(
-                  value: _alpha,
-                  min: 0,
-                  max: 1,
-                  divisions: AppLimits.sliderDivisions,
-                  onChanged: (double value) {
-                    setState(() {
-                      _alpha = value;
-                    });
-                    _notifyColorChanged();
-                  },
-                ),
-              ),
+        AlphaGradientSlider(
+          painter: LinearGradientStripPainter(
+            colors: <Color>[
+              HSVColor.fromAHSV(0, _hue, _saturation, _value).toColor(),
+              HSVColor.fromAHSV(_alpha, _hue, _saturation, _value).toColor(),
             ],
           ),
+          value: _alpha,
+          onChanged: (double value) {
+            setState(() {
+              _alpha = value;
+            });
+            _notifyColorChanged();
+          },
         ),
       ],
     );
   }
 
-  ({
-    Offset blackVertex,
-    Offset center,
-    Offset colorVertex,
-    double outerRadius,
-    double ringInnerRadius,
-    Offset whiteVertex,
-  })
-  get _currentWheelGeometry {
+  _WheelGeometry get _currentWheelGeometry {
     return _buildWheelGeometry(
       const Size.square(AppLayout.colorWheelDiameter),
       _hue,
@@ -151,18 +129,22 @@ class _ColorWheelSelectorState extends State<ColorWheelSelector> {
     );
   }
 
+  /// Places the triangle thumb on the point that best matches the current
+  /// hue/saturation/value for the current hue's triangle.
+  void _recomputeTriangleSelection() {
+    final _WheelGeometry geometry = _currentWheelGeometry;
+    _triangleSelectionPoint = _triangleBestPointForColor(
+      blackVertex: geometry.blackVertex,
+      colorVertex: geometry.colorVertex,
+      hueColor: HSVColor.fromAHSV(AppVisual.full, _hue, AppVisual.full, AppVisual.full).toColor(),
+      targetColor: HSVColor.fromAHSV(AppVisual.full, _hue, _saturation, _value).toColor(),
+      whiteVertex: geometry.whiteVertex,
+    );
+  }
+
   /// Resolves whether [localPosition] targets the hue ring or SV triangle.
   _ColorWheelDragTarget? _resolveDragTarget(Offset localPosition) {
-    final Size size = const Size.square(AppLayout.colorWheelDiameter);
-    final ({
-      Offset blackVertex,
-      Offset center,
-      Offset colorVertex,
-      double outerRadius,
-      double ringInnerRadius,
-      Offset whiteVertex,
-    })
-    geometry = _buildWheelGeometry(size, _hue);
+    final _WheelGeometry geometry = _currentWheelGeometry;
     final double distanceToCenter = (localPosition - geometry.center).distance;
 
     if (distanceToCenter <= geometry.outerRadius && distanceToCenter >= geometry.ringInnerRadius) {
@@ -191,28 +173,13 @@ class _ColorWheelSelectorState extends State<ColorWheelSelector> {
     _hue = hsvColor.hue;
     _saturation = hsvColor.saturation;
     _value = hsvColor.value;
-    _triangleSelectionPoint = _triangleBestPointForColor(
-      blackVertex: _currentWheelGeometry.blackVertex,
-      colorVertex: _currentWheelGeometry.colorVertex,
-      hueColor: HSVColor.fromAHSV(AppVisual.full, _hue, AppVisual.full, AppVisual.full).toColor(),
-      targetColor: HSVColor.fromAHSV(AppVisual.full, _hue, _saturation, _value).toColor(),
-      whiteVertex: _currentWheelGeometry.whiteVertex,
-    );
+    _recomputeTriangleSelection();
   }
 
   /// Updates hue/saturation/value based on pointer movement inside the active
   /// ring or triangle target.
   void _updateFromLocalPosition(Offset localPosition) {
-    final Size size = const Size.square(AppLayout.colorWheelDiameter);
-    final ({
-      Offset blackVertex,
-      Offset center,
-      Offset colorVertex,
-      double outerRadius,
-      double ringInnerRadius,
-      Offset whiteVertex,
-    })
-    geometry = _buildWheelGeometry(size, _hue);
+    final _WheelGeometry geometry = _currentWheelGeometry;
     final _ColorWheelDragTarget? target = _dragTarget ?? _resolveDragTarget(localPosition);
 
     if (target == null) {
@@ -226,14 +193,8 @@ class _ColorWheelSelectorState extends State<ColorWheelSelector> {
       }
 
       setState(() {
-        _hue = _normalizeDegrees(_radiansToDegrees(math.atan2(delta.dy, delta.dx)));
-        _triangleSelectionPoint = _triangleBestPointForColor(
-          blackVertex: _currentWheelGeometry.blackVertex,
-          colorVertex: _currentWheelGeometry.colorVertex,
-          hueColor: HSVColor.fromAHSV(AppVisual.full, _hue, AppVisual.full, AppVisual.full).toColor(),
-          targetColor: HSVColor.fromAHSV(AppVisual.full, _hue, _saturation, _value).toColor(),
-          whiteVertex: _currentWheelGeometry.whiteVertex,
-        );
+        _hue = _normalizeDegrees(radiansToDegrees(math.atan2(delta.dy, delta.dx)));
+        _recomputeTriangleSelection();
       });
       _notifyColorChanged();
       return;
@@ -288,15 +249,7 @@ class _ColorWheelPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final ({
-      Offset blackVertex,
-      Offset center,
-      Offset colorVertex,
-      double outerRadius,
-      double ringInnerRadius,
-      Offset whiteVertex,
-    })
-    geometry = _buildWheelGeometry(size, hue);
+    final _WheelGeometry geometry = _buildWheelGeometry(size, hue);
     final Rect outerRect = Rect.fromCircle(center: geometry.center, radius: geometry.outerRadius);
     final Rect innerRect = Rect.fromCircle(center: geometry.center, radius: geometry.ringInnerRadius);
     final Paint ringPaint = Paint()
@@ -358,7 +311,7 @@ class _ColorWheelPainter extends CustomPainter {
       ..isAntiAlias = true;
     canvas.drawPath(trianglePath, triangleBorderPaint);
 
-    final double hueRadians = _degreesToRadians(hue);
+    final double hueRadians = degreesToRadians(hue);
     final double hueIndicatorRadius = geometry.ringInnerRadius + (AppLayout.colorWheelRingThickness / AppMath.pair);
     final Offset ringThumbCenter = Offset(
       geometry.center.dx + math.cos(hueRadians) * hueIndicatorRadius,
@@ -407,52 +360,19 @@ class _ColorWheelPainter extends CustomPainter {
   }
 }
 
-class _WheelAlphaGradientPainter extends CustomPainter {
-  const _WheelAlphaGradientPainter({
-    required this.alpha,
-    required this.hue,
-    required this.saturation,
-    required this.value,
-  });
-
-  final double alpha;
-  final double hue;
-  final double saturation;
-  final double value;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Rect rect = Offset.zero & size;
-    final Gradient gradient = LinearGradient(
-      colors: <Color>[
-        HSVColor.fromAHSV(0, hue, saturation, value).toColor(),
-        HSVColor.fromAHSV(alpha, hue, saturation, value).toColor(),
-      ],
-    );
-
-    final Paint paint = Paint()..shader = gradient.createShader(rect);
-    canvas.drawRect(rect, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _WheelAlphaGradientPainter oldDelegate) {
-    return oldDelegate.alpha != alpha ||
-        oldDelegate.hue != hue ||
-        oldDelegate.saturation != saturation ||
-        oldDelegate.value != value;
-  }
-}
-
-/// Computes wheel and triangle geometry for [size] at the given [hue].
-({
+/// Wheel and triangle geometry: the ring radii around [center] and the three
+/// vertices of the saturation/value triangle.
+typedef _WheelGeometry = ({
   Offset blackVertex,
   Offset center,
   Offset colorVertex,
   double outerRadius,
   double ringInnerRadius,
   Offset whiteVertex,
-})
-_buildWheelGeometry(Size size, double hue) {
+});
+
+/// Computes wheel and triangle geometry for [size] at the given [hue].
+_WheelGeometry _buildWheelGeometry(Size size, double hue) {
   final double outerRadius = math.min(size.width, size.height) / AppMath.pair;
   final Offset center = Offset(size.width / AppMath.pair, size.height / AppMath.pair);
   final double ringInnerRadius = outerRadius - AppLayout.colorWheelRingThickness;
@@ -472,10 +392,6 @@ _buildWheelGeometry(Size size, double hue) {
   );
 }
 
-double _degreesToRadians(double degrees) {
-  return (degrees * AppMath.pi) / AppMath.degreesPerHalfTurn;
-}
-
 double _normalizeDegrees(double degrees) {
   return (degrees % AppMath.degreesPerFullTurn + AppMath.degreesPerFullTurn) % AppMath.degreesPerFullTurn;
 }
@@ -485,15 +401,11 @@ Offset _offsetOnCircle(
   double radius,
   double angleDegrees,
 ) {
-  final double radians = _degreesToRadians(angleDegrees);
+  final double radians = degreesToRadians(angleDegrees);
   return Offset(
     center.dx + math.cos(radians) * radius,
     center.dy + math.sin(radians) * radius,
   );
-}
-
-double _radiansToDegrees(double radians) {
-  return (radians * AppMath.degreesPerHalfTurn) / AppMath.pi;
 }
 
 ({double black, double color, double white}) _triangleWeightsForHsv({

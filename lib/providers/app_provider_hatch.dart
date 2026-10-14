@@ -17,8 +17,7 @@ extension AppProviderHatch on AppProvider {
   set hatchPattern(HatchPattern value) {
     _hatchPattern = value.copyWith(crossed: false).clamped();
     _prewarmHatchTiles();
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   /// The tapered-mark geometry used by the [BrushStyle.hatchMarks] style.
@@ -28,23 +27,20 @@ extension AppProviderHatch on AppProvider {
   /// Marks are pure geometry, so nothing needs prewarming.
   set hatchMarks(HatchMarks value) {
     _hatchMarks = value.clamped();
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   /// Sets whether flood fill should render as a hatch pattern (turning halftone
   /// off, the two being mutually exclusive).
   void setFillHatchEnabled(bool value) {
     fillModel.hatchEnabled = value;
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   /// Sets whether the hatch fill pattern is cross-hatched.
   void setFillHatchCrossed(bool value) {
     fillModel.hatchCrossed = value;
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   /// Generates the plain and crossed tiles for the current hatch geometry.

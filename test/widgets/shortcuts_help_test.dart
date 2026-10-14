@@ -109,6 +109,7 @@ void main() {
                     appProvider,
                     const SizedBox.shrink(),
                     onSave: onSave ?? () async {},
+                    onNewFromClipboard: () async {},
                   );
                 },
               );

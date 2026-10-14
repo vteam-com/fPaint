@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 
 // Low-level per-step pixel operations (smudge / press / blur dabs and the
@@ -105,12 +106,23 @@ class _PixelBrushComputationResult {
 // Public API
 // ---------------------------------------------------------------------------
 
-/// Resolves the spacing between resampled pixel-brush points for [brushSize].
-double resolvePixelBrushStepSpacing(double brushSize) {
-  final double radius = math.max(
+/// Resolves the dab radius (in pixels) of a pixel brush of [brushSize].
+double resolvePixelBrushRadius(double brushSize) {
+  return math.max(
     AppInteraction.smudgeMinimumRadius,
     brushSize * AppInteraction.smudgeBrushRadiusFactor,
   );
+}
+
+/// Resolves the integer pixel padding around a dab of [radius]: the rounded-up
+/// radius plus [AppInteraction.smudgeBoundsPadding].
+int resolvePixelBrushPadding(double radius) {
+  return radius.ceil() + AppInteraction.smudgeBoundsPadding;
+}
+
+/// Resolves the spacing between resampled pixel-brush points for [brushSize].
+double resolvePixelBrushStepSpacing(double brushSize) {
+  final double radius = resolvePixelBrushRadius(brushSize);
   // Dab spacing scales with the radius so large brushes don't emit an absurd
   // dab count. The whole stroke is rasterized once on pointer-up (the drag only
   // draws a marquee), so the spacing is tuned for a smooth trail rather than
@@ -146,7 +158,7 @@ Future<PixelBrushSegmentResult?> rasterizePixelBrushSegment({
   required int imageHeight,
   required List<Offset> segmentPoints,
   required double brushSize,
-  double intensity = AppInteraction.pixelBrushDefaultIntensity,
+  double intensity = AppEffects.defaultIntensity,
   required PixelBrushMode mode,
   Uint8List? clipMask,
   bool preferSynchronous = false,
@@ -268,10 +280,7 @@ _PixelBrushComputationResult _runPixelBrushComputationLod({
   required double intensity,
   required PixelBrushMode mode,
 }) {
-  final double radius = math.max(
-    AppInteraction.smudgeMinimumRadius,
-    brushSize * AppInteraction.smudgeBrushRadiusFactor,
-  );
+  final double radius = resolvePixelBrushRadius(brushSize);
   final bool singleDab = segmentPoints.length < AppMath.pair;
   final int factor = (singleDab || radius <= AppInteraction.smudgeComputeLodMinRadius)
       ? AppMath.one
@@ -412,38 +421,19 @@ _PixelBrushComputationResult _runPixelBrushComputation({
   // Start from the caller's current live pixel state.
   final Uint8List pixels = livePixels;
   final double clampedIntensity = intensity.clamp(AppEffects.minIntensity, AppEffects.maxIntensity);
-  final double appliedIntensity = clampedIntensity * AppInteraction.pixelBrushIntensityAppliedScale;
+  final double appliedIntensity = clampedIntensity * AppEffects.intensityAppliedScale;
 
-  final double radius = math.max(
-    AppInteraction.smudgeMinimumRadius,
-    brushSize * AppInteraction.smudgeBrushRadiusFactor,
-  );
+  final double radius = resolvePixelBrushRadius(brushSize);
   final double stepSpacing = resolvePixelBrushStepSpacing(brushSize);
 
   // Compute the bounding box of the segment so we work only on affected rows.
-  final int padding = radius.ceil() + AppInteraction.smudgeBoundsPadding;
-  double minX = segmentPoints.first.dx;
-  double minY = segmentPoints.first.dy;
-  double maxX = segmentPoints.first.dx;
-  double maxY = segmentPoints.first.dy;
-  for (final Offset p in segmentPoints.skip(AppMath.one)) {
-    if (p.dx < minX) {
-      minX = p.dx;
-    }
-    if (p.dy < minY) {
-      minY = p.dy;
-    }
-    if (p.dx > maxX) {
-      maxX = p.dx;
-    }
-    if (p.dy > maxY) {
-      maxY = p.dy;
-    }
-  }
-  final int workingLeft = math.max(AppMath.zero, minX.floor() - padding);
-  final int workingTop = math.max(AppMath.zero, minY.floor() - padding);
-  final int workingRight = math.min(imageWidth - AppMath.one, maxX.ceil() + padding);
-  final int workingBottom = math.min(imageHeight - AppMath.one, maxY.ceil() + padding);
+  final int padding = resolvePixelBrushPadding(radius);
+  // Callers guarantee at least one point, so the bounds are never null.
+  final Rect segmentBounds = boundsOfPoints(segmentPoints) ?? Rect.zero;
+  final int workingLeft = math.max(AppMath.zero, segmentBounds.left.floor() - padding);
+  final int workingTop = math.max(AppMath.zero, segmentBounds.top.floor() - padding);
+  final int workingRight = math.min(imageWidth - AppMath.one, segmentBounds.right.ceil() + padding);
+  final int workingBottom = math.min(imageHeight - AppMath.one, segmentBounds.bottom.ceil() + padding);
   final int workingWidth = workingRight - workingLeft + AppMath.one;
   final int workingHeight = workingBottom - workingTop + AppMath.one;
 
@@ -457,7 +447,7 @@ _PixelBrushComputationResult _runPixelBrushComputation({
   }
 
   // Extract a working sub-buffer so inner loops index cheaply.
-  final Uint8List workingPixels = _copyPixelRect(
+  final Uint8List workingPixels = copyRgbaRect(
     pixels: pixels,
     imageWidth: imageWidth,
     left: workingLeft,
@@ -467,7 +457,7 @@ _PixelBrushComputationResult _runPixelBrushComputation({
   );
   final Uint8List? workingClipMask = clipMask == null
       ? null
-      : _copyPixelRect(
+      : copyRgbaRect(
           pixels: clipMask,
           imageWidth: imageWidth,
           left: workingLeft,
@@ -562,7 +552,7 @@ _PixelBrushComputationResult _runPixelBrushComputation({
   }
 
   // Write the modified sub-buffer back into the full pixel array.
-  _writePixelRect(
+  blitRgbaRect(
     source: workingPixels,
     destination: pixels,
     imageWidth: imageWidth,

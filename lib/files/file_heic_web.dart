@@ -61,66 +61,65 @@ bool get isHeicExportSupported => false;
 Future<Uint8List> decodeHeicBytes(Uint8List heicBytes) async {
   await _ensureLibheifLoaded();
 
-  try {
-    final _HeifDecoder decoder = _HeifDecoder();
-    final List<_HeifImage> images = decoder._decode(heicBytes.toJS).toDart;
-    if (images.isEmpty) {
-      throw const HeicConversionException(_errorNoValidImages);
-    }
-
-    final _HeifImage image = images.first;
-    try {
-      final int width = image._getWidth();
-      final int height = image._getHeight();
-      if (width <= 0 || height <= 0) {
-        throw HeicConversionException(
-          '$_errorInvalidImageDimensionsPrefix width=$width, height=$height',
-        );
+  return wrapFileOperation<HeicConversionException, Uint8List>(
+    message: _errorConvertPrefix,
+    exceptionBuilder: HeicConversionException.new,
+    operation: () async {
+      final _HeifDecoder decoder = _HeifDecoder();
+      final List<_HeifImage> images = decoder._decode(heicBytes.toJS).toDart;
+      if (images.isEmpty) {
+        throw const HeicConversionException(_errorNoValidImages);
       }
 
-      final web.HTMLCanvasElement canvas = web.HTMLCanvasElement()
-        ..width = width
-        ..height = height;
-      final web.CanvasRenderingContext2D? context =
-          canvas.getContext(_canvasContext2d) as web.CanvasRenderingContext2D?;
-      if (context == null) {
-        throw const HeicConversionException(_errorCanvasContext);
-      }
+      final _HeifImage image = images.first;
+      try {
+        final int width = image._getWidth();
+        final int height = image._getHeight();
+        if (width <= 0 || height <= 0) {
+          throw HeicConversionException(
+            '$_errorInvalidImageDimensionsPrefix width=$width, height=$height',
+          );
+        }
 
-      final web.ImageData imageData = context.createImageData(width.toJS, height);
-      final Completer<void> completer = Completer<void>();
+        final web.HTMLCanvasElement canvas = web.HTMLCanvasElement()
+          ..width = width
+          ..height = height;
+        final web.CanvasRenderingContext2D? context =
+            canvas.getContext(_canvasContext2d) as web.CanvasRenderingContext2D?;
+        if (context == null) {
+          throw const HeicConversionException(_errorCanvasContext);
+        }
 
-      void displayCallback(JSObject? displayData) {
-        if (displayData == null) {
-          if (!completer.isCompleted) {
-            completer.completeError(
-              const HeicConversionException(_errorDisplayReturnedNull),
-            );
+        final web.ImageData imageData = context.createImageData(width.toJS, height);
+        final Completer<void> completer = Completer<void>();
+
+        void displayCallback(JSObject? displayData) {
+          if (displayData == null) {
+            if (!completer.isCompleted) {
+              completer.completeError(
+                const HeicConversionException(_errorDisplayReturnedNull),
+              );
+            }
+            return;
           }
-          return;
+
+          if (!completer.isCompleted) {
+            completer.complete();
+          }
         }
 
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
+        image._display(imageData, displayCallback.toJS);
+        await completer.future;
+        context.putImageData(imageData, 0, 0);
+
+        final String dataUrl = canvas.toDataUrl(_mimeTypePng);
+        final String base64Data = dataUrl.split(_dataUrlSeparator).last;
+        return base64Decode(base64Data);
+      } finally {
+        image._free();
       }
-
-      image._display(imageData, displayCallback.toJS);
-      await completer.future;
-      context.putImageData(imageData, 0, 0);
-
-      final String dataUrl = canvas.toDataUrl(_mimeTypePng);
-      final String base64Data = dataUrl.split(_dataUrlSeparator).last;
-      return base64Decode(base64Data);
-    } finally {
-      image._free();
-    }
-  } catch (e) {
-    if (e is HeicConversionException) {
-      rethrow;
-    }
-    throw HeicConversionException(_errorConvertPrefix, cause: e);
-  }
+    },
+  );
 }
 
 /// HEIC encoding is not supported on web.

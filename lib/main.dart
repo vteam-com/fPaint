@@ -378,19 +378,16 @@ class MyApp extends StatelessWidget {
                             shellProvider,
                             appProvider,
                             const MainScreen(),
-                            onSave: () async {
-                              await runWithGlobalFileSaveSnackBar<void>(
-                                initialFilePath: shellProvider.loadedFileName,
-                                completedFilePathBuilder: () => shellProvider.loadedFileName,
-                                task: () {
-                                  return saveFile(
-                                    shellProvider,
-                                    appProvider.layers,
-                                    appPreferences,
-                                  );
-                                },
-                              );
-                            },
+                            onSave: () => saveLoadedFileWithFeedback(
+                              shellProvider,
+                              appProvider.layers,
+                              appPreferences,
+                            ),
+                            onNewFromClipboard: () => newDocumentFromClipboardGuarded(
+                              context,
+                              appProvider: appProvider,
+                              shellProvider: shellProvider,
+                            ),
                           ),
                           '/settings': (_) => const SettingsPage(),
                           '/platforms': (_) => const PlatformsPage(),

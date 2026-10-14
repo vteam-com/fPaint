@@ -2,6 +2,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/widgets/app_overlay.dart';
+import 'package:fpaint/widgets/app_popup_menu.dart';
 
 /// A dropdown button replacement for Material [DropdownButton].
 class AppDropdown<T> extends StatelessWidget {
@@ -23,10 +24,10 @@ class AppDropdown<T> extends StatelessWidget {
 
     return GestureDetector(
       onTap: () async {
-        final RenderBox button = context.findRenderObject()! as RenderBox;
-        final Offset offset = button.localToGlobal(
-          Offset(0, button.size.height),
-        );
+        final Offset? offset = menuAnchorBelow(context);
+        if (offset == null) {
+          return;
+        }
         final T? result = await showAppOverlay<T>(
           context: context,
           barrierColor: AppColors.transparent,

@@ -7,6 +7,7 @@ import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/hatch_marks.dart';
 import 'package:fpaint/models/hatch_pattern.dart';
+import 'package:fpaint/models/tool_family.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/panels/tools/hatch_tool_option.dart';
 import 'package:fpaint/panels/tools/tool_family_rail.dart';
@@ -21,6 +22,7 @@ import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/gradient_color_list_editor.dart';
 import 'package:fpaint/widgets/halftone_size_picker.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:fpaint/widgets/picker_slider_tool_option.dart';
 import 'package:fpaint/widgets/text_attributes_widget.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
 import 'package:fpaint/widgets/tool_attribute_widget.dart';
@@ -168,26 +170,22 @@ class ToolsPanel extends StatelessWidget {
   ) {
     final AppLocalizations l10n = context.l10n;
 
-    return ToolAttributeWidget(
+    return PickerSliderToolOption(
       compact: minimal,
       name: l10n.colorTolerance,
-      childLeft: AppButtonIcon(
-        icon: AppIcon.support,
-        onPressed: () {
-          showTolerancePicker(context, appProvider.tolerance, (int newValue) {
-            appProvider.tolerance = newValue;
-          });
+      icon: AppIcon.support,
+      onOpenPicker: () {
+        showTolerancePicker(context, appProvider.tolerance, (int newValue) {
+          appProvider.tolerance = newValue;
+        });
+      },
+      inlineControl: TolerancePicker(
+        title: l10n.tolerance,
+        value: appProvider.tolerance,
+        onChanged: (int value) {
+          appProvider.tolerance = value;
         },
       ),
-      childRight: minimal
-          ? null
-          : TolerancePicker(
-              title: l10n.tolerance,
-              value: appProvider.tolerance,
-              onChanged: (int value) {
-                appProvider.tolerance = value;
-              },
-            ),
     );
   }
 
@@ -310,90 +308,75 @@ class ToolsPanel extends StatelessWidget {
         break;
 
       default:
-        final String title = appProvider.selectedAction == ActionType.pencil ? l10n.pencilSize : l10n.brushSize;
-        final double min = appProvider.selectedAction == ActionType.pencil ? 1 : AppInteraction.minCanvasScale;
-        final bool isPixelBrush =
-            appProvider.selectedAction == ActionType.smudge || appProvider.selectedAction == ActionType.blurBrush;
-        final double max = isPixelBrush ? AppLimits.pixelBrushSizeMax.toDouble() : AppLimits.percentMax.toDouble();
+        final String title = selectedTool == ActionType.pencil ? l10n.pencilSize : l10n.brushSize;
+        final BrushSizeRange sizeRange = brushSizeRangeFor(selectedTool);
 
         // Brush Size
         if (selectedTool.isSupported(ActionOptions.brushSize)) {
           widgets.add(
-            ToolAttributeWidget(
+            PickerSliderToolOption(
               key: Keys.toolBrushSizeTool,
               compact: minimal,
               name: title,
-              childLeft: AppButtonIcon(
-                key: Keys.toolBrushSizeButton,
-                icon: AppIcon.lineWeight,
-                constraints: minimal ? const BoxConstraints() : null,
-                padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.small),
-                onPressed: () {
-                  showBrushSizePicker(
-                    context: context,
-                    title: title,
-                    titleIcon: const AppSvgIcon(icon: AppIcon.lineWeight),
-                    value: appProvider.brushSize,
-                    min: min,
-                    max: max,
-                    onChanged: (double newValue) {
-                      appProvider.brushSize = newValue;
-                    },
-                  );
+              buttonKey: Keys.toolBrushSizeButton,
+              icon: AppIcon.lineWeight,
+              onOpenPicker: () {
+                showBrushSizePicker(
+                  context: context,
+                  title: title,
+                  titleIcon: const AppSvgIcon(icon: AppIcon.lineWeight),
+                  value: appProvider.brushSize,
+                  min: sizeRange.min,
+                  max: sizeRange.max,
+                  onChanged: (double newValue) {
+                    appProvider.brushSize = newValue;
+                  },
+                );
+              },
+              inlineControl: BrushSizePicker(
+                key: Keys.toolBrushSizeSlider,
+                title: title,
+                value: appProvider.brushSize,
+                min: sizeRange.min,
+                max: sizeRange.max,
+                onChanged: (double value) {
+                  appProvider.brushSize = value;
                 },
               ),
-              childRight: minimal
-                  ? null
-                  : BrushSizePicker(
-                      key: Keys.toolBrushSizeSlider,
-                      title: title,
-                      value: appProvider.brushSize,
-                      min: min,
-                      max: max,
-                      onChanged: (double value) {
-                        appProvider.brushSize = value;
-                      },
-                    ),
             ),
           );
         }
 
         if (selectedTool.isSupported(ActionOptions.brushIntensity)) {
           widgets.add(
-            ToolAttributeWidget(
+            PickerSliderToolOption(
               key: Keys.toolBrushIntensityTool,
               compact: minimal,
               name: l10n.effectIntensity,
-              childLeft: AppButtonIcon(
-                key: Keys.toolBrushIntensityButton,
-                icon: selectedTool.icon,
-                constraints: minimal ? const BoxConstraints() : null,
-                padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.small),
-                onPressed: () {
-                  showBrushIntensityPicker(
-                    context: context,
-                    title: l10n.effectIntensity,
-                    titleIcon: AppSvgIcon(icon: selectedTool.icon),
-                    value: appProvider.brushIntensity,
-                    onChanged: (double newValue) {
-                      appProvider.brushIntensity = newValue;
-                    },
-                  );
+              buttonKey: Keys.toolBrushIntensityButton,
+              icon: selectedTool.icon,
+              onOpenPicker: () {
+                showBrushIntensityPicker(
+                  context: context,
+                  title: l10n.effectIntensity,
+                  titleIcon: AppSvgIcon(icon: selectedTool.icon),
+                  value: appProvider.brushIntensity,
+                  onChanged: (double newValue) {
+                    appProvider.brushIntensity = newValue;
+                  },
+                );
+              },
+              inlineControl: AppSlider(
+                key: Keys.toolBrushIntensitySlider,
+                value: appProvider.brushIntensity,
+                min: AppEffects.minIntensity,
+                max: AppEffects.maxIntensity,
+                divisions: AppLimits.sliderDivisions,
+                valueLabel: formatFractionPercent(l10n, appProvider.brushIntensity),
+                onChanged: (double value) {
+                  appProvider.brushIntensity = value;
                 },
               ),
-              childRight: minimal
-                  ? null
-                  : AppSlider(
-                      key: Keys.toolBrushIntensitySlider,
-                      value: appProvider.brushIntensity,
-                      min: AppEffects.minIntensity,
-                      max: AppEffects.maxIntensity,
-                      divisions: AppLimits.sliderDivisions,
-                      valueLabel: '${(appProvider.brushIntensity * AppMath.percentScale).round()}%',
-                      onChanged: (double value) {
-                        appProvider.brushIntensity = value;
-                      },
-                    ),
             ),
           );
         }
@@ -401,28 +384,22 @@ class ToolsPanel extends StatelessWidget {
         // Brush Style
         if (selectedTool.isSupported(ActionOptions.brushStyle)) {
           widgets.add(
-            ToolAttributeWidget(
+            PickerSliderToolOption(
               compact: minimal,
               name: l10n.brushStyle,
-              childLeft: AppButtonIcon(
-                icon: AppIcon.lineStyle,
-                constraints: minimal ? const BoxConstraints() : null,
-                padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.small),
-                onPressed: () {
-                  showBrushStylePicker(
-                    context,
-                    appProvider.brushStyle,
-                    (BrushStyle selectedBrushStyle) => appProvider.brushStyle = selectedBrushStyle,
-                  );
-                },
+              icon: AppIcon.lineStyle,
+              onOpenPicker: () {
+                showBrushStylePicker(
+                  context,
+                  appProvider.brushStyle,
+                  (BrushStyle selectedBrushStyle) => appProvider.brushStyle = selectedBrushStyle,
+                );
+              },
+              inlineControl: brushStyleDropDown(
+                context,
+                appProvider.brushStyle,
+                (BrushStyle selectedBrushStyle) => appProvider.brushStyle = selectedBrushStyle,
               ),
-              childRight: minimal
-                  ? null
-                  : brushStyleDropDown(
-                      context,
-                      appProvider.brushStyle,
-                      (BrushStyle selectedBrushStyle) => appProvider.brushStyle = selectedBrushStyle,
-                    ),
             ),
           );
 
@@ -565,39 +542,33 @@ class ToolsPanel extends StatelessWidget {
     }
 
     widgets.add(
-      ToolAttributeWidget(
+      PickerSliderToolOption(
         compact: minimal,
         name: l10n.toolHalftone,
         enabled: halftoneEnabled,
         onEnabledChanged: updateHalftoneEnabled,
         enabledToggleKey: Keys.toolFillHalftoneToggle,
-        childLeft: AppButtonIcon(
-          icon: AppIcon.halftone,
-          isSelected: halftoneEnabled,
-          constraints: minimal ? const BoxConstraints() : null,
-          padding: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.small),
-          tooltip: l10n.toolHalftone,
-          onPressed: () {
-            showHalftoneSizePicker(
-              context: context,
-              value: halftonePercent,
-              enabled: halftoneEnabled,
-              onChanged: updateHalftonePercent,
-              onEnabledChanged: updateHalftoneEnabled,
-            );
-          },
+        icon: AppIcon.halftone,
+        isSelected: halftoneEnabled,
+        tooltip: l10n.toolHalftone,
+        onOpenPicker: () {
+          showHalftoneSizePicker(
+            context: context,
+            value: halftonePercent,
+            enabled: halftoneEnabled,
+            onChanged: updateHalftonePercent,
+            onEnabledChanged: updateHalftoneEnabled,
+          );
+        },
+        inlineControl: AppSlider(
+          key: Keys.toolFillHalftoneSlider,
+          valueLabel: l10n.percentageValue(halftonePercent),
+          value: halftonePercent.toDouble(),
+          min: AppMath.zero.toDouble(),
+          max: AppLimits.percentMax.toDouble(),
+          divisions: AppLimits.sliderDivisions,
+          onChanged: halftoneEnabled ? (double value) => updateHalftonePercent(value.toInt()) : null,
         ),
-        childRight: minimal
-            ? null
-            : AppSlider(
-                key: Keys.toolFillHalftoneSlider,
-                valueLabel: l10n.percentageValue(halftonePercent),
-                value: halftonePercent.toDouble(),
-                min: AppMath.zero.toDouble(),
-                max: AppLimits.percentMax.toDouble(),
-                divisions: AppLimits.sliderDivisions,
-                onChanged: halftoneEnabled ? (double value) => updateHalftonePercent(value.toInt()) : null,
-              ),
       ),
     );
   }
@@ -709,15 +680,14 @@ Widget _buildActionPicker({
   bool useSourceColors = false,
   required VoidCallback onPressed,
 }) {
-  return AppButtonIcon(
+  return AppButtonIcon.toolOption(
     key: key,
     icon: icon,
+    compact: minimal,
     isSelected: isSelected,
     color: color,
     useSourceColors: useSourceColors,
     onPressed: onPressed,
     tooltip: name,
-    constraints: minimal ? const BoxConstraints() : null,
-    padding: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.small),
   );
 }

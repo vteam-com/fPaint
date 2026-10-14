@@ -237,11 +237,11 @@ File _buildTemporarySaveFile(
 /// Formats [timestamp] for deterministic, sortable backup file names.
 String _formatBackupTimestamp(DateTime timestamp) {
   final String year = timestamp.year.toString().padLeft(AppMath.four, '0');
-  final String month = timestamp.month.toString().padLeft(AppMath.two, '0');
-  final String day = timestamp.day.toString().padLeft(AppMath.two, '0');
-  final String hour = timestamp.hour.toString().padLeft(AppMath.two, '0');
-  final String minute = timestamp.minute.toString().padLeft(AppMath.two, '0');
-  final String second = timestamp.second.toString().padLeft(AppMath.two, '0');
+  final String month = timestamp.month.toString().padLeft(AppMath.pair, '0');
+  final String day = timestamp.day.toString().padLeft(AppMath.pair, '0');
+  final String hour = timestamp.hour.toString().padLeft(AppMath.pair, '0');
+  final String minute = timestamp.minute.toString().padLeft(AppMath.pair, '0');
+  final String second = timestamp.second.toString().padLeft(AppMath.pair, '0');
   final String millisecond = timestamp.millisecond.toString().padLeft(AppMath.triple, '0');
   final String microsecond = timestamp.microsecond.toString().padLeft(AppMath.triple, '0');
   return '$year$month$day-$hour$minute$second-$millisecond$microsecond';

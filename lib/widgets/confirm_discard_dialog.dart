@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
+import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
 /// Asks the user whether they want to discard their current unsaved work.
@@ -35,4 +36,15 @@ Future<bool> confirmDiscardCurrentWork(BuildContext context) async {
   );
 
   return discardCurrentFile == true;
+}
+
+/// Returns whether the caller may replace the current document.
+///
+/// Proceeds straight away when [layers] has no unsaved changes; otherwise asks
+/// via [confirmDiscardCurrentWork] and returns the user's answer.
+Future<bool> confirmDiscardIfChanged(
+  BuildContext context,
+  LayersProvider layers,
+) async {
+  return !layers.hasChanged || await confirmDiscardCurrentWork(context);
 }

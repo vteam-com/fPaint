@@ -32,7 +32,7 @@ List<Offset> _horizontalPoints(int pointCount) => List<Offset>.generate(
 /// the given [pressures], returning its RGBA bytes.
 Future<ByteData> _renderStroke({required MyBrush brush, List<double>? pressures, List<Offset>? points}) async {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
-  renderPath(Canvas(recorder), points ?? _horizontalPoints(11), brush, AppColors.transparent, pressures: pressures);
+  renderPath(Canvas(recorder), points ?? _horizontalPoints(11), brush, pressures: pressures);
   final ui.Image image = await recorder.endRecording().toImage(_imageWidth, _imageHeight);
   return (await image.toByteData(format: ui.ImageByteFormat.rawRgba))!;
 }

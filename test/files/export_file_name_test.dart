@@ -38,4 +38,26 @@ void main() {
       expect(normalizeTiffExportFileName(_windowsTiffPath), _normalizedWindowsTiffPath);
     });
   });
+
+  group('fileExtensionOf', () {
+    test('returns the lower-case extension without the dot', () {
+      expect(fileExtensionOf('photo.JPEG'), 'jpeg');
+      expect(fileExtensionOf('/tmp/some.dir/layers.ora'), 'ora');
+      expect(fileExtensionOf(r'C:\art\scan.TIF'), 'tif');
+    });
+
+    test('returns an empty string when the file name has no extension', () {
+      expect(fileExtensionOf('noext'), isEmpty);
+      expect(fileExtensionOf('trailing.'), isEmpty);
+      expect(fileExtensionOf('/tmp/some.dir/photo'), isEmpty);
+    });
+  });
+
+  group('fileNameOf', () {
+    test('returns the last path segment for unix and windows paths', () {
+      expect(fileNameOf('/tmp/some.dir/photo.png'), 'photo.png');
+      expect(fileNameOf(r'C:\art\scan.tif'), 'scan.tif');
+      expect(fileNameOf('bare.webp'), 'bare.webp');
+    });
+  });
 }

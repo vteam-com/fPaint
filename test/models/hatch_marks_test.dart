@@ -132,8 +132,8 @@ void main() {
       final ui.PictureRecorder recorder = ui.PictureRecorder();
       final Canvas canvas = Canvas(recorder);
       final MyBrush brush = MyBrush(style: BrushStyle.hatchMarks, color: AppColors.black, size: 4);
-      renderPath(canvas, <Offset>[const Offset(5, 5), const Offset(5, 5)], brush, AppColors.black);
-      renderLine(canvas, const Offset(0, 0), const Offset(50, 0), brush, AppColors.black);
+      renderPath(canvas, <Offset>[const Offset(5, 5), const Offset(5, 5)], brush);
+      renderLine(canvas, const Offset(0, 0), const Offset(50, 0), brush);
       renderRectangle(canvas, const Offset(0, 0), const Offset(50, 40), brush, AppColors.transparent);
       renderCircle(canvas, const Offset(0, 0), const Offset(50, 50), brush, AppColors.transparent);
       recorder.endRecording();

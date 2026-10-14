@@ -99,7 +99,7 @@ class AppLayout {
   static const double quickMenuPuckSize = 56.0;
 
   /// Diameter of the backdrop disc drawn behind the quick menu slots.
-  static const double quickMenuDiscSize = (quickMenuRingRadius + toolbarButtonSize) * AppMath.two;
+  static const double quickMenuDiscSize = (quickMenuRingRadius + toolbarButtonSize) * AppMath.pair;
 
   /// Distance from the quick menu centre to the outer sub-ring (history,
   /// selection modes) that a Select or Undo slot expands.
@@ -110,5 +110,5 @@ class AppLayout {
 
   /// Furthest any quick menu slot reaches from the centre; the menu is kept
   /// this far inside the viewport so an expanded sub-ring is never cut off.
-  static const double quickMenuReach = quickMenuOuterRingRadius + toolbarButtonSize / AppMath.two;
+  static const double quickMenuReach = quickMenuOuterRingRadius + toolbarButtonSize / AppMath.pair;
 }

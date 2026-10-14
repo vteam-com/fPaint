@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/widgets/draw_rect.dart';
+import 'package:fpaint/widgets/overlay_control_widgets.dart';
 
 /// The circular on-canvas loupe shared by the pick-from-canvas gestures.
 ///
@@ -42,9 +43,9 @@ class MagnifierLoupe extends StatelessWidget {
     const double regionSize = AppLayout.previewRegionSize;
     final Widget? captionWidget = caption;
 
-    return Positioned(
-      left: pointerPosition.dx - (regionSize / AppMath.pair),
-      top: pointerPosition.dy - (regionSize / AppMath.pair),
+    return centeredPositioned(
+      center: pointerPosition,
+      size: const Size.square(regionSize),
       child: IgnorePointer(
         child: SizedBox(
           width: regionSize,

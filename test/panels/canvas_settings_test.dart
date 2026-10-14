@@ -62,18 +62,22 @@ void main() {
     );
   }
 
+  String fieldText(WidgetTester tester, Key fieldKey) {
+    return tester.widget<EditableText>(editableIn(fieldKey)).controller.text;
+  }
+
   group('showCanvasSettings aspect ratio sync', () {
     testWidgets('editing width keeps the typed value and updates height', (WidgetTester tester) async {
       await pumpCanvasSettings(tester);
 
-      expect(widthController.text, '800');
-      expect(heightController.text, '600');
+      expect(fieldText(tester, Keys.canvasSettingsWidthField), '800');
+      expect(fieldText(tester, Keys.canvasSettingsHeightField), '600');
 
       await tester.enterText(editableIn(Keys.canvasSettingsWidthField), '400');
       await tester.pump();
 
-      expect(widthController.text, '400');
-      expect(heightController.text, '300');
+      expect(fieldText(tester, Keys.canvasSettingsWidthField), '400');
+      expect(fieldText(tester, Keys.canvasSettingsHeightField), '300');
     });
 
     testWidgets('editing height keeps the typed value and updates width', (WidgetTester tester) async {
@@ -82,8 +86,8 @@ void main() {
       await tester.enterText(editableIn(Keys.canvasSettingsHeightField), '150');
       await tester.pump();
 
-      expect(heightController.text, '150');
-      expect(widthController.text, '200');
+      expect(fieldText(tester, Keys.canvasSettingsHeightField), '150');
+      expect(fieldText(tester, Keys.canvasSettingsWidthField), '200');
     });
 
     testWidgets('incomplete input does not clobber the other field', (WidgetTester tester) async {
@@ -92,8 +96,8 @@ void main() {
       await tester.enterText(editableIn(Keys.canvasSettingsWidthField), '');
       await tester.pump();
 
-      expect(widthController.text, '');
-      expect(heightController.text, '600');
+      expect(fieldText(tester, Keys.canvasSettingsWidthField), '');
+      expect(fieldText(tester, Keys.canvasSettingsHeightField), '600');
     });
 
     testWidgets('apply resizes the canvas to the entered dimensions', (WidgetTester tester) async {

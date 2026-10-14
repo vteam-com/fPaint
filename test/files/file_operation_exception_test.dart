@@ -113,4 +113,43 @@ void main() {
       expect(exception.message, contains('xyz'));
     });
   });
+
+  group('wrapFileOperation', () {
+    test('returns the operation result', () async {
+      final int result = await wrapFileOperation<OraFileException, int>(
+        message: 'wrapped',
+        exceptionBuilder: OraFileException.new,
+        operation: () async => 42,
+      );
+      expect(result, 42);
+    });
+
+    test('passes an exception of the target type through unchanged', () async {
+      const OraFileException original = OraFileException('original');
+      await expectLater(
+        wrapFileOperation<OraFileException, void>(
+          message: 'wrapped',
+          exceptionBuilder: OraFileException.new,
+          operation: () async => throw original,
+        ),
+        throwsA(same(original)),
+      );
+    });
+
+    test('wraps other errors with the message and cause', () async {
+      final StateError cause = StateError('boom');
+      await expectLater(
+        wrapFileOperation<TiffFileException, void>(
+          message: 'wrapped',
+          exceptionBuilder: TiffFileException.new,
+          operation: () async => throw cause,
+        ),
+        throwsA(
+          isA<TiffFileException>()
+              .having((TiffFileException e) => e.message, 'message', 'wrapped')
+              .having((TiffFileException e) => e.cause, 'cause', same(cause)),
+        ),
+      );
+    });
+  });
 }

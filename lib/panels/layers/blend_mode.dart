@@ -89,44 +89,44 @@ Map<String, Map<String, Object>> getSupportedBlendModes(AppLocalizations l10n) =
 /// [context] The build context for displaying the menu.
 /// [position] The screen position where the menu should appear.
 /// [selectedBlendMode] The currently selected blend mode (for highlighting).
-/// Returns the selected BlendMode, or BlendMode.srcOver if cancelled.
-Future<BlendMode> showBlendModeMenu({
+/// Returns the selected BlendMode, or `null` when the menu is dismissed
+/// without a choice so callers can leave the current mode untouched.
+Future<BlendMode?> showBlendModeMenu({
   required BuildContext context,
   Offset position = Offset.zero,
   BlendMode? selectedBlendMode,
 }) async {
   final AppLocalizations l10n = context.l10n;
   final Map<String, Map<String, Object>> blendModes = getSupportedBlendModes(l10n);
-  return await showAppMenu<BlendMode>(
-        context: context,
-        position: RelativeRect.fromLTRB(
-          position.dx,
-          position.dy,
-          position.dx + 1,
-          position.dy + 1,
-        ),
-        items: blendModes.entries.map((MapEntry<String, Map<String, Object>> entry) {
-          final BlendMode menuFlutterBlendMode = (entry.value['flutterBlendMode'] as BlendMode?) ?? BlendMode.srcOver;
+  return showAppMenu<BlendMode>(
+    context: context,
+    position: RelativeRect.fromLTRB(
+      position.dx,
+      position.dy,
+      position.dx + 1,
+      position.dy + 1,
+    ),
+    items: blendModes.entries.map((MapEntry<String, Map<String, Object>> entry) {
+      final BlendMode menuFlutterBlendMode = (entry.value['flutterBlendMode'] as BlendMode?) ?? BlendMode.srcOver;
 
-          return AppPopupMenuItem<BlendMode>(
-            value: menuFlutterBlendMode,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                AppText(
-                  entry.key,
-                  variant: selectedBlendMode == menuFlutterBlendMode ? AppTextVariant.button : AppTextVariant.body,
-                ),
-                AppText(
-                  entry.value['description'] as String,
-                  variant: AppTextVariant.subtitle,
-                ),
-              ],
+      return AppPopupMenuItem<BlendMode>(
+        value: menuFlutterBlendMode,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            AppText(
+              entry.key,
+              variant: selectedBlendMode == menuFlutterBlendMode ? AppTextVariant.button : AppTextVariant.body,
             ),
-          );
-        }).toList(),
-      ) ??
-      BlendMode.srcOver;
+            AppText(
+              entry.value['description'] as String,
+              variant: AppTextVariant.subtitle,
+            ),
+          ],
+        ),
+      );
+    }).toList(),
+  );
 }
 
 /// Converts a BlendMode enum value to a human-readable string.

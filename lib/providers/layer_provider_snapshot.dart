@@ -34,4 +34,25 @@ extension LayerSnapshot on LayerProvider {
     hasChanged = snapshot.hasChanged;
     clearCache();
   }
+
+  /// Replaces the layer's whole content with [image] placed at [offset]: both
+  /// stacks are cleared and any background fill dropped (the raster already
+  /// carries it).
+  void replaceContentWithImage(ui.Image image, {Offset offset = Offset.zero}) {
+    actionStack.clear();
+    redoStack.clear();
+    backgroundColor = null;
+    addImage(imageToAdd: image, offset: offset);
+  }
+
+  /// Rasterizes the layer at [canvasSize] into one full-canvas [ImageAction].
+  ///
+  /// The caller owns the new image (typically by placing the action on a stack
+  /// whose undo record retains it).
+  ImageAction flattenToImageAction(Size canvasSize) {
+    return ImageAction.flattened(
+      image: toImageForStorage(canvasSize),
+      canvasSize: canvasSize,
+    );
+  }
 }

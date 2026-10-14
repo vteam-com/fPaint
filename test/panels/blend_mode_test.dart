@@ -167,8 +167,9 @@ void main() {
       expect(selectedMode, BlendMode.multiply);
     });
 
-    testWidgets('returns srcOver when cancelled', (WidgetTester tester) async {
-      BlendMode? selectedMode;
+    testWidgets('returns null when cancelled', (WidgetTester tester) async {
+      BlendMode? selectedMode = BlendMode.multiply;
+      bool menuClosed = false;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -183,6 +184,7 @@ void main() {
                       context: context,
                       position: const Offset(100, 100),
                     );
+                    menuClosed = true;
                   },
                   child: const AppText('Trigger'),
                 );
@@ -200,7 +202,8 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
 
-      expect(selectedMode, BlendMode.srcOver);
+      expect(menuClosed, isTrue);
+      expect(selectedMode, isNull);
     });
   });
 }

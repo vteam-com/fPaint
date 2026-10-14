@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/widgets.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:vector_math/vector_math_64.dart' as vm;
 
 /// Position for anchor
@@ -193,4 +194,48 @@ Size scaleSizeTo(
     inputSize.width * scale,
     inputSize.height * scale,
   );
+}
+
+/// Returns the axis-aligned bounding box of [points], or `null` when empty.
+Rect? boundsOfPoints(Iterable<Offset> points) {
+  final Iterator<Offset> iterator = points.iterator;
+  if (!iterator.moveNext()) {
+    return null;
+  }
+  double minX = iterator.current.dx;
+  double minY = iterator.current.dy;
+  double maxX = minX;
+  double maxY = minY;
+  while (iterator.moveNext()) {
+    final Offset point = iterator.current;
+    if (point.dx < minX) {
+      minX = point.dx;
+    }
+    if (point.dy < minY) {
+      minY = point.dy;
+    }
+    if (point.dx > maxX) {
+      maxX = point.dx;
+    }
+    if (point.dy > maxY) {
+      maxY = point.dy;
+    }
+  }
+  return Rect.fromLTRB(minX, minY, maxX, maxY);
+}
+
+/// Grows [rect] by [inflate] on every side, snaps it outward to whole pixels
+/// and clamps it to the `0..canvasSize` pixel grid (the canvas extent is
+/// truncated to whole pixels). Returns `null` when the clamped rect is empty.
+Rect? inflateClampToCanvas(Rect rect, double inflate, Size canvasSize) {
+  final int canvasWidth = canvasSize.width.toInt();
+  final int canvasHeight = canvasSize.height.toInt();
+  final int left = (rect.left - inflate).floor().clamp(AppMath.zero, canvasWidth);
+  final int top = (rect.top - inflate).floor().clamp(AppMath.zero, canvasHeight);
+  final int right = (rect.right + inflate).ceil().clamp(AppMath.zero, canvasWidth);
+  final int bottom = (rect.bottom + inflate).ceil().clamp(AppMath.zero, canvasHeight);
+  if (right <= left || bottom <= top) {
+    return null;
+  }
+  return Rect.fromLTRB(left.toDouble(), top.toDouble(), right.toDouble(), bottom.toDouble());
 }

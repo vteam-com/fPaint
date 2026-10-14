@@ -100,9 +100,9 @@ class TransformEdgeDragZone extends StatelessWidget {
     );
     final double zoneAngle = atan2(segmentDelta.dy, segmentDelta.dx);
 
-    return Positioned(
-      left: zoneCenter.dx - zoneLength / AppMath.pair,
-      top: zoneCenter.dy - zoneThickness / AppMath.pair,
+    return centeredPositioned(
+      center: zoneCenter,
+      size: Size(zoneLength, zoneThickness),
       child: Transform.rotate(
         angle: zoneAngle,
         child: GestureDetector(
@@ -122,6 +122,12 @@ class TransformEdgeDragZone extends StatelessWidget {
     );
   }
 }
+
+/// Number of mode buttons (translate, scale, rotate, deform) in the toolbar.
+const int _transformModeButtonCount = AppMath.four;
+
+/// Number of commit buttons (apply, cancel) in the toolbar.
+const int _transformCommitButtonCount = AppMath.pair;
 
 class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin<TransformWidget> {
   @override
@@ -146,20 +152,6 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
     final bool isCenterHandleEnabled = model.isCenterHandleEnabled;
 
     final Offset screenCenter = _toScreen(model.center);
-
-    // Edge midpoints in screen space
-    final Offset topMid = _toScreen(
-      model.edgeMidpoint(TransformModel.topLeftIndex, TransformModel.topRightIndex),
-    );
-    final Offset rightMid = _toScreen(
-      model.edgeMidpoint(TransformModel.topRightIndex, TransformModel.bottomRightIndex),
-    );
-    final Offset bottomMid = _toScreen(
-      model.edgeMidpoint(TransformModel.bottomRightIndex, TransformModel.bottomLeftIndex),
-    );
-    final Offset leftMid = _toScreen(
-      model.edgeMidpoint(TransformModel.bottomLeftIndex, TransformModel.topLeftIndex),
-    );
 
     return wrapWithEscapeFocus(
       child: SizedBox.expand(
@@ -187,19 +179,19 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
                   screenEdgeMidpoints: screenEdgeMidpoints,
                 ),
 
-              if (areCornerHandlesEnabled) ...<Widget>[
-                _buildCornerHandle(TransformModel.topLeftIndex, screenCorners, interactionProfile),
-                _buildCornerHandle(TransformModel.topRightIndex, screenCorners, interactionProfile),
-                _buildCornerHandle(TransformModel.bottomRightIndex, screenCorners, interactionProfile),
-                _buildCornerHandle(TransformModel.bottomLeftIndex, screenCorners, interactionProfile),
-              ],
+              if (areCornerHandlesEnabled)
+                for (int index = 0; index < TransformModel.cornerCount; index++)
+                  _buildCornerHandle(index, screenCorners, interactionProfile),
 
-              if (areEdgeHandlesEnabled) ...<Widget>[
-                _buildEdgeHandle(TransformModel.topEdgeIndex, topMid, interactionProfile),
-                _buildEdgeHandle(TransformModel.rightEdgeIndex, rightMid, interactionProfile),
-                _buildEdgeHandle(TransformModel.bottomEdgeIndex, bottomMid, interactionProfile),
-                _buildEdgeHandle(TransformModel.leftEdgeIndex, leftMid, interactionProfile),
-              ],
+              if (areEdgeHandlesEnabled)
+                for (int edgeIndex = 0; edgeIndex < TransformModel.edgeHandleCount; edgeIndex++)
+                  _buildEdgeHandle(
+                    edgeIndex,
+                    _toScreen(
+                      model.edgeMidpoint(edgeIndex, (edgeIndex + AppMath.one) % TransformModel.cornerCount),
+                    ),
+                    interactionProfile,
+                  ),
 
               if (isCenterHandleEnabled) _buildCenterHandle(screenCenter, interactionProfile),
             ],
@@ -240,28 +232,13 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
     Offset screenCenter,
     InteractionLayoutProfile interactionProfile,
   ) {
-    return OverlayDragHandle(
-      backgroundColor: model.isCenterActive ? AppColors.selected : AppColors.overlayDark,
-      borderColor: AppColors.overlayLight,
+    return _buildTransformHandle(
+      isActive: model.isCenterActive,
       position: screenCenter,
-      size: interactionProfile.dragHandleSize,
       cursor: SystemMouseCursors.move,
-      onPanStart: (DragStartDetails _) {
-        model.setActiveCenter();
-        onChanged();
-      },
-      onPanUpdate: (DragUpdateDetails details) {
-        model.moveAll(viewport.deltaToCanvas(details.delta));
-        onChanged();
-      },
-      onPanEnd: () {
-        model.clearActiveControl();
-        onChanged();
-      },
-      onPanCancel: () {
-        model.clearActiveControl();
-        onChanged();
-      },
+      interactionProfile: interactionProfile,
+      onStart: model.setActiveCenter,
+      onCanvasDelta: model.moveAll,
     );
   }
 
@@ -271,28 +248,13 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
     List<Offset> screenCorners,
     InteractionLayoutProfile interactionProfile,
   ) {
-    return OverlayDragHandle(
-      backgroundColor: model.isCornerActive(index) ? AppColors.selected : AppColors.overlayDark,
-      borderColor: AppColors.overlayLight,
+    return _buildTransformHandle(
+      isActive: model.isCornerActive(index),
       position: screenCorners[index],
-      size: interactionProfile.dragHandleSize,
       cursor: SystemMouseCursors.grab,
-      onPanStart: (DragStartDetails _) {
-        model.setActiveCorner(index);
-        onChanged();
-      },
-      onPanUpdate: (DragUpdateDetails details) {
-        model.moveCorner(index, viewport.deltaToCanvas(details.delta));
-        onChanged();
-      },
-      onPanEnd: () {
-        model.clearActiveControl();
-        onChanged();
-      },
-      onPanCancel: () {
-        model.clearActiveControl();
-        onChanged();
-      },
+      interactionProfile: interactionProfile,
+      onStart: () => model.setActiveCorner(index),
+      onCanvasDelta: (Offset canvasDelta) => model.moveCorner(index, canvasDelta),
     );
   }
 
@@ -315,74 +277,37 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
         model.moveConnectedEdge(edgeIndex, viewport.deltaToCanvas(delta));
         onChanged();
       },
-      onDragEnd: () {
-        model.clearActiveControl();
-        onChanged();
-      },
-      onDragCancel: () {
-        model.clearActiveControl();
-        onChanged();
-      },
+      onDragEnd: _endHandleDrag,
+      onDragCancel: _endHandleDrag,
       segmentStart: segmentStart,
       segmentEnd: segmentEnd,
     );
   }
 
   /// Builds drag targets along each visible edge segment of the transform mesh.
+  ///
+  /// Each edge runs corner -> midpoint -> next corner (clockwise from the top
+  /// edge), and gets one drag zone per half-segment.
   List<Widget> _buildEdgeDragZones({
     required InteractionLayoutProfile interactionProfile,
     required List<Offset> screenCorners,
     required List<Offset> screenEdgeMidpoints,
   }) {
     return <Widget>[
-      _buildEdgeDragZone(
-        edgeIndex: TransformModel.topEdgeIndex,
-        interactionProfile: interactionProfile,
-        segmentStart: screenCorners[TransformModel.topLeftIndex],
-        segmentEnd: screenEdgeMidpoints[TransformModel.topEdgeIndex],
-      ),
-      _buildEdgeDragZone(
-        edgeIndex: TransformModel.topEdgeIndex,
-        interactionProfile: interactionProfile,
-        segmentStart: screenEdgeMidpoints[TransformModel.topEdgeIndex],
-        segmentEnd: screenCorners[TransformModel.topRightIndex],
-      ),
-      _buildEdgeDragZone(
-        edgeIndex: TransformModel.rightEdgeIndex,
-        interactionProfile: interactionProfile,
-        segmentStart: screenCorners[TransformModel.topRightIndex],
-        segmentEnd: screenEdgeMidpoints[TransformModel.rightEdgeIndex],
-      ),
-      _buildEdgeDragZone(
-        edgeIndex: TransformModel.rightEdgeIndex,
-        interactionProfile: interactionProfile,
-        segmentStart: screenEdgeMidpoints[TransformModel.rightEdgeIndex],
-        segmentEnd: screenCorners[TransformModel.bottomRightIndex],
-      ),
-      _buildEdgeDragZone(
-        edgeIndex: TransformModel.bottomEdgeIndex,
-        interactionProfile: interactionProfile,
-        segmentStart: screenCorners[TransformModel.bottomRightIndex],
-        segmentEnd: screenEdgeMidpoints[TransformModel.bottomEdgeIndex],
-      ),
-      _buildEdgeDragZone(
-        edgeIndex: TransformModel.bottomEdgeIndex,
-        interactionProfile: interactionProfile,
-        segmentStart: screenEdgeMidpoints[TransformModel.bottomEdgeIndex],
-        segmentEnd: screenCorners[TransformModel.bottomLeftIndex],
-      ),
-      _buildEdgeDragZone(
-        edgeIndex: TransformModel.leftEdgeIndex,
-        interactionProfile: interactionProfile,
-        segmentStart: screenCorners[TransformModel.bottomLeftIndex],
-        segmentEnd: screenEdgeMidpoints[TransformModel.leftEdgeIndex],
-      ),
-      _buildEdgeDragZone(
-        edgeIndex: TransformModel.leftEdgeIndex,
-        interactionProfile: interactionProfile,
-        segmentStart: screenEdgeMidpoints[TransformModel.leftEdgeIndex],
-        segmentEnd: screenCorners[TransformModel.topLeftIndex],
-      ),
+      for (int edgeIndex = 0; edgeIndex < TransformModel.edgeHandleCount; edgeIndex++) ...<Widget>[
+        _buildEdgeDragZone(
+          edgeIndex: edgeIndex,
+          interactionProfile: interactionProfile,
+          segmentStart: screenCorners[edgeIndex],
+          segmentEnd: screenEdgeMidpoints[edgeIndex],
+        ),
+        _buildEdgeDragZone(
+          edgeIndex: edgeIndex,
+          interactionProfile: interactionProfile,
+          segmentStart: screenEdgeMidpoints[edgeIndex],
+          segmentEnd: screenCorners[(edgeIndex + AppMath.one) % TransformModel.cornerCount],
+        ),
+      ],
     ];
   }
 
@@ -392,28 +317,13 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
     Offset position,
     InteractionLayoutProfile interactionProfile,
   ) {
-    return OverlayDragHandle(
-      backgroundColor: model.isEdgeActive(edgeIndex) ? AppColors.selected : AppColors.overlayDark,
-      borderColor: AppColors.overlayLight,
+    return _buildTransformHandle(
+      isActive: model.isEdgeActive(edgeIndex),
       position: position,
-      size: interactionProfile.dragHandleSize,
       cursor: SystemMouseCursors.grab,
-      onPanStart: (DragStartDetails _) {
-        model.setActiveEdgeHandle(edgeIndex);
-        onChanged();
-      },
-      onPanUpdate: (DragUpdateDetails details) {
-        model.moveEdgeHandle(edgeIndex, viewport.deltaToCanvas(details.delta));
-        onChanged();
-      },
-      onPanEnd: () {
-        model.clearActiveControl();
-        onChanged();
-      },
-      onPanCancel: () {
-        model.clearActiveControl();
-        onChanged();
-      },
+      interactionProfile: interactionProfile,
+      onStart: () => model.setActiveEdgeHandle(edgeIndex),
+      onCanvasDelta: (Offset canvasDelta) => model.moveEdgeHandle(edgeIndex, canvasDelta),
     );
   }
 
@@ -427,14 +337,22 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
   }) {
     final double buttonSize = interactionProfile.buttonSize;
     final double spacing = interactionProfile.buttonSpacing;
-    final double modeButtonsWidth = buttonSize * AppMath.four + spacing * AppMath.triple; // 4 mode buttons
-    final double confirmCancelWidth = buttonSize * AppMath.pair + spacing; // 2 confirm/cancel buttons
+    final double modeButtonsWidth = overlayControlGroupContentWidth(
+      buttonSize: buttonSize,
+      spacing: spacing,
+      buttonCount: _transformModeButtonCount,
+    );
+    final double confirmCancelWidth = overlayControlGroupContentWidth(
+      buttonSize: buttonSize,
+      spacing: spacing,
+      buttonCount: _transformCommitButtonCount,
+    );
     final double totalWidth = modeButtonsWidth + spacing + confirmCancelWidth; // All buttons with inter-group spacing
     final double viewportHeight = MediaQuery.sizeOf(context).height;
 
     final double idealControlsTop =
-        _screenQuadTop(screenCorners) - buttonSize - AppInteraction.imagePlacementHandleSize;
-    final double bottomControlsTop = _screenQuadBottom(screenCorners) + AppInteraction.imagePlacementHandleSize;
+        _screenQuadY(screenCorners, min) - buttonSize - AppInteraction.imagePlacementHandleSize;
+    final double bottomControlsTop = _screenQuadY(screenCorners, max) + AppInteraction.imagePlacementHandleSize;
     final OverlayPlacement placement = computeOverlayPlacement(
       viewportHeight: viewportHeight,
       idealTop: idealControlsTop,
@@ -443,18 +361,16 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
     );
     final double controlsLeft = screenCenter.dx - totalWidth / AppMath.pair;
 
-    final Offset translateHandleCenter = Offset(
-      controlsLeft + buttonSize / AppMath.pair,
-      placement.controlsTop + buttonSize / AppMath.pair,
+    Offset handleCenter(int buttonIndex) => overlayModeHandleCenter(
+      rowLeft: controlsLeft,
+      rowTop: placement.controlsTop,
+      buttonSize: buttonSize,
+      spacing: spacing,
+      buttonIndex: buttonIndex,
     );
-    final Offset scaleHandleCenter = Offset(
-      controlsLeft + buttonSize + spacing + buttonSize / AppMath.pair,
-      placement.controlsTop + buttonSize / AppMath.pair,
-    );
-    final Offset rotationHandleCenter = Offset(
-      controlsLeft + (buttonSize + spacing) * AppMath.pair + buttonSize / AppMath.pair,
-      placement.controlsTop + buttonSize / AppMath.pair,
-    );
+    final Offset translateHandleCenter = handleCenter(overlayTranslateButtonIndex);
+    final Offset scaleHandleCenter = handleCenter(overlayScaleButtonIndex);
+    final Offset rotationHandleCenter = handleCenter(overlayRotateButtonIndex);
 
     final Widget feedbackBubble = buildOverlayFeedbackBubble(
       label: model.isScaleFeedbackVisible
@@ -516,14 +432,16 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
                 model.beginScaleGesture();
               }
 
-              final double previousDistance = (scaleHandleCenter - screenCenter).distance;
-              final Offset pointer = scaleHandleCenter + details.delta;
-              final double currentDistance = (pointer - screenCenter).distance;
-              if (previousDistance <= AppMath.tinyPercentage) {
+              final double? factor = scaleFactorForHandleDrag(
+                handleCenter: scaleHandleCenter,
+                pivot: screenCenter,
+                dragDelta: details.delta,
+              );
+              if (factor == null) {
                 return;
               }
 
-              model.scaleUniform(currentDistance / previousDistance);
+              model.scaleUniform(factor);
               onChanged();
             },
             onPanEnd: (DragEndDetails _) {
@@ -556,16 +474,11 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
               if (!model.isRotateMode || !model.isRotationFeedbackVisible) {
                 model.beginRotateGesture();
               }
-              final double previousAngle = atan2(
-                rotationHandleCenter.dy - screenCenter.dy,
-                rotationHandleCenter.dx - screenCenter.dx,
+              final double angleDelta = angleDeltaForHandleDrag(
+                handleCenter: rotationHandleCenter,
+                pivot: screenCenter,
+                dragDelta: details.delta,
               );
-              final Offset pointer = rotationHandleCenter + details.delta;
-              final double currentAngle = atan2(
-                pointer.dy - screenCenter.dy,
-                pointer.dx - screenCenter.dx,
-              );
-              final double angleDelta = currentAngle - previousAngle;
               model.rotate(angleDelta);
               model.updateRotationFeedback(angleDelta);
               onChanged();
@@ -618,26 +531,48 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
     );
   }
 
-  /// Returns the lowest on-screen Y value of the transformed quad.
-  double _screenQuadBottom(List<Offset> screenCorners) {
-    double maxY = screenCorners[TransformModel.topLeftIndex].dy;
-    for (final Offset corner in screenCorners) {
-      if (corner.dy > maxY) {
-        maxY = corner.dy;
-      }
-    }
-    return maxY;
+  /// Builds one transform drag handle.
+  ///
+  /// [onStart] marks the control active, [onCanvasDelta] receives every drag
+  /// delta already converted to canvas space, and end/cancel clear the active
+  /// control. Every step notifies [onChanged].
+  Widget _buildTransformHandle({
+    required bool isActive,
+    required Offset position,
+    required MouseCursor cursor,
+    required InteractionLayoutProfile interactionProfile,
+    required VoidCallback onStart,
+    required ValueChanged<Offset> onCanvasDelta,
+  }) {
+    return OverlayDragHandle(
+      backgroundColor: isActive ? AppColors.selected : AppColors.overlayDark,
+      borderColor: AppColors.overlayLight,
+      position: position,
+      size: interactionProfile.dragHandleSize,
+      cursor: cursor,
+      onPanStart: (DragStartDetails _) {
+        onStart();
+        onChanged();
+      },
+      onPanUpdate: (DragUpdateDetails details) {
+        onCanvasDelta(viewport.deltaToCanvas(details.delta));
+        onChanged();
+      },
+      onPanEnd: _endHandleDrag,
+      onPanCancel: _endHandleDrag,
+    );
   }
 
-  /// Returns the highest on-screen Y value of the transformed quad.
-  double _screenQuadTop(List<Offset> screenCorners) {
-    double minY = screenCorners[TransformModel.topLeftIndex].dy;
-    for (final Offset corner in screenCorners) {
-      if (corner.dy < minY) {
-        minY = corner.dy;
-      }
-    }
-    return minY;
+  /// Clears the active handle/edge highlight when a drag ends or is canceled.
+  void _endHandleDrag() {
+    model.clearActiveControl();
+    onChanged();
+  }
+
+  /// Returns the on-screen Y values of [screenCorners] reduced by [combine]
+  /// ([min] for the quad's top edge, [max] for its bottom edge).
+  double _screenQuadY(List<Offset> screenCorners, double Function(double, double) combine) {
+    return screenCorners.map((Offset corner) => corner.dy).reduce(combine);
   }
 
   Offset _toScreen(Offset canvasPoint) => viewport.toScreen(canvasPoint);
@@ -660,14 +595,11 @@ class _TransformPreviewPainter extends CustomPainter {
   final List<Offset> screenEdgeMidpoints;
   final List<Offset> screenBoundaryPoints;
 
-  static const int _topLeftBoundaryPointIndex = AppMath.zero;
-  static const int _topMidBoundaryPointIndex = AppMath.one;
-  static const int _topRightBoundaryPointIndex = AppMath.two;
-  static const int _rightMidBoundaryPointIndex = AppMath.triple;
-  static const int _bottomRightBoundaryPointIndex = AppMath.four;
-  static const int _bottomMidBoundaryPointIndex = AppMath.four + AppMath.one;
-  static const int _bottomLeftBoundaryPointIndex = AppMath.six;
-  static const int _leftMidBoundaryPointIndex = AppMath.six + AppMath.one;
+  /// Boundary points contributed by each edge: its start corner and midpoint.
+  static const int _boundaryPointsPerEdge = AppMath.pair;
+
+  /// Total boundary points around the quad (corners interleaved with midpoints).
+  static const int _boundaryPointCount = TransformModel.edgeHandleCount * _boundaryPointsPerEdge;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -686,99 +618,47 @@ class _TransformPreviewPainter extends CustomPainter {
     }
     outlinePath.close();
 
-    final Paint outlineBorderPaint = Paint()
+    _drawTwoToneStroke(canvas, outlinePath, AppColors.overlayDark);
+
+    if (activeEdgeIndex != null) {
+      _drawTwoToneStroke(canvas, _edgePath(activeEdgeIndex!), AppColors.selected);
+    }
+  }
+
+  /// Strokes [path] with a light double-width halo under a [centerColor] line
+  /// so it stays readable on any background.
+  void _drawTwoToneStroke(Canvas canvas, Path path, Color centerColor) {
+    final Paint borderPaint = Paint()
       ..color = AppColors.overlayLight
       ..style = PaintingStyle.stroke
       ..strokeWidth = AppStroke.regular * AppMath.pair;
-    final Paint outlineCenterPaint = Paint()
-      ..color = AppColors.overlayDark
+    final Paint centerPaint = Paint()
+      ..color = centerColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = AppStroke.regular;
-
-    canvas.drawPath(outlinePath, outlineBorderPaint);
-    canvas.drawPath(outlinePath, outlineCenterPaint);
-
-    if (activeEdgeIndex != null) {
-      final Path activeEdgePath = _edgePath(activeEdgeIndex!);
-      final Paint activeEdgeBorderPaint = Paint()
-        ..color = AppColors.overlayLight
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = AppStroke.regular * AppMath.pair;
-      final Paint activeEdgeCenterPaint = Paint()
-        ..color = AppColors.selected
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = AppStroke.regular;
-      canvas.drawPath(activeEdgePath, activeEdgeBorderPaint);
-      canvas.drawPath(activeEdgePath, activeEdgeCenterPaint);
-    }
+    canvas.drawPath(path, borderPaint);
+    canvas.drawPath(path, centerPaint);
   }
 
   /// Returns the polyline segment for one highlighted boundary edge.
   ///
-  /// Each transform edge uses three boundary points: corner -> midpoint -> corner.
+  /// Each transform edge uses three consecutive boundary points:
+  /// corner -> midpoint -> next corner (wrapping back to the first point).
   Path _edgePath(int edgeIndex) {
     final Path edgePath = Path();
-    switch (edgeIndex) {
-      case TransformModel.topEdgeIndex:
-        edgePath
-          ..moveTo(
-            screenBoundaryPoints[_topLeftBoundaryPointIndex].dx,
-            screenBoundaryPoints[_topLeftBoundaryPointIndex].dy,
-          )
-          ..lineTo(
-            screenBoundaryPoints[_topMidBoundaryPointIndex].dx,
-            screenBoundaryPoints[_topMidBoundaryPointIndex].dy,
-          )
-          ..lineTo(
-            screenBoundaryPoints[_topRightBoundaryPointIndex].dx,
-            screenBoundaryPoints[_topRightBoundaryPointIndex].dy,
-          );
-      case TransformModel.rightEdgeIndex:
-        edgePath
-          ..moveTo(
-            screenBoundaryPoints[_topRightBoundaryPointIndex].dx,
-            screenBoundaryPoints[_topRightBoundaryPointIndex].dy,
-          )
-          ..lineTo(
-            screenBoundaryPoints[_rightMidBoundaryPointIndex].dx,
-            screenBoundaryPoints[_rightMidBoundaryPointIndex].dy,
-          )
-          ..lineTo(
-            screenBoundaryPoints[_bottomRightBoundaryPointIndex].dx,
-            screenBoundaryPoints[_bottomRightBoundaryPointIndex].dy,
-          );
-      case TransformModel.bottomEdgeIndex:
-        edgePath
-          ..moveTo(
-            screenBoundaryPoints[_bottomRightBoundaryPointIndex].dx,
-            screenBoundaryPoints[_bottomRightBoundaryPointIndex].dy,
-          )
-          ..lineTo(
-            screenBoundaryPoints[_bottomMidBoundaryPointIndex].dx,
-            screenBoundaryPoints[_bottomMidBoundaryPointIndex].dy,
-          )
-          ..lineTo(
-            screenBoundaryPoints[_bottomLeftBoundaryPointIndex].dx,
-            screenBoundaryPoints[_bottomLeftBoundaryPointIndex].dy,
-          );
-      case TransformModel.leftEdgeIndex:
-        edgePath
-          ..moveTo(
-            screenBoundaryPoints[_bottomLeftBoundaryPointIndex].dx,
-            screenBoundaryPoints[_bottomLeftBoundaryPointIndex].dy,
-          )
-          ..lineTo(
-            screenBoundaryPoints[_leftMidBoundaryPointIndex].dx,
-            screenBoundaryPoints[_leftMidBoundaryPointIndex].dy,
-          )
-          ..lineTo(
-            screenBoundaryPoints[_topLeftBoundaryPointIndex].dx,
-            screenBoundaryPoints[_topLeftBoundaryPointIndex].dy,
-          );
-      default:
-        edgePath.addPath(Path(), Offset.zero);
+    if (edgeIndex < 0 ||
+        edgeIndex >= TransformModel.edgeHandleCount ||
+        screenBoundaryPoints.length != _boundaryPointCount) {
+      return edgePath;
     }
-    return edgePath;
+    final int startIndex = edgeIndex * _boundaryPointsPerEdge;
+    final Offset start = screenBoundaryPoints[startIndex];
+    final Offset middle = screenBoundaryPoints[startIndex + AppMath.one];
+    final Offset end = screenBoundaryPoints[(startIndex + _boundaryPointsPerEdge) % _boundaryPointCount];
+    return edgePath
+      ..moveTo(start.dx, start.dy)
+      ..lineTo(middle.dx, middle.dy)
+      ..lineTo(end.dx, end.dy);
   }
 
   @override

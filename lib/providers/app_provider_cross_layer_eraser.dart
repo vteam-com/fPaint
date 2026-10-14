@@ -41,7 +41,7 @@ extension AppProviderCrossLayerEraser on AppProvider {
       positions: <Offset>[position, position],
       brush: MyBrush(color: brushColor, size: brushSize, style: brushStyle),
       fillColor: fillColor,
-      clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
+      clipPath: selectorModel.activeClipPath,
     );
 
     final CrossLayerEraserStroke stroke = crossLayerEraser;
@@ -57,18 +57,13 @@ extension AppProviderCrossLayerEraser on AppProvider {
       layer.beginStrokePreview();
     }
 
-    undoProvider.executeAction(
+    // Every target appends the same shared action instance (see
+    // [CrossLayerEraserStroke]).
+    this._executeLayerAppend(
       name: ActionType.eraser.name,
-      forward: () {
-        for (final LayerProvider layer in targets) {
-          layer.appendDrawingAction(action);
-        }
-      },
-      backward: () {
-        for (final LayerProvider layer in targets.reversed) {
-          layer.undo();
-        }
-      },
+      resolveTargets: () => targets,
+      buildActions: (_) => <UserActionDrawing>[action],
+      notifyAfterReplay: false,
     );
 
     layers.update();

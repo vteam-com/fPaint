@@ -24,8 +24,10 @@ import 'package:logging/logging.dart';
 export 'package:fpaint/providers/layer_provider.dart';
 
 part 'layers_provider_canvas_geometry.dart';
+part 'layers_provider_document.dart';
 part 'layers_provider_hit_test.dart';
 part 'layers_provider_image_resize.dart';
+part 'layers_provider_raster_replacement.dart';
 
 final Logger _log = Logger(logNameLayersProvider);
 
@@ -679,17 +681,7 @@ class LayersProvider extends ChangeNotifier {
       return List<UserActionDrawing>.from(layer.actionStack);
     }
 
-    final ui.Image flattenedLayerImage = layer.toImageForStorage(size);
-
-    return <UserActionDrawing>[
-      ImageAction(
-        positions: <Offset>[
-          Offset.zero,
-          Offset(size.width, size.height),
-        ],
-        image: flattenedLayerImage,
-      ),
-    ];
+    return <UserActionDrawing>[layer.flattenToImageAction(size)];
   }
 
   /// Merges two layers together.
@@ -710,10 +702,7 @@ class LayersProvider extends ChangeNotifier {
 
     // Textures the merge record can resurrect on redo (notably the rasterized
     // flatten image). Listed so disposal waits until the record leaves history.
-    final List<ui.Image> retainedImages = <ui.Image>[
-      for (final UserActionDrawing action in actionsToAppend)
-        if (action.image != null) action.image!,
-    ];
+    final List<ui.Image> retainedImages = LayerStateSnapshot.imagesOf(actionsToAppend);
 
     _undoProvider.executeAction(
       name: 'Merge Layer',
@@ -792,20 +781,12 @@ class LayersProvider extends ChangeNotifier {
     // renderLayer() takes the fast drawImage path (one blit per layer) instead
     // of replaying the full action stack for any layer whose cache was cleared
     // by a recent stroke but whose debounced thumbnail update has not yet fired.
-    await Future.wait(
-      _list.where((LayerProvider layer) => layer.isVisible).map((LayerProvider layer) => layer.ensureCachePrimed()),
-    );
+    await this.primeVisibleLayerCaches();
 
     final ui.Image compositeImage = await renderCanvasImage(
       width: this.size.width.toInt(),
       height: this.size.height.toInt(),
-      draw: (ui.Canvas canvas) {
-        for (final LayerProvider layer in _list.reversed) {
-          if (layer.isVisible) {
-            layer.renderLayer(canvas);
-          }
-        }
-      },
+      draw: this.renderVisibleLayers,
     );
     // Free the previous composite texture before replacing it; otherwise every
     // capture (color sampling, export, top-colors refresh) leaks a full-canvas
@@ -854,12 +835,7 @@ class LayersProvider extends ChangeNotifier {
   /// Captures the canvas panel to an image and returns the image bytes.
   Future<Uint8List> capturePainterToImageBytes() async {
     final ui.Image image = await capturePainterToImage();
-    // Convert the image to byte data (e.g., PNG)
-    final ByteData? byteData = await image.toByteData(
-      format: ui.ImageByteFormat.png,
-    );
-
-    return byteData!.buffer.asUint8List();
+    return (await encodeImageToPng(image))!;
   }
 
   /// Gets the composited color at canvas [offset], clamped into the canvas.

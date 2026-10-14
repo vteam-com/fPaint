@@ -3,7 +3,7 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/widgets/base_picker.dart';
-import 'package:fpaint/widgets/material_free.dart';
+import 'package:fpaint/widgets/slider_picker_state.dart';
 
 /// A widget that allows the user to pick pixel-brush intensity using a slider.
 class BrushIntensityPicker extends BasePicker<double> {
@@ -24,26 +24,10 @@ class BrushIntensityPicker extends BasePicker<double> {
 }
 
 /// The state for [BrushIntensityPicker].
-class _BrushIntensityPickerState extends BasePickerState<double> {
-  @override
-  double clampValue(double value) {
-    return value.clamp(widget.min!, widget.max!);
-  }
-
-  @override
-  Widget buildPickerWidget() {
-    return AppSlider(
-      value: currentValue,
-      min: widget.min!,
-      max: widget.max!,
-      divisions: widget.divisions,
-      onChanged: updateValue,
-    );
-  }
-
+class _BrushIntensityPickerState extends SliderPickerState<double> {
   @override
   String formatValue(double value) {
-    return '${(value * AppMath.percentScale).round()}%';
+    return formatFractionPercent(context.l10n, value);
   }
 }
 

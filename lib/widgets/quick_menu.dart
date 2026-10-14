@@ -5,6 +5,7 @@ import 'package:fpaint/helpers/shortcut_tooltip.dart';
 import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
+import 'package:fpaint/models/app_command.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/quick_menu_model.dart';
 import 'package:fpaint/models/quick_menu_slot.dart';
@@ -26,10 +27,10 @@ const double _discRimAlpha = 0.35;
 const double _highlightRingAlpha = 0.9;
 
 const double _slotSize = AppLayout.toolbarButtonSize;
-const double _halfSlot = _slotSize / AppMath.two;
-const double _halfSwatch = AppLayout.quickMenuSwatchSize / AppMath.two;
-const double _halfPuck = AppLayout.quickMenuPuckSize / AppMath.two;
-const double _halfDisc = AppLayout.quickMenuDiscSize / AppMath.two;
+const double _halfSlot = _slotSize / AppMath.pair;
+const double _halfSwatch = AppLayout.quickMenuSwatchSize / AppMath.pair;
+const double _halfPuck = AppLayout.quickMenuPuckSize / AppMath.pair;
+const double _halfDisc = AppLayout.quickMenuDiscSize / AppMath.pair;
 
 /// The on-canvas radial quick menu (Sketchbook "lagoon" / Krita pop-up
 /// palette): recent tools plus Select and Undo on the ring, recent colors on
@@ -285,8 +286,8 @@ class _QuickMenuState extends State<QuickMenu> {
     return Positioned(
       left: point.dx - halfExtent,
       top: point.dy - halfExtent,
-      width: halfExtent * AppMath.two,
-      height: halfExtent * AppMath.two,
+      width: halfExtent * AppMath.pair,
+      height: halfExtent * AppMath.pair,
       child: child,
     );
   }
@@ -302,9 +303,9 @@ class _QuickMenuState extends State<QuickMenu> {
       return mode.icon;
     }
     return switch (slot.command!) {
-      QuickMenuCommand.selection => AppIcon.selector,
-      QuickMenuCommand.undo => AppIcon.undo,
-      QuickMenuCommand.redo => AppIcon.redo,
+      QuickMenuCommand.selection => AppCommand.selector.icon,
+      QuickMenuCommand.undo => AppCommand.undo.icon,
+      QuickMenuCommand.redo => AppCommand.redo.icon,
       QuickMenuCommand.selectAdd => AppIcon.selectorMathAdd,
       QuickMenuCommand.selectRemove => AppIcon.selectorMathRemove,
       QuickMenuCommand.invertSelection => AppIcon.selectorMathInvert,
@@ -323,9 +324,9 @@ class _QuickMenuState extends State<QuickMenu> {
       return mode.label(l10n);
     }
     return switch (slot.command!) {
-      QuickMenuCommand.selection => tooltipWithShortcut(l10n.toolSelector, singleKeyShortcut(ShortcutKeys.s)),
-      QuickMenuCommand.undo => tooltipWithShortcut(ShortcutActions.undo, primaryModifiedShortcut(ShortcutKeys.z)),
-      QuickMenuCommand.redo => tooltipWithShortcut(ShortcutActions.redo, primaryModifiedShortcut(ShortcutKeys.y)),
+      QuickMenuCommand.selection => AppCommand.selector.tooltip(l10n.toolSelector),
+      QuickMenuCommand.undo => AppCommand.undo.tooltip(ShortcutActions.undo),
+      QuickMenuCommand.redo => AppCommand.redo.tooltip(ShortcutActions.redo),
       QuickMenuCommand.selectAdd => tooltipWithShortcut(l10n.toolAdd, shiftModifierShortcutLabel()),
       QuickMenuCommand.selectRemove => tooltipWithShortcut(l10n.toolRemove, secondaryModifierShortcutLabel()),
       QuickMenuCommand.invertSelection => l10n.toolInvert,

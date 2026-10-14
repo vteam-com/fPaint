@@ -1,4 +1,5 @@
 // ignore: fcheck_one_class_per_file
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/list_helper.dart';
@@ -104,34 +105,20 @@ class _ColorSelectorState extends State<ColorSelector> {
                   ),
                 ),
               ),
-              SizedBox(
-                height: AppLayout.sliderHeight,
-                child: Stack(
-                  alignment: AlignmentDirectional.center,
-                  children: <Widget>[
-                    const TransparentPaper(patternSize: AppMath.bytesPerPixel),
-                    CustomPaint(
-                      painter: AlphaGradientPainter(
-                        hue: hue,
-                        brightness: brightness,
-                      ),
-                      child: AppSlider(
-                        value: alpha,
-                        min: 0,
-                        max: 1,
-                        divisions: AppLimits.sliderDivisions,
-                        onChanged: (double value) {
-                          setState(() {
-                            alpha = value;
-                            widget.onColorChanged(
-                              hsvToColor(hue, brightness, alpha),
-                            );
-                          });
-                        },
-                      ),
-                    ),
-                  ],
+              AlphaGradientSlider(
+                painter: AlphaGradientPainter(
+                  hue: hue,
+                  brightness: brightness,
                 ),
+                value: alpha,
+                onChanged: (double value) {
+                  setState(() {
+                    alpha = value;
+                    widget.onColorChanged(
+                      hsvToColor(hue, brightness, alpha),
+                    );
+                  });
+                },
               ),
             ],
           ),
@@ -151,96 +138,131 @@ class _ColorSelectorState extends State<ColorSelector> {
   }
 }
 
-/// Paints a hue gradient on a canvas.
-class HueGradientPainter extends CustomPainter {
+/// A slider-height opacity slider: a checkerboard under [painter]'s
+/// transparent-to-opaque strip, with an [AppSlider] for [value] (0..1) on top.
+class AlphaGradientSlider extends StatelessWidget {
+  /// Creates an [AlphaGradientSlider].
+  const AlphaGradientSlider({
+    super.key,
+    required this.painter,
+    required this.value,
+    required this.onChanged,
+  });
+
+  /// Called with the new alpha (0..1) while the slider is dragged.
+  final ValueChanged<double> onChanged;
+
+  /// Paints the transparent-to-opaque gradient strip behind the slider.
+  final CustomPainter painter;
+
+  /// The current alpha, from 0 (transparent) to 1 (opaque).
+  final double value;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: AppLayout.sliderHeight,
+      child: Stack(
+        alignment: AlignmentDirectional.center,
+        children: <Widget>[
+          const TransparentPaper(patternSize: AppMath.bytesPerPixel),
+          CustomPaint(
+            painter: painter,
+            child: AppSlider(
+              value: value,
+              min: 0,
+              max: 1,
+              divisions: AppLimits.sliderDivisions,
+              onChanged: onChanged,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Fills its whole area with a left-to-right [LinearGradient] of [colors]
+/// (optionally at [stops]); repaints only when the colors or stops change.
+class LinearGradientStripPainter extends CustomPainter {
+  /// Creates a [LinearGradientStripPainter].
+  LinearGradientStripPainter({required this.colors, this.stops});
+
+  /// The gradient colors, left to right.
+  final List<Color> colors;
+
+  /// Optional positions (0..1) of [colors]; evenly spread when null.
+  final List<double>? stops;
+
   @override
   void paint(Canvas canvas, Size size) {
-    const List<Color> colors = <Color>[
-      Color.fromRGBO(255, 0, 0, 1), // 1 Red
-      Color.fromRGBO(255, 255, 0, 1), // 2 Yellow
-      Color.fromRGBO(0, 255, 0, 1), // 3 Green
-
-      Color.fromRGBO(0, 255, 255, 1), // 4 Cyan
-
-      Color.fromRGBO(0, 0, 255, 1), // 5 Blue
-      Color.fromRGBO(255, 0, 255, 1), // 6 Purple
-      Color.fromRGBO(255, 0, 0, 1), // 7 Red
-    ];
-
-    final Gradient gradient = LinearGradient(
-      colors: colors,
-      stops: calculateSpread(0, 1, colors.length),
-    );
-
     final Rect rect = Offset.zero & size;
+    final Gradient gradient = LinearGradient(colors: colors, stops: stops);
     final Paint paint = Paint()..shader = gradient.createShader(rect);
     canvas.drawRect(rect, paint);
   }
 
   @override
-  bool shouldRepaint(covariant HueGradientPainter oldDelegate) {
-    return false; // Hue gradient is static, never needs repaint based on properties.
+  bool shouldRepaint(covariant LinearGradientStripPainter oldDelegate) {
+    return !listEquals(oldDelegate.colors, colors) || !listEquals(oldDelegate.stops, stops);
   }
+}
+
+/// The fully saturated hue spectrum, red through every hue back to red.
+const List<Color> _hueSpectrumColors = <Color>[
+  Color.fromRGBO(255, 0, 0, 1), // 1 Red
+  Color.fromRGBO(255, 255, 0, 1), // 2 Yellow
+  Color.fromRGBO(0, 255, 0, 1), // 3 Green
+
+  Color.fromRGBO(0, 255, 255, 1), // 4 Cyan
+
+  Color.fromRGBO(0, 0, 255, 1), // 5 Blue
+  Color.fromRGBO(255, 0, 255, 1), // 6 Purple
+  Color.fromRGBO(255, 0, 0, 1), // 7 Red
+];
+
+/// Paints a hue gradient on a canvas.
+class HueGradientPainter extends LinearGradientStripPainter {
+  /// Creates a [HueGradientPainter].
+  HueGradientPainter()
+    : super(
+        colors: _hueSpectrumColors,
+        stops: calculateSpread(0, 1, _hueSpectrumColors.length),
+      );
 }
 
 /// Paints a brightness gradient on a canvas.
-class BrightnessGradientPainter extends CustomPainter {
+class BrightnessGradientPainter extends LinearGradientStripPainter {
   /// Creates a [BrightnessGradientPainter].
-  BrightnessGradientPainter({required this.hue});
+  BrightnessGradientPainter({required this.hue})
+    : super(
+        colors: <Color>[
+          HSLColor.fromAHSL(1.0, hue, 1.0, 0.0).toColor(), // Black
+          HSLColor.fromAHSL(1.0, hue, 1.0, AppVisual.half).toColor(), // Middle lightness
+          HSLColor.fromAHSL(1.0, hue, 1.0, 1.0).toColor(), // White
+        ],
+      );
 
   /// The hue of the gradient.
   final double hue;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Rect rect = Offset.zero & size;
-    final Gradient gradient = LinearGradient(
-      colors: <Color>[
-        HSLColor.fromAHSL(1.0, hue, 1.0, 0.0).toColor(), // Black
-        HSLColor.fromAHSL(1.0, hue, 1.0, AppVisual.half).toColor(), // Middle lightness
-        HSLColor.fromAHSL(1.0, hue, 1.0, 1.0).toColor(), // White
-      ],
-    );
-
-    final Paint paint = Paint()..shader = gradient.createShader(rect);
-    canvas.drawRect(rect, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant BrightnessGradientPainter oldDelegate) {
-    return oldDelegate.hue != hue;
-  }
 }
 
 /// Paints an alpha gradient on a canvas.
-class AlphaGradientPainter extends CustomPainter {
+class AlphaGradientPainter extends LinearGradientStripPainter {
   /// Creates an [AlphaGradientPainter].
-  AlphaGradientPainter({required this.hue, required this.brightness});
+  AlphaGradientPainter({required this.hue, required this.brightness})
+    : super(
+        colors: <Color>[
+          hsvToColor(hue, brightness, 0.0), // Transparent
+          hsvToColor(hue, brightness, 1.0), // Opaque
+        ],
+      );
 
   /// The hue of the gradient.
   final double hue;
 
   /// The brightness of the gradient.
   final double brightness;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Rect rect = Offset.zero & size;
-    final Gradient gradient = LinearGradient(
-      colors: <Color>[
-        hsvToColor(hue, brightness, 0.0), // Transparent
-        hsvToColor(hue, brightness, 1.0), // Opaque
-      ],
-    );
-
-    final Paint paint = Paint()..shader = gradient.createShader(rect);
-    canvas.drawRect(rect, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant AlphaGradientPainter oldDelegate) {
-    return oldDelegate.hue != hue || oldDelegate.brightness != brightness;
-  }
 }
 
 /// Converts HSV values to a Color.

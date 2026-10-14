@@ -236,7 +236,7 @@
   "pencilSize": "Taille du crayon",
   "penOnlyDrawingSubtitle": "Lorsque cette option est activee, les outils de dessin acceptent uniquement le stylet; le toucher reste disponible pour naviguer sur la toile.",
   "penOnlyDrawingTitle": "Dessin au stylet uniquement",
-  "percentageValue": "Echelle : {value} %",
+  "percentageValue": "{value} %",
   "@percentageValue": {
     "placeholders": {
       "value": {}

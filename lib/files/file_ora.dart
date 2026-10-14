@@ -1,6 +1,5 @@
-import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' show Platform;
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -95,12 +94,12 @@ Future<({Uint8List bytes, ui.Offset offset})> _prepareOraLayerExport({
   final ui.Rect exportBounds = layer.estimateContentBoundsForStorage();
   final ui.Image layerImage = layer.toImageForStorageBounds(exportBounds);
   try {
-    final ByteData? byteData = await layerImage.toByteData(
+    final ByteData byteData = await requireImageByteData<OraFileException>(
+      image: layerImage,
       format: ui.ImageByteFormat.png,
+      errorMessage: _errorOraLayerEncodingFailed,
+      exceptionBuilder: OraFileException.new,
     );
-    if (byteData == null) {
-      throw const OraFileException(_errorOraLayerEncodingFailed);
-    }
 
     return (
       bytes: byteData.buffer.asUint8List(),
@@ -131,6 +130,37 @@ const String _svgColor = 'svg:color';
 const String _svgLuminosity = 'svg:luminosity';
 const String _svgSrcOverLegacy = 'svg:src-over';
 
+/// ORA `composite-op` values and the blend modes they map to, one per mode.
+const Map<String, ui.BlendMode> _oraCompositeOpBlendModes = <String, ui.BlendMode>{
+  _svgSourceOver: ui.BlendMode.srcOver,
+  _svgMultiply: ui.BlendMode.multiply,
+  _svgScreen: ui.BlendMode.screen,
+  _svgOverlay: ui.BlendMode.overlay,
+  _svgDarken: ui.BlendMode.darken,
+  _svgLighten: ui.BlendMode.lighten,
+  _svgColorDodge: ui.BlendMode.colorDodge,
+  _svgColorBurn: ui.BlendMode.colorBurn,
+  _svgHardLight: ui.BlendMode.hardLight,
+  _svgSoftLight: ui.BlendMode.softLight,
+  _svgDifference: ui.BlendMode.difference,
+  _svgExclusion: ui.BlendMode.exclusion,
+  _svgPlus: ui.BlendMode.plus,
+  _svgHue: ui.BlendMode.hue,
+  _svgSaturation: ui.BlendMode.saturation,
+  _svgColor: ui.BlendMode.color,
+  _svgLuminosity: ui.BlendMode.luminosity,
+};
+
+/// Read-only aliases accepted on import but never written on export.
+const Map<String, ui.BlendMode> _oraLegacyCompositeOpBlendModes = <String, ui.BlendMode>{
+  _svgSrcOverLegacy: ui.BlendMode.srcOver,
+};
+
+/// Blend modes mapped back onto their canonical ORA `composite-op` for export.
+final Map<ui.BlendMode, String> _oraBlendModeCompositeOps = <ui.BlendMode, String>{
+  for (final MapEntry<String, ui.BlendMode> entry in _oraCompositeOpBlendModes.entries) entry.value: entry.key,
+};
+
 /// Reads an ORA file and updates the provided [AppProvider] with its contents.
 ///
 /// This function asynchronously reads the ORA file located at the given [filePath]
@@ -144,27 +174,14 @@ const String _svgSrcOverLegacy = 'svg:src-over';
 Future<void> readImageFromFilePathOra(
   LayersProvider layers,
   String filePath,
-) async {
-  final File oraFile = File(filePath);
-  if (!await oraFile.exists()) {
-    throw OraFileException('$_errorOraFileNotFoundPrefix "$filePath"');
-  }
-
-  try {
-    await readOraFileFromBytes(
-      layers,
-      await oraFile.readAsBytes(),
-    );
-  } on OraFileException {
-    rethrow;
-  } catch (error, stackTrace) {
-    throwFileOperationException<OraFileException>(
-      message: '$_errorOraReadFilePrefix "$filePath"',
-      error: error,
-      stackTrace: stackTrace,
-      exceptionBuilder: OraFileException.new,
-    );
-  }
+) {
+  return readLayeredFileFromPath<OraFileException>(
+    path: filePath,
+    readBytes: (Uint8List bytes) => readOraFileFromBytes(layers, bytes),
+    fileNotFoundPrefix: _errorOraFileNotFoundPrefix,
+    readFailedPrefix: _errorOraReadFilePrefix,
+    exceptionBuilder: OraFileException.new,
+  );
 }
 
 /// Read the file from  bytes
@@ -172,50 +189,49 @@ Future<void> readOraFileFromBytes(
   LayersProvider layers,
   Uint8List bytes,
 ) async {
-  try {
-    // Extract the ZIP contents
-    final Archive archive = ZipDecoder().decodeBytes(bytes);
+  await wrapFileOperation<OraFileException, void>(
+    message: _errorOraReadBytes,
+    exceptionBuilder: OraFileException.new,
+    operation: () async {
+      // Extract the ZIP contents
+      final Archive archive = ZipDecoder().decodeBytes(bytes);
 
-    // Find the stack.xml file
-    final ArchiveFile stackFile = archive.files.firstWhere(
-      (ArchiveFile file) => file.name == _oraStackXmlEntry,
-      orElse: () => throw const OraFileException(_errorOraMissingStackXml),
-    );
+      // Find the stack.xml file
+      final ArchiveFile stackFile = archive.files.firstWhere(
+        (ArchiveFile file) => file.name == _oraStackXmlEntry,
+        orElse: () => throw const OraFileException(_errorOraMissingStackXml),
+      );
 
-    // Parse the stack.xml content
-    final XmlDocument xmlDoc = XmlDocument.parse(
-      String.fromCharCodes(stackFile.content),
-    );
+      // Parse the stack.xml content
+      final XmlDocument xmlDoc = XmlDocument.parse(
+        String.fromCharCodes(stackFile.content),
+      );
 
-    final ui.Size canvasSize = _extractOraCanvasSize(xmlDoc);
+      final ui.Size canvasSize = _extractOraCanvasSize(_requireOraImageElement(xmlDoc));
 
-    LayerProvider? selectedLayer;
-    await layers.replaceAll(
-      canvasSize: canvasSize,
-      addLayers: () async {
-        selectedLayer = await importFromOraXml(archive, layers, xmlDoc);
-      },
-    );
-    _restoreSelectedLayer(layers, selectedLayer);
-  } on OraFileException {
-    rethrow;
-  } catch (error, stackTrace) {
-    throwFileOperationException<OraFileException>(
-      message: _errorOraReadBytes,
-      error: error,
-      stackTrace: stackTrace,
-      exceptionBuilder: OraFileException.new,
-    );
-  }
+      LayerProvider? selectedLayer;
+      await layers.replaceAll(
+        canvasSize: canvasSize,
+        addLayers: () async {
+          selectedLayer = await importFromOraXml(archive, layers, xmlDoc);
+        },
+      );
+      layers.selectLayerIfPresent(selectedLayer);
+    },
+  );
 }
 
-/// Extracts the canvas size from the ORA XML document.
-ui.Size _extractOraCanvasSize(XmlDocument xmlDoc) {
+/// Returns the root `image` element of an ORA stack document, or throws.
+XmlElement _requireOraImageElement(XmlDocument xmlDoc) {
   final XmlElement? xmlElementImage = xmlDoc.getElement(_oraElementImage);
   if (xmlElementImage == null) {
     throw const OraFileException(_errorOraMissingImageElement);
   }
+  return xmlElementImage;
+}
 
+/// Extracts the canvas size from the ORA root `image` element.
+ui.Size _extractOraCanvasSize(XmlElement xmlElementImage) {
   final String? width = xmlElementImage.getAttribute(_oraAttrWidth);
   final String? height = xmlElementImage.getAttribute(_oraAttrHeight);
   if (width == null || height == null) {
@@ -234,21 +250,8 @@ Future<LayerProvider?> importFromOraXml(
   LayersProvider layers,
   XmlDocument xmlDoc,
 ) async {
-  final XmlElement? xmlElementImage = xmlDoc.getElement(_oraElementImage);
-  if (xmlElementImage == null) {
-    throw const OraFileException(_errorOraMissingImageElement);
-  }
-
-  final String? width = xmlElementImage.getAttribute(_oraAttrWidth);
-  final String? height = xmlElementImage.getAttribute(_oraAttrHeight);
-  if (width == null || height == null) {
-    throw const OraFileException(_errorOraMissingDimensions);
-  }
-
-  layers.size = ui.Size(
-    double.parse(width),
-    double.parse(height),
-  );
+  final XmlElement xmlElementImage = _requireOraImageElement(xmlDoc);
+  layers.size = _extractOraCanvasSize(xmlElementImage);
 
   final XmlElement? xmlElementTopStack = xmlElementImage.getElement(_oraElementStack);
   return importStack(archive, layers, xmlElementTopStack);
@@ -282,23 +285,6 @@ Future<LayerProvider?> importStack(
     }
   }
   return selectedLayer;
-}
-
-/// Selects [selectedLayer] once the full stack has been rebuilt.
-///
-/// [LayersProvider.replaceAll] resets the selection to the first layer, so the
-/// restore must run after it completes. No-op when the layer is absent.
-void _restoreSelectedLayer(
-  LayersProvider layers,
-  LayerProvider? selectedLayer,
-) {
-  if (selectedLayer == null) {
-    return;
-  }
-  final int index = layers.getLayerIndex(selectedLayer);
-  if (index >= 0) {
-    layers.selectedLayerIndex = index;
-  }
 }
 
 /// Creates and configures a layer from an ORA layer XML node.
@@ -376,87 +362,14 @@ bool _isLayerVisible(String visibilityAsText) {
 /// [ui.BlendMode.srcOver] is returned.
 ///
 ui.BlendMode getBlendModeFromOraCompositOp(String compositeOp) {
-  switch (compositeOp) {
-    case _svgSourceOver:
-    case _svgSrcOverLegacy:
-      return ui.BlendMode.srcOver;
-    case _svgMultiply:
-      return ui.BlendMode.multiply;
-    case _svgScreen:
-      return ui.BlendMode.screen;
-    case _svgOverlay:
-      return ui.BlendMode.overlay;
-    case _svgDarken:
-      return ui.BlendMode.darken;
-    case _svgLighten:
-      return ui.BlendMode.lighten;
-    case _svgColorDodge:
-      return ui.BlendMode.colorDodge;
-    case _svgColorBurn:
-      return ui.BlendMode.colorBurn;
-    case _svgHardLight:
-      return ui.BlendMode.hardLight;
-    case _svgSoftLight:
-      return ui.BlendMode.softLight;
-    case _svgDifference:
-      return ui.BlendMode.difference;
-    case _svgExclusion:
-      return ui.BlendMode.exclusion;
-    case _svgPlus:
-      return ui.BlendMode.plus;
-    case _svgHue:
-      return ui.BlendMode.hue;
-    case _svgSaturation:
-      return ui.BlendMode.saturation;
-    case _svgColor:
-      return ui.BlendMode.color;
-    case _svgLuminosity:
-      return ui.BlendMode.luminosity;
-    default:
-      return ui.BlendMode.srcOver;
-  }
+  return _oraCompositeOpBlendModes[compositeOp] ?? _oraLegacyCompositeOpBlendModes[compositeOp] ?? ui.BlendMode.srcOver;
 }
 
 /// Encodes a Flutter [ui.BlendMode] as an ORA `composite-op` value.
+///
+/// Modes ORA cannot express are written as `svg:source-over`.
 String _getOraCompositeOpFromBlendMode(ui.BlendMode blendMode) {
-  switch (blendMode) {
-    case ui.BlendMode.srcOver:
-      return _svgSourceOver;
-    case ui.BlendMode.multiply:
-      return _svgMultiply;
-    case ui.BlendMode.screen:
-      return _svgScreen;
-    case ui.BlendMode.overlay:
-      return _svgOverlay;
-    case ui.BlendMode.darken:
-      return _svgDarken;
-    case ui.BlendMode.lighten:
-      return _svgLighten;
-    case ui.BlendMode.colorDodge:
-      return _svgColorDodge;
-    case ui.BlendMode.colorBurn:
-      return _svgColorBurn;
-    case ui.BlendMode.hardLight:
-      return _svgHardLight;
-    case ui.BlendMode.softLight:
-      return _svgSoftLight;
-    case ui.BlendMode.difference:
-      return _svgDifference;
-    case ui.BlendMode.exclusion:
-      return _svgExclusion;
-    case ui.BlendMode.plus:
-      return _svgPlus;
-    case ui.BlendMode.hue:
-      return _svgHue;
-    case ui.BlendMode.saturation:
-      return _svgSaturation;
-    case ui.BlendMode.color:
-      return _svgColor;
-    case ui.BlendMode.luminosity:
-      return _svgLuminosity;
-    default:
-      return _svgSourceOver;
-  }
+  return _oraBlendModeCompositeOps[blendMode] ?? _svgSourceOver;
 }
 
 /// Adds an image to a specified layer from an archive.
@@ -477,7 +390,7 @@ Future<void> addImageToLayer({
     final ArchiveFile? file = archive.files.toList().findFirstMatch((ArchiveFile f) => f.name == imageName);
     if (file != null) {
       final List<int> bytes = file.content as List<int>;
-      final ui.Image image = await decodeImage(bytes);
+      final ui.Image image = await fromBytesToImage(bytes is Uint8List ? bytes : Uint8List.fromList(bytes));
 
       layer.addImage(
         imageToAdd: image,
@@ -489,33 +402,6 @@ Future<void> addImageToLayer({
   } catch (e) {
     _log.severe('Failed to add image to layer', e);
   }
-}
-
-///
-/// Parameters:
-/// - [archive]: The archive containing the image files.
-/// - [layers]: The provider managing all layers (not directly used in this function).
-/// - [layer]: The specific layer to which the image will be added.
-/// - [imageName]: The name of the image file to retrieve from the archive.
-/// - [offset]: The position where the image will be added on the layer.
-///
-/// Throws:
-/// - This function does not throw errors but logs them using [Logger].
-///
-/// Example:
-/// ```dart
-/// await addImageToLayer(
-///   archive: myArchive,
-///   layer: myLayerProvider,
-///   imageName: 'example.png',
-///   offset: ui.Offset(10, 20),
-/// );
-/// ```
-
-Future<ui.Image> decodeImage(List<int> bytes) async {
-  final Completer<ui.Image> completer = Completer<ui.Image>();
-  ui.decodeImageFromList(Uint8List.fromList(bytes), completer.complete);
-  return completer.future;
 }
 
 /// Returns the embedded ORA preview PNG when the archive provides one.
@@ -801,41 +687,35 @@ Future<void> _addOraPreviewFiles({
   required Archive archive,
   required LayersProvider layers,
 }) async {
-  final ({bool disposeImage, ui.Image image}) mergedImageCapture = await _captureOraMergedImage(layers);
-  final ui.Image mergedImage = mergedImageCapture.image;
+  // Owned by the provider (layers.cachedImage): never dispose it here.
+  final ui.Image mergedImage = await layers.captureCompositeForExport();
+  final Uint8List? mergedPngBytes = await _safeImageToPngBytes(mergedImage, _oraMergedImageEntry);
+  if (mergedPngBytes == null) {
+    return;
+  }
+
+  archive.addFile(
+    _storedNeutralArchiveFile(
+      _oraMergedImageEntry,
+      mergedPngBytes,
+    ),
+  );
+
+  final ui.Image thumbnailImage = _createOraThumbnailImage(mergedImage);
   try {
-    final Uint8List? mergedPngBytes = await _safeImageToPngBytes(mergedImage, _oraMergedImageEntry);
-    if (mergedPngBytes == null) {
+    final Uint8List? thumbnailPngBytes = await _safeImageToPngBytes(thumbnailImage, _oraThumbnailEntry);
+    if (thumbnailPngBytes == null) {
       return;
     }
 
     archive.addFile(
       _storedNeutralArchiveFile(
-        _oraMergedImageEntry,
-        mergedPngBytes,
+        _oraThumbnailEntry,
+        thumbnailPngBytes,
       ),
     );
-
-    final ui.Image thumbnailImage = _createOraThumbnailImage(mergedImage);
-    try {
-      final Uint8List? thumbnailPngBytes = await _safeImageToPngBytes(thumbnailImage, _oraThumbnailEntry);
-      if (thumbnailPngBytes == null) {
-        return;
-      }
-
-      archive.addFile(
-        _storedNeutralArchiveFile(
-          _oraThumbnailEntry,
-          thumbnailPngBytes,
-        ),
-      );
-    } finally {
-      thumbnailImage.dispose();
-    }
   } finally {
-    if (mergedImageCapture.disposeImage) {
-      mergedImage.dispose();
-    }
+    thumbnailImage.dispose();
   }
 }
 
@@ -846,26 +726,11 @@ Future<void> _addOraPreviewFiles({
 /// layer payload remains valid.
 Future<Uint8List?> _safeImageToPngBytes(ui.Image image, String entryName) async {
   try {
-    final ByteData? pngData = await image.toByteData(format: ui.ImageByteFormat.png);
-    return pngData?.buffer.asUint8List();
+    return await encodeImageToPng(image);
   } on Object catch (error, stackTrace) {
     _log.warning('Skipping ORA preview entry "$entryName" due to PNG encode failure.', error, stackTrace);
     return null;
   }
-}
-
-/// Reuses the current merged snapshot when it is known to be up to date.
-Future<({bool disposeImage, ui.Image image})> _captureOraMergedImage(LayersProvider layers) async {
-  final ui.Image? cachedImage = layers.cachedImage;
-  if (!layers.hasChanged && cachedImage != null) {
-    return (disposeImage: false, image: cachedImage);
-  }
-
-  // capturePainterToImage() stores the result in layers.cachedImage (and clears
-  // hasChanged), so the provider owns it — disposing it here would leave
-  // cachedImage dangling and trip an Image.dispose assertion on the next
-  // capture (e.g. a following preparePngBytes for a thumbnail).
-  return (disposeImage: false, image: await layers.capturePainterToImage());
 }
 
 /// Builds the ORA thumbnail directly from the merged image without a PNG round-trip.

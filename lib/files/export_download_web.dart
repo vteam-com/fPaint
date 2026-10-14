@@ -2,11 +2,7 @@
 import 'dart:js_interop';
 import 'dart:typed_data';
 
-import 'package:fpaint/files/export_file_name.dart';
-import 'package:fpaint/files/export_prepare.dart';
-import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/providers/app_preferences.dart';
-import 'package:fpaint/providers/layers_provider.dart';
 import 'package:web/web.dart' as web;
 
 const String _htmlAnchorTag = 'a';
@@ -44,56 +40,13 @@ void _ignoreDesktopOnlyArguments(
   }
 }
 
-/// Saves the current canvas as a PNG file and triggers a browser download.
-Future<void> saveAsPng(
-  LayersProvider layers,
+/// Delivers already-encoded export [bytes] as a browser download named
+/// [filePath].
+Future<void> writeExportBytes(
   String filePath,
+  Uint8List bytes,
 ) async {
-  downloadBlob(await preparePngBytes(layers), filePath);
-}
-
-/// Saves the current content as a JPEG file and triggers a browser download.
-Future<void> saveAsJpeg(
-  LayersProvider layers,
-  String filePath,
-) async {
-  downloadBlob(await prepareJpegBytes(layers), filePath);
-}
-
-/// Saves the current project as an ORA (OpenRaster) file and triggers a browser download.
-Future<void> saveAsOra(
-  LayersProvider layers,
-  String filePath,
-) async {
-  downloadBlob(await prepareOraBytes(layers), filePath);
-}
-
-/// Saves all layers as a layered TIFF file and triggers a browser download.
-Future<void> saveAsTiff(
-  LayersProvider layers,
-  String? filePath,
-) async {
-  if (filePath != null) {
-    final Uint8List tiffBytes = await convertLayersToTiff(layers);
-    downloadBlob(tiffBytes, normalizeTiffExportFileName(filePath));
-    layers.clearHasChanged();
-  }
-}
-
-/// Saves the current content as a WebP file and triggers a browser download.
-Future<void> saveAsWebp(
-  LayersProvider layers,
-  String filePath,
-) async {
-  downloadBlob(await prepareWebpBytes(layers), filePath);
-}
-
-/// Saves the current content as a HEIC file and triggers a browser download.
-Future<void> saveAsHeic(
-  LayersProvider layers,
-  String filePath,
-) async {
-  downloadBlob(await prepareHeicBytes(layers), filePath);
+  downloadBlob(bytes, filePath);
 }
 
 /// Downloads a file represented by the given image bytes and file name.

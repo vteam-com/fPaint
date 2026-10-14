@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 
@@ -75,43 +77,62 @@ class _TransparentBackgroundPainter extends CustomPainter {
 }
 
 /// Draws a transparent background grid on the canvas.
-/// The grid is composed of alternating grey and transparent squares,
-/// with the size of each square determined by the canvas size and a fixed cell size.
-/// The grid is clipped to the canvas bounds and is drawn using the provided Canvas object.
+/// The grid is composed of alternating grey squares of [patternSize] pixels,
+/// anchored at [offset], clipped to the [offset] & [size] bounds, and filled
+/// with the shared [checkerboardShader] in a single `drawRect`.
 void drawTransparentBackgroundOffsetAndSize({
   required Canvas canvas,
   required Size size,
   Offset offset = Offset.zero,
   int patternSize = AppLimits.transparentPatternSize,
 }) {
-  final double cellSize = size.width / (size.width / patternSize);
   canvas.save();
-  final Rect containerRect = Rect.fromLTWH(
-    offset.dx,
-    offset.dy,
-    size.width,
-    size.height,
-  );
-
+  canvas.translate(offset.dx, offset.dy);
+  final Rect containerRect = Offset.zero & size;
   canvas.clipRect(containerRect);
-  final Paint paintBackground = Paint()..color = AppColors.grey300;
-  canvas.drawRect(containerRect, paintBackground);
-
-  final Paint paintCell = Paint()..color = AppColors.grey400;
-  for (double x = 0; x < size.width; x += cellSize) {
-    for (double y = 0; y < size.height; y += cellSize) {
-      if ((x ~/ cellSize + y ~/ cellSize) % AppMath.pair == 0) {
-        canvas.drawRect(
-          Rect.fromLTWH(
-            x + offset.dx,
-            y + offset.dy,
-            cellSize,
-            cellSize,
-          ),
-          paintCell,
-        );
-      }
-    }
-  }
+  canvas.drawRect(containerRect, Paint()..shader = checkerboardShader(patternSize: patternSize));
   canvas.restore();
+}
+
+/// Rasterized checkerboard tiles and their repeating shaders, one per
+/// pattern size. The tile image is retained alongside its shader so it is
+/// never finalized while the shader still samples it.
+final Map<int, (ui.Image, ui.ImageShader)> _checkerboardCache = <int, (ui.Image, ui.ImageShader)>{};
+
+/// Returns a repeating transparency checkerboard shader with square cells of
+/// [patternSize] logical pixels: [AppColors.grey400] cells on an
+/// [AppColors.grey300] ground, with a dark cell at the origin.
+///
+/// The two-by-two cell tile is rasterized once per [patternSize] and cached
+/// for the life of the process, so filling any area is a single `drawRect`
+/// rather than one `drawRect` per cell.
+ui.ImageShader checkerboardShader({int patternSize = AppLimits.transparentPatternSize}) {
+  final (ui.Image, ui.ImageShader)? cached = _checkerboardCache[patternSize];
+  if (cached != null) {
+    return cached.$2;
+  }
+
+  final int tile = patternSize * AppMath.pair;
+  final double cellSize = patternSize.toDouble();
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final Canvas tileCanvas = Canvas(recorder);
+  tileCanvas.drawRect(
+    Rect.fromLTWH(0, 0, tile.toDouble(), tile.toDouble()),
+    Paint()..color = AppColors.grey300,
+  );
+  final Paint cellPaint = Paint()..color = AppColors.grey400;
+  tileCanvas.drawRect(Rect.fromLTWH(0, 0, cellSize, cellSize), cellPaint);
+  tileCanvas.drawRect(Rect.fromLTWH(cellSize, cellSize, cellSize, cellSize), cellPaint);
+
+  final ui.Picture picture = recorder.endRecording();
+  final ui.Image tileImage = picture.toImageSync(tile, tile);
+  picture.dispose();
+  final ui.ImageShader shader = ui.ImageShader(
+    tileImage,
+    TileMode.repeated,
+    TileMode.repeated,
+    Matrix4.identity().storage,
+  );
+  _checkerboardCache[patternSize] = (tileImage, shader);
+  return shader;
 }

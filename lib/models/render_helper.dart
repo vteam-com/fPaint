@@ -23,12 +23,9 @@ void renderPencilStroke(
   List<Offset> positions,
   MyBrush brush,
 ) {
-  final Paint paint = Paint();
-  paint.color = brush.color;
-  paint.strokeWidth = brush.size;
-  paint.style = PaintingStyle.stroke;
-  paint.strokeCap = StrokeCap.round;
-  paint.blendMode = BlendMode.src;
+  final Paint paint = _roundStrokePaint(brush.size)
+    ..color = brush.color
+    ..blendMode = BlendMode.src;
   _renderFreehandStroke(canvas, positions, paint);
 }
 
@@ -42,11 +39,7 @@ void renderPencilEraserStroke(
   List<Offset> positions,
   MyBrush brush,
 ) {
-  final Paint paint = Paint();
-  paint.strokeWidth = brush.size;
-  paint.style = PaintingStyle.stroke;
-  paint.strokeCap = StrokeCap.round;
-  paint.blendMode = BlendMode.clear;
+  final Paint paint = _roundStrokePaint(brush.size)..blendMode = BlendMode.clear;
   _renderFreehandStroke(canvas, positions, paint);
 }
 
@@ -98,28 +91,10 @@ void renderRectangle(
   MyBrush brush,
   Color fillColor,
 ) {
-  // Draw the base rectangle
-  final Paint paint = Paint();
-  paint.color = fillColor;
-  paint.strokeCap = StrokeCap.round;
-  paint.strokeWidth = brush.size;
-  paint.style = PaintingStyle.fill;
+  // Draw the base rectangle, then the outline around it.
   final Rect rect = Rect.fromPoints(p1, p2);
-  canvas.drawRect(rect, paint);
-
-  // Draw the path around the rectangle
-  paint.style = PaintingStyle.stroke;
-  paint.color = brush.color;
-  final Path path = Path()..addRect(rect);
-  drawPathWithBrushStyle(
-    canvas,
-    paint,
-    path,
-    brush.style,
-    brush.size,
-    hatch: brush.hatch,
-    marks: brush.marks,
-  );
+  canvas.drawRect(rect, Paint()..color = fillColor);
+  _strokeOutlineWithBrush(canvas, Path()..addRect(rect), brush);
 }
 
 /// Renders a circle on the canvas.
@@ -136,36 +111,13 @@ void renderCircle(
   MyBrush brush,
   Color fillColor,
 ) {
-  final Paint paint = Paint();
-  paint.color = fillColor;
-  paint.strokeCap = StrokeCap.round;
-  paint.strokeWidth = brush.size;
-  paint.style = PaintingStyle.fill;
-
   final double radius = (p1 - p2).distance / AppMath.pair;
   final Offset center = Offset(
     (p1.dx + p2.dx) / AppMath.pair,
     (p1.dy + p2.dy) / AppMath.pair,
   );
-  canvas.drawCircle(center, radius, paint);
-  paint.style = PaintingStyle.stroke;
-  paint.color = brush.color;
-  final Path path = Path()
-    ..addOval(
-      Rect.fromCircle(
-        center: center,
-        radius: radius,
-      ),
-    );
-  drawPathWithBrushStyle(
-    canvas,
-    paint,
-    path,
-    brush.style,
-    brush.size,
-    hatch: brush.hatch,
-    marks: brush.marks,
-  );
+  canvas.drawCircle(center, radius, Paint()..color = fillColor);
+  _strokeOutlineWithBrush(canvas, Path()..addOval(Rect.fromCircle(center: center, radius: radius)), brush);
 }
 
 /// Renders a path on the canvas.
@@ -173,15 +125,13 @@ void renderCircle(
 /// The [canvas] parameter is the canvas to draw on.
 /// The [positions] parameter is the list of points that make up the path.
 /// The [brush] parameter is the brush to use for the stroke.
-/// The [fillColor] parameter is the fill color of the path.
 /// The optional [pressures] (normalized pen pressure per point, parallel to
 /// [positions]) makes a solid or soft stroke vary its width along its length;
 /// patterned styles keep a constant width.
 void renderPath(
   Canvas canvas,
   List<Offset> positions,
-  MyBrush brush,
-  Color fillColor, {
+  MyBrush brush, {
   List<double>? pressures,
 }) {
   if (pressures != null &&
@@ -192,16 +142,6 @@ void renderPath(
     return;
   }
 
-  final Paint paint = Paint();
-  paint.color = fillColor;
-  paint.style = PaintingStyle.stroke;
-  paint.strokeCap = StrokeCap.round;
-  // Round the joins between segments. The default StrokeJoin.miter extends the
-  // outer edge to a point at every vertex, so a curved gesture (a polyline of
-  // many short segments) sprouts sharp triangles wherever the direction turns.
-  paint.strokeJoin = StrokeJoin.round;
-  paint.strokeWidth = brush.size;
-
   final Path path = Path()
     ..moveTo(
       positions.first.dx,
@@ -210,9 +150,10 @@ void renderPath(
   for (final Offset position in positions) {
     path.lineTo(position.dx, position.dy);
   }
-  paint.style = PaintingStyle.stroke;
-  paint.color = brush.color;
-  drawPathWithBrushStyle(canvas, paint, path, brush.style, brush.size, hatch: brush.hatch, marks: brush.marks);
+  // Round the joins between segments. The default StrokeJoin.miter extends the
+  // outer edge to a point at every vertex, so a curved gesture (a polyline of
+  // many short segments) sprouts sharp triangles wherever the direction turns.
+  _strokeOutlineWithBrush(canvas, path, brush, strokeJoin: StrokeJoin.round);
 }
 
 /// Draws a pressure-sensitive solid or soft brush stroke whose width follows
@@ -300,33 +241,41 @@ void _addClockwisePolygon(Path path, List<Offset> points) {
 /// The [p1] parameter is the starting point of the line.
 /// The [p2] parameter is the ending point of the line.
 /// The [brush] parameter is the brush to use for the stroke.
-/// The [fillColor] parameter is the fill color of the line.
 void renderLine(
   Canvas canvas,
   Offset p1,
   Offset p2,
   MyBrush brush,
-  Color fillColor,
 ) {
-  final Paint paint = Paint();
-  paint.color = fillColor;
-  paint.strokeCap = StrokeCap.round;
-  paint.strokeWidth = brush.size;
-  paint.style = PaintingStyle.stroke;
-
-  final Path path = Path()
-    ..moveTo(p1.dx, p1.dy)
-    ..lineTo(p2.dx, p2.dy);
-  paint.color = brush.color;
-  drawPathWithBrushStyle(
+  _strokeOutlineWithBrush(
     canvas,
-    paint,
-    path,
-    brush.style,
-    brush.size,
-    hatch: brush.hatch,
-    marks: brush.marks,
+    Path()
+      ..moveTo(p1.dx, p1.dy)
+      ..lineTo(p2.dx, p2.dy),
+    brush,
   );
+}
+
+/// Builds a fresh round-capped stroke [Paint] of [strokeWidth].
+Paint _roundStrokePaint(double strokeWidth) {
+  return Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeCap = StrokeCap.round
+    ..strokeWidth = strokeWidth;
+}
+
+/// Strokes [path] in [brush]'s colour, size and style (dash, hatch, soft, …)
+/// with a fresh round-capped paint joined by [strokeJoin].
+void _strokeOutlineWithBrush(
+  Canvas canvas,
+  Path path,
+  MyBrush brush, {
+  StrokeJoin strokeJoin = StrokeJoin.miter,
+}) {
+  final Paint paint = _roundStrokePaint(brush.size)
+    ..color = brush.color
+    ..strokeJoin = strokeJoin;
+  drawPathWithBrushStyle(canvas, paint, path, brush.style, brush.size, hatch: brush.hatch, marks: brush.marks);
 }
 
 /// Renders a region on the canvas.
@@ -657,14 +606,17 @@ void drawPathDash(
 /// The [source] parameter is the path to create the dashed path from.
 /// The [dashWidth] parameter is the width of the dashes.
 /// The [dashGap] parameter is the gap between the dashes.
+/// The [phase] parameter is how far along each contour the first dash starts
+/// (animate it to make the dashes "march").
 Path createDashedPath(
   Path source, {
   required double dashWidth,
   required double dashGap,
+  double phase = 0.0,
 }) {
   final Path dashedPath = Path();
   for (final ui.PathMetric pathMetric in source.computeMetrics()) {
-    double distance = 0.0;
+    double distance = phase;
     while (distance < pathMetric.length) {
       final double nextDashLength = distance + dashWidth;
       dashedPath.addPath(
@@ -678,6 +630,33 @@ Path createDashedPath(
     }
   }
   return dashedPath;
+}
+
+/// Draws [path] as dashes of [dashLength] that alternate between
+/// [firstPaint] and [secondPaint], each followed by [gap].
+///
+/// The [firstPaint] dashes start [phase] along each contour; the
+/// [secondPaint] dashes are shifted by one dash-plus-gap so the two tones
+/// interleave. With a zero [gap] they read as one continuous two-tone line.
+void drawTwoToneDashedPath(
+  Canvas canvas,
+  Path path, {
+  required double dashLength,
+  required Paint firstPaint,
+  required Paint secondPaint,
+  double gap = 0.0,
+  double phase = 0.0,
+}) {
+  final double period = dashLength + gap;
+  final double sameToneGap = period + gap;
+  canvas.drawPath(
+    createDashedPath(path, dashWidth: dashLength, dashGap: sameToneGap, phase: phase),
+    firstPaint,
+  );
+  canvas.drawPath(
+    createDashedPath(path, dashWidth: dashLength, dashGap: sameToneGap, phase: phase + period),
+    secondPaint,
+  );
 }
 
 /// Draws circular dots along a [path].
@@ -695,12 +674,18 @@ void _drawPathDots(
     ..color = paint.color
     ..style = PaintingStyle.fill;
 
+  _forEachPositionAlongPath(path, gap, (Offset position) => canvas.drawCircle(position, radius, dotPaint));
+}
+
+/// Calls [visit] with the position every [gap] along each contour of [path],
+/// starting at each contour's beginning.
+void _forEachPositionAlongPath(Path path, double gap, void Function(Offset) visit) {
   for (final ui.PathMetric metric in path.computeMetrics()) {
-    double distance = 0.0;
+    double distance = AppMath.zero.toDouble();
     while (distance < metric.length) {
       final ui.Tangent? tangent = metric.getTangentForOffset(distance);
       if (tangent != null) {
-        canvas.drawCircle(tangent.position, radius, dotPaint);
+        visit(tangent.position);
       }
       distance += gap;
     }
@@ -761,22 +746,14 @@ void _drawPathSlashes(
   final double gap = brushSize * AppStroke.dashGapFactor;
   final double halfSlash = slashLength / AppMath.pair;
 
-  for (final ui.PathMetric metric in path.computeMetrics()) {
-    double distance = 0.0;
-    while (distance < metric.length) {
-      final ui.Tangent? tangent = metric.getTangentForOffset(distance);
-      if (tangent != null) {
-        final Offset center = tangent.position;
-        // Draw a forward slash (/) — tilted line from bottom-left to top-right
-        canvas.drawLine(
-          Offset(center.dx - halfSlash, center.dy + halfSlash),
-          Offset(center.dx + halfSlash, center.dy - halfSlash),
-          paint,
-        );
-      }
-      distance += gap;
-    }
-  }
+  _forEachPositionAlongPath(path, gap, (Offset center) {
+    // Draw a forward slash (/) — tilted line from bottom-left to top-right
+    canvas.drawLine(
+      Offset(center.dx - halfSlash, center.dy + halfSlash),
+      Offset(center.dx + halfSlash, center.dy - halfSlash),
+      paint,
+    );
+  });
 }
 
 /// Renders text on the canvas.

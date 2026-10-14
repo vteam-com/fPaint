@@ -1,7 +1,12 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/models/render_helper.dart';
+
+/// Length of each marching-ants dash (px).
+const double _antDashWidth = 4;
+
+/// Gap between successive marching-ants dashes (px).
+const double _antDashSpace = 6;
 
 /// A widget that displays an animated "marching ants" path.
 ///
@@ -113,22 +118,12 @@ class MarchingAntsPainter extends CustomPainter {
       paint.color = AppColors.overlayDark;
       paint.strokeCap = StrokeCap.round;
 
-      final Path dashPath = Path();
-      const double dashWidth = 4;
-      const double dashSpace = 6;
-      final double distance = phase;
-
-      for (final ui.PathMetric pathMetric in path!.computeMetrics()) {
-        double segmentDistance = distance;
-        while (segmentDistance < pathMetric.length) {
-          final double nextDistance = segmentDistance + dashWidth;
-          dashPath.addPath(
-            pathMetric.extractPath(segmentDistance, nextDistance),
-            Offset.zero,
-          );
-          segmentDistance = nextDistance + dashSpace;
-        }
-      }
+      final Path dashPath = createDashedPath(
+        path!,
+        dashWidth: _antDashWidth,
+        dashGap: _antDashSpace,
+        phase: phase,
+      );
 
       // Draw dashes over the border
       canvas.drawPath(dashPath, paint);
@@ -143,13 +138,10 @@ class MarchingAntsPainter extends CustomPainter {
       paint.strokeWidth = AppStroke.thin;
 
       final double totalLength = (linePointEnd! - linePointStart!).distance;
-      const double dashWidth = 4;
-      const double dashSpace = 6;
-      final double distance = phase;
 
-      double segmentDistance = distance;
+      double segmentDistance = phase;
       while (segmentDistance < totalLength) {
-        final double nextDistance = segmentDistance + dashWidth;
+        final double nextDistance = segmentDistance + _antDashWidth;
         final Offset start = Offset.lerp(
           linePointStart!,
           linePointEnd!,
@@ -161,7 +153,7 @@ class MarchingAntsPainter extends CustomPainter {
           nextDistance / totalLength,
         )!;
         canvas.drawLine(start, end, paint);
-        segmentDistance = nextDistance + dashSpace;
+        segmentDistance = nextDistance + _antDashSpace;
       }
     }
   }

@@ -100,7 +100,7 @@ void main() {
 
     expect(previewBytes, isNotNull);
 
-    final ui.Image previewImage = await decodeImage(previewBytes!);
+    final ui.Image previewImage = await fromBytesToImage(previewBytes!);
     expect(previewImage.height, AppLayout.thumbnailMaxHeight.toInt());
   });
 
@@ -316,7 +316,7 @@ void main() {
     final ArchiveFile layerFile = archive.files.firstWhere(
       (ArchiveFile file) => file.name == 'data/layer-0.png',
     );
-    final ui.Image exportedLayerImage = await decodeImage(
+    final ui.Image exportedLayerImage = await fromBytesToImage(
       Uint8List.fromList(layerFile.content as List<int>),
     );
     expect(exportedLayerImage.width, 1);

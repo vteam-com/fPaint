@@ -83,13 +83,7 @@ Future<void> _runSharePanelSaveAction({
 
   await _runSharePanelAction(
     context,
-    () {
-      return runWithGlobalFileSaveSnackBar<void>(
-        initialFilePath: shellProvider.loadedFileName,
-        completedFilePathBuilder: () => shellProvider.loadedFileName,
-        task: () => saveFile(shellProvider, layers, preferences),
-      );
-    },
+    () => saveLoadedFileWithFeedback(shellProvider, layers, preferences),
     dismissOnAction,
   );
 }

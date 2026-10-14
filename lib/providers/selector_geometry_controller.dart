@@ -140,15 +140,11 @@ class SelectorGeometryController {
   void selectAll() {
     _host.cancelEffectPreview();
     _host.cancelPendingWandRequest();
-    _model.isVisible = true;
-    _model.isDrawing = false;
-    _model.path1 = Path()
-      ..addRect(
+    _model.replacePath(
+      Path()..addRect(
         Rect.fromPoints(Offset.zero, Offset(_host.canvasWidth, _host.canvasHeight)),
-      );
-    _model.path2 = null;
-    _model.points.clear();
-    _model.math = SelectorMath.replace;
+      ),
+    );
     _host.repaintToolOptions();
     _host.update();
   }

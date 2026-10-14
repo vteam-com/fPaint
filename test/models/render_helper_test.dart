@@ -29,6 +29,35 @@ void main() {
       // 100 / (10+5) = ~6.67 → expect 7 segments
       expect(metrics.length, greaterThanOrEqualTo(6));
     });
+
+    test('phase shifts where the first dash starts', () {
+      final Path source = Path()
+        ..moveTo(0, 0)
+        ..lineTo(100, 0);
+      final Path result = createDashedPath(source, dashWidth: 10.0, dashGap: 10.0, phase: 5.0);
+      final Rect firstDash = result.computeMetrics().first.extractPath(0, 1).getBounds();
+      expect(firstDash.left, closeTo(5.0, 0.001));
+    });
+  });
+
+  group('drawTwoToneDashedPath', () {
+    test('draws both tones without throwing', () {
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+      final Path source = Path()
+        ..moveTo(0, 0)
+        ..lineTo(100, 0);
+      drawTwoToneDashedPath(
+        canvas,
+        source,
+        dashLength: 6,
+        gap: 2,
+        phase: 1,
+        firstPaint: Paint()..style = PaintingStyle.stroke,
+        secondPaint: Paint()..style = PaintingStyle.stroke,
+      );
+      expect(recorder.endRecording(), isNotNull);
+    });
   });
 
   group('drawPathWithBrushStyle', () {
@@ -383,12 +412,12 @@ void main() {
 
     test('renderLine with solid brush', () {
       final MyBrush brush = MyBrush(color: AppColors.black, size: 2.0);
-      renderLine(canvas, const Offset(0, 0), const Offset(100, 100), brush, AppColors.transparent);
+      renderLine(canvas, const Offset(0, 0), const Offset(100, 100), brush);
     });
 
     test('renderLine with slash brush', () {
       final MyBrush brush = MyBrush(color: AppColors.black, size: 2.0, style: BrushStyle.slash);
-      renderLine(canvas, const Offset(0, 0), const Offset(100, 100), brush, AppColors.transparent);
+      renderLine(canvas, const Offset(0, 0), const Offset(100, 100), brush);
     });
 
     test('renderPath with multiple points', () {
@@ -397,7 +426,6 @@ void main() {
         canvas,
         const <Offset>[Offset(0, 0), Offset(50, 50), Offset(100, 0)],
         brush,
-        AppColors.transparent,
       );
     });
 
@@ -407,7 +435,6 @@ void main() {
         canvas,
         const <Offset>[Offset(0, 0), Offset(50, 50), Offset(100, 0)],
         brush,
-        AppColors.transparent,
       );
     });
 

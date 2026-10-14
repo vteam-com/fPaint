@@ -3,11 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/viewport_transform_helper.dart';
-import 'package:fpaint/l10n/app_localizations_x.dart';
+import 'package:fpaint/models/tool_family.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
-import 'package:fpaint/widgets/confirm_discard_dialog.dart';
+import 'package:fpaint/widgets/locked_layer_guard.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/shortcuts_help.dart';
 
@@ -20,20 +20,31 @@ import 'package:fpaint/widgets/shortcuts_help.dart';
 /// The [shellProvider] parameter is the [ShellProvider] instance used to manage the application's shell.
 /// The [appProvider] parameter is the [AppProvider] instance used to manage the application's state.
 /// The [child] parameter is the widget to wrap with the keyboard shortcuts and actions.
+/// [onSave] and [onNewFromClipboard] run the document Save and guarded
+/// "New from clipboard" flows, which live above the widget layer.
 Widget shortCutsForMainApp(
   BuildContext context,
   ShellProvider shellProvider,
   AppProvider appProvider,
   Widget child, {
   required Future<void> Function() onSave,
+  required Future<void> Function() onNewFromClipboard,
 }) {
-  void showLockedLayerMessage() {
-    context.showSnackBarMessage(
-      context.l10n.layerLockedForEditing(appProvider.layers.selectedLayer.name),
-    );
+  final Map<ShortcutActivator, Intent> shortcuts = _buildShortcuts();
+
+  /// Keyboard zoom/rotate take over from auto-placement and pivot on the
+  /// canvas centre, since there is no pointer to anchor to.
+  Object? zoomAboutCenter(double scaleDelta) {
+    shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+    appProvider.zoomAboutCenter(scaleDelta);
+    return null;
   }
 
-  final Map<ShortcutActivator, Intent> shortcuts = _buildShortcuts();
+  Object? rotateAboutCenter(double rotationDelta) {
+    shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+    appProvider.rotateAboutCenter(rotationDelta);
+    return null;
+  }
 
   return _MainAppShortcutScope(
     appProvider: appProvider,
@@ -46,24 +57,10 @@ Widget shortCutsForMainApp(
         onInvoke: (RedoIntent _) => appProvider.redoAction(),
       ),
       ZoomInIntent: CallbackAction<ZoomInIntent>(
-        onInvoke: (ZoomInIntent _) {
-          shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-          appProvider.applyScaleToCanvas(
-            scaleDelta: AppVisual.enlarge,
-            anchorPoint: appProvider.canvasCenter,
-          );
-          return null;
-        },
+        onInvoke: (ZoomInIntent _) => zoomAboutCenter(AppVisual.enlarge),
       ),
       ZoomOutIntent: CallbackAction<ZoomOutIntent>(
-        onInvoke: (ZoomOutIntent _) {
-          shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-          appProvider.applyScaleToCanvas(
-            scaleDelta: AppVisual.shrink,
-            anchorPoint: appProvider.canvasCenter,
-          );
-          return null;
-        },
+        onInvoke: (ZoomOutIntent _) => zoomAboutCenter(AppVisual.shrink),
       ),
       ResetZoomIntent: CallbackAction<ResetZoomIntent>(
         onInvoke: (ResetZoomIntent _) {
@@ -75,24 +72,12 @@ Widget shortCutsForMainApp(
         },
       ),
       RotateViewCounterClockwiseIntent: CallbackAction<RotateViewCounterClockwiseIntent>(
-        onInvoke: (RotateViewCounterClockwiseIntent _) {
-          shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-          appProvider.applyRotationToCanvas(
-            rotationDelta: -degreesToRadians(AppInteraction.viewportRotationKeyboardStepDegrees),
-            anchorPoint: appProvider.canvasCenter,
-          );
-          return null;
-        },
+        onInvoke: (RotateViewCounterClockwiseIntent _) =>
+            rotateAboutCenter(-degreesToRadians(AppInteraction.viewportRotationKeyboardStepDegrees)),
       ),
       RotateViewClockwiseIntent: CallbackAction<RotateViewClockwiseIntent>(
-        onInvoke: (RotateViewClockwiseIntent _) {
-          shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-          appProvider.applyRotationToCanvas(
-            rotationDelta: degreesToRadians(AppInteraction.viewportRotationKeyboardStepDegrees),
-            anchorPoint: appProvider.canvasCenter,
-          );
-          return null;
-        },
+        onInvoke: (RotateViewClockwiseIntent _) =>
+            rotateAboutCenter(degreesToRadians(AppInteraction.viewportRotationKeyboardStepDegrees)),
       ),
       BrushSizeDecreaseIntent: CallbackAction<BrushSizeDecreaseIntent>(
         onInvoke: (BrushSizeDecreaseIntent _) => appProvider.stepBrushSize(increase: false),
@@ -105,8 +90,7 @@ Widget shortCutsForMainApp(
       ),
       CutIntent: CallbackAction<CutIntent>(
         onInvoke: (CutIntent _) async {
-          if (appProvider.isSelectedLayerLocked) {
-            showLockedLayerMessage();
+          if (!guardSelectedLayerUnlocked(context, appProvider)) {
             return null;
           }
 
@@ -119,10 +103,7 @@ Widget shortCutsForMainApp(
       ),
       NewDocumentFromClipboardImage: CallbackAction<NewDocumentFromClipboardImage>(
         onInvoke: (NewDocumentFromClipboardImage _) async {
-          if (appProvider.layers.hasChanged && await confirmDiscardCurrentWork(context) == false) {
-            return;
-          }
-          appProvider.newDocumentFromClipboardImage();
+          await onNewFromClipboard();
           return null;
         },
       ),
@@ -131,8 +112,7 @@ Widget shortCutsForMainApp(
       ),
       DuplicateIntent: CallbackAction<DuplicateIntent>(
         onInvoke: (DuplicateIntent _) async {
-          if (appProvider.isSelectedLayerLocked) {
-            showLockedLayerMessage();
+          if (!guardSelectedLayerUnlocked(context, appProvider)) {
             return null;
           }
 
@@ -169,33 +149,9 @@ Widget shortCutsForMainApp(
         },
       ),
 
-      ToolBrushIntent: CallbackAction<ToolBrushIntent>(
-        onInvoke: (ToolBrushIntent _) {
-          appProvider.selectedAction = ActionType.brush;
-          return null;
-        },
-      ),
-      ToolEraserIntent: CallbackAction<ToolEraserIntent>(
-        onInvoke: (ToolEraserIntent _) {
-          appProvider.selectedAction = ActionType.eraser;
-          return null;
-        },
-      ),
-      ToolSelectionIntent: CallbackAction<ToolSelectionIntent>(
-        onInvoke: (ToolSelectionIntent _) {
-          appProvider.selectedAction = ActionType.selector;
-          return null;
-        },
-      ),
-      ToolFillIntent: CallbackAction<ToolFillIntent>(
-        onInvoke: (ToolFillIntent _) {
-          appProvider.selectedAction = ActionType.fill;
-          return null;
-        },
-      ),
-      ToolTextIntent: CallbackAction<ToolTextIntent>(
-        onInvoke: (ToolTextIntent _) {
-          appProvider.selectedAction = ActionType.text;
+      SelectToolIntent: CallbackAction<SelectToolIntent>(
+        onInvoke: (SelectToolIntent intent) {
+          appProvider.selectedAction = intent.action;
           return null;
         },
       ),
@@ -223,8 +179,7 @@ Widget shortCutsForMainApp(
       // Delete/Erase
       DeleteIntent: CallbackAction<DeleteIntent>(
         onInvoke: (DeleteIntent _) async {
-          if (appProvider.isSelectedLayerLocked && appProvider.selectorModel.path1 != null) {
-            showLockedLayerMessage();
+          if (appProvider.selectorModel.path1 != null && !guardSelectedLayerUnlocked(context, appProvider)) {
             return null;
           }
 
@@ -417,34 +372,13 @@ class SelectAllIntent extends Intent {
   const SelectAllIntent();
 }
 
-/// An [Intent] that switches to the brush tool.
-class ToolBrushIntent extends Intent {
-  /// Creates a [ToolBrushIntent].
-  const ToolBrushIntent();
-}
+/// An [Intent] that switches to the tool [action] (see [kToolShortcuts]).
+class SelectToolIntent extends Intent {
+  /// Creates a [SelectToolIntent] for [action].
+  const SelectToolIntent(this.action);
 
-/// An [Intent] that switches to the eraser tool.
-class ToolEraserIntent extends Intent {
-  /// Creates a [ToolEraserIntent].
-  const ToolEraserIntent();
-}
-
-/// An [Intent] that switches to the selection tool.
-class ToolSelectionIntent extends Intent {
-  /// Creates a [ToolSelectionIntent].
-  const ToolSelectionIntent();
-}
-
-/// An [Intent] that switches to the fill tool.
-class ToolFillIntent extends Intent {
-  /// Creates a [ToolFillIntent].
-  const ToolFillIntent();
-}
-
-/// An [Intent] that switches to the text tool.
-class ToolTextIntent extends Intent {
-  /// Creates a [ToolTextIntent].
-  const ToolTextIntent();
+  /// The tool to activate.
+  final ActionType action;
 }
 
 /// An [Intent] that triggers the new document from clipboard image action.
@@ -515,6 +449,18 @@ void showShortcutsHelp(BuildContext context) {
   );
 }
 
+/// Binds [intent] to exactly Cmd + [key] and exactly Ctrl + [key] (plus Shift
+/// when [shift] is true), so one call covers macOS and Windows/Linux.
+void addPrimaryModifierShortcut(
+  Map<ShortcutActivator, Intent> shortcuts,
+  LogicalKeyboardKey key,
+  Intent intent, {
+  bool shift = false,
+}) {
+  shortcuts[SingleActivator(key, meta: true, shift: shift)] = intent;
+  shortcuts[SingleActivator(key, control: true, shift: shift)] = intent;
+}
+
 /// Builds the keyboard shortcuts map, combining platform-specific shortcuts.
 Map<ShortcutActivator, Intent> _buildShortcuts() {
   final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{};
@@ -536,35 +482,19 @@ Map<ShortcutActivator, Intent> _buildShortcuts() {
     }
   }
 
-  // Undo
-  addCrossPlatformShortcut(LogicalKeyboardKey.keyZ, const UndoIntent());
-  shortcuts[const SingleActivator(LogicalKeyboardKey.keyZ, meta: true)] = const UndoIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.keyZ, control: true)] = const UndoIntent();
-
-  // Redo
-  addCrossPlatformShortcut(
-    LogicalKeyboardKey.keyZ,
-    const RedoIntent(),
-    secondaryKey: LogicalKeyboardKey.shift,
-  );
-  shortcuts[const SingleActivator(LogicalKeyboardKey.keyZ, meta: true, shift: true)] = const RedoIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.keyZ, control: true, shift: true)] = const RedoIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.keyY, meta: true)] = const RedoIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.keyY, control: true)] = const RedoIntent();
+  // Undo / Redo
+  addPrimaryModifierShortcut(shortcuts, LogicalKeyboardKey.keyZ, const UndoIntent());
+  addPrimaryModifierShortcut(shortcuts, LogicalKeyboardKey.keyZ, const RedoIntent(), shift: true);
+  addPrimaryModifierShortcut(shortcuts, LogicalKeyboardKey.keyY, const RedoIntent());
 
   // Zoom in (Cmd/Ctrl + '=' and Cmd/Ctrl + Shift + '=' for '+').
-  shortcuts[const SingleActivator(LogicalKeyboardKey.equal, meta: true)] = const ZoomInIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.equal, control: true)] = const ZoomInIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.equal, meta: true, shift: true)] = const ZoomInIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.equal, control: true, shift: true)] = const ZoomInIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.numpadAdd, meta: true)] = const ZoomInIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.numpadAdd, control: true)] = const ZoomInIntent();
+  addPrimaryModifierShortcut(shortcuts, LogicalKeyboardKey.equal, const ZoomInIntent());
+  addPrimaryModifierShortcut(shortcuts, LogicalKeyboardKey.equal, const ZoomInIntent(), shift: true);
+  addPrimaryModifierShortcut(shortcuts, LogicalKeyboardKey.numpadAdd, const ZoomInIntent());
 
   // Zoom out (Cmd/Ctrl + '-').
-  shortcuts[const SingleActivator(LogicalKeyboardKey.minus, meta: true)] = const ZoomOutIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.minus, control: true)] = const ZoomOutIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.numpadSubtract, meta: true)] = const ZoomOutIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.numpadSubtract, control: true)] = const ZoomOutIntent();
+  addPrimaryModifierShortcut(shortcuts, LogicalKeyboardKey.minus, const ZoomOutIntent());
+  addPrimaryModifierShortcut(shortcuts, LogicalKeyboardKey.numpadSubtract, const ZoomOutIntent());
 
   // Brush size: bare `[` / `]`, the convention every major paint app shares.
   shortcuts[const SingleActivator(LogicalKeyboardKey.bracketLeft)] = const BrushSizeDecreaseIntent();
@@ -578,10 +508,8 @@ Map<ShortcutActivator, Intent> _buildShortcuts() {
   shortcuts[const SingleActivator(LogicalKeyboardKey.numpad6)] = const RotateViewClockwiseIntent();
 
   // Reset zoom (Cmd/Ctrl + '0').
-  shortcuts[const SingleActivator(LogicalKeyboardKey.digit0, meta: true)] = const ResetZoomIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.digit0, control: true)] = const ResetZoomIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.numpad0, meta: true)] = const ResetZoomIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.numpad0, control: true)] = const ResetZoomIntent();
+  addPrimaryModifierShortcut(shortcuts, LogicalKeyboardKey.digit0, const ResetZoomIntent());
+  addPrimaryModifierShortcut(shortcuts, LogicalKeyboardKey.numpad0, const ResetZoomIntent());
 
   // Save
   addCrossPlatformShortcut(LogicalKeyboardKey.keyS, const SaveIntent());
@@ -596,23 +524,18 @@ Map<ShortcutActivator, Intent> _buildShortcuts() {
   addCrossPlatformShortcut(LogicalKeyboardKey.keyV, const PasteIntent());
 
   // Duplicate in the selected layer (exactly Cmd/Ctrl + D).
-  shortcuts[const SingleActivator(LogicalKeyboardKey.keyD, control: true)] = const DuplicateIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.keyD, meta: true)] = const DuplicateIntent();
+  addPrimaryModifierShortcut(shortcuts, LogicalKeyboardKey.keyD, const DuplicateIntent());
 
   // Duplicate to a new layer (exactly Shift + Cmd/Ctrl + D).
-  shortcuts[const SingleActivator(LogicalKeyboardKey.keyD, control: true, shift: true)] =
-      const DuplicateNewLayerIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.keyD, meta: true, shift: true)] = const DuplicateNewLayerIntent();
+  addPrimaryModifierShortcut(shortcuts, LogicalKeyboardKey.keyD, const DuplicateNewLayerIntent(), shift: true);
 
   // Select All
   addCrossPlatformShortcut(LogicalKeyboardKey.keyA, const SelectAllIntent());
 
-  // Tools
-  shortcuts[const SingleActivator(LogicalKeyboardKey.keyB)] = const ToolBrushIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.keyE)] = const ToolEraserIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.keyS)] = const ToolSelectionIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.keyF)] = const ToolFillIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.keyT)] = const ToolTextIntent();
+  // Tools (bare keys, from the shared tool-shortcut table)
+  for (final ToolShortcut tool in kToolShortcuts) {
+    shortcuts[SingleActivator(tool.key)] = SelectToolIntent(tool.action);
+  }
 
   // Tab key (no duplicates needed)
   shortcuts[LogicalKeySet(LogicalKeyboardKey.tab)] = const ToggleShellModeIntent();

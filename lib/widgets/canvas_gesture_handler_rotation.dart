@@ -98,14 +98,11 @@ extension _CanvasGestureHandlerRotation on _CanvasGestureHandlerState {
 
   /// The signed angle between the two controlling touch contacts.
   double? _getTouchContactAngle() {
-    if (_activePointers.length < AppMath.pair) {
+    final (Offset, Offset)? pair = _controllingTouchPair();
+    if (pair == null) {
       return null;
     }
-    final Offset? firstPosition = _pointerPositions[_activePointers[AppMath.zero]];
-    final Offset? secondPosition = _pointerPositions[_activePointers[AppMath.one]];
-    if (firstPosition == null || secondPosition == null) {
-      return null;
-    }
+    final (Offset firstPosition, Offset secondPosition) = pair;
     final Offset span = secondPosition - firstPosition;
     return atan2(span.dy, span.dx);
   }

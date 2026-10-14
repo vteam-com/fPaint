@@ -87,7 +87,7 @@ enum SelectionEffect {
       apply: _applyNoiseEffect,
       supportsSizeControl: true,
       defaultSize: AppEffects.noiseDefaultSize,
-      sizeValueResolver: _noiseSelectionEffectSizeValue,
+      sizeValueResolver: noiseCellSize,
     ),
   ),
   pixelate(
@@ -96,7 +96,7 @@ enum SelectionEffect {
       apply: _applyPixelateEffect,
       supportsSizeControl: true,
       defaultSize: AppEffects.pixelateDefaultSize,
-      sizeValueResolver: _pixelateSelectionEffectSizeValue,
+      sizeValueResolver: pixelateBlockSize,
     ),
   ),
   shadow(
@@ -162,18 +162,6 @@ enum SelectionEffect {
 
 int _defaultSelectionEffectSizeValue(double _) {
   return AppEffects.noiseMinCellSize;
-}
-
-int _noiseSelectionEffectSizeValue(double size) {
-  final double clampedSize = size.clamp(AppEffects.minSize, AppEffects.maxSize);
-  return AppEffects.noiseMinCellSize +
-      (((AppEffects.noiseMaxCellSize - AppEffects.noiseMinCellSize).toDouble()) * clampedSize).round();
-}
-
-int _pixelateSelectionEffectSizeValue(double size) {
-  final double clampedSize = size.clamp(AppEffects.minSize, AppEffects.maxSize);
-  return AppEffects.pixelateMinBlockSize +
-      (((AppEffects.pixelateMaxBlockSize - AppEffects.pixelateMinBlockSize).toDouble()) * clampedSize).round();
 }
 
 Future<ui.Image> _applyBlurEffect(

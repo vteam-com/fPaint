@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 
 /// A loading indicator replacing Material [CircularProgressIndicator].
 class AppProgressIndicator extends StatefulWidget {
@@ -66,7 +67,7 @@ class _SpinnerPainter extends CustomPainter {
 
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius - strokeWidth / AppMath.pair),
-      _startAngle + progress * AppMath.degreesPerFullTurn * AppMath.pi / AppMath.degreesPerHalfTurn,
+      _startAngle + degreesToRadians(progress * AppMath.degreesPerFullTurn),
       _sweepAngle,
       false,
       Paint()

@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 
 /// Runs [apply] only when [strength] is above the minimum effect intensity.
 Future<ui.Image> _applyWithStrengthGuard(
@@ -73,6 +74,38 @@ int _opacityToByte(double opacity) {
   return (opacity.clamp(AppEffects.minIntensity, AppEffects.maxIntensity) * AppLimits.rgbChannelMax).round();
 }
 
+/// White at the byte opacity of [opacity]: a paint colour that modulates only
+/// the alpha of what it draws (or of a saveLayer it composites).
+Color _opacityColor(double opacity) {
+  return Color.fromARGB(
+    _opacityToByte(opacity),
+    AppLimits.rgbChannelMax,
+    AppLimits.rgbChannelMax,
+    AppLimits.rgbChannelMax,
+  );
+}
+
+/// Draws [image] at the origin through a decal-tiled Gaussian blur of [sigma],
+/// bounded to the image rect.
+void _drawBlurredImage(Canvas canvas, ui.Image image, double sigma) {
+  canvas.saveLayer(
+    Rect.fromLTWH(
+      AppMath.zero.toDouble(),
+      AppMath.zero.toDouble(),
+      image.width.toDouble(),
+      image.height.toDouble(),
+    ),
+    Paint()
+      ..imageFilter = ui.ImageFilter.blur(
+        sigmaX: sigma,
+        sigmaY: sigma,
+        tileMode: TileMode.decal,
+      ),
+  );
+  canvas.drawImage(image, Offset.zero, Paint());
+  canvas.restore();
+}
+
 /// Applies a Gaussian blur with the given [sigma] to [image], scaled by [strength].
 ///
 /// [strength] ranges from 0.0 (no blur) to 1.0 (full blur at the authored [sigma]).
@@ -93,24 +126,7 @@ Future<ui.Image> applyGaussianBlur(
       return renderCanvasImage(
         width: image.width,
         height: image.height,
-        draw: (Canvas canvas) {
-          canvas.saveLayer(
-            Rect.fromLTWH(
-              0,
-              0,
-              image.width.toDouble(),
-              image.height.toDouble(),
-            ),
-            Paint()
-              ..imageFilter = ui.ImageFilter.blur(
-                sigmaX: effectiveSigma,
-                sigmaY: effectiveSigma,
-                tileMode: TileMode.decal,
-              ),
-          );
-          canvas.drawImage(image, Offset.zero, Paint());
-          canvas.restore();
-        },
+        draw: (Canvas canvas) => _drawBlurredImage(canvas, image, effectiveSigma),
       );
     },
   );
@@ -137,7 +153,7 @@ Future<ui.Image> applyPixelate(
     apply: () async {
       final int w = image.width;
       final int h = image.height;
-      final int blockSize = max(1, (_resolvePixelateBlockSize(size) * pixelScale).round());
+      final int blockSize = max(1, (pixelateBlockSize(size) * pixelScale).round());
       final int smallW = max(1, w ~/ blockSize);
       final int smallH = max(1, h ~/ blockSize);
 
@@ -167,12 +183,7 @@ Future<ui.Image> applyPixelate(
           }
           final Paint blockPaint = Paint()..filterQuality = FilterQuality.none;
           if (!isFullStrength) {
-            blockPaint.color = Color.fromARGB(
-              _opacityToByte(strength),
-              AppLimits.rgbChannelMax,
-              AppLimits.rgbChannelMax,
-              AppLimits.rgbChannelMax,
-            );
+            blockPaint.color = _opacityColor(strength);
           }
           canvas.drawImageRect(
             small,
@@ -223,23 +234,12 @@ Future<ui.Image> applyGrayscale(
           1,
           0,
         ]);
-      final int opacityByte = _opacityToByte(strength);
-
       return renderCanvasImage(
         width: image.width,
         height: image.height,
         draw: (Canvas canvas) {
           canvas.drawImage(image, Offset.zero, Paint());
-          canvas.saveLayer(
-            null,
-            Paint()
-              ..color = Color.fromARGB(
-                opacityByte,
-                AppLimits.rgbChannelMax,
-                AppLimits.rgbChannelMax,
-                AppLimits.rgbChannelMax,
-              ),
-          );
+          canvas.saveLayer(null, Paint()..color = _opacityColor(strength));
           canvas.drawImage(image, Offset.zero, grayPaint);
           canvas.restore();
         },
@@ -268,19 +268,7 @@ Future<ui.Image> applySharpen(
       final int h = image.height;
       final Rect rect = Rect.fromLTWH(0, 0, w.toDouble(), h.toDouble());
 
-      void drawBlurred(Canvas canvas) {
-        canvas.saveLayer(
-          rect,
-          Paint()
-            ..imageFilter = ui.ImageFilter.blur(
-              sigmaX: effectiveSigma,
-              sigmaY: effectiveSigma,
-              tileMode: TileMode.decal,
-            ),
-        );
-        canvas.drawImage(image, Offset.zero, Paint());
-        canvas.restore();
-      }
+      void drawBlurred(Canvas canvas) => _drawBlurredImage(canvas, image, effectiveSigma);
 
       // The original and its blurred copy are stacked vertically into one image
       // so a single readback covers both planes. An unsharp mask needs unclamped
@@ -335,7 +323,7 @@ Future<ui.Image> applySharpen(
             AppLimits.rgbChannelMax,
           );
         }
-        result[i + AppEffects.alphaChannelIndex] = origPixels[i + AppEffects.alphaChannelIndex];
+        result[i + AppMath.rgbChannelAlpha] = origPixels[i + AppMath.rgbChannelAlpha];
       }
 
       return imageFromPixelsDecode(result, w, h);
@@ -358,7 +346,7 @@ Future<ui.Image> applyNoise(
 }) {
   final int effectiveRange = max(1, (AppEffects.noiseRange * strength).round());
   final int effectiveOffset = effectiveRange ~/ 2;
-  final int cellSize = max(1, (_resolveNoiseCellSize(size) * pixelScale).round());
+  final int cellSize = max(1, (noiseCellSize(size) * pixelScale).round());
   final Random rng = random ?? Random();
 
   return _applyPixelTransform(
@@ -379,7 +367,7 @@ Future<ui.Image> applyNoise(
             final int rowStart = ((y + yOffset) * image.width + x) * AppMath.bytesPerPixel;
             for (int xOffset = 0; xOffset < cellWidth; xOffset++) {
               final int pixelIndex = rowStart + (xOffset * AppMath.bytesPerPixel);
-              final int alpha = pixels[pixelIndex + AppEffects.alphaChannelIndex];
+              final int alpha = pixels[pixelIndex + AppMath.rgbChannelAlpha];
               if (alpha == 0) {
                 for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
                   pixels[pixelIndex + c] = 0;
@@ -397,16 +385,23 @@ Future<ui.Image> applyNoise(
   );
 }
 
-int _resolvePixelateBlockSize(double size) {
+/// Maps a normalized effect [size] (clamped to
+/// [AppEffects.minSize]..[AppEffects.maxSize]) linearly onto the integer pixel
+/// range [minPixels]..[maxPixels].
+int resolveEffectSize(double size, int minPixels, int maxPixels) {
   final double clampedSize = size.clamp(AppEffects.minSize, AppEffects.maxSize);
-  final double blockSpan = (AppEffects.pixelateMaxBlockSize - AppEffects.pixelateMinBlockSize).toDouble();
-  return AppEffects.pixelateMinBlockSize + (blockSpan * clampedSize).round();
+  final double span = (maxPixels - minPixels).toDouble();
+  return minPixels + (span * clampedSize).round();
 }
 
-int _resolveNoiseCellSize(double size) {
-  final double clampedSize = size.clamp(AppEffects.minSize, AppEffects.maxSize);
-  final double cellSpan = (AppEffects.noiseMaxCellSize - AppEffects.noiseMinCellSize).toDouble();
-  return AppEffects.noiseMinCellSize + (cellSpan * clampedSize).round();
+/// Resolves the pixelate block edge (in pixels) for a normalized [size].
+int pixelateBlockSize(double size) {
+  return resolveEffectSize(size, AppEffects.pixelateMinBlockSize, AppEffects.pixelateMaxBlockSize);
+}
+
+/// Resolves the noise cell edge (in pixels) for a normalized [size].
+int noiseCellSize(double size) {
+  return resolveEffectSize(size, AppEffects.noiseMinCellSize, AppEffects.noiseMaxCellSize);
 }
 
 /// Applies a vignette effect — darkening the edges while keeping the center bright.
@@ -498,7 +493,7 @@ Future<ui.Image> applyHueRotation(
   ui.Image image, {
   double strength = AppEffects.defaultIntensity,
 }) {
-  final double radians = AppEffects.hueRotationMax * strength * pi / AppMath.degreesPerHalfTurn;
+  final double radians = degreesToRadians(AppEffects.hueRotationMax * strength);
   final double cosine = cos(radians);
   final double sine = sin(radians);
 

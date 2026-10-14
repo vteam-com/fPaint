@@ -1,6 +1,5 @@
-import 'dart:math' as math;
-
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 
 /// The geometry of **hatch marks**: tapered strokes emitted every [spacing]
 /// pixels along the brush path, each [length] pixels long, heading
@@ -38,7 +37,7 @@ class HatchMarks {
   final int curvePercent;
 
   /// The relative angle in radians, normalised to a full turn.
-  double get angleRadians => (angleDegrees % AppHatchMarks.maxAngleDegrees) * math.pi / AppMath.degreesPerHalfTurn;
+  double get angleRadians => degreesToRadians((angleDegrees % AppHatchMarks.maxAngleDegrees).toDouble());
 
   /// The taper as a `0..1` fraction.
   double get taper => taperPercent / AppMath.percentScale;

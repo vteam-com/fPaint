@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/file_ora.dart';
+import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/panels/side_panel/recent_files_dialog.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 
@@ -30,7 +31,7 @@ void main() {
 
     expect(resolvedBytes, isNotNull);
 
-    final ui.Image previewImage = await decodeImage(resolvedBytes!);
+    final ui.Image previewImage = await fromBytesToImage(resolvedBytes!);
     expect(previewImage.width, AppLayout.thumbnailMaxHeight.toInt() * 2);
     expect(previewImage.height, AppLayout.thumbnailMaxHeight.toInt());
   });

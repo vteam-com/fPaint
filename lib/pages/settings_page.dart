@@ -4,8 +4,8 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/trackpad_pressure.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
-import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/app_preferences.dart';
+import 'package:fpaint/widgets/app_page_scaffold.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/shortcuts.dart';
 
@@ -29,140 +29,83 @@ class _SettingsPageState extends State<SettingsPage> {
 
     final String selectedLanguage = appPreferences.languageCode ?? _systemLanguage;
 
-    return AppScaffold(
-      body: Column(
+    return AppPageScaffold(
+      title: l10n.settings,
+      contentWidth: AppLayout.dialogWidth,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: AppSpacing.large,
         children: <Widget>[
-          DecoratedBox(
-            decoration: const BoxDecoration(color: AppColors.surface),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.small, vertical: AppSpacing.small),
-              child: Row(
-                children: <Widget>[
-                  AppButtonIcon(
-                    icon: AppIcon.arrowLeft,
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  const SizedBox(width: AppSpacing.small),
-                  AppText(
-                    l10n.settings,
-                    variant: AppTextVariant.title,
-                  ),
-                ],
-              ),
+          AppListTile(
+            title: AppText(l10n.languageLabel),
+            subtitle: AppText(l10n.languageSubtitle, variant: AppTextVariant.subtitle),
+            trailing: AppDropdown<String>(
+              value: selectedLanguage,
+              onChanged: (String? value) {
+                if (value == null) {
+                  return;
+                }
+
+                final String? languageCode = value == _systemLanguage ? null : value;
+                appPreferences.setLanguageCode(languageCode);
+              },
+              items: <AppDropdownItem<String>>[
+                AppDropdownItem<String>(
+                  value: _systemLanguage,
+                  child: AppText(l10n.languageSystem),
+                ),
+                AppDropdownItem<String>(
+                  value: _languageCodeEn,
+                  child: AppText(l10n.languageEnglish),
+                ),
+                AppDropdownItem<String>(
+                  value: _languageCodeFr,
+                  child: AppText(l10n.languageFrench),
+                ),
+                AppDropdownItem<String>(
+                  value: _languageCodeEs,
+                  child: AppText(l10n.languageSpanish),
+                ),
+              ],
             ),
           ),
-          Expanded(
-            child: Center(
-              child: SizedBox(
-                width: AppLayout.dialogWidth,
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: AppSpacing.large,
-                    children: <Widget>[
-                      AppListTile(
-                        title: AppText(l10n.languageLabel),
-                        subtitle: AppText(l10n.languageSubtitle, variant: AppTextVariant.subtitle),
-                        trailing: AppDropdown<String>(
-                          value: selectedLanguage,
-                          onChanged: (String? value) {
-                            if (value == null) {
-                              return;
-                            }
-
-                            final String? languageCode = value == _systemLanguage ? null : value;
-                            appPreferences.setLanguageCode(languageCode);
-                          },
-                          items: <AppDropdownItem<String>>[
-                            AppDropdownItem<String>(
-                              value: _systemLanguage,
-                              child: AppText(l10n.languageSystem),
-                            ),
-                            AppDropdownItem<String>(
-                              value: _languageCodeEn,
-                              child: AppText(l10n.languageEnglish),
-                            ),
-                            AppDropdownItem<String>(
-                              value: _languageCodeFr,
-                              child: AppText(l10n.languageFrench),
-                            ),
-                            AppDropdownItem<String>(
-                              value: _languageCodeEs,
-                              child: AppText(l10n.languageSpanish),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const AppDivider(),
-                      AppListTile(
-                        title: AppText(l10n.penOnlyDrawingTitle),
-                        subtitle: AppText(l10n.penOnlyDrawingSubtitle, variant: AppTextVariant.subtitle),
-                        trailing: AppToggleSwitch(
-                          value: appPreferences.penOnlyDrawing,
-                          onChanged: (bool value) {
-                            setState(() {
-                              appPreferences.setPenOnlyDrawing(value);
-                            });
-                          },
-                        ),
-                        onTap: () {
-                          setState(() {
-                            appPreferences.setPenOnlyDrawing(!appPreferences.penOnlyDrawing);
-                          });
-                        },
-                      ),
-                      if (TrackpadPressure.isSupported) ...<Widget>[
-                        const AppDivider(),
-                        AppListTile(
-                          title: AppText(l10n.trackpadPressureTitle),
-                          subtitle: AppText(l10n.trackpadPressureSubtitle, variant: AppTextVariant.subtitle),
-                          trailing: AppToggleSwitch(
-                            value: appPreferences.trackpadPressure,
-                            onChanged: (bool value) {
-                              setState(() {
-                                appPreferences.setTrackpadPressure(value);
-                              });
-                            },
-                          ),
-                          onTap: () {
-                            setState(() {
-                              appPreferences.setTrackpadPressure(!appPreferences.trackpadPressure);
-                            });
-                          },
-                        ),
-                      ],
-                      if (!kIsWeb) ...<Widget>[
-                        const AppDivider(),
-                        AppListTile(
-                          title: AppText(l10n.keepSaveBackupsTitle),
-                          subtitle: AppText(l10n.keepSaveBackupsSubtitle, variant: AppTextVariant.subtitle),
-                          trailing: AppToggleSwitch(
-                            value: appPreferences.keepSaveBackups,
-                            onChanged: (bool value) {
-                              setState(() {
-                                appPreferences.setKeepSaveBackups(value);
-                              });
-                            },
-                          ),
-                          onTap: () {
-                            setState(() {
-                              appPreferences.setKeepSaveBackups(!appPreferences.keepSaveBackups);
-                            });
-                          },
-                        ),
-                      ],
-                      const AppDivider(),
-                      AppButtonText(
-                        onPressed: () {
-                          showShortcutsHelp(context);
-                        },
-                        text: l10n.keyboardShortcuts,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+          const AppDivider(),
+          AppSwitchListTile(
+            title: AppText(l10n.penOnlyDrawingTitle),
+            subtitle: AppText(l10n.penOnlyDrawingSubtitle, variant: AppTextVariant.subtitle),
+            value: appPreferences.penOnlyDrawing,
+            onChanged: (bool value) => setState(() {
+              appPreferences.setPenOnlyDrawing(value);
+            }),
+          ),
+          if (TrackpadPressure.isSupported) ...<Widget>[
+            const AppDivider(),
+            AppSwitchListTile(
+              title: AppText(l10n.trackpadPressureTitle),
+              subtitle: AppText(l10n.trackpadPressureSubtitle, variant: AppTextVariant.subtitle),
+              value: appPreferences.trackpadPressure,
+              onChanged: (bool value) => setState(() {
+                appPreferences.setTrackpadPressure(value);
+              }),
             ),
+          ],
+          if (!kIsWeb) ...<Widget>[
+            const AppDivider(),
+            AppSwitchListTile(
+              title: AppText(l10n.keepSaveBackupsTitle),
+              subtitle: AppText(l10n.keepSaveBackupsSubtitle, variant: AppTextVariant.subtitle),
+              value: appPreferences.keepSaveBackups,
+              onChanged: (bool value) => setState(() {
+                appPreferences.setKeepSaveBackups(value);
+              }),
+            ),
+          ],
+          const AppDivider(),
+          AppButtonText(
+            onPressed: () {
+              showShortcutsHelp(context);
+            },
+            text: l10n.keyboardShortcuts,
           ),
         ],
       ),

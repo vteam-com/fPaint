@@ -3,16 +3,9 @@ part of 'canvas_gesture_handler.dart';
 extension _CanvasGestureHandlerStateEyedropperMethods on _CanvasGestureHandlerState {
   /// Captures an eyedropper sample at [screenPosition] when an eyedropper is armed.
   bool _handleEyeDropperPointerStart(AppProvider appProvider, ui.Offset screenPosition) {
-    final bool isBrushDrop = appProvider.eyeDropPositionForBrush != null;
-    final bool isFillDrop = appProvider.eyeDropPositionForFill != null;
-    if (!isBrushDrop && !isFillDrop) {
+    final bool? isBrushDrop = appProvider.moveActiveEyeDrop(screenPosition);
+    if (isBrushDrop == null) {
       return false;
-    }
-
-    if (isBrushDrop) {
-      appProvider.eyeDropPositionForBrush = screenPosition;
-    } else {
-      appProvider.eyeDropPositionForFill = screenPosition;
     }
 
     final Offset canvasPosition = appProvider.toCanvas(screenPosition);
@@ -105,14 +98,34 @@ extension _CanvasGestureHandlerStateEyedropperMethods on _CanvasGestureHandlerSt
     ui.Offset adjustedPosition, {
     required bool sampleAllLayers,
   }) {
+    _beginToleranceDrag(
+      appProvider,
+      screenPosition,
+      adjustedPosition,
+      sampleAllLayers: sampleAllLayers,
+      showFeedback: () => appProvider.showFillTolerancePreview(appProvider.tolerance),
+    );
+  }
+
+  /// Anchors a tap-then-drag-horizontally tolerance gesture (Edge Detection
+  /// wand or paint bucket) at [screenPosition] / [canvasPosition], seeded
+  /// from the current tolerance, then calls [showFeedback] to raise the
+  /// tool's tolerance HUD and pins the pointer at the tap so the horizontal
+  /// scrub adjusts tolerance in place instead of dragging the cursor across
+  /// the canvas.
+  void _beginToleranceDrag(
+    AppProvider appProvider,
+    ui.Offset screenPosition,
+    ui.Offset canvasPosition, {
+    required bool sampleAllLayers,
+    required VoidCallback showFeedback,
+  }) {
     _toleranceDragAnchorScreen = screenPosition;
-    _toleranceDragAnchorCanvas = adjustedPosition;
+    _toleranceDragAnchorCanvas = canvasPosition;
     _toleranceDragStartTolerance = appProvider.tolerance;
     _toleranceDragSampleAllLayers = sampleAllLayers;
     _toleranceDragLastApplied = appProvider.tolerance;
-    appProvider.showFillTolerancePreview(appProvider.tolerance);
-    // Pin the pointer at the tap: the horizontal scrub adjusts tolerance in
-    // place instead of dragging the cursor across the canvas.
+    showFeedback();
     appProvider.beginTolerancePointerLock(screenPosition);
   }
 

@@ -302,17 +302,9 @@ class LayerProvider extends ChangeNotifier {
     ui.Offset offset = Offset.zero,
     ActionType tool = ActionType.image,
   }) {
-    final UserActionDrawing newAction = ImageAction(
+    final UserActionDrawing newAction = ImageAction.placedAt(
       action: tool,
-      positions: <ui.Offset>[
-        offset,
-        Offset(
-          offset.dx + imageToAdd.width.toDouble(),
-          offset.dy + imageToAdd.height.toDouble(),
-        ),
-      ],
-      brush: MyBrush(color: AppColors.transparent, size: 0),
-      fillColor: AppColors.transparent,
+      offset: offset,
       image: imageToAdd,
     );
 
@@ -478,12 +470,7 @@ class LayerProvider extends ChangeNotifier {
     _cachedImage = null;
     _cachedThumbnailImage?.dispose();
     _cachedThumbnailImage = null;
-    _strokeBaseline?.dispose();
-    _strokeBaseline = null;
-    _strokeBaselineDisplay?.dispose();
-    _strokeBaselineDisplay = null;
-    _strokeBaselinePicture?.dispose();
-    _strokeBaselinePicture = null;
+    _disposeStrokeBaselines();
     super.dispose();
   }
 
@@ -497,12 +484,7 @@ class LayerProvider extends ChangeNotifier {
   /// [renderLayer]) because the layer opacity/blend is applied by the group
   /// `saveLayer` when the baseline is composited.
   void beginStrokePreview() {
-    _strokeBaseline?.dispose();
-    _strokeBaseline = null;
-    _strokeBaselineDisplay?.dispose();
-    _strokeBaselineDisplay = null;
-    _strokeBaselinePicture?.dispose();
-    _strokeBaselinePicture = null;
+    _disposeStrokeBaselines();
 
     _strokeBaselineActionCount = actionStack.length;
     _strokeFoldedActionIndex = _strokeBaselineActionCount;
@@ -535,6 +517,17 @@ class LayerProvider extends ChangeNotifier {
     _strokeBaselinePicture = recorder.endRecording();
   }
 
+  /// Releases every freehand-stroke baseline form (full-res raster, display
+  /// projection, recorded picture) this layer owns.
+  void _disposeStrokeBaselines() {
+    _strokeBaseline?.dispose();
+    _strokeBaseline = null;
+    _strokeBaselineDisplay?.dispose();
+    _strokeBaselineDisplay = null;
+    _strokeBaselinePicture?.dispose();
+    _strokeBaselinePicture = null;
+  }
+
   /// Clears the freehand-stroke baseline, returning [renderLayer] to its normal
   /// path. Call at stroke end (when `isUserDrawing` becomes false).
   ///
@@ -542,12 +535,7 @@ class LayerProvider extends ChangeNotifier {
   /// fires at stroke start (via [appendDrawingAction]) right after the baseline
   /// is captured.
   void clearStrokePreview() {
-    _strokeBaseline?.dispose();
-    _strokeBaseline = null;
-    _strokeBaselineDisplay?.dispose();
-    _strokeBaselineDisplay = null;
-    _strokeBaselinePicture?.dispose();
-    _strokeBaselinePicture = null;
+    _disposeStrokeBaselines();
     _strokeBaselineActionCount = 0;
     _strokeFoldedActionIndex = 0;
     _strokeFoldedPointCount = 0;
@@ -835,7 +823,6 @@ class LayerProvider extends ChangeNotifier {
             theCanvasToUse,
             points,
             action.brush,
-            fillColor,
             pressures: action.pressures,
           ),
         );
@@ -849,7 +836,6 @@ class LayerProvider extends ChangeNotifier {
             points.first,
             points.last,
             action.brush,
-            fillColor,
           ),
         );
 

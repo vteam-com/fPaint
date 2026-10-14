@@ -263,7 +263,7 @@ void main() {
       expect(resultBytes[topLeftPixelBase], 0);
       expect(resultBytes[topLeftPixelBase + 1], 0);
       expect(resultBytes[topLeftPixelBase + 2], 0);
-      expect(resultBytes[topLeftPixelBase + AppEffects.alphaChannelIndex], 0);
+      expect(resultBytes[topLeftPixelBase + AppMath.rgbChannelAlpha], 0);
     });
   });
 
@@ -293,5 +293,13 @@ void main() {
       expect(result.width, original.width);
       expect(result.height, original.height);
     });
+  });
+
+  test('resolveEffectSize maps the clamped size onto the pixel range', () {
+    expect(resolveEffectSize(AppEffects.minSize, 2, 10), 2);
+    expect(resolveEffectSize(AppEffects.maxSize, 2, 10), 10);
+    expect(resolveEffectSize(AppEffects.maxSize * 2, 2, 10), 10);
+    expect(pixelateBlockSize(AppEffects.minSize), AppEffects.pixelateMinBlockSize);
+    expect(noiseCellSize(AppEffects.maxSize), AppEffects.noiseMaxCellSize);
   });
 }

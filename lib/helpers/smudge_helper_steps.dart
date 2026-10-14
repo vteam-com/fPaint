@@ -19,27 +19,22 @@ bool _applySmudgeStep({
   required Uint8List? clipMask,
 }) {
   final double radiusSquared = radius * radius;
-  final int integerRadius = radius.ceil() + AppInteraction.smudgeBoundsPadding;
-  final int left = math.max(
-    AppMath.zero,
-    math.min(fromCenter.dx, toCenter.dx).floor() - integerRadius,
+  final _DabBounds? bounds = _clampedDabBounds(
+    minX: math.min(fromCenter.dx, toCenter.dx),
+    minY: math.min(fromCenter.dy, toCenter.dy),
+    maxX: math.max(fromCenter.dx, toCenter.dx),
+    maxY: math.max(fromCenter.dy, toCenter.dy),
+    padding: resolvePixelBrushPadding(radius),
+    imageWidth: imageWidth,
+    imageHeight: imageHeight,
   );
-  final int top = math.max(
-    AppMath.zero,
-    math.min(fromCenter.dy, toCenter.dy).floor() - integerRadius,
-  );
-  final int right = math.min(
-    imageWidth - AppMath.one,
-    math.max(fromCenter.dx, toCenter.dx).ceil() + integerRadius,
-  );
-  final int bottom = math.min(
-    imageHeight - AppMath.one,
-    math.max(fromCenter.dy, toCenter.dy).ceil() + integerRadius,
-  );
-
-  if (right < left || bottom < top) {
+  if (bounds == null) {
     return false;
   }
+  final int left = bounds.left;
+  final int top = bounds.top;
+  final int right = bounds.right;
+  final int bottom = bounds.bottom;
 
   // Source position for destination (x, y): sourceX = fromCenter.dx + (x − toCenter.dx).
   // For destinations in [left, right] the sources span [left + d, right + d] where
@@ -56,7 +51,7 @@ bool _applySmudgeStep({
 
   // Snapshot the expanded region *before* modification so every pixel in this
   // step samples from a consistent pre-step state.
-  final Uint8List snapshot = _copyPixelRect(
+  final Uint8List snapshot = copyRgbaRect(
     pixels: pixels,
     imageWidth: imageWidth,
     left: snapshotLeft,
@@ -110,20 +105,8 @@ bool _applySmudgeStep({
         continue;
       }
 
-      final double feather = (AppVisual.full - math.sqrt(distanceSquared) / radius).clamp(
-        AppMath.zero.toDouble(),
-        AppVisual.full,
-      );
-      // Smoothstep (feather²·(3−2·feather)) rather than a bare feather². A bare
-      // feather² peaks with a corner at the tip centre, so at the CPU path's dab
-      // spacing each dab's peak shows through as periodic washboard ridges along
-      // the stroke. Smoothstep is flat-sloped at both the centre and the edge, so
-      // overlapping dabs sum smoothly. Still only multiplies — no per-pixel pow.
-      final double radialFalloff = feather * feather * (3.0 - (2.0 * feather));
-      final double blend = (AppInteraction.smudgeBlendStrength * intensity * radialFalloff).clamp(
-        AppMath.zero.toDouble(),
-        AppVisual.full,
-      );
+      final double feather = _discFeather(math.sqrt(distanceSquared), radius);
+      final double blend = _dabBlend(AppInteraction.smudgeBlendStrength, intensity, _smoothstep(feather));
       if (blend <= AppMath.zero.toDouble()) {
         continue;
       }
@@ -163,29 +146,128 @@ bool _blendPremultipliedSample({
   required int sourceSnapshotIndex,
   required double blend,
 }) {
-  final int srcAlpha = snapshot[sourceSnapshotIndex + AppMath.rgbChannelAlpha];
-  final int dstAlpha = snapshot[destinationSnapshotIndex + AppMath.rgbChannelAlpha];
+  return _writePremultipliedBlend(
+    pixels: pixels,
+    destinationIndex: destinationIndex,
+    dstRed: snapshot[destinationSnapshotIndex + AppMath.rgbChannelRed],
+    dstGreen: snapshot[destinationSnapshotIndex + AppMath.rgbChannelGreen],
+    dstBlue: snapshot[destinationSnapshotIndex + AppMath.rgbChannelBlue],
+    dstAlpha: snapshot[destinationSnapshotIndex + AppMath.rgbChannelAlpha],
+    srcRed: snapshot[sourceSnapshotIndex + AppMath.rgbChannelRed],
+    srcGreen: snapshot[sourceSnapshotIndex + AppMath.rgbChannelGreen],
+    srcBlue: snapshot[sourceSnapshotIndex + AppMath.rgbChannelBlue],
+    srcAlpha: snapshot[sourceSnapshotIndex + AppMath.rgbChannelAlpha],
+    blend: blend,
+  );
+}
+
+/// Blends the straight-RGBA destination sample toward the straight-RGBA source
+/// sample by [blend] in *premultiplied* space and writes the straight result
+/// into [pixels] at [destinationIndex]. Returns whether any byte changed.
+///
+/// Shared by the smudge/press sample blend and the blur neighbourhood blend.
+bool _writePremultipliedBlend({
+  required Uint8List pixels,
+  required int destinationIndex,
+  required int dstRed,
+  required int dstGreen,
+  required int dstBlue,
+  required int dstAlpha,
+  required int srcRed,
+  required int srcGreen,
+  required int srcBlue,
+  required int srcAlpha,
+  required double blend,
+}) {
   final double inverseBlend = AppVisual.full - blend;
   final double newAlpha = (dstAlpha * inverseBlend) + (srcAlpha * blend);
-  bool anyChanged = false;
-  for (int channel = AppMath.zero; channel < AppMath.rgbChannelAlpha; channel++) {
-    final double dstPremul = snapshot[destinationSnapshotIndex + channel] * dstAlpha.toDouble();
-    final double srcPremul = snapshot[sourceSnapshotIndex + channel] * srcAlpha.toDouble();
-    final double newPremul = (dstPremul * inverseBlend) + (srcPremul * blend);
-    final int newValue = newAlpha > AppMath.zero
-        ? (newPremul / newAlpha).round().clamp(AppMath.zero, AppLimits.rgbChannelMax)
-        : AppMath.zero;
-    if (newValue != pixels[destinationIndex + channel]) {
-      anyChanged = true;
-      pixels[destinationIndex + channel] = newValue;
-    }
-  }
+  final int newRed = _blendPremultipliedChannel(dstRed, dstAlpha, srcRed, srcAlpha, inverseBlend, blend, newAlpha);
+  final int newGreen = _blendPremultipliedChannel(
+    dstGreen,
+    dstAlpha,
+    srcGreen,
+    srcAlpha,
+    inverseBlend,
+    blend,
+    newAlpha,
+  );
+  final int newBlue = _blendPremultipliedChannel(dstBlue, dstAlpha, srcBlue, srcAlpha, inverseBlend, blend, newAlpha);
   final int newAlphaByte = newAlpha.round().clamp(AppMath.zero, AppLimits.rgbChannelMax);
-  if (newAlphaByte != pixels[destinationIndex + AppMath.rgbChannelAlpha]) {
-    anyChanged = true;
-    pixels[destinationIndex + AppMath.rgbChannelAlpha] = newAlphaByte;
+  if (newRed == pixels[destinationIndex + AppMath.rgbChannelRed] &&
+      newGreen == pixels[destinationIndex + AppMath.rgbChannelGreen] &&
+      newBlue == pixels[destinationIndex + AppMath.rgbChannelBlue] &&
+      newAlphaByte == pixels[destinationIndex + AppMath.rgbChannelAlpha]) {
+    return false;
   }
-  return anyChanged;
+  pixels[destinationIndex + AppMath.rgbChannelRed] = newRed;
+  pixels[destinationIndex + AppMath.rgbChannelGreen] = newGreen;
+  pixels[destinationIndex + AppMath.rgbChannelBlue] = newBlue;
+  pixels[destinationIndex + AppMath.rgbChannelAlpha] = newAlphaByte;
+  return true;
+}
+
+/// Blends one colour channel in premultiplied space and divides it back out
+/// by [newAlpha], returning the straight byte (zero when fully transparent).
+int _blendPremultipliedChannel(
+  int dst,
+  int dstAlpha,
+  int src,
+  int srcAlpha,
+  double inverseBlend,
+  double blend,
+  double newAlpha,
+) {
+  if (newAlpha <= AppMath.zero) {
+    return AppMath.zero;
+  }
+  final double newPremul = ((dst * dstAlpha) * inverseBlend) + ((src * srcAlpha) * blend);
+  return (newPremul / newAlpha).round().clamp(AppMath.zero, AppLimits.rgbChannelMax);
+}
+
+/// Inclusive pixel bounds of a dab footprint, clamped to the image.
+typedef _DabBounds = ({int left, int top, int right, int bottom});
+
+/// Returns the inclusive pixel bounds covering the box [minX]..[maxX] ×
+/// [minY]..[maxY] grown by [padding], clamped to the image; `null` when the
+/// clamped box is empty.
+_DabBounds? _clampedDabBounds({
+  required double minX,
+  required double minY,
+  required double maxX,
+  required double maxY,
+  required int padding,
+  required int imageWidth,
+  required int imageHeight,
+}) {
+  final int left = math.max(AppMath.zero, minX.floor() - padding);
+  final int top = math.max(AppMath.zero, minY.floor() - padding);
+  final int right = math.min(imageWidth - AppMath.one, maxX.ceil() + padding);
+  final int bottom = math.min(imageHeight - AppMath.one, maxY.ceil() + padding);
+  if (right < left || bottom < top) {
+    return null;
+  }
+  return (left: left, top: top, right: right, bottom: bottom);
+}
+
+/// Linear disc feather: 1 at the centre, 0 at [radius] and beyond.
+double _discFeather(double distance, double radius) {
+  return (AppVisual.full - distance / radius).clamp(AppMath.zero.toDouble(), AppVisual.full);
+}
+
+/// Cubic smoothstep of [feather]: `feather²·(3 − 2·feather)`.
+///
+/// Used rather than a bare feather², which peaks with a corner at the tip
+/// centre so that at the CPU path's dab spacing each dab's peak shows through
+/// as periodic washboard ridges along the stroke. Smoothstep is flat-sloped at
+/// both the centre and the edge, so overlapping dabs sum smoothly. Still only
+/// multiplies — no per-pixel pow.
+double _smoothstep(double feather) {
+  return feather * feather * (AppMath.smoothstepEdgeWeight - (AppMath.smoothstepSlopeWeight * feather));
+}
+
+/// Per-pixel blend weight: [strength] × [intensity] × [falloff], clamped to 0..1.
+double _dabBlend(double strength, double intensity, double falloff) {
+  return (strength * intensity * falloff).clamp(AppMath.zero.toDouble(), AppVisual.full);
 }
 
 /// Applies one radial "press" dab centred at [center]: ink is pushed outward
@@ -208,21 +290,28 @@ bool _applyPressStep({
   required Uint8List? clipMask,
 }) {
   final double radiusSquared = radius * radius;
-  final int integerRadius = radius.ceil() + AppInteraction.smudgeBoundsPadding;
-  final int left = math.max(AppMath.zero, center.dx.floor() - integerRadius);
-  final int top = math.max(AppMath.zero, center.dy.floor() - integerRadius);
-  final int right = math.min(imageWidth - AppMath.one, center.dx.ceil() + integerRadius);
-  final int bottom = math.min(imageHeight - AppMath.one, center.dy.ceil() + integerRadius);
-
-  if (right < left || bottom < top) {
+  final _DabBounds? bounds = _clampedDabBounds(
+    minX: center.dx,
+    minY: center.dy,
+    maxX: center.dx,
+    maxY: center.dy,
+    padding: resolvePixelBrushPadding(radius),
+    imageWidth: imageWidth,
+    imageHeight: imageHeight,
+  );
+  if (bounds == null) {
     return false;
   }
+  final int left = bounds.left;
+  final int top = bounds.top;
+  final int right = bounds.right;
+  final int bottom = bounds.bottom;
 
   final int rectWidth = right - left + AppMath.one;
   final int rectHeight = bottom - top + AppMath.one;
   // Snapshot the disc before modification so every destination samples a
   // consistent pre-press state (the bloat source is always inside this disc).
-  final Uint8List snapshot = _copyPixelRect(
+  final Uint8List snapshot = copyRgbaRect(
     pixels: pixels,
     imageWidth: imageWidth,
     left: left,
@@ -257,10 +346,7 @@ bool _applyPressStep({
         continue;
       }
 
-      final double feather = (AppVisual.full - distance / radius).clamp(
-        AppMath.zero.toDouble(),
-        AppVisual.full,
-      );
+      final double feather = _discFeather(distance, radius);
       // Sample from a smaller radius (pulled toward the centre) so inner ink
       // surfaces here — pushed outward. The pull peaks in the interior and
       // vanishes at the rim (feather → 0), leaving the boundary seamless.
@@ -282,11 +368,7 @@ bool _applyPressStep({
         continue;
       }
 
-      final double radialFalloff = feather * feather * (3.0 - (2.0 * feather));
-      final double blend = (AppInteraction.smudgeBlendStrength * intensity * radialFalloff).clamp(
-        AppMath.zero.toDouble(),
-        AppVisual.full,
-      );
+      final double blend = _dabBlend(AppInteraction.smudgeBlendStrength, intensity, _smoothstep(feather));
       if (blend <= AppMath.zero.toDouble()) {
         continue;
       }
@@ -321,20 +403,27 @@ bool _applyBlurStep({
   required Uint8List? clipMask,
 }) {
   final double radiusSquared = radius * radius;
-  final int intRadius = radius.ceil();
-  final int left = math.max(AppMath.zero, center.dx.floor() - intRadius);
-  final int top = math.max(AppMath.zero, center.dy.floor() - intRadius);
-  final int right = math.min(imageWidth - AppMath.one, center.dx.ceil() + intRadius);
-  final int bottom = math.min(imageHeight - AppMath.one, center.dy.ceil() + intRadius);
-
-  if (right < left || bottom < top) {
+  final _DabBounds? bounds = _clampedDabBounds(
+    minX: center.dx,
+    minY: center.dy,
+    maxX: center.dx,
+    maxY: center.dy,
+    padding: radius.ceil(),
+    imageWidth: imageWidth,
+    imageHeight: imageHeight,
+  );
+  if (bounds == null) {
     return false;
   }
+  final int left = bounds.left;
+  final int top = bounds.top;
+  final int right = bounds.right;
+  final int bottom = bounds.bottom;
 
   final int rectWidth = right - left + AppMath.one;
   final int rectHeight = bottom - top + AppMath.one;
   // Snapshot so every destination pixel reads unmodified source values.
-  final Uint8List snapshot = _copyPixelRect(
+  final Uint8List snapshot = copyRgbaRect(
     pixels: pixels,
     imageWidth: imageWidth,
     left: left,
@@ -360,17 +449,10 @@ bool _applyBlurStep({
         continue;
       }
 
-      final double feather = (AppVisual.full - math.sqrt(distanceSquared) / radius).clamp(
-        AppMath.zero.toDouble(),
-        AppVisual.full,
-      );
-      // blurBrushEdgeFalloffExponent is 2.0 — a multiply is far cheaper than
-      // math.pow() called once per pixel across the brush disc.
-      final double radialFalloff = feather * feather;
-      final double blend = (AppInteraction.blurBrushStrength * intensity * radialFalloff).clamp(
-        AppMath.zero.toDouble(),
-        AppVisual.full,
-      );
+      final double feather = _discFeather(math.sqrt(distanceSquared), radius);
+      // Quadratic edge falloff — a multiply is far cheaper than math.pow()
+      // called once per pixel across the brush disc.
+      final double blend = _dabBlend(AppInteraction.blurBrushStrength, intensity, feather * feather);
       if (blend <= AppMath.zero.toDouble()) {
         continue;
       }
@@ -418,41 +500,20 @@ bool _applyBlurStep({
       // white backdrop behind an alpha-0 hole) can't bleed in as alpha rises.
       // `avgR/G/B` are alpha-corrected straight colours and `avgA` their mean
       // alpha, so `avg*·avgA` is the premultiplied average sample.
-      final double inverseBlend = AppVisual.full - blend;
-      final int origR = snapshot[snapshotI + AppMath.rgbChannelRed];
-      final int origG = snapshot[snapshotI + AppMath.rgbChannelGreen];
-      final int origB = snapshot[snapshotI + AppMath.rgbChannelBlue];
-      final int origA = snapshot[snapshotI + AppMath.rgbChannelAlpha];
-      final double newAlphaD = (origA * inverseBlend) + (avgA * blend);
-      final int newA = newAlphaD.round().clamp(AppMath.zero, AppLimits.rgbChannelMax);
-      final int newR = newAlphaD > AppMath.zero
-          ? (((origR * origA) * inverseBlend + (avgR * avgA) * blend) / newAlphaD).round().clamp(
-              AppMath.zero,
-              AppLimits.rgbChannelMax,
-            )
-          : AppMath.zero;
-      final int newG = newAlphaD > AppMath.zero
-          ? (((origG * origA) * inverseBlend + (avgG * avgA) * blend) / newAlphaD).round().clamp(
-              AppMath.zero,
-              AppLimits.rgbChannelMax,
-            )
-          : AppMath.zero;
-      final int newB = newAlphaD > AppMath.zero
-          ? (((origB * origA) * inverseBlend + (avgB * avgA) * blend) / newAlphaD).round().clamp(
-              AppMath.zero,
-              AppLimits.rgbChannelMax,
-            )
-          : AppMath.zero;
-
-      if (newR != snapshot[snapshotI + AppMath.rgbChannelRed] ||
-          newG != snapshot[snapshotI + AppMath.rgbChannelGreen] ||
-          newB != snapshot[snapshotI + AppMath.rgbChannelBlue] ||
-          newA != snapshot[snapshotI + AppMath.rgbChannelAlpha]) {
+      if (_writePremultipliedBlend(
+        pixels: pixels,
+        destinationIndex: di,
+        dstRed: snapshot[snapshotI + AppMath.rgbChannelRed],
+        dstGreen: snapshot[snapshotI + AppMath.rgbChannelGreen],
+        dstBlue: snapshot[snapshotI + AppMath.rgbChannelBlue],
+        dstAlpha: snapshot[snapshotI + AppMath.rgbChannelAlpha],
+        srcRed: avgR,
+        srcGreen: avgG,
+        srcBlue: avgB,
+        srcAlpha: avgA,
+        blend: blend,
+      )) {
         anyChanged = true;
-        pixels[di + AppMath.rgbChannelRed] = newR;
-        pixels[di + AppMath.rgbChannelGreen] = newG;
-        pixels[di + AppMath.rgbChannelBlue] = newB;
-        pixels[di + AppMath.rgbChannelAlpha] = newA;
       }
     }
   }
@@ -481,63 +542,6 @@ Future<Uint8List?> createPixelBrushClipMask({
     },
   );
   return extractImagePixels(maskImage);
-}
-
-/// Copies a rectangular subset of [pixels] into a packed RGBA byte array.
-Uint8List _copyPixelRect({
-  required Uint8List pixels,
-  required int imageWidth,
-  required int left,
-  required int top,
-  required int width,
-  required int height,
-}) {
-  final Uint8List result = Uint8List(width * height * AppMath.bytesPerPixel);
-  final int rowByteCount = width * AppMath.bytesPerPixel;
-
-  for (int row = AppMath.zero; row < height; row++) {
-    final int sourceOffset = _pixelIndex(
-      width: imageWidth,
-      x: left,
-      y: top + row,
-    );
-    final int destinationOffset = row * rowByteCount;
-    result.setRange(
-      destinationOffset,
-      destinationOffset + rowByteCount,
-      pixels,
-      sourceOffset,
-    );
-  }
-
-  return result;
-}
-
-/// Writes a rectangular sub-buffer back into [destination] at [left]/[top].
-void _writePixelRect({
-  required Uint8List source,
-  required Uint8List destination,
-  required int imageWidth,
-  required int left,
-  required int top,
-  required int width,
-  required int height,
-}) {
-  final int rowByteCount = width * AppMath.bytesPerPixel;
-  for (int row = AppMath.zero; row < height; row++) {
-    final int destinationOffset = _pixelIndex(
-      width: imageWidth,
-      x: left,
-      y: top + row,
-    );
-    final int sourceOffset = row * rowByteCount;
-    destination.setRange(
-      destinationOffset,
-      destinationOffset + rowByteCount,
-      source,
-      sourceOffset,
-    );
-  }
 }
 
 /// Returns whether [clipMask] includes the given pixel coordinate.

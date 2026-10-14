@@ -1,6 +1,7 @@
 part of 'layers_provider.dart';
 
-/// Region-bounded rendering behind the layer hit-test and region captures.
+/// Region-bounded rendering behind the layer hit-test and region captures,
+/// plus the shared visible-layer composite used by full-canvas captures.
 ///
 /// Kept as a part-file extension, like [LayersProviderCanvasGeometry], so the
 /// stack owner stays under fCheck's per-class LOC limit.
@@ -40,6 +41,23 @@ extension LayersProviderHitTest on LayersProvider {
       return byteData == null ? null : _colorAtPixelIndex(byteData, 0);
     } finally {
       sample.dispose();
+    }
+  }
+
+  /// Primes every visible layer's full-res raster cache in parallel, so a
+  /// following composite takes [LayerProvider.renderLayer]'s one-blit fast path
+  /// instead of replaying each action stack.
+  Future<void> primeVisibleLayerCaches() async {
+    await Future.wait(
+      _list.where((LayerProvider layer) => layer.isVisible).map((LayerProvider layer) => layer.ensureCachePrimed()),
+    );
+  }
+
+  /// Composites every visible layer onto [canvas] bottom-first, passing
+  /// [compositeBounds] through to [LayerProvider.renderLayer].
+  void renderVisibleLayers(ui.Canvas canvas, {ui.Rect? compositeBounds}) {
+    for (final LayerProvider layer in this._visibleLayersBottomFirst()) {
+      layer.renderLayer(canvas, compositeBounds: compositeBounds);
     }
   }
 

@@ -1,15 +1,19 @@
+import 'dart:typed_data';
+
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
 import 'package:fpaint/files/export_file_name.dart';
+import 'package:fpaint/files/export_prepare.dart';
+import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 
 const String _saveImageTitle = 'fPaint Save Image';
 const String _saveImageAsTiffTitle = 'fPaint Save Image as TIFF';
 const String _saveImageAsHeicTitle = 'fPaint Save Image as HEIC';
 
-/// Writes [layers] to [fileName] in one concrete format.
-typedef SaveFormatWriter = Future<void> Function(LayersProvider layers, String fileName);
+/// Encodes [layers] into the bytes of one concrete format.
+typedef SaveFormatBytesPreparer = Future<Uint8List> Function(LayersProvider layers);
 
 /// Normalizes the target file name before saving (e.g. collapsing `.tiff` to
 /// `.tif`). Returns the name unchanged by default.
@@ -25,9 +29,10 @@ String _unchangedFileName(String fileName) => fileName;
 class _SaveFormatConfig {
   const _SaveFormatConfig({
     required this.extensions,
-    required this.write,
+    required this.prepareBytes,
     required this.defaultExportFileName,
     this.supportsLayers = false,
+    this.clearsHasChangedOnWrite = false,
     this.normalizeFileName = _unchangedFileName,
     this.pickerExtensions,
     this.exportDialogTitle = _saveImageTitle,
@@ -36,8 +41,8 @@ class _SaveFormatConfig {
   /// Every file extension that maps to this format; the first is canonical.
   final List<String> extensions;
 
-  /// Writes the document in this format.
-  final SaveFormatWriter write;
+  /// Encodes the document in this format.
+  final SaveFormatBytesPreparer prepareBytes;
 
   /// Suggested file name when exporting with no name in hand.
   final String defaultExportFileName;
@@ -46,6 +51,10 @@ class _SaveFormatConfig {
   /// selected layer inside the file). Flat formats rely on a preference keyed
   /// by file path instead.
   final bool supportsLayers;
+
+  /// Whether writing this format marks the document as saved. Layered TIFF
+  /// keeps every layer, so even an export leaves nothing unsaved.
+  final bool clearsHasChangedOnWrite;
 
   /// Adjusts the target file name before saving.
   final SaveFormatFileNameNormalizer normalizeFileName;
@@ -63,21 +72,21 @@ enum SaveFileFormat {
   png(
     _SaveFormatConfig(
       extensions: <String>[FileExtensions.png],
-      write: saveAsPng,
+      prepareBytes: preparePngBytes,
       defaultExportFileName: '$exportBaseFileName.${FileExtensions.png}',
     ),
   ),
   jpeg(
     _SaveFormatConfig(
       extensions: <String>[FileExtensions.jpg, FileExtensions.jpeg],
-      write: saveAsJpeg,
+      prepareBytes: prepareJpegBytes,
       defaultExportFileName: '$exportBaseFileName.${FileExtensions.jpg}',
     ),
   ),
   ora(
     _SaveFormatConfig(
       extensions: <String>[FileExtensions.ora],
-      write: saveAsOra,
+      prepareBytes: prepareOraBytes,
       defaultExportFileName: '$exportBaseFileName.${FileExtensions.ora}',
       supportsLayers: true,
     ),
@@ -85,7 +94,8 @@ enum SaveFileFormat {
   tiff(
     _SaveFormatConfig(
       extensions: <String>[FileExtensions.tif, FileExtensions.tiff],
-      write: saveAsTiff,
+      prepareBytes: convertLayersToTiff,
+      clearsHasChangedOnWrite: true,
       defaultExportFileName: defaultTiffExportFileName,
       supportsLayers: true,
       normalizeFileName: normalizeTiffExportFileName,
@@ -96,14 +106,14 @@ enum SaveFileFormat {
   webp(
     _SaveFormatConfig(
       extensions: <String>[FileExtensions.webp],
-      write: saveAsWebp,
+      prepareBytes: prepareWebpBytes,
       defaultExportFileName: '$exportBaseFileName.${FileExtensions.webp}',
     ),
   ),
   heic(
     _SaveFormatConfig(
       extensions: <String>[FileExtensions.heic],
-      write: saveAsHeic,
+      prepareBytes: prepareHeicBytes,
       defaultExportFileName: '$exportBaseFileName.${FileExtensions.heic}',
       exportDialogTitle: _saveImageAsHeicTitle,
     ),
@@ -137,7 +147,14 @@ enum SaveFileFormat {
   String get displayName => _config.extensions.first.toUpperCase();
 
   /// Writes [layers] to [fileName] in this format.
-  Future<void> write(LayersProvider layers, String fileName) => _config.write(layers, fileName);
+  ///
+  /// [fileName] is normalized first (e.g. `.tiff` becomes `.tif`).
+  Future<void> write(LayersProvider layers, String fileName) async {
+    await writeExportBytes(normalizeFileName(fileName), await _config.prepareBytes(layers));
+    if (_config.clearsHasChangedOnWrite) {
+      layers.clearHasChanged();
+    }
+  }
 
   /// Resolves a save format from a file extension, or null when unsupported.
   static SaveFileFormat? fromExtension(String extension) {
@@ -151,5 +168,5 @@ enum SaveFileFormat {
   }
 
   /// Resolves a save format from a file name.
-  static SaveFileFormat? fromFileName(String fileName) => fromExtension(fileName.split('.').last);
+  static SaveFileFormat? fromFileName(String fileName) => fromExtension(fileExtensionOf(fileName));
 }

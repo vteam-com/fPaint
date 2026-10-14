@@ -7,6 +7,7 @@ import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/base_picker.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:fpaint/widgets/slider_picker_state.dart';
 
 /// A widget that allows the user to pick the halftone dot-size percentage.
 class HalftoneSizePicker extends BasePicker<int> {
@@ -27,23 +28,7 @@ class HalftoneSizePicker extends BasePicker<int> {
 }
 
 /// The state for [HalftoneSizePicker].
-class HalftoneSizePickerState extends BasePickerState<int> {
-  @override
-  int clampValue(int value) {
-    return value.clamp(AppMath.zero, AppLimits.percentMax);
-  }
-
-  @override
-  Widget buildPickerWidget() {
-    return AppSlider(
-      value: currentValue.toDouble(),
-      min: AppMath.zero.toDouble(),
-      max: AppLimits.percentMax.toDouble(),
-      divisions: AppLimits.sliderDivisions,
-      onChanged: (double value) => updateValue(value.toInt()),
-    );
-  }
-
+class HalftoneSizePickerState extends SliderPickerState<int> {
   @override
   String formatValue(int value) {
     final AppLocalizations l10n = context.l10n;

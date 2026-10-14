@@ -35,10 +35,9 @@ class TextAttributesWidget extends StatelessWidget {
         ToolAttributeWidget(
           compact: minimal,
           name: l10n.fontSizeLabel,
-          childLeft: AppButtonIcon(
+          childLeft: AppButtonIcon.toolOption(
             icon: AppIcon.formatSize,
-            constraints: minimal ? const BoxConstraints() : null,
-            padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.small),
+            compact: minimal,
             onPressed: () {
               showBrushSizePicker(
                 context: context,

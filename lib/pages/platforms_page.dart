@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
-import 'package:fpaint/models/app_icon_enum.dart';
+import 'package:fpaint/widgets/app_page_scaffold.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -27,82 +27,52 @@ class PlatformsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final AppLocalizations l10n = context.l10n;
 
-    return AppScaffold(
-      body: Column(
+    return AppPageScaffold(
+      title: l10n.availablePlatforms,
+      contentWidth: AppLayout.platformPageWidth,
+      child: Column(
         children: <Widget>[
-          DecoratedBox(
-            decoration: const BoxDecoration(color: AppColors.surface),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.small, vertical: AppSpacing.small),
-              child: Row(
-                children: <Widget>[
-                  AppButtonIcon(
-                    icon: AppIcon.arrowLeft,
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  const SizedBox(width: AppSpacing.small),
-                  AppText(
-                    l10n.availablePlatforms,
-                    variant: AppTextVariant.title,
-                  ),
-                ],
-              ),
-            ),
+          platformItem(
+            _platformMacOS,
+            'assets/images/platforms/platformDesktopMacOS.png',
+            l10n.desktopSoftware,
+            _urlMacOSDownload,
           ),
-          Expanded(
-            child: Center(
-              child: SizedBox(
-                width: AppLayout.platformPageWidth,
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: <Widget>[
-                      platformItem(
-                        _platformMacOS,
-                        'assets/images/platforms/platformDesktopMacOS.png',
-                        l10n.desktopSoftware,
-                        _urlMacOSDownload,
-                      ),
-                      platformItem(
-                        _platformWindows,
-                        'assets/images/platforms/platformDesktopWindows.png',
-                        l10n.desktopSoftware,
-                        _urlWindowsDownload,
-                      ),
-                      platformItem(
-                        _platformLinux,
-                        'assets/images/platforms/platformDesktopLinux.png',
-                        l10n.desktopSoftware,
-                        _urlLinuxDownload,
-                      ),
-                      const SizedBox(
-                        height: AppSpacing.largest,
-                      ),
-                      platformItem(
-                        _platformIOS,
-                        'assets/images/platforms/platformMobileIOS.png',
-                        l10n.mobileApp,
-                        _urlIOSApp,
-                      ),
-                      platformItem(
-                        _platformAndroid,
-                        'assets/images/platforms/platformMobileAndroid.png',
-                        l10n.mobileApp,
-                        _urlAndroidApp,
-                      ),
-                      const SizedBox(
-                        height: AppSpacing.largest,
-                      ),
-                      platformItem(
-                        l10n.webBrowser,
-                        'assets/images/platforms/platformWeb.png',
-                        l10n.runOnMostBrowsers,
-                        _urlWebApp,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+          platformItem(
+            _platformWindows,
+            'assets/images/platforms/platformDesktopWindows.png',
+            l10n.desktopSoftware,
+            _urlWindowsDownload,
+          ),
+          platformItem(
+            _platformLinux,
+            'assets/images/platforms/platformDesktopLinux.png',
+            l10n.desktopSoftware,
+            _urlLinuxDownload,
+          ),
+          const SizedBox(
+            height: AppSpacing.largest,
+          ),
+          platformItem(
+            _platformIOS,
+            'assets/images/platforms/platformMobileIOS.png',
+            l10n.mobileApp,
+            _urlIOSApp,
+          ),
+          platformItem(
+            _platformAndroid,
+            'assets/images/platforms/platformMobileAndroid.png',
+            l10n.mobileApp,
+            _urlAndroidApp,
+          ),
+          const SizedBox(
+            height: AppSpacing.largest,
+          ),
+          platformItem(
+            l10n.webBrowser,
+            'assets/images/platforms/platformWeb.png',
+            l10n.runOnMostBrowsers,
+            _urlWebApp,
           ),
         ],
       ),
@@ -140,7 +110,7 @@ class PlatformsPage extends StatelessWidget {
                       height: AppLayout.iconSize * AppVisual.previewTextScale,
                       child: DecoratedBox(
                         decoration: const BoxDecoration(color: AppColors.white),
-                        child: Image.asset(image, package: 'fpaint_assets'),
+                        child: Image.asset(image, package: appAssetsPackage),
                       ),
                     ),
                   ),

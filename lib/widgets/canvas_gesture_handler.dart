@@ -26,10 +26,12 @@ import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/inherited_scope.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/recovery/draft_recovery_controller.dart';
+import 'package:fpaint/widgets/locked_layer_guard.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
 
 part 'canvas_gesture_handler_eyedropper.dart';
+part 'canvas_gesture_handler_multi_touch.dart';
 part 'canvas_gesture_handler_quick_menu.dart';
 part 'canvas_gesture_handler_rotation.dart';
 part 'canvas_gesture_handler_state_methods.dart';
@@ -191,14 +193,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             return;
           }
 
-          if (appProvider.eyeDropPositionForBrush != null) {
-            appProvider.eyeDropPositionForBrush = event.localPosition;
-            appProvider.repaintMainView();
-            return;
-          }
-
-          if (appProvider.eyeDropPositionForFill != null) {
-            appProvider.eyeDropPositionForFill = event.localPosition;
+          if (appProvider.moveActiveEyeDrop(event.localPosition) != null) {
             appProvider.repaintMainView();
             return;
           }
@@ -273,9 +268,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
                 if (_activePointerId != -1) {
                   _cancelActiveTouchInteraction(appProvider);
                 }
-                _lastScaleDistance = _getDistanceBetweenTouchPoints();
-                _lastMultiTouchFocalPoint = _getMultiTouchFocalPoint();
-                _lastTouchContactAngle = _getTouchContactAngle();
+                _seedMultiTouchBaseline();
                 _resetGestureTwist();
                 _multiTouchPointersMoved.clear();
                 appProvider.layers.beginInteractiveViewportChange();
@@ -356,24 +349,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             return;
           }
           if (event.kind == PointerDeviceKind.touch) {
-            final bool wasMultiTouch = _activePointers.length >= AppMath.pair;
-            _pointerPositions.remove(event.pointer);
-            _activePointers.remove(event.pointer);
-            if (_activePointers.length < AppMath.pair) {
-              _lastScaleDistance = 0.0;
-              _lastMultiTouchFocalPoint = null;
-              _lastTouchContactAngle = null;
-              _resetGestureTwist();
-              _multiTouchPointersMoved.clear();
-              if (wasMultiTouch) {
-                appProvider.layers.endInteractiveViewportChange();
-              }
-            } else if (wasMultiTouch) {
-              _lastScaleDistance = _getDistanceBetweenTouchPoints();
-              _lastMultiTouchFocalPoint = _getMultiTouchFocalPoint();
-              _lastTouchContactAngle = _getTouchContactAngle();
-              _multiTouchPointersMoved.clear();
-            }
+            final bool wasMultiTouch = _releaseTouchPointer(appProvider, event.pointer);
             if (wasMultiTouch) {
               _pendingTouchDownEvent = null;
             } else {
@@ -387,9 +363,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
           } else {
             if (_panningPointerId == event.pointer) {
               _openQuickMenuOnSecondaryClick(appProvider, event.localPosition);
-              _panningPointerId = -1;
-              _isMouseRotateDrag = false;
-              _resetGestureTwist();
+              _endSecondaryPan();
               return;
             }
             _handlePointerEnd(appProvider, event);
@@ -400,25 +374,8 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             return;
           }
           if (event.kind == PointerDeviceKind.touch) {
-            final bool wasMultiTouch = _activePointers.length >= AppMath.pair;
-            _pointerPositions.remove(event.pointer);
-            _activePointers.remove(event.pointer);
             _pendingTouchDownEvent = null;
-            if (_activePointers.length < AppMath.pair) {
-              _lastScaleDistance = 0.0;
-              _lastMultiTouchFocalPoint = null;
-              _lastTouchContactAngle = null;
-              _resetGestureTwist();
-              _multiTouchPointersMoved.clear();
-              if (wasMultiTouch) {
-                appProvider.layers.endInteractiveViewportChange();
-              }
-            } else if (wasMultiTouch) {
-              _lastScaleDistance = _getDistanceBetweenTouchPoints();
-              _lastMultiTouchFocalPoint = _getMultiTouchFocalPoint();
-              _lastTouchContactAngle = _getTouchContactAngle();
-              _multiTouchPointersMoved.clear();
-            }
+            final bool wasMultiTouch = _releaseTouchPointer(appProvider, event.pointer);
             if (!wasMultiTouch && _activePointerId == event.pointer) {
               _cancelActiveTouchInteraction(appProvider);
             }
@@ -428,9 +385,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
           } else {
             if (_panningPointerId == event.pointer) {
               _secondaryPressPosition = null;
-              _panningPointerId = -1;
-              _isMouseRotateDrag = false;
-              _resetGestureTwist();
+              _endSecondaryPan();
               return;
             }
             _handlePointerEnd(appProvider, event);

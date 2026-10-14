@@ -4,6 +4,7 @@ import 'package:fpaint/helpers/shortcut_tooltip.dart';
 import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
+import 'package:fpaint/models/tool_family.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
 /// One shortcut row: the keys to cap, its description, an optional trailing
@@ -92,11 +93,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
       (
         title: ShortcutCategories.tools,
         shortcuts: <_ShortcutEntry>[
-          _shortcutEntry(<String>[ShortcutKeys.b], ShortcutActions.brushTool),
-          _shortcutEntry(<String>[ShortcutKeys.e], ShortcutActions.eraserTool),
-          _shortcutEntry(<String>[ShortcutKeys.s], ShortcutActions.selectionTool),
-          _shortcutEntry(<String>[ShortcutKeys.f], ShortcutActions.fillTool),
-          _shortcutEntry(<String>[ShortcutKeys.t], ShortcutActions.textTool),
+          for (final ToolShortcut tool in kToolShortcuts) _shortcutEntry(<String>[tool.label], tool.helpAction),
           _shortcutEntry(<String>[ShortcutKeys.bracketLeft], ShortcutActions.decreaseBrushSize),
           _shortcutEntry(<String>[ShortcutKeys.bracketRight], ShortcutActions.increaseBrushSize),
           _shortcutEntry(

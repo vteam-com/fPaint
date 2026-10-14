@@ -223,7 +223,7 @@ void main() {
       final HSLColor previewHsl = HSLColor.fromColor(preview.color);
 
       expect(preview.color.toARGB32(), isNot(Colors.red.toARGB32()));
-      expect(previewHsl.hue, closeTo(AppMath.degrees180, AppLimits.hueGroupingStepDegrees.toDouble()));
+      expect(previewHsl.hue, closeTo(AppMath.degreesPerHalfTurn, AppLimits.hueGroupingStepDegrees.toDouble()));
       expect(previewHsl.saturation, greaterThan(AppVisual.half));
     });
 

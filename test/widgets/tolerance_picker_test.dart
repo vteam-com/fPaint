@@ -7,13 +7,22 @@ import 'package:material_ui/material_ui.dart';
 void main() {
   group('TolerancePicker', () {
     testWidgets('TolerancePickerState clamps value correctly', (WidgetTester tester) async {
-      final TolerancePicker picker = TolerancePicker(
-        title: 'Tolerance',
-        value: 50,
-        onChanged: (int value) {},
+      // Clamping reads the picker's min/max, so the state must be mounted.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Material(
+              child: TolerancePicker(
+                title: 'Tolerance',
+                value: 50,
+                onChanged: (int value) {},
+              ),
+            ),
+          ),
+        ),
       );
 
-      final TolerancePickerState state = picker.createState();
+      final TolerancePickerState state = tester.state<TolerancePickerState>(find.byType(TolerancePicker));
 
       expect(state.clampValue(0), 1); // Below min
       expect(state.clampValue(50), 50); // Within range

@@ -194,4 +194,34 @@ void main() {
       expect(after.height, closeTo(before.height, 0.5));
     });
   });
+
+  group('boundsOfPoints', () {
+    test('returns null for no points', () {
+      expect(boundsOfPoints(<Offset>[]), isNull);
+    });
+
+    test('returns the box enclosing every point', () {
+      expect(
+        boundsOfPoints(const <Offset>[Offset(5, -2), Offset(-3, 7), Offset(1, 1)]),
+        const Rect.fromLTRB(-3, -2, 5, 7),
+      );
+    });
+  });
+
+  group('inflateClampToCanvas', () {
+    test('inflates, snaps outward and clamps to the canvas', () {
+      expect(
+        inflateClampToCanvas(const Rect.fromLTRB(2.5, 3.5, 8.2, 9.7), 4, const Size(10, 12)),
+        const Rect.fromLTRB(0, 0, 10, 12),
+      );
+      expect(
+        inflateClampToCanvas(const Rect.fromLTRB(4.5, 4.5, 5.2, 5.2), 1, const Size(10, 10)),
+        const Rect.fromLTRB(3, 3, 7, 7),
+      );
+    });
+
+    test('returns null when the clamped rect is empty', () {
+      expect(inflateClampToCanvas(const Rect.fromLTRB(20, 20, 30, 30), 1, const Size(10, 10)), isNull);
+    });
+  });
 }

@@ -54,6 +54,43 @@ void main() {
     });
   });
 
+  group('encodeImageToPng', () {
+    test('returns PNG-encoded bytes that decode back to the same size', () async {
+      final Uint8List? pngBytes = await encodeImageToPng(_createTestImage());
+
+      expect(pngBytes, isNotNull);
+      final ui.Image decoded = await fromBytesToImage(pngBytes!);
+      expect(decoded.width, _testWidth);
+      expect(decoded.height, _testHeight);
+    });
+  });
+
+  group('unpremultiplyRgbaInPlace', () {
+    test('divides colour by alpha and zeroes transparent pixels', () {
+      final Uint8List pixels = Uint8List.fromList(<int>[
+        64, 32, 0, 128, // half-transparent, premultiplied
+        10, 20, 30, 0, // fully transparent with stray colour
+        1, 2, 3, 255, // opaque, left untouched
+      ]);
+
+      final Uint8List result = unpremultiplyRgbaInPlace(pixels);
+
+      expect(identical(result, pixels), isTrue);
+      expect(pixels, <int>[128, 64, 0, 128, 0, 0, 0, 0, 1, 2, 3, 255]);
+    });
+
+    test('inverts premultiplyRgbaInPlace for opaque-enough colours', () {
+      final List<int> straight = <int>[200, 100, 50, 200];
+      final Uint8List pixels = premultiplyRgbaInPlace(Uint8List.fromList(straight));
+
+      unpremultiplyRgbaInPlace(pixels);
+
+      for (int i = 0; i < straight.length; i++) {
+        expect((pixels[i] - straight[i]).abs(), lessThanOrEqualTo(1));
+      }
+    });
+  });
+
   group('downsampleRgbaBox', () {
     // Builds a [width]x[height] straight-RGBA buffer from per-pixel [pixel]
     // callbacks returning an (r, g, b, a) 4-list.
@@ -156,6 +193,44 @@ void main() {
       final ui.Image rotated = await rotateImage90(image);
       expect(rotated.width, image.height);
       expect(rotated.height, image.width);
+    });
+
+    test('rotates pixels clockwise', () async {
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+      canvas.drawRect(const Rect.fromLTWH(0, 0, 4, 2), Paint()..color = const Color(0xFF0000FF));
+      canvas.drawRect(const Rect.fromLTWH(0, 0, 1, 1), Paint()..color = const Color(0xFFFF0000));
+      final ui.Image image = recorder.endRecording().toImageSync(4, 2);
+
+      final ui.Image rotated = await rotateImage90(image);
+      final ByteData? bytes = await rotated.toByteData();
+
+      // Top-left marker of the 4x2 source lands top-right of the 2x4 result.
+      const int topRightOffset = 1 * 4;
+      expect(bytes!.getUint8(topRightOffset), 0xFF); // red channel
+      expect(bytes.getUint8(0), 0x00); // top-left is now blue fill
+    });
+  });
+
+  group('clipImageToPath', () {
+    test('crops to bounds and clears pixels outside the path', () async {
+      final ui.Image image = _createTestImage(color: Colors.red);
+      const Rect bounds = Rect.fromLTWH(10, 5, 20, 10);
+      final ui.Path triangle = ui.Path()
+        ..moveTo(bounds.left, bounds.top)
+        ..lineTo(bounds.right, bounds.top)
+        ..lineTo(bounds.left, bounds.bottom)
+        ..close();
+
+      final ui.Image clipped = await clipImageToPath(image, triangle, bounds);
+      final ByteData? bytes = await clipped.toByteData();
+
+      expect(clipped.width, 20);
+      expect(clipped.height, 10);
+      expect(bytes!.getUint8(3), 0xFF); // top-left inside the triangle
+      final int bottomRightAlpha = ((clipped.height - 1) * clipped.width + clipped.width - 1) * 4 + 3;
+      expect(bytes.getUint8(bottomRightAlpha), 0x00); // outside the path
+      expect(image.debugDisposed, isFalse); // source ownership stays with caller
     });
   });
 
@@ -293,5 +368,20 @@ void main() {
       expect(readBack[1], closeTo(128, 2));
       expect(readBack[2], closeTo(128, 2));
     });
+  });
+
+  test('copyRgbaRect and blitRgbaRect round-trip a sub-rectangle', () {
+    const int width = 4;
+    const int height = 3;
+    final Uint8List pixels = Uint8List.fromList(List<int>.generate(width * height * 4, (int i) => i));
+    final Uint8List patch = copyRgbaRect(pixels: pixels, imageWidth: width, left: 1, top: 1, width: 2, height: 2);
+    expect(patch.sublist(0, 4), pixels.sublist(20, 24));
+    expect(patch.sublist(8, 12), pixels.sublist(36, 40));
+
+    final Uint8List destination = Uint8List(pixels.length);
+    blitRgbaRect(source: patch, destination: destination, imageWidth: width, left: 1, top: 1, width: 2, height: 2);
+    expect(destination.sublist(20, 28), pixels.sublist(20, 28));
+    expect(destination.sublist(36, 44), pixels.sublist(36, 44));
+    expect(destination.sublist(0, 20).every((int v) => v == 0), isTrue);
   });
 }

@@ -67,26 +67,10 @@ List<String> getColorComponentsAsHex(
   bool includeAlpha = true,
   bool alphaIsFirst = true,
 ]) {
-  final String alpha = (color.a * AppLimits.rgbChannelMax)
-      .toInt()
-      .toRadixString(AppMath.hexRadix)
-      .padLeft(AppMath.hexPad, '0')
-      .toUpperCase();
-  final String red = (color.r * AppLimits.rgbChannelMax)
-      .toInt()
-      .toRadixString(AppMath.hexRadix)
-      .padLeft(AppMath.hexPad, '0')
-      .toUpperCase();
-  final String green = (color.g * AppLimits.rgbChannelMax)
-      .toInt()
-      .toRadixString(AppMath.hexRadix)
-      .padLeft(AppMath.hexPad, '0')
-      .toUpperCase();
-  final String blue = (color.b * AppLimits.rgbChannelMax)
-      .toInt()
-      .toRadixString(AppMath.hexRadix)
-      .padLeft(AppMath.hexPad, '0')
-      .toUpperCase();
+  final String alpha = _channelHex(color.a);
+  final String red = _channelHex(color.r);
+  final String green = _channelHex(color.g);
+  final String blue = _channelHex(color.b);
   if (alphaIsFirst) {
     return <String>[
       if (includeAlpha) alpha,
@@ -94,13 +78,22 @@ List<String> getColorComponentsAsHex(
       green,
       blue,
     ];
-  } else {}
+  }
   return <String>[
     red,
     green,
     blue,
     if (includeAlpha) alpha,
   ];
+}
+
+/// Formats a normalized 0..1 colour [channel] as a two-digit upper-case hex byte.
+String _channelHex(double channel) {
+  return (channel * AppLimits.rgbChannelMax)
+      .toInt()
+      .toRadixString(AppMath.hexRadix)
+      .padLeft(AppMath.hexPad, '0')
+      .toUpperCase();
 }
 
 /// Calculates the contrast color based on the luminance of the input color.

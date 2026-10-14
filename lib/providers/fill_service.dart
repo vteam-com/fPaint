@@ -274,7 +274,7 @@ class FillService {
     final int pointCount = fillModel.gradientPoints.length;
     final int colorCount = fillModel.gradientStopColors.length;
     final int stopCount = fillModel.gradientStopPositions.length;
-    return pointCount >= AppMath.two && colorCount >= FillModel.gradientStopMin && stopCount == colorCount;
+    return pointCount >= AppMath.pair && colorCount >= FillModel.gradientStopMin && stopCount == colorCount;
   }
 
   /// Converts an absolute [point] inside [bounds] into a gradient alignment.

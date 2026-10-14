@@ -14,24 +14,16 @@ class AppMath {
 
   static const double degrees60 = 60.0;
   static const double degrees120 = 120.0;
-  static const double degrees180 = 180.0;
   static const double degrees240 = 240.0;
   static const double degrees300 = 300.0;
   static const int zero = 0;
   static const int one = 1;
-  static const int two = 2;
   static const int four = 4;
   static const int six = 6;
   static const int eight = 8;
   static const int pair = 2;
   static const int triple = 3;
   static const int bytesPerPixel = 4;
-
-  /// Byte offsets of each channel within a packed straight-RGBA pixel.
-  static const int rgbaRedOffset = 0;
-  static const int rgbaGreenOffset = 1;
-  static const int rgbaBlueOffset = 2;
-  static const int rgbaAlphaOffset = 3;
   static const int baseTen = 10;
   static const int hexRadix = 16;
   static const int hexPad = 2;
@@ -41,8 +33,9 @@ class AppMath {
   static const double percentScale = 100.0;
   static const double tinyPercentage = 0.01;
 
-  /// Approximation of π used for radian/degree conversions.
-  static const double pi = 3.14159;
+  /// Weights of the cubic smoothstep `t²·(3 − 2·t)`: flat-sloped at both ends.
+  static const double smoothstepEdgeWeight = 3.0;
+  static const double smoothstepSlopeWeight = 2.0;
 
   /// Angle increment for rotation snap haptic feedback.
   static const double rotationSnapInterval = 45.0;

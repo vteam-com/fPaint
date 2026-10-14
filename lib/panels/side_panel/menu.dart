@@ -7,6 +7,7 @@ import 'package:fpaint/helpers/shortcut_tooltip.dart';
 import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
+import 'package:fpaint/models/app_command.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/menu_model.dart';
 import 'package:fpaint/pages/settings_page.dart';
@@ -53,22 +54,22 @@ class MainMenu extends StatelessWidget {
         buildMenuItem(
           value: MenuIds.newFile,
           text: l10n.startOver,
-          icon: AppIcon.powerSettingsNew,
+          icon: AppCommand.newDocument.icon,
         ),
         buildMenuItem(
           value: MenuIds.newFromClipboard,
           text: l10n.newFromClipboard,
-          icon: AppIcon.clipboardPaste,
+          icon: AppCommand.paste.icon,
         ),
         buildMenuItem(
           value: MenuIds.openFile,
           text: l10n.importLabel,
-          icon: AppIcon.fileDownload,
+          icon: AppCommand.importFile.icon,
         ),
         buildMenuItem(
           value: MenuIds.export,
           text: l10n.exportLabel,
-          icon: AppIcon.iosShare,
+          icon: AppCommand.exportFile.icon,
         ),
         if (!kIsWeb && shellProvider.loadedFileName.isNotEmpty)
           buildMenuItem(
@@ -132,29 +133,13 @@ void onDropDownMenuSelection(
       onFileNew(context);
       break;
     case MenuIds.openFile:
-      showAppBottomSheet<void>(
-        context: context,
-        builder: (BuildContext _) {
-          return ImportDialog(parentContext: context);
-        },
-      );
-
+      await showImportSheet(context);
       break;
     case MenuIds.newFromClipboard:
-      AppProvider.of(context).newDocumentFromClipboardImage();
+      await newDocumentFromClipboardGuarded(context);
       break;
     case MenuIds.save:
-      await runWithGlobalFileSaveSnackBar<void>(
-        initialFilePath: shellProvider.loadedFileName,
-        completedFilePathBuilder: () => shellProvider.loadedFileName,
-        task: () {
-          return saveFile(
-            shellProvider,
-            layers,
-            preferences,
-          );
-        },
-      );
+      await saveLoadedFileWithFeedback(shellProvider, layers, preferences);
       break;
 
     case MenuIds.export:
@@ -205,42 +190,4 @@ void onDropDownMenuSelection(
       showAboutBox(context);
       break;
   }
-}
-
-/// Builds a menu item.
-AppPopupMenuItem<int> buildMenuItem({
-  required int value,
-  required String text,
-  String? subtitle,
-  AppIcon? icon,
-  Color? iconColor,
-  Key? key,
-}) {
-  return AppPopupMenuItem<int>(
-    value: value,
-    child: Row(
-      key: key,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        if (icon != null) AppSvgIcon(icon: icon, size: AppSpacing.large, color: iconColor),
-        if (icon != null) const SizedBox(width: AppSpacing.small),
-        Flexible(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              AppText(text),
-              if (subtitle != null) ...<Widget>[
-                const SizedBox(height: AppSpacing.thin),
-                AppText(
-                  subtitle,
-                  variant: AppTextVariant.subtitle,
-                ),
-              ],
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
 }

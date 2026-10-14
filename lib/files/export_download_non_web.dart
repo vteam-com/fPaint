@@ -2,40 +2,16 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:fpaint/files/export_file_name.dart';
-import 'package:fpaint/files/export_prepare.dart';
-import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/files/save_backup.dart';
 import 'package:fpaint/providers/app_preferences.dart';
-import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/security_scoped_file_service.dart';
 
-/// Saves the current painter content as a PNG image file.
-Future<void> saveAsPng(
-  LayersProvider layers,
+/// Writes already-encoded export [bytes] to [filePath].
+Future<void> writeExportBytes(
   String filePath,
+  Uint8List bytes,
 ) async {
-  await File(filePath).writeAsBytes(await preparePngBytes(layers));
-}
-
-/// Saves the current painter content as a JPEG image file.
-Future<void> saveAsJpeg(
-  LayersProvider layers,
-  String? filePath,
-) async {
-  if (filePath != null) {
-    await File(filePath).writeAsBytes(await prepareJpegBytes(layers));
-  }
-}
-
-/// Saves the current project as an ORA (OpenRaster) file.
-Future<void> saveAsOra(
-  LayersProvider layers,
-  String? filePath,
-) async {
-  if (filePath != null) {
-    await File(filePath).writeAsBytes(await prepareOraBytes(layers));
-  }
+  await File(filePath).writeAsBytes(bytes);
 }
 
 /// Converts a save-dialog [Uri] into a local file path.
@@ -110,40 +86,5 @@ Future<void> _exportWithFilePicker({
     if (preferences != null) {
       await preferences.addRecentFile(selectedFilePath);
     }
-  }
-}
-
-/// Saves all layers as a layered TIFF file at [filePath].
-///
-/// If [filePath] is null, the export is skipped.
-Future<void> saveAsTiff(
-  LayersProvider layers,
-  String? filePath,
-) async {
-  if (filePath != null) {
-    final String normalizedFilePath = normalizeTiffExportFileName(filePath);
-    final Uint8List tiffBytes = await convertLayersToTiff(layers);
-    await File(normalizedFilePath).writeAsBytes(tiffBytes);
-    layers.clearHasChanged();
-  }
-}
-
-/// Saves the current painter content as a WebP image file.
-Future<void> saveAsWebp(
-  LayersProvider layers,
-  String? filePath,
-) async {
-  if (filePath != null) {
-    await File(filePath).writeAsBytes(await prepareWebpBytes(layers));
-  }
-}
-
-/// Saves the current painter content as a HEIC image file.
-Future<void> saveAsHeic(
-  LayersProvider layers,
-  String? filePath,
-) async {
-  if (filePath != null) {
-    await File(filePath).writeAsBytes(await prepareHeicBytes(layers));
   }
 }

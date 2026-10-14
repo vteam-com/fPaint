@@ -1,24 +1,8 @@
 part of 'app_provider.dart';
 
-typedef SelectionStateSnapshot = ({
-  bool isVisible,
-  bool isDrawing,
-  Path? path1,
-  Path? path2,
-  List<Offset> points,
-  SelectorMath math,
-});
-
 /// Captures the current selection state so duplicate-apply undo can restore it.
 SelectionStateSnapshot captureSelectionState(AppProvider appProvider) {
-  return (
-    isVisible: appProvider.selectorModel.isVisible,
-    isDrawing: appProvider.selectorModel.isDrawing,
-    path1: appProvider.selectorModel.path1 == null ? null : Path.from(appProvider.selectorModel.path1!),
-    path2: appProvider.selectorModel.path2 == null ? null : Path.from(appProvider.selectorModel.path2!),
-    points: List<Offset>.from(appProvider.selectorModel.points),
-    math: appProvider.selectorModel.math,
-  );
+  return appProvider.selectorModel.snapshot();
 }
 
 /// Restores a previously captured selection state.
@@ -26,25 +10,13 @@ void restoreSelectionState(
   AppProvider appProvider,
   SelectionStateSnapshot selectionSnapshot,
 ) {
-  appProvider.selectorModel.isVisible = selectionSnapshot.isVisible;
-  appProvider.selectorModel.isDrawing = selectionSnapshot.isDrawing;
-  appProvider.selectorModel.path1 = selectionSnapshot.path1 == null ? null : Path.from(selectionSnapshot.path1!);
-  appProvider.selectorModel.path2 = selectionSnapshot.path2 == null ? null : Path.from(selectionSnapshot.path2!);
-  appProvider.selectorModel.points
-    ..clear()
-    ..addAll(selectionSnapshot.points);
-  appProvider.selectorModel.math = selectionSnapshot.math;
+  appProvider.selectorModel.restore(selectionSnapshot);
   appProvider.repaintToolOptions();
 }
 
 /// Replaces the active selection with a rectangle matching [bounds].
 void selectRectOnCanvas(AppProvider appProvider, Rect bounds) {
-  appProvider.selectorModel.isVisible = true;
-  appProvider.selectorModel.isDrawing = false;
-  appProvider.selectorModel.path1 = Path()..addRect(bounds);
-  appProvider.selectorModel.path2 = null;
-  appProvider.selectorModel.points.clear();
-  appProvider.selectorModel.math = SelectorMath.replace;
+  appProvider.selectorModel.replacePath(Path()..addRect(bounds));
   appProvider.repaintToolOptions();
 }
 
@@ -76,12 +48,7 @@ void commitPlacedImage(
       if (commitMode == ImagePlacementCommitMode.replaceLayer && layerRestoreState != null) {
         final LayerProvider targetLayer = appProvider.layers.get(layerRestoreState.layerIndex);
         appProvider.layers.selectedLayerIndex = layerRestoreState.layerIndex;
-        targetLayer.actionStack.clear();
-        targetLayer.redoStack.clear();
-        targetLayer.backgroundColor = null;
-        targetLayer.addImage(imageToAdd: image, offset: offset);
-        targetLayer.hasChanged = true;
-        targetLayer.clearCache();
+        targetLayer.replaceContentWithImage(image, offset: offset);
         if (selectionBounds != null) {
           selectRectOnCanvas(appProvider, selectionBounds);
         }

@@ -1,19 +1,19 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
+import 'package:fpaint/helpers/platform_modifiers.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
-import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/providers/shell_provider.dart';
-import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/effect_preview_bottom_sheet.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
@@ -299,21 +299,11 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
     final double buttonSize = interactionProfile.buttonSize;
     final double spacing = interactionProfile.buttonSpacing;
     final double iconSize = interactionProfile.iconSize;
-    final double modeControlsWidth = _controlSurfaceWidth(
-      contentWidth: _controlGroupContentWidth(
-        buttonSize: buttonSize,
-        spacing: spacing,
-        buttonCount: _selectionModeButtonCount,
-      ),
+    final double controlsWidth = _selectionToolbarWidth(
+      buttonSize: buttonSize,
+      spacing: spacing,
+      showQuickActions: showQuickActions,
     );
-    final double quickActionsWidth = _controlSurfaceWidth(
-      contentWidth: _controlGroupContentWidth(
-        buttonSize: buttonSize,
-        spacing: spacing,
-        buttonCount: _selectionQuickActionButtonCount,
-      ),
-    );
-    final double controlsWidth = showQuickActions ? modeControlsWidth + spacing + quickActionsWidth : modeControlsWidth;
     final double viewportHeight = MediaQuery.sizeOf(context).height;
     final double snappedControlsTop =
         MediaQuery.paddingOf(context).top + AppLayout.shellTopBarHeight + AppSpacing.small;
@@ -326,13 +316,19 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
     final double controlsLeft = bounds.center.dx - controlsWidth / AppMath.pair;
     final double modeButtonsLeft = controlsLeft + _selectionToolbarSurfacePadding;
     final double controlsTop = placement.controlsTop + _selectionToolbarSurfacePadding;
-    final Offset scaleHandleCenter = Offset(
-      modeButtonsLeft + buttonSize + spacing + buttonSize / AppMath.pair,
-      controlsTop + buttonSize / AppMath.pair,
+    final Offset scaleHandleCenter = overlayModeHandleCenter(
+      rowLeft: modeButtonsLeft,
+      rowTop: controlsTop,
+      buttonSize: buttonSize,
+      spacing: spacing,
+      buttonIndex: overlayScaleButtonIndex,
     );
-    final Offset rotateHandleCenter = Offset(
-      modeButtonsLeft + (buttonSize + spacing) * AppMath.pair + buttonSize / AppMath.pair,
-      controlsTop + buttonSize / AppMath.pair,
+    final Offset rotateHandleCenter = overlayModeHandleCenter(
+      rowLeft: modeButtonsLeft,
+      rowTop: controlsTop,
+      buttonSize: buttonSize,
+      spacing: spacing,
+      buttonIndex: overlayRotateButtonIndex,
     );
 
     final Widget feedbackBubble = buildOverlayFeedbackBubble(label: _feedbackLabel(l10n));
@@ -362,13 +358,14 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
             cursor: SystemMouseCursors.grab,
             onPanStart: (DragStartDetails _) => _beginScaleFeedback(),
             onPanUpdate: (DragUpdateDetails details) {
-              final double previousDistance = (scaleHandleCenter - bounds.center).distance;
-              final Offset pointer = scaleHandleCenter + details.delta;
-              final double currentDistance = (pointer - bounds.center).distance;
-              if (previousDistance <= AppMath.tinyPercentage) {
+              final double? factor = scaleFactorForHandleDrag(
+                handleCenter: scaleHandleCenter,
+                pivot: bounds.center,
+                dragDelta: details.delta,
+              );
+              if (factor == null) {
                 return;
               }
-              final double factor = currentDistance / previousDistance;
               _updateScaleFeedback(factor);
               widget.onScale(factor);
             },
@@ -384,16 +381,11 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
             cursor: SystemMouseCursors.grab,
             onPanStart: (DragStartDetails _) => _beginRotateFeedback(),
             onPanUpdate: (DragUpdateDetails details) {
-              final Offset pointer = rotateHandleCenter + details.delta;
-              final double previousAngle = atan2(
-                rotateHandleCenter.dy - bounds.center.dy,
-                rotateHandleCenter.dx - bounds.center.dx,
+              final double angleDelta = angleDeltaForHandleDrag(
+                handleCenter: rotateHandleCenter,
+                pivot: bounds.center,
+                dragDelta: details.delta,
               );
-              final double currentAngle = atan2(
-                pointer.dy - bounds.center.dy,
-                pointer.dx - bounds.center.dx,
-              );
-              final double angleDelta = currentAngle - previousAngle;
               _updateRotateFeedback(angleDelta);
               widget.onRotate(angleDelta);
             },
@@ -458,19 +450,15 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
     );
   }
 
-  /// Returns the width of one toolbar group's button content.
-  double _controlGroupContentWidth({
+  /// Returns the full grouped-surface width of a [buttonCount] toolbar group,
+  /// including the shared panel padding on both sides.
+  double _controlSurfaceWidth({
     required double buttonSize,
     required double spacing,
     required int buttonCount,
   }) {
-    final int gapCount = max(AppMath.zero, buttonCount - AppMath.one);
-    return (buttonSize * buttonCount) + (spacing * gapCount);
-  }
-
-  /// Returns the full grouped-surface width after adding shared panel padding.
-  double _controlSurfaceWidth({required double contentWidth}) {
-    return contentWidth + (_selectionToolbarSurfacePadding * AppMath.pair);
+    return overlayControlGroupContentWidth(buttonSize: buttonSize, spacing: spacing, buttonCount: buttonCount) +
+        (_selectionToolbarSurfacePadding * AppMath.pair);
   }
 
   bool get _duplicateMoveCreatesNewLayer {
@@ -567,10 +555,6 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
     _updateResizeFeedback();
   }
 
-  bool get _isApplePlatform {
-    return defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
-  }
-
   bool get _isFeedbackVisible =>
       (_feedbackMode != _SelectionOverlayFeedbackMode.none &&
           _feedbackMode != _SelectionOverlayFeedbackMode.translate) ||
@@ -583,22 +567,18 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
     required bool showQuickActions,
   }) {
     final double modeControlsWidth = _controlSurfaceWidth(
-      contentWidth: _controlGroupContentWidth(
-        buttonSize: buttonSize,
-        spacing: spacing,
-        buttonCount: _selectionModeButtonCount,
-      ),
+      buttonSize: buttonSize,
+      spacing: spacing,
+      buttonCount: _selectionModeButtonCount,
     );
     if (!showQuickActions) {
       return modeControlsWidth;
     }
 
     final double quickActionsWidth = _controlSurfaceWidth(
-      contentWidth: _controlGroupContentWidth(
-        buttonSize: buttonSize,
-        spacing: spacing,
-        buttonCount: _selectionQuickActionButtonCount,
-      ),
+      buttonSize: buttonSize,
+      spacing: spacing,
+      buttonCount: _selectionQuickActionButtonCount,
     );
     return modeControlsWidth + spacing + quickActionsWidth;
   }
@@ -607,8 +587,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
     if (widget.onDuplicateMove == null) {
       return false;
     }
-    final HardwareKeyboard keyboard = HardwareKeyboard.instance;
-    return _isApplePlatform ? keyboard.isAltPressed : keyboard.isControlPressed;
+    return isPrimaryAltModifierPressed();
   }
 
   /// Updates the resize dimensions feedback from the current path bounds.
@@ -632,7 +611,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
         _activeRotationDegrees = 0;
       }
       final double previousDegrees = _activeRotationDegrees;
-      _activeRotationDegrees += angleRadians * AppMath.degreesPerHalfTurn / pi;
+      _activeRotationDegrees += radiansToDegrees(angleRadians);
       triggerRotationSnapHaptic(previousDegrees, _activeRotationDegrees);
     });
   }
@@ -684,40 +663,10 @@ class _EffectsPopupButtonState extends State<_EffectsPopupButton> {
     );
   }
 
-  /// Opens a popup menu anchored below this button listing all available
-  /// [SelectionEffect] options with their icons and localized labels.
+  /// Opens the selection effects menu below this button and forwards the
+  /// chosen [SelectionEffect] to the caller.
   void _showEffectsMenu(BuildContext context) {
-    final RenderBox button = context.findRenderObject()! as RenderBox;
-    final Offset offset = button.localToGlobal(
-      Offset(button.size.width / AppMath.pair, button.size.height),
-    );
-
-    showAppMenu<SelectionEffect>(
-      context: context,
-      position: RelativeRect.fromLTRB(
-        offset.dx,
-        offset.dy,
-        offset.dx,
-        offset.dy,
-      ),
-      items: SelectionEffect.values
-          .map(
-            (SelectionEffect effect) => AppPopupMenuItem<SelectionEffect>(
-              value: effect,
-              child: Row(
-                spacing: AppSpacing.medium,
-                children: <Widget>[
-                  AppSvgIcon(
-                    icon: effect.icon,
-                    size: AppLayout.iconSize,
-                  ),
-                  AppText(effectLabel(widget.l10n, effect)),
-                ],
-              ),
-            ),
-          )
-          .toList(),
-    ).then((SelectionEffect? selected) {
+    showSelectionEffectsMenu(context, widget.l10n).then((SelectionEffect? selected) {
       if (mounted && selected != null) {
         // ignore: use_build_context_synchronously
         widget.onEffectSelected(selected, context);

@@ -32,6 +32,13 @@ Future<Uint8List?> extractImagePixels(
   return byteData?.buffer.asUint8List();
 }
 
+/// Encodes [image] as PNG bytes, or returns null when the engine yields no data.
+///
+/// Callers that must fail loudly should use `requireImageByteData` instead.
+Future<Uint8List?> encodeImageToPng(ui.Image image) {
+  return extractImagePixels(image, format: ui.ImageByteFormat.png);
+}
+
 /// Renders drawing commands into a new [ui.Image] with the given dimensions.
 Future<ui.Image> renderCanvasImage({
   required int width,
@@ -148,12 +155,11 @@ Future<Uint8List?> convertImageToUint8List(ui.Image image) async {
 
 /// Copies a [ui.Image] to the system clipboard as a PNG.
 Future<void> copyImageToClipboard(ui.Image image) async {
-  final ByteData? data = await image.toByteData(format: ui.ImageByteFormat.png);
-  if (data == null) {
+  final Uint8List? pngBytes = await encodeImageToPng(image);
+  if (pngBytes == null) {
     return;
   }
 
-  final Uint8List pngBytes = data.buffer.asUint8List();
   _sessionClipboardImageBytes = pngBytes;
   await copyImageBytesToClipboard(pngBytes);
 }
@@ -249,10 +255,10 @@ Uint8List downsampleRgbaBox(
       for (int sy = sy0; sy < sy1 && sy < srcHeight; sy++) {
         int si = ((sy * srcWidth) + sx0) * AppMath.bytesPerPixel;
         for (int sx = sx0; sx < sx1 && sx < srcWidth; sx++) {
-          final int sampleAlpha = src[si + AppMath.rgbaAlphaOffset];
-          r += src[si + AppMath.rgbaRedOffset] * sampleAlpha;
-          g += src[si + AppMath.rgbaGreenOffset] * sampleAlpha;
-          b += src[si + AppMath.rgbaBlueOffset] * sampleAlpha;
+          final int sampleAlpha = src[si + AppMath.rgbChannelAlpha];
+          r += src[si + AppMath.rgbChannelRed] * sampleAlpha;
+          g += src[si + AppMath.rgbChannelGreen] * sampleAlpha;
+          b += src[si + AppMath.rgbChannelBlue] * sampleAlpha;
           a += sampleAlpha;
           count++;
           si += AppMath.bytesPerPixel;
@@ -264,13 +270,52 @@ Uint8List downsampleRgbaBox(
       final int oi = ((dy * dstWidth) + dx) * AppMath.bytesPerPixel;
       // When every source sample is fully transparent the colour is undefined;
       // fall back to zero so nothing bleeds in.
-      out[oi + AppMath.rgbaRedOffset] = a > AppMath.zero ? r ~/ a : AppMath.zero;
-      out[oi + AppMath.rgbaGreenOffset] = a > AppMath.zero ? g ~/ a : AppMath.zero;
-      out[oi + AppMath.rgbaBlueOffset] = a > AppMath.zero ? b ~/ a : AppMath.zero;
-      out[oi + AppMath.rgbaAlphaOffset] = a ~/ count;
+      out[oi + AppMath.rgbChannelRed] = a > AppMath.zero ? r ~/ a : AppMath.zero;
+      out[oi + AppMath.rgbChannelGreen] = a > AppMath.zero ? g ~/ a : AppMath.zero;
+      out[oi + AppMath.rgbChannelBlue] = a > AppMath.zero ? b ~/ a : AppMath.zero;
+      out[oi + AppMath.rgbChannelAlpha] = a ~/ count;
     }
   }
   return out;
+}
+
+/// Copies the [width]×[height] RGBA rectangle at [left]/[top] of [pixels]
+/// (row stride [imageWidth] pixels) into a new tightly packed buffer.
+Uint8List copyRgbaRect({
+  required Uint8List pixels,
+  required int imageWidth,
+  required int left,
+  required int top,
+  required int width,
+  required int height,
+}) {
+  final Uint8List result = Uint8List(width * height * AppMath.bytesPerPixel);
+  final int rowByteCount = width * AppMath.bytesPerPixel;
+  for (int row = AppMath.zero; row < height; row++) {
+    final int sourceOffset = (((top + row) * imageWidth) + left) * AppMath.bytesPerPixel;
+    final int destinationOffset = row * rowByteCount;
+    result.setRange(destinationOffset, destinationOffset + rowByteCount, pixels, sourceOffset);
+  }
+  return result;
+}
+
+/// Writes the tightly packed [width]×[height] RGBA [source] rectangle into
+/// [destination] (row stride [imageWidth] pixels) at [left]/[top].
+void blitRgbaRect({
+  required Uint8List source,
+  required Uint8List destination,
+  required int imageWidth,
+  required int left,
+  required int top,
+  required int width,
+  required int height,
+}) {
+  final int rowByteCount = width * AppMath.bytesPerPixel;
+  for (int row = AppMath.zero; row < height; row++) {
+    final int destinationOffset = (((top + row) * imageWidth) + left) * AppMath.bytesPerPixel;
+    final int sourceOffset = row * rowByteCount;
+    destination.setRange(destinationOffset, destinationOffset + rowByteCount, source, sourceOffset);
+  }
 }
 
 /// Converts a straight (un-premultiplied) RGBA buffer to premultiplied RGBA
@@ -282,20 +327,35 @@ Uint8List downsampleRgbaBox(
 /// transparent pixel toward white: a 50%-opaque mid grey (128,128,128,128)
 /// round-trips as (255,255,255,128). That is invisible in fully opaque regions
 /// and glaring on the feathered rim of a brush dab.
-Uint8List premultiplyRgbaInPlace(Uint8List pixels) {
+Uint8List premultiplyRgbaInPlace(Uint8List pixels) => _rescaleColorByAlphaInPlace(pixels, premultiply: true);
+
+/// Converts a premultiplied RGBA buffer to straight (un-premultiplied) RGBA
+/// **in place**, returning the same buffer for convenient chaining.
+///
+/// The inverse of [premultiplyRgbaInPlace]: fully transparent pixels get a zero
+/// colour, fully opaque pixels are left untouched, and every other colour
+/// channel is divided by its alpha and clamped to the channel range.
+Uint8List unpremultiplyRgbaInPlace(Uint8List pixels) => _rescaleColorByAlphaInPlace(pixels, premultiply: false);
+
+/// Shared body of [premultiplyRgbaInPlace] and [unpremultiplyRgbaInPlace]:
+/// scales every colour channel by `alpha / max` when [premultiply], else by
+/// `max / alpha`, zeroing fully transparent pixels and skipping opaque ones.
+Uint8List _rescaleColorByAlphaInPlace(Uint8List pixels, {required bool premultiply}) {
   for (int index = AppMath.zero; index < pixels.length; index += AppMath.bytesPerPixel) {
-    final int alpha = pixels[index + AppMath.rgbaAlphaOffset];
-    if (alpha == AppLimits.rgbChannelMax) {
+    final int alpha = pixels[index + AppMath.rgbChannelAlpha];
+    if (alpha >= AppLimits.rgbChannelMax) {
       continue;
     }
-    if (alpha == AppMath.zero) {
-      pixels[index + AppMath.rgbaRedOffset] = AppMath.zero;
-      pixels[index + AppMath.rgbaGreenOffset] = AppMath.zero;
-      pixels[index + AppMath.rgbaBlueOffset] = AppMath.zero;
+    if (alpha <= AppMath.zero) {
+      pixels[index + AppMath.rgbChannelRed] = AppMath.zero;
+      pixels[index + AppMath.rgbChannelGreen] = AppMath.zero;
+      pixels[index + AppMath.rgbChannelBlue] = AppMath.zero;
       continue;
     }
-    for (int channel = AppMath.zero; channel < AppMath.rgbaAlphaOffset; channel++) {
-      pixels[index + channel] = (pixels[index + channel] * alpha / AppLimits.rgbChannelMax).round().clamp(
+    final int numerator = premultiply ? alpha : AppLimits.rgbChannelMax;
+    final int denominator = premultiply ? AppLimits.rgbChannelMax : alpha;
+    for (int channel = AppMath.zero; channel < AppMath.rgbChannelAlpha; channel++) {
+      pixels[index + channel] = (pixels[index + channel] * numerator / denominator).round().clamp(
         AppMath.zero,
         AppLimits.rgbChannelMax,
       );
@@ -344,6 +404,28 @@ Future<ui.Image> rotateImage90(ui.Image image) async {
       canvas.translate(h, 0);
       canvas.rotate(math.pi / AppMath.pair);
       canvas.drawImage(image, ui.Offset.zero, ui.Paint());
+    },
+  );
+}
+
+/// Renders [source] clipped to [clipPath] into a new image sized to [bounds].
+///
+/// [clipPath] and [bounds] are in [source] pixel coordinates; the result's
+/// origin maps to `bounds.topLeft`. The returned image is fully rasterized,
+/// so the caller may dispose [source] as soon as this future completes.
+/// [source] is never disposed here — ownership stays with the caller.
+Future<ui.Image> clipImageToPath(
+  ui.Image source,
+  ui.Path clipPath,
+  ui.Rect bounds,
+) {
+  return renderCanvasImage(
+    width: bounds.width.toInt(),
+    height: bounds.height.toInt(),
+    draw: (ui.Canvas canvas) {
+      canvas.translate(-bounds.left, -bounds.top);
+      canvas.clipPath(clipPath);
+      canvas.drawImage(source, ui.Offset.zero, ui.Paint());
     },
   );
 }

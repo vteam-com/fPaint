@@ -78,31 +78,29 @@ List<_ToolbarActionGroup> _buildToolbarActionGroups({
     ),
     _ToolbarActionGroup(
       actions: <_ToolbarActionEntry>[
-        _ToolbarActionEntry(
-          child: _buildUndoRedoButton(
+        _iconEntry(
+          _buildUndoRedoButton(
             interactionProfile: interactionProfile,
             enabled: canUndo,
             key: Keys.floatActionUndo,
-            icon: AppIcon.undo,
+            command: AppCommand.undo,
             historyLabel: appProvider.undoProvider.getHistoryStringForUndo(),
-            shortcutKey: ShortcutKeys.z,
             action: appProvider.undoAction,
           ),
-          estimatedWidth: _iconActionWidth(interactionProfile),
-          importance: _ToolbarActionImportance.critical,
+          interactionProfile,
+          _ToolbarActionImportance.critical,
         ),
-        _ToolbarActionEntry(
-          child: _buildUndoRedoButton(
+        _iconEntry(
+          _buildUndoRedoButton(
             interactionProfile: interactionProfile,
             enabled: canRedo,
             key: Keys.floatActionRedo,
-            icon: AppIcon.redo,
+            command: AppCommand.redo,
             historyLabel: appProvider.undoProvider.getHistoryStringForRedo(),
-            shortcutKey: ShortcutKeys.y,
             action: appProvider.redoAction,
           ),
-          estimatedWidth: _iconActionWidth(interactionProfile),
-          importance: _ToolbarActionImportance.medium,
+          interactionProfile,
+          _ToolbarActionImportance.medium,
         ),
       ],
       spacing: interactionProfile.buttonSpacing,
@@ -138,21 +136,18 @@ List<_ToolbarActionGroup> _buildToolbarActionGroups({
     ),
     _ToolbarActionGroup(
       actions: <_ToolbarActionEntry>[
-        _ToolbarActionEntry(
-          child: _buildZoomButton(
+        _iconEntry(
+          _buildZoomButton(
             key: Keys.floatActionZoomOut,
             shellProvider: shellProvider,
             appProvider: appProvider,
             interactionProfile: interactionProfile,
-            tooltip: tooltipWithShortcut(
-              ShortcutActions.zoomOut,
-              primaryModifiedShortcut(ShortcutKeys.minus),
-            )!,
-            icon: AppIcon.zoomOut,
+            command: AppCommand.zoomOut,
+            label: ShortcutActions.zoomOut,
             scaleDelta: AppVisual.shrink,
           ),
-          estimatedWidth: _iconActionWidth(interactionProfile),
-          importance: _ToolbarActionImportance.medium,
+          interactionProfile,
+          _ToolbarActionImportance.medium,
         ),
         _ToolbarActionEntry(
           child: _buildCenterAndDimensionButton(shellProvider, appProvider),
@@ -162,8 +157,8 @@ List<_ToolbarActionGroup> _buildToolbarActionGroups({
         // Only offered while the view is actually rotated: free rotation is easy to
         // enter by accident and otherwise hard to leave by hand.
         if (appProvider.layers.isRotated)
-          _ToolbarActionEntry(
-            child: buildToolbarIconButton(
+          _iconEntry(
+            buildToolbarIconButton(
               key: Keys.floatActionResetRotation,
               tooltip: l10n.resetViewRotation,
               icon: AppIcon.rotateRight,
@@ -173,24 +168,21 @@ List<_ToolbarActionGroup> _buildToolbarActionGroups({
                 appProvider.resetCanvasRotation();
               },
             ),
-            estimatedWidth: _iconActionWidth(interactionProfile),
-            importance: _ToolbarActionImportance.medium,
+            interactionProfile,
+            _ToolbarActionImportance.medium,
           ),
-        _ToolbarActionEntry(
-          child: _buildZoomButton(
+        _iconEntry(
+          _buildZoomButton(
             key: Keys.floatActionZoomIn,
             shellProvider: shellProvider,
             appProvider: appProvider,
             interactionProfile: interactionProfile,
-            tooltip: tooltipWithShortcut(
-              ShortcutActions.zoomIn,
-              primaryModifiedShortcut(ShortcutKeys.plus),
-            )!,
-            icon: AppIcon.zoomIn,
+            command: AppCommand.zoomIn,
+            label: ShortcutActions.zoomIn,
             scaleDelta: AppVisual.enlarge,
           ),
-          estimatedWidth: _iconActionWidth(interactionProfile),
-          importance: _ToolbarActionImportance.medium,
+          interactionProfile,
+          _ToolbarActionImportance.medium,
         ),
       ],
       spacing: interactionProfile.buttonSpacing,

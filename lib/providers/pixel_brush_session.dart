@@ -16,7 +16,7 @@ class PixelBrushStrokeSession {
   int generation = 0;
 
   /// Intensity captured when the current stroke started.
-  double intensity = AppInteraction.pixelBrushDefaultIntensity;
+  double intensity = AppEffects.defaultIntensity;
 
   /// Whether the active gesture is a paint-mode effect stroke: it reuses the
   /// pixel-brush gesture capture but commits the armed Adjust effect on
@@ -71,11 +71,7 @@ class PixelBrushStrokeSession {
     }
     strokePoints.add(position);
 
-    final double radius = max(
-      AppInteraction.smudgeMinimumRadius,
-      brushSize * AppInteraction.smudgeBrushRadiusFactor,
-    );
-    final double padding = (radius.ceil() + AppInteraction.smudgeBoundsPadding).toDouble();
+    final double padding = resolvePixelBrushPadding(resolvePixelBrushRadius(brushSize)).toDouble();
     final ui.Rect pointBounds = ui.Rect.fromLTRB(
       position.dx - padding,
       position.dy - padding,
@@ -158,10 +154,14 @@ class PixelBrushStrokeSession {
     if (dest == null) {
       return;
     }
-    final int rowBytes = regionWidth * AppMath.bytesPerPixel;
-    for (int row = AppMath.zero; row < regionHeight; row++) {
-      final int destOffset = (((destTop + row) * _sourceWidth) + destLeft) * AppMath.bytesPerPixel;
-      dest.setRange(destOffset, destOffset + rowBytes, region, row * rowBytes);
-    }
+    blitRgbaRect(
+      source: region,
+      destination: dest,
+      imageWidth: _sourceWidth,
+      left: destLeft,
+      top: destTop,
+      width: regionWidth,
+      height: regionHeight,
+    );
   }
 }

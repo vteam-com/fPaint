@@ -461,6 +461,58 @@ void main() {
     });
   });
 
+  group('createSelectionImage', () {
+    test('disposes the full-canvas layer raster it renders from', () async {
+      appProvider.selectAll();
+      final Size canvasSize = appProvider.layers.size;
+      final List<Image> created = <Image>[];
+      final ImageEventCallback? previousOnCreate = Image.onCreate;
+      Image.onCreate = created.add;
+      final Image? clipped;
+      try {
+        clipped = await appProvider.createSelectionImage();
+      } finally {
+        Image.onCreate = previousOnCreate;
+      }
+
+      expect(clipped, isNotNull);
+      final List<Image> sources = created
+          .where(
+            (Image image) =>
+                !identical(image, clipped) &&
+                image.width == canvasSize.width.toInt() &&
+                image.height == canvasSize.height.toInt(),
+          )
+          .toList();
+      expect(sources, isNotEmpty);
+      for (final Image source in sources) {
+        expect(source.debugDisposed, isTrue);
+      }
+      expect(clipped!.debugDisposed, isFalse);
+      clipped.dispose();
+    });
+
+    test('clips the layer to the selection bounds', () async {
+      final Image layerImage = await createFilledLayerImage(
+        width: appProvider.layers.size.width.toInt(),
+        height: appProvider.layers.size.height.toInt(),
+        color: const Color(0xFF00FF00),
+      );
+      appProvider.layers.selectedLayer.addImage(imageToAdd: layerImage);
+      appProvider.selectorModel.isVisible = true;
+      appProvider.selectorModel.path1 = Path()..addRect(const Rect.fromLTWH(10, 20, 30, 40));
+
+      final Image? clipped = await appProvider.createSelectionImage();
+
+      expect(clipped, isNotNull);
+      expect(clipped!.width, 30);
+      expect(clipped.height, 40);
+      final ByteData? bytes = await clipped.toByteData();
+      expect(bytes!.getUint32(0) & 0xFF, 0xFF); // alpha of first pixel
+      clipped.dispose();
+    });
+  });
+
   group('paste', () {
     test('starts clipboard paste in transform mode centered on the canvas', () async {
       final Image clipboardImage = await createClipboardTestImage();
@@ -614,11 +666,11 @@ void main() {
           (((previewImage.height - AppMath.one) * previewImage.width) + (previewImage.width - AppMath.one)) *
           AppMath.bytesPerPixel;
       expect(
-        previewData!.getUint8(previewInsidePixelBase + AppEffects.alphaChannelIndex),
+        previewData!.getUint8(previewInsidePixelBase + AppMath.rgbChannelAlpha),
         greaterThan(AppMath.zero),
       );
       expect(
-        previewData.getUint8(previewOutsidePixelBase + AppEffects.alphaChannelIndex),
+        previewData.getUint8(previewOutsidePixelBase + AppMath.rgbChannelAlpha),
         AppMath.zero,
       );
 
@@ -637,11 +689,11 @@ void main() {
           (((committedImage.height - AppMath.one) * committedImage.width) + (committedImage.width - AppMath.one)) *
           AppMath.bytesPerPixel;
       expect(
-        committedData!.getUint8(committedInsidePixelBase + AppEffects.alphaChannelIndex),
+        committedData!.getUint8(committedInsidePixelBase + AppMath.rgbChannelAlpha),
         greaterThan(AppMath.zero),
       );
       expect(
-        committedData.getUint8(committedOutsidePixelBase + AppEffects.alphaChannelIndex),
+        committedData.getUint8(committedOutsidePixelBase + AppMath.rgbChannelAlpha),
         AppMath.zero,
       );
     });
@@ -706,7 +758,7 @@ void main() {
       final Image patch = committed.image!;
       final ByteData patchData = (await patch.toByteData(format: ImageByteFormat.rawRgba))!;
       int alphaAt(int x, int y) => patchData.getUint8(
-        (((y * patch.width) + x) * AppMath.bytesPerPixel) + AppEffects.alphaChannelIndex,
+        (((y * patch.width) + x) * AppMath.bytesPerPixel) + AppMath.rgbChannelAlpha,
       );
       expect(alphaAt(45, 35), greaterThan(AppMath.zero));
       expect(alphaAt(2, 2), AppMath.zero);
@@ -752,8 +804,7 @@ void main() {
       const int originX = 20 - 10; // stroke left - radius
       const int originY = 20 - 10; // stroke top - radius
       int alphaAt(int canvasX, int canvasY) => patchData.getUint8(
-        ((((canvasY - originY) * patch.width) + (canvasX - originX)) * AppMath.bytesPerPixel) +
-            AppEffects.alphaChannelIndex,
+        ((((canvasY - originY) * patch.width) + (canvasX - originX)) * AppMath.bytesPerPixel) + AppMath.rgbChannelAlpha,
       );
 
       // Every point along the stroke centreline must be opaque — including the
@@ -797,8 +848,7 @@ void main() {
       const int originX = 20 - 10; // stroke left - radius
       const int originY = 20 - 10; // stroke top - radius
       int alphaAt(int canvasX, int canvasY) => patchData.getUint8(
-        ((((canvasY - originY) * patch.width) + (canvasX - originX)) * AppMath.bytesPerPixel) +
-            AppEffects.alphaChannelIndex,
+        ((((canvasY - originY) * patch.width) + (canvasX - originX)) * AppMath.bytesPerPixel) + AppMath.rgbChannelAlpha,
       );
       // Opaque at the dab centre, transparent at the patch corner (~14 px from
       // the centre, outside the radius-10 disc).

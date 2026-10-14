@@ -1,8 +1,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/effect_intensity_controls.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
@@ -67,4 +69,35 @@ Future<void> startEffectPreviewWithBottomSheet(
   }
 
   await previewFuture;
+}
+
+/// Opens a popup menu anchored below [context]'s widget listing every
+/// [SelectionEffect] with its icon and localized label.
+///
+/// Resolves to the chosen effect, or `null` when the menu is dismissed.
+Future<SelectionEffect?> showSelectionEffectsMenu(
+  BuildContext context,
+  AppLocalizations l10n,
+) {
+  return showAppMenuBelow<SelectionEffect>(
+    context: context,
+    centered: true,
+    items: SelectionEffect.values
+        .map(
+          (SelectionEffect effect) => AppPopupMenuItem<SelectionEffect>(
+            value: effect,
+            child: Row(
+              spacing: AppSpacing.medium,
+              children: <Widget>[
+                AppSvgIcon(
+                  icon: effect.icon,
+                  size: AppLayout.iconSize,
+                ),
+                AppText(effectLabel(l10n, effect)),
+              ],
+            ),
+          ),
+        )
+        .toList(),
+  );
 }

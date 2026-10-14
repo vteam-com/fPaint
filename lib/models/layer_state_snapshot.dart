@@ -36,4 +36,20 @@ class LayerStateSnapshot {
 
   /// The layer's opacity at capture time.
   final double opacity;
+
+  /// Every GPU texture a restore of this snapshot reintroduces: the images of
+  /// both [actions] and [redoActions].
+  ///
+  /// Undo records that restore this snapshot list these as retained images so
+  /// their disposal waits until the record leaves history.
+  List<ui.Image> get images => <ui.Image>[
+    ...imagesOf(actions),
+    ...imagesOf(redoActions),
+  ];
+
+  /// The non-null images carried by [actions], in order.
+  static List<ui.Image> imagesOf(Iterable<UserActionDrawing> actions) => <ui.Image>[
+    for (final UserActionDrawing action in actions)
+      if (action.image != null) action.image!,
+  ];
 }

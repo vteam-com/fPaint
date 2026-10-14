@@ -33,3 +33,21 @@ int _lastPathSeparatorIndex(String fileNameOrPath) {
 
   return unixSeparatorIndex > windowsSeparatorIndex ? unixSeparatorIndex : windowsSeparatorIndex;
 }
+
+/// Returns the lower-case extension of [fileNameOrPath], without the dot.
+///
+/// Returns an empty string when the last path segment has no extension (or
+/// ends with a dot), so a dot in a parent directory name is never mistaken for
+/// one.
+String fileExtensionOf(String fileNameOrPath) {
+  final int extensionIndex = fileNameOrPath.lastIndexOf(_extensionSeparator);
+  if (extensionIndex <= _lastPathSeparatorIndex(fileNameOrPath) ||
+      extensionIndex == fileNameOrPath.length - AppMath.one) {
+    return '';
+  }
+  return fileNameOrPath.substring(extensionIndex + AppMath.one).toLowerCase();
+}
+
+/// Returns the last segment of [path] (its file name), accepting both `/` and
+/// `\` as separators.
+String fileNameOf(String path) => path.substring(_lastPathSeparatorIndex(path) + AppMath.one);

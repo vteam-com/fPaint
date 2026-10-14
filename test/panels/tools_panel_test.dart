@@ -340,7 +340,7 @@ void main() {
       slider.onChanged!(AppEffects.maxIntensity);
       await tester.pump();
 
-      expect(appProvider.brushIntensity, greaterThan(AppInteraction.pixelBrushDefaultIntensity));
+      expect(appProvider.brushIntensity, greaterThan(AppEffects.defaultIntensity));
     });
 
     testWidgets('updates tool button selection when selectedAction changes externally', (

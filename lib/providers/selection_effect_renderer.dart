@@ -31,15 +31,10 @@ class SelectionEffectRenderer {
       );
     }
 
-    return renderCanvasImage(
-      width: image.width,
-      height: image.height,
-      draw: (ui.Canvas canvas) {
-        canvas.save();
-        canvas.clipPath(localSelectionPath, doAntiAlias: true);
-        canvas.drawImage(image, Offset.zero, ui.Paint());
-        canvas.restore();
-      },
+    return clipImageToPath(
+      image,
+      localSelectionPath,
+      Offset.zero & Size(image.width.toDouble(), image.height.toDouble()),
     );
   }
 

@@ -1,13 +1,14 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/app_button_row.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/app_slider.dart';
-import 'package:fpaint/widgets/app_snackbar.dart';
+import 'package:fpaint/widgets/locked_layer_guard.dart';
 
 /// Shared effect sliders and Apply/Cancel controls for an active effect preview.
 ///
@@ -76,7 +77,7 @@ class _EffectIntensityControlsState extends State<EffectIntensityControls> {
             icon: AppSvgIcon(icon: effect.icon, size: AppLayout.iconSize),
             label: effectLabel(widget.l10n, effect),
             value: _strength,
-            valueLabel: '${(_strength * AppMath.percentScale).round()}%',
+            valueLabel: formatFractionPercent(widget.l10n, _strength),
             min: effect.bipolar ? -AppEffects.maxIntensity : AppEffects.minIntensity,
             max: AppEffects.maxIntensity,
             onChanged: (double value) async {
@@ -112,10 +113,7 @@ class _EffectIntensityControlsState extends State<EffectIntensityControls> {
               AppRowPrimaryButton(
                 key: widget.applyButtonKey,
                 onPressed: () async {
-                  if (widget.appProvider.isSelectedLayerLocked) {
-                    context.showSnackBarMessage(
-                      widget.l10n.layerLockedForEditing(widget.appProvider.layers.selectedLayer.name),
-                    );
+                  if (!guardSelectedLayerUnlocked(context, widget.appProvider)) {
                     return;
                   }
 

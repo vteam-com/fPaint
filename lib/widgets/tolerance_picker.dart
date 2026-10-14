@@ -6,7 +6,7 @@ import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/base_picker.dart';
-import 'package:fpaint/widgets/material_free.dart';
+import 'package:fpaint/widgets/slider_picker_state.dart';
 
 /// A widget that allows the user to pick a tolerance value using a slider.
 class TolerancePicker extends BasePicker<int> {
@@ -23,23 +23,7 @@ class TolerancePicker extends BasePicker<int> {
 }
 
 /// The state for [TolerancePicker].
-class TolerancePickerState extends BasePickerState<int> {
-  @override
-  int clampValue(int value) {
-    return value.clamp(1, AppLimits.percentMax);
-  }
-
-  @override
-  Widget buildPickerWidget() {
-    return AppSlider(
-      value: currentValue.toDouble(),
-      min: 1,
-      max: AppLimits.percentMax.toDouble(),
-      divisions: AppLimits.sliderDivisions,
-      onChanged: (double value) => updateValue(value.toInt()),
-    );
-  }
-
+class TolerancePickerState extends SliderPickerState<int> {
   @override
   String formatValue(int value) {
     return value.toStringAsFixed(0);

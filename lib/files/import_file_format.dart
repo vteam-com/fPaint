@@ -1,4 +1,5 @@
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/files/export_file_name.dart';
 
 /// How a supported input file is turned into layers.
 ///
@@ -113,7 +114,7 @@ enum ImportFileFormat {
   }
 
   /// Resolves an import format from a file name.
-  static ImportFileFormat? fromFileName(String fileName) => fromExtension(fileName.split('.').last);
+  static ImportFileFormat? fromFileName(String fileName) => fromExtension(fileExtensionOf(fileName));
 
   /// Every extension the app can open, for file-picker filters and support
   /// checks.

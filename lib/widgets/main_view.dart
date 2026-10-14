@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:ui' show PathMetric;
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
@@ -7,6 +6,7 @@ import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/render_helper.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
@@ -19,6 +19,7 @@ import 'package:fpaint/widgets/effect_preview_bottom_sheet.dart';
 import 'package:fpaint/widgets/fill_preview_overlay.dart';
 import 'package:fpaint/widgets/fill_widget.dart';
 import 'package:fpaint/widgets/layer_picker_puck.dart';
+import 'package:fpaint/widgets/locked_layer_guard.dart';
 import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
@@ -166,8 +167,7 @@ class MainViewState extends State<MainView> {
                           appProvider.selectionTranslateByScreenDelta(offset);
                         },
                         onDuplicateMove: (Offset offset, bool duplicateOnNewLayer) async {
-                          if (!duplicateOnNewLayer && appProvider.isSelectedLayerLocked) {
-                            _showLockedLayerMessage(appProvider);
+                          if (!duplicateOnNewLayer && !guardSelectedLayerUnlocked(context, appProvider)) {
                             return;
                           }
 
@@ -191,8 +191,7 @@ class MainViewState extends State<MainView> {
                             return;
                           }
 
-                          if (appProvider.isSelectedLayerLocked) {
-                            _showLockedLayerMessage(appProvider);
+                          if (!guardSelectedLayerUnlocked(context, appProvider)) {
                             return;
                           }
 
@@ -204,8 +203,7 @@ class MainViewState extends State<MainView> {
                           appProvider.clearSelectionAndRestorePreviousTool();
                         },
                         onEffectSelected: (SelectionEffect effect, BuildContext _) async {
-                          if (appProvider.isSelectedLayerLocked) {
-                            _showLockedLayerMessage(appProvider);
+                          if (!guardSelectedLayerUnlocked(context, appProvider)) {
                             return;
                           }
 
@@ -373,13 +371,9 @@ class MainViewState extends State<MainView> {
           ),
 
         if (showBrushSizePreview && appProvider.brushSizePreviewPosition != null)
-          Positioned(
-            left:
-                appProvider.brushSizePreviewPosition!.dx -
-                (appProvider.brushSizePreviewSize! * appProvider.layers.scale) / AppMath.pair,
-            top:
-                appProvider.brushSizePreviewPosition!.dy -
-                (appProvider.brushSizePreviewSize! * appProvider.layers.scale) / AppMath.pair,
+          centeredPositioned(
+            center: appProvider.brushSizePreviewPosition!,
+            size: Size.square(appProvider.brushSizePreviewSize! * appProvider.layers.scale),
             child: _BrushSizePreviewOverlay(
               diameter: appProvider.brushSizePreviewSize! * appProvider.layers.scale,
               color: appProvider.brushSizePreviewColor,
@@ -409,9 +403,9 @@ class MainViewState extends State<MainView> {
     return Stack(
       children: <Widget>[
         if (appProvider.tolerancePointerAnchor != null)
-          Positioned(
-            left: appProvider.tolerancePointerAnchor!.dx - AppInteraction.toleranceAnchorMarkerSize / AppMath.pair,
-            top: appProvider.tolerancePointerAnchor!.dy - AppInteraction.toleranceAnchorMarkerSize / AppMath.pair,
+          centeredPositioned(
+            center: appProvider.tolerancePointerAnchor!,
+            size: const Size.square(AppInteraction.toleranceAnchorMarkerSize),
             child: const _ToleranceAnchorMarker(),
           ),
 
@@ -456,7 +450,7 @@ class MainViewState extends State<MainView> {
           center: Alignment.topCenter,
           colors: <Color>[
             AppColors.grey50,
-            AppColors.grey500,
+            AppColors.grey,
           ],
           stops: <double>[0, 1],
         ),
@@ -479,13 +473,6 @@ class MainViewState extends State<MainView> {
           },
         ),
       ),
-    );
-  }
-
-  void _showLockedLayerMessage(AppProvider appProvider) {
-    showSnackBarIfMounted(
-      context,
-      context.l10n.layerLockedForEditing(appProvider.layers.selectedLayer.name),
     );
   }
 }
@@ -564,12 +551,12 @@ class _BrushSizePreviewOverlayPainter extends CustomPainter {
     canvas.drawCircle(center, radius, fillPaint);
 
     final Rect borderRect = Rect.fromCircle(center: center, radius: radius);
-    final double circumference = AppMath.pair * AppMath.pi * radius;
+    final double circumference = AppMath.pair * math.pi * radius;
     final int segmentCount = math.max(
       AppMath.eight,
       (circumference / AppLayout.brushSizePreviewDashLength).round(),
     );
-    final double sweepAngle = (AppMath.pair * AppMath.pi) / segmentCount;
+    final double sweepAngle = (AppMath.pair * math.pi) / segmentCount;
 
     final Paint blackPaint = Paint()
       ..color = AppColors.black
@@ -692,28 +679,16 @@ class _PixelBrushGestureMarqueePainter extends CustomPainter {
 
   /// Draws [path] as a thin dark/light dashed line: dark dashes occupy the first
   /// half of each `2·_dashLength` period, light dashes the second, so together
-  /// they read as a continuous marching-ants marquee.
+  /// they read as a continuous marching-ants marquee. A zero-length path (a
+  /// tap) yields no dashes, leaving just the footprint band.
   void _drawDashedCentreLine(Canvas canvas, Path path) {
-    final Path darkDashes = _dashPath(path, AppMath.zero.toDouble());
-    final Path lightDashes = _dashPath(path, _dashLength);
-    canvas.drawPath(darkDashes, _dashPaint(AppColors.black.withAlpha(_dashDarkAlpha)));
-    canvas.drawPath(lightDashes, _dashPaint(AppColors.white.withAlpha(_dashLightAlpha)));
-  }
-
-  /// Extracts dashes of [_dashLength] (spaced one gap apart) from [source],
-  /// starting [phase] px along each contour. A zero-length path (a tap) yields
-  /// no dashes, leaving just the footprint band.
-  Path _dashPath(Path source, double phase) {
-    final Path dashed = Path();
-    for (final PathMetric metric in source.computeMetrics()) {
-      double distance = phase;
-      while (distance < metric.length) {
-        final double end = math.min(distance + _dashLength, metric.length);
-        dashed.addPath(metric.extractPath(distance, end), Offset.zero);
-        distance += _dashLength * AppMath.pair;
-      }
-    }
-    return dashed;
+    drawTwoToneDashedPath(
+      canvas,
+      path,
+      dashLength: _dashLength,
+      firstPaint: _dashPaint(AppColors.black.withAlpha(_dashDarkAlpha)),
+      secondPaint: _dashPaint(AppColors.white.withAlpha(_dashLightAlpha)),
+    );
   }
 
   Paint _dashPaint(Color color) => Paint()

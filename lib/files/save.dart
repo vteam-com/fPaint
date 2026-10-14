@@ -1,5 +1,6 @@
 import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
+import 'package:fpaint/files/export_file_name.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
 import 'package:fpaint/files/save_backup.dart';
 import 'package:fpaint/files/save_file_format.dart';
@@ -8,6 +9,7 @@ import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/security_scoped_file_service.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/app_snackbar.dart';
 import 'package:logging/logging.dart';
 
 export 'package:fpaint/files/save_file_format.dart';
@@ -51,7 +53,7 @@ Future<void> saveFile(
   final String fileName = shellProvider.loadedFileName;
   final SaveFileFormat? format = SaveFileFormat.fromFileName(fileName);
   if (format == null) {
-    final String extension = fileName.split('.').last.toLowerCase();
+    final String extension = fileExtensionOf(fileName);
     _log.severe('Unsupported file extension for saving: $extension');
     throw UnsupportedSaveFormatException(extension);
   }
@@ -85,6 +87,23 @@ Future<void> saveFile(
       stackTrace,
     );
   }
+}
+
+/// Saves the loaded document in place via [saveFile], showing the global
+/// "saving" / "saved" snack bar feedback.
+///
+/// The single Save entry point for the menu, the share panel and the keyboard
+/// shortcut, so they all report progress the same way.
+Future<void> saveLoadedFileWithFeedback(
+  ShellProvider shellProvider,
+  LayersProvider layers,
+  AppPreferences preferences,
+) {
+  return runWithGlobalFileSaveSnackBar<void>(
+    initialFilePath: shellProvider.loadedFileName,
+    completedFilePathBuilder: () => shellProvider.loadedFileName,
+    task: () => saveFile(shellProvider, layers, preferences),
+  );
 }
 
 /// Saves a file through the macOS security-scoped bookmark when one exists.

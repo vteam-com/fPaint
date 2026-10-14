@@ -27,9 +27,14 @@ final Logger _log = Logger(logNameRecentFiles);
 
 const String _oraFileSuffix = '.${FileExtensions.ora}';
 const String _psdFileSuffix = '.${FileExtensions.psd}';
+const String _logMetadataFailed = 'Failed to read recent file metadata';
+const String _logThumbnailFailed = 'Failed to load recent file thumbnail';
 
 typedef RecentFileMetadata = ({bool exists, DateTime? lastModified});
 typedef RecentFileMetadataLoader = Future<RecentFileMetadata> Function(String path, String? bookmark);
+
+/// Loads the MRU thumbnail of the file at `path` (resolved via `bookmark`).
+typedef RecentFileThumbnailLoader = Future<ui.Image?> Function(String path, String? bookmark);
 
 /// Returns thumbnail-ready bytes for MRU previews.
 ///
@@ -52,6 +57,16 @@ Future<Uint8List?> resolveRecentFileThumbnailBytes({
   return fileBytes;
 }
 
+/// Opens the unified [ImportDialog] as a bottom sheet anchored to [context].
+///
+/// Shared by the top toolbar and the main menu so both open the same sheet.
+Future<void> showImportSheet(BuildContext context) {
+  return showAppBottomSheet<void>(
+    context: context,
+    builder: (BuildContext _) => ImportDialog(parentContext: context),
+  );
+}
+
 /// The unified import dialog widget.
 class ImportDialog extends StatefulWidget {
   const ImportDialog({
@@ -67,7 +82,7 @@ class ImportDialog extends StatefulWidget {
   /// after the dialog closes.
   final BuildContext parentContext;
   final RecentFileMetadataLoader? recentFileMetadataLoader;
-  final Future<ui.Image?> Function(String path, String? bookmark)? recentFileThumbnailLoader;
+  final RecentFileThumbnailLoader? recentFileThumbnailLoader;
   @override
   State<ImportDialog> createState() => _ImportDialogState();
 }
@@ -190,35 +205,16 @@ class _ImportDialogState extends State<ImportDialog> {
 
   /// Builds the clickable clipboard source tile shown when an image is available.
   Widget _buildClipboardTile(AppLocalizations l10n) {
-    return GestureDetector(
+    return _buildImportSourceTile(
       onTap: _handleClipboardImport,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: _buildImportTileSurface(
-          child: Row(
-            children: <Widget>[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(AppRadius.small),
-                child: SizedBox(
-                  width: AppLayout.thumbnailMaxHeight,
-                  height: AppLayout.thumbnailMaxHeight,
-                  child: _buildClipboardPreviewGraphic(),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.large),
-              Expanded(
-                child: AppText(
-                  l10n.fromClipboard,
-                  variant: AppTextVariant.bodyBold,
-                ),
-              ),
-              const AppSvgIcon(
-                icon: AppIcon.clipboardPaste,
-                color: AppColors.textSecondary,
-              ),
-            ],
-          ),
-        ),
+      thumbnail: _buildClipboardPreviewGraphic(),
+      details: AppText(
+        l10n.fromClipboard,
+        variant: AppTextVariant.bodyBold,
+      ),
+      trailing: const AppSvgIcon(
+        icon: AppIcon.clipboardPaste,
+        color: AppColors.textSecondary,
       ),
     );
   }
@@ -235,12 +231,11 @@ class _ImportDialogState extends State<ImportDialog> {
 
   void _handleClipboardImport() {
     Navigator.pop(context);
-    final AppProvider appProvider = AppProvider.of(widget.parentContext);
     if (_addAsLayer) {
-      appProvider.paste();
+      AppProvider.of(widget.parentContext).paste();
       return;
     }
-    appProvider.newDocumentFromClipboardImage();
+    newDocumentFromClipboardGuarded(widget.parentContext);
   }
 
   /// Loads the current clipboard image once so the dialog can render a preview.
@@ -256,20 +251,47 @@ class _ImportDialogState extends State<ImportDialog> {
   }
 }
 
-/// Shared surface styling for the import dialog source tiles and recent rows.
-Widget _buildImportTileSurface({required Widget child}) {
-  return DecoratedBox(
-    decoration: BoxDecoration(
-      color: AppColors.surfaceVariant,
-      borderRadius: BorderRadius.circular(AppRadius.medium),
-      border: Border.all(
-        color: AppColors.overlayBorder,
-        width: AppStroke.thin,
+/// A clickable import source row (the clipboard tile and each recent file):
+/// a rounded square [thumbnail], the [details] beside it and a [trailing]
+/// control, on the shared tile surface.
+Widget _buildImportSourceTile({
+  required VoidCallback onTap,
+  required Widget thumbnail,
+  required Widget details,
+  required Widget trailing,
+}) {
+  return GestureDetector(
+    onTap: onTap,
+    child: MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceVariant,
+          borderRadius: BorderRadius.circular(AppRadius.medium),
+          border: Border.all(
+            color: AppColors.overlayBorder,
+            width: AppStroke.thin,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.medium),
+          child: Row(
+            children: <Widget>[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadius.small),
+                child: SizedBox(
+                  width: AppLayout.thumbnailMaxHeight,
+                  height: AppLayout.thumbnailMaxHeight,
+                  child: thumbnail,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.large),
+              Expanded(child: details),
+              trailing,
+            ],
+          ),
+        ),
       ),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.all(AppSpacing.medium),
-      child: child,
     ),
   );
 }
@@ -311,8 +333,11 @@ Future<void> _openRecentFile(
 ) async {
   final LayersProvider layers = LayersProvider.of(context);
   final ShellProvider shellProvider = ShellProvider.of(context);
+  // Resolved before any await so the open never reaches back into a
+  // possibly-defunct BuildContext.
+  final AppPreferences preferences = AppPreferences.of(context);
 
-  if (layers.hasChanged && await confirmDiscardCurrentWork(context) == false) {
+  if (!await confirmDiscardIfChanged(context, layers)) {
     return;
   }
 
@@ -327,16 +352,18 @@ Future<void> _openRecentFile(
       context: context,
       layers: layers,
       path: resolvedPath,
+      preferences: preferences,
     ),
   );
 
   if (success) {
-    shellProvider.loadedFileName = path;
-    layers.clearHasChanged();
-    shellProvider.requestCanvasFit();
-    if (context.mounted) {
-      await AppPreferences.of(context).addRecentFile(path);
-    }
+    await finishDocumentOpen(
+      shellProvider: shellProvider,
+      layers: layers,
+      preferences: preferences,
+      path: path,
+      bookmark: bookmark,
+    );
   } else if (context.mounted) {
     context.showSnackBarMessage(
       context.l10n.errorReadingFile(path),
@@ -383,7 +410,7 @@ class _RecentFileEntry extends StatefulWidget {
   final Future<void> Function() onDiscard;
   final VoidCallback onTap;
   final String path;
-  final Future<ui.Image?> Function(String path, String? bookmark)? thumbnailLoader;
+  final RecentFileThumbnailLoader? thumbnailLoader;
   @override
   State<_RecentFileEntry> createState() => _RecentFileEntryState();
 }
@@ -406,48 +433,29 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
     final String parentPath = File(widget.path).parent.path;
     final AppLocalizations l10n = context.l10n;
 
-    return GestureDetector(
-      onTap: widget.onTap,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.small),
-          child: _buildImportTileSurface(
-            child: Row(
-              children: <Widget>[
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(AppRadius.small),
-                  child: SizedBox(
-                    width: AppLayout.thumbnailMaxHeight,
-                    height: AppLayout.thumbnailMaxHeight,
-                    child: _buildThumbnail(),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.large),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      AppText(fileName, variant: AppTextVariant.bodyBold),
-                      AppText(parentPath, variant: AppTextVariant.subtitle),
-                      if (_lastModified != null)
-                        AppText(
-                          _formatLastModified(context, _lastModified!),
-                          variant: AppTextVariant.subtitle,
-                        ),
-                    ],
-                  ),
-                ),
-                AppButtonIcon(
-                  tooltip: l10n.delete,
-                  icon: AppIcon.playlistRemove,
-                  onPressed: () {
-                    widget.onDiscard();
-                  },
-                ),
-              ],
-            ),
-          ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.small),
+      child: _buildImportSourceTile(
+        onTap: widget.onTap,
+        thumbnail: _buildThumbnail(),
+        details: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            AppText(fileName, variant: AppTextVariant.bodyBold),
+            AppText(parentPath, variant: AppTextVariant.subtitle),
+            if (_lastModified != null)
+              AppText(
+                _formatLastModified(context, _lastModified!),
+                variant: AppTextVariant.subtitle,
+              ),
+          ],
+        ),
+        trailing: AppButtonIcon(
+          tooltip: l10n.delete,
+          icon: AppIcon.playlistRemove,
+          onPressed: () {
+            widget.onDiscard();
+          },
         ),
       ),
     );
@@ -497,36 +505,41 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
     return const AppProgressIndicator();
   }
 
+  /// Runs [load], logging [failureMessage] and applying [onFailure] as a state
+  /// update when it throws.
+  Future<void> _guardedLoad({
+    required Future<void> Function() load,
+    required String failureMessage,
+    required VoidCallback onFailure,
+  }) async {
+    try {
+      await load();
+    } catch (e, stackTrace) {
+      _log.warning(failureMessage, e, stackTrace);
+      if (mounted) {
+        setState(onFailure);
+      }
+    }
+  }
+
   /// Loads non-thumbnail MRU metadata such as file existence and modified time.
-  Future<void> _loadFileMetadata() async {
-    if (widget.metadataLoader != null) {
-      try {
-        final RecentFileMetadata metadata = await widget.metadataLoader!(widget.path, widget.bookmark);
-        if (!mounted) {
+  Future<void> _loadFileMetadata() {
+    final RecentFileMetadataLoader? metadataLoader = widget.metadataLoader;
+    return _guardedLoad(
+      failureMessage: _logMetadataFailed,
+      onFailure: () => _lastModified = null,
+      load: () async {
+        if (metadataLoader != null) {
+          final RecentFileMetadata metadata = await metadataLoader(widget.path, widget.bookmark);
+          if (mounted) {
+            setState(() {
+              _fileExists = metadata.exists;
+              _lastModified = metadata.lastModified;
+            });
+          }
           return;
         }
-
-        setState(() {
-          _fileExists = metadata.exists;
-          _lastModified = metadata.lastModified;
-        });
-      } catch (e, stackTrace) {
-        _log.warning('Failed to read recent file metadata', e, stackTrace);
-        if (mounted) {
-          setState(() {
-            _lastModified = null;
-          });
-        }
-      }
-      return;
-    }
-
-    try {
-      await SecurityScopedFileService.withResolvedBookmark(
-        bookmarkBase64: widget.bookmark,
-        fallbackPath: widget.path,
-        action: (String resolvedPath) async {
-          final File file = File(resolvedPath);
+        await _withResolvedFile((File file) async {
           if (!await file.exists()) {
             if (mounted) {
               setState(() {
@@ -538,56 +551,37 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
           }
 
           final DateTime lastModified = await file.lastModified();
-          if (!mounted) {
-            return;
+          if (mounted) {
+            setState(() {
+              _fileExists = true;
+              _lastModified = lastModified;
+            });
           }
-
-          setState(() {
-            _fileExists = true;
-            _lastModified = lastModified;
-          });
-        },
-      );
-    } catch (e, stackTrace) {
-      _log.warning('Failed to resolve recent file metadata', e, stackTrace);
-      if (mounted) {
-        setState(() {
-          _lastModified = null;
         });
-      }
-    }
+      },
+    );
   }
 
   /// Asynchronously decodes the image file and scales it to a thumbnail.
-  Future<void> _loadThumbnail() async {
-    if (widget.thumbnailLoader != null) {
-      try {
-        final ui.Image? thumbnail = await widget.thumbnailLoader!(widget.path, widget.bookmark);
-        if (!mounted) {
-          thumbnail?.dispose();
+  Future<void> _loadThumbnail() {
+    final RecentFileThumbnailLoader? thumbnailLoader = widget.thumbnailLoader;
+    return _guardedLoad(
+      failureMessage: _logThumbnailFailed,
+      onFailure: () => _loadFailed = true,
+      load: () async {
+        if (thumbnailLoader != null) {
+          final ui.Image? thumbnail = await thumbnailLoader(widget.path, widget.bookmark);
+          if (!mounted) {
+            thumbnail?.dispose();
+            return;
+          }
+          setState(() {
+            _thumbnail = thumbnail;
+            _loadFailed = thumbnail == null;
+          });
           return;
         }
-        setState(() {
-          _thumbnail = thumbnail;
-          _loadFailed = thumbnail == null;
-        });
-      } catch (e, stackTrace) {
-        _log.warning('Failed to load recent file thumbnail', e, stackTrace);
-        if (mounted) {
-          setState(() {
-            _loadFailed = true;
-          });
-        }
-      }
-      return;
-    }
-
-    try {
-      await SecurityScopedFileService.withResolvedBookmark(
-        bookmarkBase64: widget.bookmark,
-        fallbackPath: widget.path,
-        action: (String resolvedPath) async {
-          final File file = File(resolvedPath);
+        await _withResolvedFile((File file) async {
           if (!file.existsSync()) {
             if (mounted) {
               setState(() {
@@ -600,7 +594,7 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
           final Uint8List bytes = await file.readAsBytes();
           final Uint8List? thumbnailBytes = await resolveRecentFileThumbnailBytes(
             fileBytes: bytes,
-            path: resolvedPath,
+            path: file.path,
           );
           if (thumbnailBytes == null) {
             if (mounted) {
@@ -620,16 +614,19 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
               _thumbnail = frame.image;
             });
           }
-        },
-      );
-    } catch (e, stackTrace) {
-      _log.warning('Failed to decode recent file thumbnail', e, stackTrace);
-      if (mounted) {
-        setState(() {
-          _loadFailed = true;
         });
-      }
-    }
+      },
+    );
+  }
+
+  /// Runs [action] on this entry's file, resolved through its security-scoped
+  /// bookmark when it has one.
+  Future<void> _withResolvedFile(Future<void> Function(File) action) {
+    return SecurityScopedFileService.withResolvedBookmark(
+      bookmarkBase64: widget.bookmark,
+      fallbackPath: widget.path,
+      action: (String resolvedPath) => action(File(resolvedPath)),
+    );
   }
 }
 

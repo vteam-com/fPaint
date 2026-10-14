@@ -548,7 +548,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String percentageValue(Object value) {
-    return 'Escala: $value%';
+    return '$value %';
   }
 
   @override

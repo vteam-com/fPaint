@@ -91,11 +91,7 @@ class WandSourceSampler {
       layers.selectedLayer.renderLayer(canvas, compositeBounds: compositeBounds);
       return;
     }
-    for (final LayerProvider layer in layers.list.reversed) {
-      if (layer.isVisible) {
-        layer.renderLayer(canvas, compositeBounds: compositeBounds);
-      }
-    }
+    layers.renderVisibleLayers(canvas, compositeBounds: compositeBounds);
   }
 
   /// Creates a stable fingerprint of the pixels the wand would sample.

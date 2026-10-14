@@ -55,17 +55,17 @@ extension AppProviderSelectionEffects on AppProvider {
   /// Returns null when the source image could not be produced. Callers own the
   /// returned image and must dispose it.
   Future<({ui.Image image, Path path, Rect bounds, bool coversEntireLayer})?> _captureEffectTarget() async {
-    final bool hasSelection = selectorModel.isVisible && selectorModel.path1 != null;
+    final Path? selectionPath = selectorModel.copyActiveClipPath();
 
-    if (hasSelection) {
+    if (selectionPath != null) {
       final ui.Image? clippedImage = await createSelectionImage();
       if (clippedImage == null) {
         return null;
       }
       return (
         image: clippedImage,
-        path: Path.from(selectorModel.path1!),
-        bounds: selectorModel.path1!.getBounds(),
+        path: selectionPath,
+        bounds: selectionPath.getBounds(),
         coversEntireLayer: false,
       );
     }
@@ -192,22 +192,28 @@ extension AppProviderSelectionEffects on AppProvider {
     update();
   }
 
+  /// Drops a visible Apply preview and invalidates its in-flight renders.
+  /// Returns whether a preview was discarded; repainting is the caller's job.
+  bool _discardEffectPreview() {
+    if (!effectPreviewModel.isVisible) {
+      return false;
+    }
+    effectPreviewModel.clear();
+    effectPreviewRenderVersion++;
+    return true;
+  }
+
   /// Arms [effect] for painting onto the canvas, cancelling any Apply preview.
   void armEffectBrush(SelectionEffect effect) {
-    if (effectPreviewModel.isVisible) {
-      effectPreviewModel.clear();
-      effectPreviewRenderVersion++;
-    }
+    this._discardEffectPreview();
     effectBrushModel.arm(effect);
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   /// Disarms the paint effect (e.g. tapping the armed effect again).
   void disarmEffectBrush() {
     effectBrushModel.disarm();
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   /// Updates the strength used by painted effect strokes.
@@ -235,24 +241,11 @@ extension AppProviderSelectionEffects on AppProvider {
       return;
     }
 
-    final double rawRadius = brushSize * AppInteraction.smudgeBrushRadiusFactor;
-    final double radius = rawRadius > AppInteraction.smudgeMinimumRadius
-        ? rawRadius
-        : AppInteraction.smudgeMinimumRadius;
-
-    final int canvasWidth = layers.size.width.toInt();
-    final int canvasHeight = layers.size.height.toInt();
-    final int left = (strokeBounds.left - radius).floor().clamp(AppMath.zero, canvasWidth);
-    final int top = (strokeBounds.top - radius).floor().clamp(AppMath.zero, canvasHeight);
-    final int right = (strokeBounds.right + radius).ceil().clamp(AppMath.zero, canvasWidth);
-    final int bottom = (strokeBounds.bottom + radius).ceil().clamp(AppMath.zero, canvasHeight);
-    final int width = right - left;
-    final int height = bottom - top;
-    if (width <= AppMath.zero || height <= AppMath.zero) {
+    final double radius = resolvePixelBrushRadius(brushSize);
+    final Rect? regionRect = inflateClampToCanvas(strokeBounds, radius, layers.size);
+    if (regionRect == null) {
       return;
     }
-
-    final Rect regionRect = Rect.fromLTWH(left.toDouble(), top.toDouble(), width.toDouble(), height.toDouble());
     final ui.Image layerImage = await layers.captureLayerRegion(layers.selectedLayerIndex, regionRect);
     final ui.Image processed = await effect.apply(layerImage, strength: strength, size: size);
     if (identical(processed, layerImage)) {
@@ -265,14 +258,14 @@ extension AppProviderSelectionEffects on AppProvider {
     }
     layerImage.dispose();
 
-    final Offset regionOrigin = Offset(left.toDouble(), top.toDouble());
+    final Offset regionOrigin = regionRect.topLeft;
     final Path bandPath = _effectBrushBandPath(strokePoints, regionOrigin, radius);
 
     // Clip the processed region to the brushed band (and the active selection):
     // clipPath on a fillable path is the same masking idiom the Apply flow uses.
     final ui.Image patch = await renderCanvasImage(
-      width: width,
-      height: height,
+      width: regionRect.width.toInt(),
+      height: regionRect.height.toInt(),
       draw: (ui.Canvas canvas) {
         canvas.save();
         if (clipPath != null) {
@@ -285,16 +278,10 @@ extension AppProviderSelectionEffects on AppProvider {
     );
     processed.dispose();
 
-    undoProvider.executeAction(
+    this._executeLayerAppend(
       name: effect.name,
-      forward: () {
-        layers.selectedLayer.addImage(imageToAdd: patch, offset: regionOrigin);
-        update();
-      },
-      backward: () {
-        layers.selectedLayer.undo();
-        update();
-      },
+      resolveTargets: this._selectedLayerTarget,
+      buildActions: (_) => <UserActionDrawing>[ImageAction.placedAt(image: patch, offset: regionOrigin)],
     );
     update();
   }

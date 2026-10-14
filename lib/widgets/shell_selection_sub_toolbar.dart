@@ -5,16 +5,14 @@ import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
-import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_mode_display.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
-import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/effect_preview_bottom_sheet.dart';
-import 'package:fpaint/widgets/material_free.dart';
+import 'package:fpaint/widgets/locked_layer_guard.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:fpaint/widgets/toolbar_icon_button.dart';
 
@@ -232,37 +230,7 @@ void _showSelectionEffectsMenu({
   required AppProvider appProvider,
   required AppLocalizations l10n,
 }) {
-  final RenderBox button = context.findRenderObject()! as RenderBox;
-  final Offset offset = button.localToGlobal(
-    Offset(button.size.width / AppMath.pair, button.size.height),
-  );
-
-  showAppMenu<SelectionEffect>(
-    context: context,
-    position: RelativeRect.fromLTRB(
-      offset.dx,
-      offset.dy,
-      offset.dx,
-      offset.dy,
-    ),
-    items: SelectionEffect.values
-        .map(
-          (SelectionEffect effect) => AppPopupMenuItem<SelectionEffect>(
-            value: effect,
-            child: Row(
-              spacing: AppSpacing.medium,
-              children: <Widget>[
-                AppSvgIcon(
-                  icon: effect.icon,
-                  size: AppLayout.iconSize,
-                ),
-                AppText(effectLabel(l10n, effect)),
-              ],
-            ),
-          ),
-        )
-        .toList(),
-  ).then((SelectionEffect? selected) {
+  showSelectionEffectsMenu(context, l10n).then((SelectionEffect? selected) {
     if (selected == null) {
       return;
     }
@@ -271,10 +239,7 @@ void _showSelectionEffectsMenu({
       return;
     }
 
-    if (appProvider.isSelectedLayerLocked) {
-      context.showSnackBarMessage(
-        l10n.layerLockedForEditing(appProvider.layers.selectedLayer.name),
-      );
+    if (!guardSelectedLayerUnlocked(context, appProvider)) {
       return;
     }
 

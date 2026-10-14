@@ -1,6 +1,5 @@
-import 'dart:math' as math;
-
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 
 /// The geometry of a hatch pattern: parallel lines at [angleDegrees], every
 /// [spacing] pixels, each [lineWidth] pixels thick, optionally [crossed] by a
@@ -31,7 +30,7 @@ class HatchPattern {
   final bool crossed;
 
   /// The line angle in radians, normalised to a half turn.
-  double get angleRadians => (angleDegrees % AppHatch.maxAngleDegrees) * math.pi / AppMath.degreesPerHalfTurn;
+  double get angleRadians => degreesToRadians((angleDegrees % AppHatch.maxAngleDegrees).toDouble());
 
   /// The thickness actually rendered: at least one pixel and always thinner than
   /// the spacing so a gap remains between lines.

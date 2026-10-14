@@ -1,9 +1,9 @@
-import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/image_helper.dart';
 
 /// Lazily-generated, cached noise tile that gives the grain ("pencil") brush
 /// style its paper texture.
@@ -12,7 +12,7 @@ import 'package:fpaint/constants/constants.dart';
 /// deterministic — and reused for the app lifetime. The stroke renderer samples
 /// it as a repeating [ui.ImageShader] in canvas space, so the grain reads as a
 /// stationary paper texture that the stroke reveals. Generation is async
-/// ([decodeImageFromPixels]); until [prewarm] completes, the grain style falls
+/// ([imageFromPixelsDecode]); until [prewarm] completes, the grain style falls
 /// back to a solid stroke.
 class BrushGrain {
   BrushGrain._();
@@ -47,12 +47,10 @@ class BrushGrain {
       final int offset = i * AppMath.bytesPerPixel;
       pixels[offset] = channelMax; // R
       pixels[offset + AppMath.one] = channelMax; // G
-      pixels[offset + AppMath.two] = channelMax; // B
+      pixels[offset + AppMath.pair] = channelMax; // B
       pixels[offset + AppMath.bytesPerPixel - AppMath.one] = AppBrushGrain.minAlpha + random.nextInt(alphaRange); // A
     }
 
-    final Completer<ui.Image> completer = Completer<ui.Image>();
-    ui.decodeImageFromPixels(pixels, size, size, ui.PixelFormat.rgba8888, completer.complete);
-    _tile = await completer.future;
+    _tile = await imageFromPixelsDecode(pixels, size, size);
   }
 }

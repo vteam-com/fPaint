@@ -120,8 +120,20 @@ extension AppProviderCanvas on AppProvider {
     if (!layers.isRotated) {
       return;
     }
+    rotateAboutCenter(-layers.rotation, notifyListener: notifyListener);
+  }
+
+  /// Zooms the viewport by [scaleDelta], keeping the canvas centre fixed on
+  /// screen (keyboard and toolbar zoom, which have no pointer to anchor to).
+  void zoomAboutCenter(double scaleDelta) {
+    applyScaleToCanvas(scaleDelta: scaleDelta, anchorPoint: canvasCenter);
+  }
+
+  /// Rotates the viewport by [rotationDelta] radians, keeping the canvas
+  /// centre fixed on screen.
+  void rotateAboutCenter(double rotationDelta, {bool notifyListener = true}) {
     applyRotationToCanvas(
-      rotationDelta: -layers.rotation,
+      rotationDelta: rotationDelta,
       anchorPoint: canvasCenter,
       notifyListener: notifyListener,
     );
@@ -218,16 +230,24 @@ extension AppProviderCanvas on AppProvider {
   }
 
   /// Creates a new document from an image in the clipboard.
-  void newDocumentFromClipboardImage() async {
+  ///
+  /// Completes with `true` once the new canvas holds the clipboard image, or
+  /// `false` when the clipboard has no decodable image (the current document
+  /// is then left untouched). UI entry points should go through
+  /// `newDocumentFromClipboardGuarded`, which confirms discarding unsaved work
+  /// and fits the new canvas to the view.
+  Future<bool> newDocumentFromClipboardImage() async {
     final ui.Image? clipboardImage = await getImageFromClipboard();
-    if (clipboardImage != null) {
-      final double width = clipboardImage.width.toDouble();
-      final double height = clipboardImage.height.toDouble();
-      final Size newCanvasSize = Size(width, height);
-      canvasClear(newCanvasSize);
-      layers.selectedLayer.addImage(imageToAdd: clipboardImage);
-      update();
+    if (clipboardImage == null) {
+      return false;
     }
+    final double width = clipboardImage.width.toDouble();
+    final double height = clipboardImage.height.toDouble();
+    final Size newCanvasSize = Size(width, height);
+    canvasClear(newCanvasSize);
+    layers.selectedLayer.addImage(imageToAdd: clipboardImage);
+    update();
+    return true;
   }
 
   /// Resamples every layer to [width] × [height] (see

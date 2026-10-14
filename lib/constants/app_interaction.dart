@@ -148,12 +148,8 @@ class AppInteraction {
   static const double smudgeSourceCacheMargin = 384.0;
 
   static const double smudgeBlendStrength = 0.8;
-  static const double smudgeEdgeFalloffExponent = 2.0;
-  static const double pixelBrushDefaultIntensity = 0.5;
-  static const double pixelBrushIntensityAppliedScale = 2.0;
   static const int smudgeBoundsPadding = 2;
   static const double blurBrushStrength = 0.6;
-  static const double blurBrushEdgeFalloffExponent = 2.0;
   static const int blurBrushKernelHalf = 1;
   static const int blurBrushKernelHalfRange = 2;
   static const int pixelBrushMaxUndoGestures = 3;

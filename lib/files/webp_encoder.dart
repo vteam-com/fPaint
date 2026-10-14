@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:fpaint/files/package_image_bridge.dart';
 import 'package:fpaint/files/webp_encoder_shared.dart';
 import 'package:fpaint/files/webp_vp8l_encoder.dart';
 import 'package:image/image.dart' as img;
@@ -43,15 +44,5 @@ Uint8List encodeWebpLossless(
 ) {
   assert(rgba.length == width * height * WebPEncodingConstants.rgbaBytesPerPixel);
 
-  final img.Image image = img.Image.fromBytes(
-    width: width,
-    height: height,
-    bytes: rgba.buffer,
-    bytesOffset: rgba.offsetInBytes,
-    rowStride: width * WebPEncodingConstants.rgbaBytesPerPixel,
-    numChannels: WebPEncodingConstants.rgbaBytesPerPixel,
-    order: img.ChannelOrder.rgba,
-  );
-
-  return WebPEncoder().encode(image);
+  return WebPEncoder().encode(packageImageFromRgbaBytes(rgba, width, height));
 }

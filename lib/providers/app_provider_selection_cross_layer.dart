@@ -33,8 +33,7 @@ extension AppProviderSelectionCrossLayer on AppProvider {
     }
     selectorModel.allLayers = value;
     prewarmWandSourceCache();
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   /// Renders the current selection clipped from the merged visible composite
@@ -53,11 +52,7 @@ extension AppProviderSelectionCrossLayer on AppProvider {
     // Prime every visible layer's raster first so renderLayer takes the
     // one-blit fast path instead of replaying each action stack (the same
     // trick capturePainterToImage uses).
-    await Future.wait(
-      layers.list
-          .where((LayerProvider layer) => layer.isVisible)
-          .map((LayerProvider layer) => layer.ensureCachePrimed()),
-    );
+    await layers.primeVisibleLayerCaches();
 
     return renderCanvasImage(
       width: bounds.width.toInt(),
@@ -65,11 +60,7 @@ extension AppProviderSelectionCrossLayer on AppProvider {
       draw: (ui.Canvas canvas) {
         canvas.translate(-bounds.left, -bounds.top);
         canvas.clipPath(selectorModel.path1!);
-        for (final LayerProvider layer in layers.list.reversed) {
-          if (layer.isVisible) {
-            layer.renderLayer(canvas, compositeBounds: Offset.zero & layers.size);
-          }
-        }
+        layers.renderVisibleLayers(canvas, compositeBounds: Offset.zero & layers.size);
       },
     );
   }
@@ -96,22 +87,10 @@ extension AppProviderSelectionCrossLayer on AppProvider {
       return false;
     }
 
-    undoProvider.executeAction(
+    this._executeLayerAppend(
       name: ActionType.cut.name,
-      forward: () {
-        for (final LayerProvider layer in targets) {
-          layer.appendDrawingAction(
-            CutAction(path: Path.from(selectionPath)),
-          );
-        }
-        update();
-      },
-      backward: () {
-        for (final LayerProvider layer in targets.reversed) {
-          layer.undo();
-        }
-        update();
-      },
+      resolveTargets: () => targets,
+      buildActions: (_) => <UserActionDrawing>[CutAction(path: Path.from(selectionPath))],
     );
 
     return true;
@@ -201,30 +180,19 @@ extension AppProviderSelectionCrossLayer on AppProvider {
       entry.image.dispose();
     }
 
-    undoProvider.executeAction(
+    final List<LayerProvider> targets = <LayerProvider>[
+      for (final CrossLayerLiftEntry entry in lift) entry.layer,
+    ];
+    this._executeLayerAppend(
       name: 'Transform',
+      resolveTargets: () => targets,
+      buildActions: (int i) => <UserActionDrawing>[
+        CutAction(path: Path.from(selectionPath)),
+        ImageAction.placedAt(image: warpedImages[i], offset: imageOffset),
+      ],
       // The warped textures are re-added by forward on redo; retaining them
       // defers disposal until the record leaves history (crop's protocol).
       retainedImages: warpedImages,
-      forward: () {
-        for (int i = 0; i < lift.length; i++) {
-          lift[i].layer.appendDrawingAction(
-            CutAction(path: Path.from(selectionPath)),
-          );
-          lift[i].layer.addImage(
-            imageToAdd: warpedImages[i],
-            offset: imageOffset,
-          );
-        }
-        update();
-      },
-      backward: () {
-        for (final CrossLayerLiftEntry entry in lift.reversed) {
-          entry.layer.undo(); // undo add image
-          entry.layer.undo(); // undo cut
-        }
-        update();
-      },
     );
   }
 
@@ -235,20 +203,13 @@ extension AppProviderSelectionCrossLayer on AppProvider {
     required Rect bounds,
   }) async {
     final ui.Image layerImage = layer.toImageForStorage(layers.size);
-
-    final ui.Image clipped = await renderCanvasImage(
-      width: bounds.width.toInt(),
-      height: bounds.height.toInt(),
-      draw: (ui.Canvas canvas) {
-        canvas.translate(-bounds.left, -bounds.top);
-        canvas.clipPath(selectionPath);
-        canvas.drawImage(layerImage, Offset.zero, Paint());
-      },
-    );
-    // clipped is fully rasterized (awaited), so the full-canvas source raster
-    // is no longer needed — release it instead of stranding a texture per layer.
-    layerImage.dispose();
-
-    return clipped;
+    try {
+      return await clipImageToPath(layerImage, selectionPath, bounds);
+    } finally {
+      // The clipped result is fully rasterized once awaited, so the full-canvas
+      // source raster is no longer needed — release it instead of stranding a
+      // texture per layer.
+      layerImage.dispose();
+    }
   }
 }

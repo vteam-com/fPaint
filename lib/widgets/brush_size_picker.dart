@@ -3,7 +3,7 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/widgets/base_picker.dart';
-import 'package:fpaint/widgets/material_free.dart';
+import 'package:fpaint/widgets/slider_picker_state.dart';
 
 /// A widget that allows the user to pick a brush size using a slider.
 class BrushSizePicker extends BasePicker<double> {
@@ -22,25 +22,7 @@ class BrushSizePicker extends BasePicker<double> {
 }
 
 /// The state for [BrushSizePicker].
-class _BrushSizePickerState extends BasePickerState<double> {
-  @override
-  double clampValue(double value) {
-    final double min = widget.min!;
-    final double max = widget.max!;
-    return value.clamp(min, max);
-  }
-
-  @override
-  Widget buildPickerWidget() {
-    return AppSlider(
-      value: currentValue,
-      min: widget.min!,
-      max: widget.max!,
-      divisions: widget.divisions,
-      onChanged: updateValue,
-    );
-  }
-
+class _BrushSizePickerState extends SliderPickerState<double> {
   @override
   String formatValue(double value) {
     return value.toStringAsFixed(1);

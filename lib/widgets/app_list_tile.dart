@@ -74,14 +74,19 @@ class AppSwitchListTile extends StatelessWidget {
     required this.title,
     required this.value,
     required this.onChanged,
+    this.subtitle,
   });
   final ValueChanged<bool> onChanged;
+
+  /// Optional secondary line beneath [title].
+  final Widget? subtitle;
   final Widget title;
   final bool value;
   @override
   Widget build(BuildContext context) {
     return AppListTile(
       title: title,
+      subtitle: subtitle,
       trailing: AppToggleSwitch(value: value, onChanged: onChanged),
       onTap: () => onChanged(!value),
     );

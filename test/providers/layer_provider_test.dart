@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
@@ -7,6 +8,34 @@ import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/layer_provider.dart';
 
 const Size _defaultSize = Size(800, 600);
+
+const Color _markerColor = Color(0xFFFF0000);
+const Color _fillColor = Color(0xFF0000FF);
+
+/// Creates a [width]x[height] blue image with a single red marker pixel at
+/// its top-left corner, so rotation direction is observable.
+ui.Image _createMarkedImage(int width, int height) {
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final Canvas canvas = Canvas(recorder);
+  canvas.drawRect(
+    Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
+    Paint()..color = _fillColor,
+  );
+  canvas.drawRect(const Rect.fromLTWH(0, 0, 1, 1), Paint()..color = _markerColor);
+  return recorder.endRecording().toImageSync(width, height);
+}
+
+/// Reads the straight RGBA color of pixel ([x], [y]) in [image].
+Future<Color> _pixelAt(ui.Image image, int x, int y) async {
+  final ByteData? data = await image.toByteData();
+  final int offset = (y * image.width + x) * 4;
+  return Color.fromARGB(
+    data!.getUint8(offset + 3),
+    data.getUint8(offset),
+    data.getUint8(offset + 1),
+    data.getUint8(offset + 2),
+  );
+}
 
 /// Creates a [LayerProvider] for testing.
 LayerProvider _createLayer({String name = 'Test'}) {
@@ -593,6 +622,32 @@ void main() {
       // Origin (50, 100) with imgH=30 → (600-100-30, 50) = (470, 50)
       expect(layer.actionStack.first.positions.first.dx, closeTo(470, 1));
       expect(layer.actionStack.first.positions.first.dy, closeTo(50, 1));
+    });
+
+    test('rotates image pixels clockwise, matching the position mapping', () async {
+      final LayerProvider layer = _createLayer();
+      final ui.Image testImage = _createMarkedImage(20, 10);
+      layer.appendDrawingAction(
+        ImageAction(
+          positions: <Offset>[Offset.zero, const Offset(20, 10)],
+          image: testImage,
+        ),
+      );
+
+      await layer.rotate90Clockwise(_defaultSize);
+
+      // Clockwise: the image's top-left marker lands at its top-right corner.
+      final ui.Image rotated = layer.actionStack.first.image!;
+      expect(await _pixelAt(rotated, rotated.width - 1, 0), _markerColor);
+      expect(await _pixelAt(rotated, 0, 0), _fillColor);
+
+      // Whole-canvas render: the canvas's top-left corner moves to the
+      // top-right corner of the rotated (600x800) canvas.
+      final Size rotatedSize = Size(_defaultSize.height, _defaultSize.width);
+      layer.size = rotatedSize;
+      final ui.Image rendered = layer.toImageForStorage(rotatedSize);
+      expect(await _pixelAt(rendered, rotatedSize.width.toInt() - 1, 0), _markerColor);
+      rendered.dispose();
     });
 
     test('rotates text object position', () async {

@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:fpaint/constants/constants.dart';
@@ -61,14 +60,9 @@ void applyPixelBrushPatchToLayer({
   // when replayed under the display cache's fractional scale — the white
   // rectangle around the stroke. src replaces cleanly at any scale.
   append(
-    ImageAction(
+    ImageAction.placed(
       action: pixelBrushActionType(mode),
-      positions: <ui.Offset>[patch.bounds.topLeft, patch.bounds.bottomRight],
-      brush: MyBrush(
-        color: AppColors.transparent,
-        size: AppMath.zero.toDouble(),
-      ),
-      fillColor: AppColors.transparent,
+      bounds: patch.bounds,
       image: patch.image,
     ),
   );
@@ -93,43 +87,10 @@ void compactPixelBrushLayerHistory({
     return;
   }
 
-  final ui.Image flattenedLayerImage = targetLayer.toImageForStorage(targetLayer.size);
   targetLayer.actionStack
     ..clear()
-    ..add(
-      ImageAction(
-        positions: <ui.Offset>[
-          ui.Offset.zero,
-          ui.Offset(targetLayer.size.width, targetLayer.size.height),
-        ],
-        image: flattenedLayerImage,
-      ),
-    );
+    ..add(targetLayer.flattenToImageAction(targetLayer.size));
   targetLayer.redoStack.clear();
   targetLayer.hasChanged = true;
   targetLayer.clearCache();
-}
-
-/// Copies an RGBA rectangle from [pixels] into a tightly packed patch buffer.
-Uint8List copyPixelBrushRect({
-  required Uint8List pixels,
-  required int imageWidth,
-  required int left,
-  required int top,
-  required int width,
-  required int height,
-}) {
-  final Uint8List result = Uint8List(width * height * AppMath.bytesPerPixel);
-  final int rowByteCount = width * AppMath.bytesPerPixel;
-  for (int row = AppMath.zero; row < height; row++) {
-    final int sourceOffset = (((top + row) * imageWidth) + left) * AppMath.bytesPerPixel;
-    final int destinationOffset = row * rowByteCount;
-    result.setRange(
-      destinationOffset,
-      destinationOffset + rowByteCount,
-      pixels,
-      sourceOffset,
-    );
-  }
-  return result;
 }

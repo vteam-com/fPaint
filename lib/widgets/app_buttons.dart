@@ -227,6 +227,23 @@ class AppButtonIcon extends StatelessWidget {
     this.enabled = true,
     this.useSourceColors = false,
   });
+
+  /// Creates an icon button for a tool panel that may be [compact]: no
+  /// minimum size and thin padding when compact, small padding otherwise.
+  AppButtonIcon.toolOption({
+    super.key,
+    required this.icon,
+    required this.onPressed,
+    required bool compact,
+    this.isSelected = false,
+    this.color,
+    this.size,
+    this.tooltip,
+    this.enabled = true,
+    this.useSourceColors = false,
+  }) : constraints = compact ? const BoxConstraints() : null,
+       padding = EdgeInsets.all(compact ? AppSpacing.thin : AppSpacing.small);
+
   final Color? color;
   final BoxConstraints? constraints;
   final bool enabled;

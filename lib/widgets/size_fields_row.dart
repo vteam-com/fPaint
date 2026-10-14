@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/widgets/material_free.dart';
@@ -156,4 +157,106 @@ Size? parsePositiveSize(
     return null;
   }
   return Size(width, height);
+}
+
+/// Extra sheet content built under the sheet's [StateSetter], so it can keep
+/// its own state (e.g. the canvas anchor) across rebuilds.
+typedef SizeSheetExtraBuilder = Widget Function(BuildContext context, StateSetter setSheetState);
+
+/// Applies a validated [size] from a size sheet, with the sheet's final
+/// aspect-ratio [lockAspectRatio] state.
+typedef SizeSheetApply = void Function(Size size, bool lockAspectRatio);
+
+/// Shows the shared width / height bottom sheet used by the canvas-size and
+/// image-size commands.
+///
+/// The sheet owns (and disposes) its field controllers, seeded from
+/// [initialSize]. On Apply, valid positive dimensions close the sheet and are
+/// handed to [onApply]; invalid input reports [mustBePositiveMessage] (or the
+/// not-a-number message) and keeps the sheet open.
+Future<void> showSizeSheet({
+  required BuildContext context,
+  required String title,
+  required Size initialSize,
+  required bool initialLockAspectRatio,
+  required String mustBePositiveMessage,
+  required SizeSheetApply onApply,
+  required Key widthFieldKey,
+  required Key heightFieldKey,
+  required Key lockButtonKey,
+  required Key applyButtonKey,
+  String? hint,
+  SizeSheetExtraBuilder? extraBuilder,
+}) {
+  final TextEditingController widthController = TextEditingController(
+    text: initialSize.width.toInt().toString(),
+  );
+  final TextEditingController heightController = TextEditingController(
+    text: initialSize.height.toInt().toString(),
+  );
+  bool lockAspectRatio = initialLockAspectRatio;
+
+  return showAppBottomSheet<void>(
+    context: context,
+    builder: (BuildContext context) {
+      final AppLocalizations l10n = context.l10n;
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setSheetState) {
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.large),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                spacing: AppSpacing.medium,
+                children: <Widget>[
+                  AppText(title, variant: AppTextVariant.title),
+                  if (hint != null) AppText(hint, variant: AppTextVariant.subtitle),
+                  SizeFieldsRow(
+                    widthController: widthController,
+                    heightController: heightController,
+                    lockAspectRatio: lockAspectRatio,
+                    onLockAspectRatioChanged: (bool lock) {
+                      setSheetState(() => lockAspectRatio = lock);
+                    },
+                    widthFieldKey: widthFieldKey,
+                    heightFieldKey: heightFieldKey,
+                    lockButtonKey: lockButtonKey,
+                  ),
+                  if (extraBuilder != null) extraBuilder(context, setSheetState),
+                  AppButtonRow(
+                    actions: <Widget>[
+                      AppRowPrimaryButton(
+                        key: applyButtonKey,
+                        onPressed: () {
+                          final Size? newSize = parsePositiveSize(
+                            context,
+                            widthText: widthController.text,
+                            heightText: heightController.text,
+                            mustBePositiveMessage: mustBePositiveMessage,
+                          );
+                          if (newSize == null) {
+                            return;
+                          }
+                          // Close first: applying may be async and take a
+                          // moment on a large canvas; the sheet has nothing
+                          // further to show.
+                          Navigator.pop(context);
+                          onApply(newSize, lockAspectRatio);
+                        },
+                        text: l10n.apply,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    },
+  ).whenComplete(() {
+    widthController.dispose();
+    heightController.dispose();
+  });
 }

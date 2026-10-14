@@ -1,11 +1,13 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/files/decoded_layer_document.dart';
+import 'package:fpaint/files/decoded_raster_layer.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
+import 'package:fpaint/files/package_image_bridge.dart';
 import 'package:fpaint/files/tiff_constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
@@ -117,7 +119,7 @@ Future<List<_LayerFrame>> _buildLayerFrames(LayersProvider layers) async {
     final ui.Image layerImage = layer.toImageForStorage(layers.size);
     final Rect exportBounds = await _resolveLayerExportBounds(layerImage, layers.size);
     final ui.Image croppedLayerImage = cropImage(layerImage, exportBounds);
-    final img.Image? decoded = await _decodeUiImageToPackageImage(croppedLayerImage);
+    final img.Image? decoded = await uiImageToPackageImage(croppedLayerImage);
 
     if (decoded == null) {
       continue;
@@ -143,7 +145,7 @@ Future<List<_LayerFrame>> _buildLayerFrames(LayersProvider layers) async {
 }
 
 Future<img.Image> _buildCompositeFrame(LayersProvider layers) async {
-  final img.Image? compositeImage = await _decodeUiImageToPackageImage(
+  final img.Image? compositeImage = await uiImageToPackageImage(
     await layers.capturePainterToImage(),
   );
 
@@ -172,15 +174,6 @@ Future<Rect> _resolveLayerExportBounds(
   );
 }
 
-Future<img.Image?> _decodeUiImageToPackageImage(ui.Image uiImage) async {
-  final ByteData? byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
-  if (byteData == null) {
-    return null;
-  }
-
-  return img.decodeImage(byteData.buffer.asUint8List());
-}
-
 final Logger _log = Logger(logNameFileTiff);
 
 /// Decodes TIFF bytes and populates [layers] with one layer per TIFF frame.
@@ -193,33 +186,7 @@ Future<void> readTiffFileFromBytes(
   LayersProvider layers,
   Uint8List bytes,
 ) async {
-  final _DecodedTiffDocument decodedDocument = _decodeTiffDocument(bytes);
-
-  LayerProvider? selectedLayer;
-  await layers.replaceAll(
-    canvasSize: decodedDocument.size,
-    addLayers: () async {
-      for (final _DecodedTiffLayer layer in decodedDocument.layers) {
-        final LayerProvider appended = await _appendDecodedTiffLayer(
-          layers,
-          meta: layer.meta,
-          image: layer.image,
-          offset: layer.offset,
-        );
-        if (layer.meta.selected) {
-          selectedLayer = appended;
-        }
-      }
-    },
-  );
-
-  // replaceAll resets the selection to the first layer, so restore afterwards.
-  if (selectedLayer != null) {
-    final int index = layers.getLayerIndex(selectedLayer!);
-    if (index >= 0) {
-      layers.selectedLayerIndex = index;
-    }
-  }
+  await applyDecodedDocument(layers, _decodeTiffDocument(bytes));
 }
 
 /// Decodes [bytes] into a validated TIFF document model ready to apply.
@@ -228,7 +195,7 @@ Future<void> readTiffFileFromBytes(
 /// falls back to frame-by-frame decoding for flat TIFFs, and throws a
 /// [TiffFileException] when the payload is invalid or contains no usable
 /// layers.
-_DecodedTiffDocument _decodeTiffDocument(Uint8List bytes) {
+DecodedRasterDocument _decodeTiffDocument(Uint8List bytes) {
   final img.TiffDecoder decoder = img.TiffDecoder();
   final img.TiffInfo? tiffInfo = decoder.startDecode(bytes);
 
@@ -236,13 +203,13 @@ _DecodedTiffDocument _decodeTiffDocument(Uint8List bytes) {
     throw const TiffFileException(_errorInvalidTiffData);
   }
 
-  final List<_DecodedTiffLayer>? subIfdLayers = _tryDecodeSubIfdLayers(bytes, tiffInfo);
-  final List<_DecodedTiffLayer> decodedLayers = subIfdLayers ?? _decodeFrameLayers(decoder, tiffInfo);
+  final List<DecodedRasterLayer>? subIfdLayers = _tryDecodeSubIfdLayers(bytes, tiffInfo);
+  final List<DecodedRasterLayer> decodedLayers = subIfdLayers ?? _decodeFrameLayers(decoder, tiffInfo);
   if (decodedLayers.isEmpty) {
     throw const TiffFileException(_errorNoDecodedTiffLayers);
   }
 
-  return _DecodedTiffDocument(
+  return DecodedRasterDocument(
     size: Size(tiffInfo.width.toDouble(), tiffInfo.height.toDouble()),
     layers: decodedLayers,
   );
@@ -254,7 +221,7 @@ _DecodedTiffDocument _decodeTiffDocument(Uint8List bytes) {
 /// painting stack expected by [LayersProvider]. Any undecodable frame is skipped
 /// with a warning, while an entirely empty TIFF still fails with a
 /// [TiffFileException].
-List<_DecodedTiffLayer> _decodeFrameLayers(
+List<DecodedRasterLayer> _decodeFrameLayers(
   img.TiffDecoder decoder,
   img.TiffInfo tiffInfo,
 ) {
@@ -263,7 +230,7 @@ List<_DecodedTiffLayer> _decodeFrameLayers(
     throw const TiffFileException(_errorNoTiffFrames);
   }
 
-  final List<_DecodedTiffLayer> decodedLayers = <_DecodedTiffLayer>[];
+  final List<DecodedRasterLayer> decodedLayers = <DecodedRasterLayer>[];
   for (int i = numFrames - 1; i >= 0; i--) {
     final img.Image? frame = decoder.decodeFrame(i);
 
@@ -272,42 +239,14 @@ List<_DecodedTiffLayer> _decodeFrameLayers(
       continue;
     }
 
-    decodedLayers.add(
-      _DecodedTiffLayer(
-        image: frame,
-        meta: _extractLayerMeta(tiffInfo, i),
-        offset: Offset.zero,
-      ),
-    );
+    decodedLayers.add(_extractLayerMeta(tiffInfo, i).toDecodedLayer(frame, Offset.zero));
   }
 
   return decodedLayers;
 }
 
-class _DecodedTiffDocument {
-  _DecodedTiffDocument({
-    required this.size,
-    required this.layers,
-  });
-
-  final Size size;
-  final List<_DecodedTiffLayer> layers;
-}
-
-class _DecodedTiffLayer {
-  _DecodedTiffLayer({
-    required this.image,
-    required this.meta,
-    required this.offset,
-  });
-
-  final img.Image image;
-  final _LayerMeta meta;
-  final Offset offset;
-}
-
 /// Decodes SketchBook-style layer pages stored in a root SubIFD array.
-List<_DecodedTiffLayer>? _tryDecodeSubIfdLayers(
+List<DecodedRasterLayer>? _tryDecodeSubIfdLayers(
   Uint8List bytes,
   img.TiffInfo tiffInfo,
 ) {
@@ -324,7 +263,7 @@ List<_DecodedTiffLayer>? _tryDecodeSubIfdLayers(
   final bool isBigEndian = tiffInfo.bigEndian ?? false;
   final double canvasHeight = tiffInfo.height.toDouble();
   final bool aliasAuthored = _isAliasAuthoredRoot(rootImage);
-  final List<_DecodedTiffLayer> decodedLayers = <_DecodedTiffLayer>[];
+  final List<DecodedRasterLayer> decodedLayers = <DecodedRasterLayer>[];
 
   for (final int subIfdOffset in subIfdOffsets) {
     final img.TiffImage? subIfdImage = _readTiffImageAtOffset(bytes, isBigEndian, subIfdOffset);
@@ -332,25 +271,29 @@ List<_DecodedTiffLayer>? _tryDecodeSubIfdLayers(
       continue;
     }
 
-    final img.Image decodedImage = subIfdImage.decode(img.InputBuffer(bytes, bigEndian: isBigEndian));
+    final img.Image decodedImage = toRgba8PackageImage(
+      subIfdImage.decode(img.InputBuffer(bytes, bigEndian: isBigEndian)),
+    );
 
     if (_readIntTag(subIfdImage, TiffConstants.tagOrientation) == TiffConstants.orientationBottomLeft) {
       img.flipVertical(decodedImage);
     }
 
+    // A fresh 8-bit RGBA image owns its buffer, so these edits land in place.
+    final Uint8List pixels = decodedImage.toUint8List();
+
     if (_layerStoresBgraPixels(subIfdImage, aliasAuthored: aliasAuthored)) {
-      _swapRedBlue(decodedImage);
+      _swapRedBlueInPlace(pixels);
     }
 
     if (_readIntTag(subIfdImage, TiffConstants.tagExtraSamples) == TiffConstants.extraSamplesAssociatedAlpha) {
-      _unMultiplyAlpha(decodedImage);
+      unpremultiplyRgbaInPlace(pixels);
     }
 
     decodedLayers.add(
-      _DecodedTiffLayer(
-        image: decodedImage,
-        meta: _extractSubIfdLayerMeta(subIfdImage, decodedLayers.length),
-        offset: _extractSubIfdOffset(subIfdImage, canvasHeight),
+      _extractSubIfdLayerMeta(subIfdImage, decodedLayers.length).toDecodedLayer(
+        decodedImage,
+        _extractSubIfdOffset(subIfdImage, canvasHeight),
       ),
     );
   }
@@ -409,12 +352,12 @@ bool _layerStoresBgraPixels(
   }
 }
 
-/// Swaps the red and blue channels of every pixel in [image] in place.
-void _swapRedBlue(img.Image image) {
-  for (final img.Pixel pixel in image) {
-    final num red = pixel.r;
-    pixel.r = pixel.b;
-    pixel.b = red;
+/// Swaps the red and blue channels of every pixel in an RGBA [pixels] buffer.
+void _swapRedBlueInPlace(Uint8List pixels) {
+  for (int index = AppMath.zero; index < pixels.length; index += AppMath.bytesPerPixel) {
+    final int red = pixels[index + AppMath.rgbChannelRed];
+    pixels[index + AppMath.rgbChannelRed] = pixels[index + AppMath.rgbChannelBlue];
+    pixels[index + AppMath.rgbChannelBlue] = red;
   }
 }
 
@@ -566,12 +509,25 @@ String _fallbackLayerName(int layerIndex) {
   return buffer.toString();
 }
 
-List<int> _readIntTagList(
+/// Reads the value of [tag], or null when the tag is absent or empty.
+img.IfdValue? _readTagValue(
   img.TiffImage tiffImage,
   int tag,
 ) {
   final img.IfdValue? value = tiffImage.tags[tag]?.read();
   if (value == null || value.length == 0) {
+    return null;
+  }
+
+  return value;
+}
+
+List<int> _readIntTagList(
+  img.TiffImage tiffImage,
+  int tag,
+) {
+  final img.IfdValue? value = _readTagValue(tiffImage, tag);
+  if (value == null) {
     return const <int>[];
   }
 
@@ -582,24 +538,14 @@ int? _readIntTag(
   img.TiffImage tiffImage,
   int tag,
 ) {
-  final img.IfdValue? value = tiffImage.tags[tag]?.read();
-  if (value == null || value.length == 0) {
-    return null;
-  }
-
-  return value.toInt();
+  return _readTagValue(tiffImage, tag)?.toInt();
 }
 
 double? _readDoubleTag(
   img.TiffImage tiffImage,
   int tag,
 ) {
-  final img.IfdValue? value = tiffImage.tags[tag]?.read();
-  if (value == null || value.length == 0) {
-    return null;
-  }
-
-  return value.toDouble();
+  return _readTagValue(tiffImage, tag)?.toDouble();
 }
 
 /// Reads ASCII or byte-backed text from a TIFF tag.
@@ -607,8 +553,8 @@ String? _readTextTag(
   img.TiffImage tiffImage,
   int tag,
 ) {
-  final img.IfdValue? value = tiffImage.tags[tag]?.read();
-  if (value == null || value.length == 0) {
+  final img.IfdValue? value = _readTagValue(tiffImage, tag);
+  if (value == null) {
     return null;
   }
 
@@ -624,63 +570,6 @@ String? _readTextTag(
 
   final String text = String.fromCharCodes(bytes).trim();
   return text.isEmpty ? null : text;
-}
-
-/// Converts associated-alpha TIFF pixels into straight-alpha PNG pixels.
-void _unMultiplyAlpha(img.Image image) {
-  for (int y = 0; y < image.height; y++) {
-    for (int x = 0; x < image.width; x++) {
-      final img.Pixel pixel = image.getPixel(x, y);
-      final int alpha = pixel.a.toInt();
-
-      if (alpha <= 0) {
-        pixel.r = 0;
-        pixel.g = 0;
-        pixel.b = 0;
-        continue;
-      }
-
-      if (alpha >= AppLimits.rgbChannelMax) {
-        continue;
-      }
-
-      pixel.r = _unMultiplyChannel(pixel.r.toInt(), alpha);
-      pixel.g = _unMultiplyChannel(pixel.g.toInt(), alpha);
-      pixel.b = _unMultiplyChannel(pixel.b.toInt(), alpha);
-    }
-  }
-}
-
-int _unMultiplyChannel(
-  int channel,
-  int alpha,
-) {
-  return (channel * AppLimits.rgbChannelMax / alpha).round().clamp(0, AppLimits.rgbChannelMax);
-}
-
-/// Appends one decoded TIFF layer to the canvas, preserving placement.
-///
-/// Returns the created [LayerProvider] so callers can restore the selection.
-Future<LayerProvider> _appendDecodedTiffLayer(
-  LayersProvider layers, {
-  required _LayerMeta meta,
-  required img.Image image,
-  required Offset offset,
-}) async {
-  final LayerProvider newLayer = layers.addTop(name: meta.name);
-  newLayer.opacity = meta.opacity;
-  newLayer.blendMode = meta.blendMode;
-  newLayer.isVisible = meta.visible;
-  newLayer.isLocked = meta.locked;
-
-  final Uint8List pngBytes = img.encodePng(image);
-  final ui.Image uiFrameImage = await _decodeImageFromList(pngBytes);
-
-  newLayer.addImage(
-    imageToAdd: uiFrameImage,
-    offset: offset,
-  );
-  return newLayer;
 }
 
 /// Parsed layer metadata extracted from a TIFF frame's ImageDescription tag.
@@ -702,6 +591,20 @@ class _LayerMeta {
 
   /// Whether this layer was the selected layer when the TIFF was written.
   final bool selected;
+
+  /// Pairs this metadata with the decoded [image] placed at [offset].
+  DecodedRasterLayer toDecodedLayer(img.Image image, Offset offset) {
+    return DecodedRasterLayer(
+      image: image,
+      name: name,
+      offset: offset,
+      opacity: opacity,
+      blendMode: blendMode,
+      visible: visible,
+      locked: locked,
+      selected: selected,
+    );
+  }
 }
 
 /// Reads the ImageDescription tag from the [frameIndex]-th frame of
@@ -756,15 +659,8 @@ _LayerMeta? _tryParseJsonMeta(String description, int frameIndex) {
     final bool visible = (map[TiffConstants.metaKeyVisible] as bool?) ?? true;
     final bool locked = (map[TiffConstants.metaKeyLocked] as bool?) ?? false;
     final bool selected = (map[TiffConstants.metaKeySelected] as bool?) ?? false;
-    final String blendName = (map[TiffConstants.metaKeyBlendMode] as String?) ?? 'srcOver';
-
-    ui.BlendMode blendMode = ui.BlendMode.srcOver;
-    for (final ui.BlendMode mode in ui.BlendMode.values) {
-      if (mode.name == blendName) {
-        blendMode = mode;
-        break;
-      }
-    }
+    final ui.BlendMode blendMode =
+        ui.BlendMode.values.asNameMap()[map[TiffConstants.metaKeyBlendMode] as String?] ?? ui.BlendMode.srcOver;
 
     return _LayerMeta(
       name: name,
@@ -791,13 +687,4 @@ Future<void> readTiffFromFilePath(
     readFailedPrefix: _errorTiffReadFilePrefix,
     exceptionBuilder: TiffFileException.new,
   );
-}
-
-// Private helper to convert Uint8List to ui.Image
-Future<ui.Image> _decodeImageFromList(Uint8List list) {
-  final Completer<ui.Image> completer = Completer<ui.Image>();
-  ui.decodeImageFromList(list, (ui.Image img) {
-    completer.complete(img);
-  });
-  return completer.future;
 }

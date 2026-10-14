@@ -82,6 +82,30 @@ Never throwFileOperationException<T extends FileOperationException>({
   );
 }
 
+/// Runs [operation], reporting any failure as a typed [FileOperationException].
+///
+/// A [T] thrown by [operation] passes through untouched; any other error is
+/// wrapped in a [T] built from [message] (with the error as its cause) and
+/// rethrown with the original stack trace.
+Future<R> wrapFileOperation<T extends FileOperationException, R>({
+  required String message,
+  required FileOperationExceptionBuilder<T> exceptionBuilder,
+  required Future<R> Function() operation,
+}) async {
+  try {
+    return await operation();
+  } on T {
+    rethrow;
+  } catch (error, stackTrace) {
+    throwFileOperationException<T>(
+      message: message,
+      error: error,
+      stackTrace: stackTrace,
+      exceptionBuilder: exceptionBuilder,
+    );
+  }
+}
+
 /// Returns non-null byte data for [image] encoded as [format], or throws.
 Future<ByteData> requireImageByteData<T extends FileOperationException>({
   required ui.Image image,
@@ -119,16 +143,9 @@ Future<void> readLayeredFileFromPath<T extends FileOperationException>({
     throw exceptionBuilder('$fileNotFoundPrefix "$path"');
   }
 
-  try {
-    await readBytes(await file.readAsBytes());
-  } on T {
-    rethrow;
-  } catch (error, stackTrace) {
-    throwFileOperationException<T>(
-      message: '$readFailedPrefix "$path"',
-      error: error,
-      stackTrace: stackTrace,
-      exceptionBuilder: exceptionBuilder,
-    );
-  }
+  await wrapFileOperation<T, void>(
+    message: '$readFailedPrefix "$path"',
+    exceptionBuilder: exceptionBuilder,
+    operation: () async => readBytes(await file.readAsBytes()),
+  );
 }

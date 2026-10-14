@@ -176,16 +176,10 @@ extension AppProviderSelection on AppProvider {
       return null;
     }
 
-    final ui.Image image = layers.selectedLayer.toImageForStorage(layers.size);
-
-    return renderCanvasImage(
-      width: bounds.width.toInt(),
-      height: bounds.height.toInt(),
-      draw: (ui.Canvas canvas) {
-        canvas.translate(-bounds.left, -bounds.top);
-        canvas.clipPath(selectorModel.path1!);
-        canvas.drawImage(image, Offset.zero, Paint());
-      },
+    return this._clipLayerToSelection(
+      layers.selectedLayer,
+      selectionPath: selectorModel.path1!,
+      bounds: bounds,
     );
   }
 
@@ -642,23 +636,13 @@ extension AppProviderSelection on AppProvider {
       return false;
     }
 
-    undoProvider.executeAction(
+    this._executeLayerAppend(
       name: name,
-      forward: () {
-        layers.selectedLayer.appendDrawingAction(
-          CutAction(path: erasePath, erasesEntireLayer: erasesEntireLayer),
-        );
-        layers.selectedLayer.addImage(
-          imageToAdd: replacement,
-          offset: offset,
-        );
-        update();
-      },
-      backward: () {
-        layers.selectedLayer.undo(); // undo add image
-        layers.selectedLayer.undo(); // undo cut
-        update();
-      },
+      resolveTargets: this._selectedLayerTarget,
+      buildActions: (_) => <UserActionDrawing>[
+        CutAction(path: erasePath, erasesEntireLayer: erasesEntireLayer),
+        ImageAction.placedAt(image: replacement, offset: offset),
+      ],
     );
 
     return true;
@@ -786,8 +770,7 @@ extension AppProviderSelection on AppProvider {
         }
         selectorModel.isDrawing = false;
         selectorModel.applyMath();
-        repaintToolOptions();
-        update();
+        updateWithToolOptions();
       }
     } finally {
       wandSelection.isInProgress = false;

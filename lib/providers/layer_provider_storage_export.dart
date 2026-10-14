@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/hatch_marks_renderer.dart';
 import 'package:fpaint/models/render_helper.dart';
@@ -124,23 +125,7 @@ extension LayerProviderStorageExport on LayerProvider {
     required List<ui.Offset> positions,
     required double outset,
   }) {
-    if (positions.isEmpty) {
-      return null;
-    }
-
-    double minX = positions.first.dx;
-    double minY = positions.first.dy;
-    double maxX = positions.first.dx;
-    double maxY = positions.first.dy;
-
-    for (final ui.Offset position in positions.skip(AppMath.one)) {
-      minX = min(minX, position.dx);
-      minY = min(minY, position.dy);
-      maxX = max(maxX, position.dx);
-      maxY = max(maxY, position.dy);
-    }
-
-    return ui.Rect.fromLTRB(minX, minY, maxX, maxY).inflate(outset);
+    return boundsOfPoints(positions)?.inflate(outset);
   }
 
   /// Estimates the maximum painted distance from a stroke path for [brush].

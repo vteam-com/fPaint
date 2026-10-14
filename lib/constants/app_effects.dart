@@ -46,9 +46,6 @@ class AppEffects {
   /// Number of color channels processed (R, G, B — alpha is preserved).
   static const int rgbChannelCount = 3;
 
-  /// Byte index of the alpha channel within an RGBA pixel.
-  static const int alphaChannelIndex = 3;
-
   /// Strength of the vignette darkening at the edges (0 = none, 1 = full black).
   static const double vignetteStrength = 0.75;
 

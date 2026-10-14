@@ -25,6 +25,29 @@ class TextObject {
   FontStyle fontStyle;
   TextAlign textAlign;
 
+  /// Returns a copy with the given fields replaced.
+  TextObject copyWith({
+    String? text,
+    Offset? position,
+    Color? color,
+    double? size,
+    String? fontFamily,
+    FontWeight? fontWeight,
+    FontStyle? fontStyle,
+    TextAlign? textAlign,
+  }) {
+    return TextObject(
+      text: text ?? this.text,
+      position: position ?? this.position,
+      color: color ?? this.color,
+      size: size ?? this.size,
+      fontFamily: fontFamily ?? this.fontFamily,
+      fontWeight: fontWeight ?? this.fontWeight,
+      fontStyle: fontStyle ?? this.fontStyle,
+      textAlign: textAlign ?? this.textAlign,
+    );
+  }
+
   /// Builds a paragraph using the same style and layout settings as rendering.
   ui.Paragraph buildParagraph() {
     final ui.ParagraphBuilder paragraphBuilder =

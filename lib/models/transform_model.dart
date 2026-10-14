@@ -1,9 +1,10 @@
-import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/models/visible_model.dart';
 
 /// Holds the state for a perspective/skew transform operation on a selected region.
@@ -188,20 +189,14 @@ class TransformModel extends VisibleModel {
 
   /// Sets deform mode, resets to corner handles, and clears transient feedback.
   void setDeformMode() {
-    clearActiveControl();
+    _enterMode(TransformInteractionMode.deform);
     handleSet = TransformHandleSet.corners;
-    interactionMode = TransformInteractionMode.deform;
-    endScaleGesture();
-    endRotateGesture();
   }
 
   /// Sets deform mode with all handles enabled so translation is directly available.
   void setTranslateMode() {
-    clearActiveControl();
+    _enterMode(TransformInteractionMode.deform);
     handleSet = TransformHandleSet.all;
-    interactionMode = TransformInteractionMode.deform;
-    endScaleGesture();
-    endRotateGesture();
   }
 
   /// Cycles the enabled transform handles from corners, to edges, to all controls.
@@ -218,16 +213,19 @@ class TransformModel extends VisibleModel {
 
   /// Sets rotate mode and clears any transient scale feedback.
   void setRotateMode() {
-    clearActiveControl();
-    interactionMode = TransformInteractionMode.rotate;
-    endScaleGesture();
-    endRotateGesture();
+    _enterMode(TransformInteractionMode.rotate);
   }
 
   /// Sets uniform scale mode without starting a drag gesture.
   void setScaleMode() {
+    _enterMode(TransformInteractionMode.scale);
+  }
+
+  /// Switches to [mode], clearing the active control and any live scale or
+  /// rotation feedback.
+  void _enterMode(TransformInteractionMode mode) {
     clearActiveControl();
-    interactionMode = TransformInteractionMode.scale;
+    interactionMode = mode;
     endScaleGesture();
     endRotateGesture();
   }
@@ -287,7 +285,7 @@ class TransformModel extends VisibleModel {
   /// Updates the live rotation feedback by [angleRadians].
   void updateRotationFeedback(double angleRadians) {
     final double previousDegrees = activeRotationDegrees;
-    activeRotationDegrees += angleRadians * AppMath.degreesPerHalfTurn / math.pi;
+    activeRotationDegrees += radiansToDegrees(angleRadians);
     triggerRotationSnapHaptic(previousDegrees, activeRotationDegrees);
   }
 
@@ -305,14 +303,7 @@ class TransformModel extends VisibleModel {
     );
     final Offset scaleCenter = center;
 
-    corners = corners.map((Offset corner) {
-      final Offset vector = corner - scaleCenter;
-      return scaleCenter + (vector * clampedFactor);
-    }).toList();
-    edgeMidpoints = edgeMidpoints.map((Offset midpoint) {
-      final Offset vector = midpoint - scaleCenter;
-      return scaleCenter + (vector * clampedFactor);
-    }).toList();
+    _mapControlPoints((Offset point) => scaleCenter + ((point - scaleCenter) * clampedFactor));
 
     final double previousPercent = activeScalePercent;
     activeScalePercent *= clampedFactor;
@@ -322,23 +313,14 @@ class TransformModel extends VisibleModel {
   /// Rotates the full quad around its center by [angleRadians].
   void rotate(double angleRadians) {
     final Offset rotationCenter = center;
-    final double cosine = math.cos(angleRadians);
-    final double sine = math.sin(angleRadians);
+    _mapControlPoints((Offset point) => rotationCenter + rotateOffset(point - rotationCenter, angleRadians));
+  }
 
-    corners = corners.map((Offset corner) {
-      final Offset vector = corner - rotationCenter;
-      return Offset(
-        rotationCenter.dx + (vector.dx * cosine) - (vector.dy * sine),
-        rotationCenter.dy + (vector.dx * sine) + (vector.dy * cosine),
-      );
-    }).toList();
-    edgeMidpoints = edgeMidpoints.map((Offset midpoint) {
-      final Offset vector = midpoint - rotationCenter;
-      return Offset(
-        rotationCenter.dx + (vector.dx * cosine) - (vector.dy * sine),
-        rotationCenter.dy + (vector.dx * sine) + (vector.dy * cosine),
-      );
-    }).toList();
+  /// Replaces [corners] and [edgeMidpoints] with fresh lists of each point
+  /// passed through [transform].
+  void _mapControlPoints(Offset Function(Offset) transform) {
+    corners = corners.map(transform).toList();
+    edgeMidpoints = edgeMidpoints.map(transform).toList();
   }
 
   /// Returns the center of the quad.
@@ -391,30 +373,7 @@ class TransformModel extends VisibleModel {
     if (corners.isEmpty && edgeMidpoints.isEmpty) {
       return Rect.zero;
     }
-    final List<Offset> activeEdgeMidpoints = effectiveEdgeMidpoints;
-    final List<Offset> controlPoints = <Offset>[
-      ...corners,
-      ...activeEdgeMidpoints,
-    ];
-    double minX = controlPoints.first.dx;
-    double maxX = controlPoints.first.dx;
-    double minY = controlPoints.first.dy;
-    double maxY = controlPoints.first.dy;
-    for (final Offset point in controlPoints) {
-      if (point.dx < minX) {
-        minX = point.dx;
-      }
-      if (point.dx > maxX) {
-        maxX = point.dx;
-      }
-      if (point.dy < minY) {
-        minY = point.dy;
-      }
-      if (point.dy > maxY) {
-        maxY = point.dy;
-      }
-    }
-    return Rect.fromLTRB(minX, minY, maxX, maxY);
+    return boundsOfPoints(<Offset>[...corners, ...effectiveEdgeMidpoints]) ?? Rect.zero;
   }
 
   /// Maps a corner-pair edge query onto the stored edge midpoint index.

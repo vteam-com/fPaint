@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:fpaint/helpers/platform_modifiers.dart';
 import 'package:fpaint/helpers/shortcuts_constants.dart';
 
 const String _tooltipShortcutOpen = ' (';
@@ -18,28 +18,28 @@ String? tooltipWithShortcut(
 
 /// Returns the platform primary modifier label (Command glyph on Apple platforms, Ctrl elsewhere).
 String primaryModifierShortcutLabel() {
-  return _isApplePlatform ? ShortcutModifiers.cmd : ShortcutModifiers.ctrl;
+  return isApplePlatform ? ShortcutModifiers.cmd : ShortcutModifiers.ctrl;
 }
 
 /// Returns the platform control modifier label (Control glyph on Apple platforms, Ctrl elsewhere).
 String controlModifierShortcutLabel() {
-  return _isApplePlatform ? ShortcutModifiers.ctrlSymbol : ShortcutModifiers.ctrl;
+  return isApplePlatform ? ShortcutModifiers.ctrlSymbol : ShortcutModifiers.ctrl;
 }
 
 /// Returns the label for the duplicate-on-drag modifier
 /// (Option glyph on Apple platforms, Ctrl elsewhere — see `_shouldDuplicateMoveGesture`).
 String duplicateDragModifierShortcutLabel() {
-  return _isApplePlatform ? ShortcutModifiers.option : ShortcutModifiers.ctrl;
+  return isApplePlatform ? ShortcutModifiers.option : ShortcutModifiers.ctrl;
 }
 
 /// Returns the platform secondary modifier label (Option glyph on Apple platforms, Alt elsewhere).
 String secondaryModifierShortcutLabel() {
-  return _isApplePlatform ? ShortcutModifiers.option : ShortcutModifiers.alt;
+  return isApplePlatform ? ShortcutModifiers.option : ShortcutModifiers.alt;
 }
 
 /// Returns the platform shift modifier label (Shift glyph on Apple platforms, Shift elsewhere).
 String shiftModifierShortcutLabel() {
-  return _isApplePlatform ? ShortcutModifiers.shiftSymbol : ShortcutModifiers.shift;
+  return isApplePlatform ? ShortcutModifiers.shiftSymbol : ShortcutModifiers.shift;
 }
 
 /// Joins modifier and key labels with the shortcut separator, skipping empty parts.
@@ -55,8 +55,4 @@ String primaryModifiedShortcut(String key) {
 /// Returns a shortcut label for a plain single key.
 String singleKeyShortcut(String key) {
   return key;
-}
-
-bool get _isApplePlatform {
-  return defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
 }

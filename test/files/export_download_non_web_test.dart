@@ -57,20 +57,15 @@ void main() {
       expect(() => exportAs, returnsNormally);
     });
 
-    test('saveAsPng function exists', () {
-      expect(() => saveAsPng, returnsNormally);
-    });
+    test('writeExportBytes writes the encoded bytes to the path', () async {
+      final Directory tempDirectory = await Directory.systemTemp.createTemp(_recentExportTestDirectoryPrefix);
+      addTearDown(() => tempDirectory.delete(recursive: true));
+      final String exportPath = '${tempDirectory.path}${Platform.pathSeparator}$_recentExportFileName';
+      final Uint8List bytes = Uint8List.fromList(<int>[_repeatExportCount, _repeatExportCount + 1]);
 
-    test('saveAsJpeg function exists', () {
-      expect(() => saveAsJpeg, returnsNormally);
-    });
+      await writeExportBytes(exportPath, bytes);
 
-    test('saveAsOra function exists', () {
-      expect(() => saveAsOra, returnsNormally);
-    });
-
-    test('saveAsTiff function exists', () {
-      expect(() => saveAsTiff, returnsNormally);
+      expect(await File(exportPath).readAsBytes(), bytes);
     });
 
     test('adds exported files to recent items without duplicates', () async {

@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/helpers/platform_modifiers.dart';
 import 'package:fpaint/helpers/smudge_helper.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/helpers/viewport_transform_helper.dart';
@@ -21,6 +22,7 @@ import 'package:fpaint/models/hatch_marks.dart';
 import 'package:fpaint/models/hatch_pattern.dart';
 import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/image_placement_model.dart';
+import 'package:fpaint/models/layer_state_snapshot.dart';
 import 'package:fpaint/models/quick_menu_model.dart';
 import 'package:fpaint/models/quick_menu_slot.dart';
 import 'package:fpaint/models/selection_effect.dart';
@@ -28,6 +30,7 @@ import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/text_tool_state.dart';
 import 'package:fpaint/models/tool_descriptor.dart';
+import 'package:fpaint/models/tool_family.dart';
 import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -50,6 +53,7 @@ export 'package:fpaint/providers/layers_provider.dart';
 part 'app_provider_canvas.dart';
 part 'app_provider_cross_layer_eraser.dart';
 part 'app_provider_hatch.dart';
+part 'app_provider_layer_append.dart';
 part 'app_provider_pixel_brush.dart';
 part 'app_provider_quick_menu.dart';
 part 'app_provider_selection.dart';
@@ -304,10 +308,11 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
       action.clipPath = selectorModel.path1;
     }
 
-    _undoProvider.executeAction(
+    this._executeLayerAppend(
       name: action.action.name,
-      forward: () => layers.selectedLayer.appendDrawingAction(action),
-      backward: () => layers.selectedLayer.undo(),
+      resolveTargets: this._selectedLayerTarget,
+      buildActions: (_) => <UserActionDrawing>[action],
+      notifyAfterReplay: false,
     );
 
     layers.update();
@@ -318,27 +323,22 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
   ///
   /// Awaits the replay so an asynchronous record (canvas rotate/flip) is fully
   /// reverted before dependent UI updates run.
-  Future<void> undoAction() async {
+  Future<void> undoAction() => _replayHistory(_undoProvider.undo);
+
+  /// Redoes an action; see [undoAction] for the async replay contract.
+  Future<void> redoAction() => _replayHistory(_undoProvider.redo);
+
+  /// Runs one history step ([replay] is undo or redo) and refreshes the UI.
+  Future<void> _replayHistory(Future<void> Function() replay) async {
     // Finalize any live gradient-fill session first so the transient preview
     // (which is not on the undo stack) never participates in history.
     if (isGradientPreviewActive) {
       applyGradientPreview();
     }
-    // A pixel-brush commit still rendering must not land after this undo and
-    // resurrect the state the user just reverted; drop the in-flight stroke.
+    // A pixel-brush commit still rendering must not land after this step and
+    // resurrect the state the user just left; drop the in-flight stroke.
     pixelBrushSession.clearStroke();
-    await _undoProvider.undo();
-    layers.update();
-    update();
-  }
-
-  /// Redoes an action; see [undoAction] for the async replay contract.
-  Future<void> redoAction() async {
-    if (isGradientPreviewActive) {
-      applyGradientPreview();
-    }
-    pixelBrushSession.clearStroke();
-    await _undoProvider.redo();
+    await replay();
     layers.update();
     update();
   }
@@ -388,9 +388,8 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
 
     _selectedAction = value;
 
-    if (value != ActionType.selector && effectPreviewModel.isVisible) {
-      effectPreviewModel.clear();
-      effectPreviewRenderVersion++;
+    if (value != ActionType.selector) {
+      this._discardEffectPreview();
     }
 
     if (value != ActionType.fill) {
@@ -500,8 +499,7 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
   set brushSize(double value) {
     preferences.setBrushSize(value);
     _showBrushSizePreview(value);
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   void _showBrushSizePreview(double value) {
@@ -572,7 +570,7 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
       case ActionType.blurBrush:
         return preferences.blurBrushIntensity;
       default:
-        return AppInteraction.pixelBrushDefaultIntensity;
+        return AppEffects.defaultIntensity;
     }
   }
 
@@ -588,8 +586,7 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
       default:
         return;
     }
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   //-------------------------
@@ -605,8 +602,7 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
     if (value.isHatch) {
       this._prewarmHatchTiles();
     }
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   //-------------------------
@@ -625,8 +621,7 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
   set brushColor(Color value) {
     preferences.setBrushColor(value);
     layers.recentColors.record(value);
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   //-------------------------
@@ -639,8 +634,7 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
   set fillColor(Color value) {
     preferences.setFillColor(value);
     layers.recentColors.record(value);
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   //-------------------------
@@ -654,8 +648,7 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
   @override
   set tolerance(int value) {
     _tolerance = max(1, min(AppLimits.percentMax, value));
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   //-------------------------
@@ -785,8 +778,7 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
     textToolState.fontWeight = value.fontWeight;
     textToolState.fontStyle = value.fontStyle;
     textToolState.textAlign = value.textAlign;
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   /// Copies the style of [textObject] into the shared text tool state.
@@ -899,14 +891,9 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
   /// that was captured against the old region.
   @override
   void cancelEffectPreview() {
-    if (!effectPreviewModel.isVisible) {
-      return;
+    if (this._discardEffectPreview()) {
+      updateWithToolOptions();
     }
-
-    effectPreviewModel.clear();
-    effectPreviewRenderVersion++;
-    repaintToolOptions();
-    update();
   }
 
   /// Drops a queued magic-wand sample. Part of [SelectorGeometryHost].
@@ -972,29 +959,25 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
   /// Sets the active fill mode and rebuilds tool options.
   void setFillMode(FillMode value) {
     fillModel.mode = value;
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   /// Sets whether flood fill should render as a halftone pattern.
   void setFillHalftoneEnabled(bool value) {
     fillModel.halftoneEnabled = value;
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   /// Sets the maximum halftone dot size percentage.
   void setFillHalftoneMaxDotSizePercent(int value) {
     fillModel.halftoneMaxDotSizePercent = value;
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   /// Sets the active selector mode and rebuilds tool options.
   void setSelectorMode(SelectorMode value) {
     selectorModel.mode = value;
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   /// Whether the Edge Detection (magic wand) selector is the active tool.
@@ -1006,22 +989,19 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
   /// Sets the active selector math mode and rebuilds tool options.
   void setSelectorMath(SelectorMath value) {
     selectorModel.math = value;
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   /// Sets the shared text-tool font size.
   void setTextToolSize(double value) {
     textToolState.size = value;
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   /// Sets the shared text-tool color.
   void setTextToolColor(Color value) {
     textToolState.color = value;
-    repaintToolOptions();
-    update();
+    updateWithToolOptions();
   }
 
   //=============================================================================
@@ -1031,5 +1011,11 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
   @override
   void update() {
     notifyListeners();
+  }
+
+  /// Repaints the tool-options chrome, then notifies the full app shell.
+  void updateWithToolOptions() {
+    repaintToolOptions();
+    update();
   }
 }

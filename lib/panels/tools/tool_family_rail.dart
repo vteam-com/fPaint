@@ -6,12 +6,16 @@ import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/tool_descriptor.dart';
+import 'package:fpaint/models/tool_family.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/app_buttons.dart';
 import 'package:fpaint/widgets/app_divider.dart';
 import 'package:fpaint/widgets/app_slider.dart';
 import 'package:fpaint/widgets/side_panel_header.dart';
+
+/// Brush-size range of a painted effect brush.
+final BrushSizeRange _effectBrushSizeRange = brushSizeRangeFor(ActionType.brush, effectArmed: true);
 
 /// The tool rail: two sections split by interaction shape.
 ///
@@ -70,15 +74,15 @@ class ToolFamilyRail extends StatelessWidget {
             label: l10n.brushSize,
             value: appProvider.brushSize,
             valueLabel: appProvider.brushSize.toStringAsFixed(AppMath.zero),
-            min: AppInteraction.minCanvasScale,
-            max: AppLimits.pixelBrushSizeMax.toDouble(),
+            min: _effectBrushSizeRange.min,
+            max: _effectBrushSizeRange.max,
             onChanged: (double value) => appProvider.brushSize = value,
           ),
           AppSlider(
             key: Keys.effectPaintStrengthSlider,
             label: effectLabel(l10n, armedEffect),
             value: appProvider.effectBrushModel.strength,
-            valueLabel: '${(appProvider.effectBrushModel.strength * AppMath.percentScale).round()}%',
+            valueLabel: formatFractionPercent(l10n, appProvider.effectBrushModel.strength),
             min: armedEffect.bipolar ? -AppEffects.maxIntensity : AppEffects.minIntensity,
             max: AppEffects.maxIntensity,
             onChanged: (double value) => appProvider.setEffectBrushStrength(value),
@@ -125,31 +129,26 @@ class ToolFamilyRail extends StatelessWidget {
     ToolDescriptor descriptor,
     SelectionEffect? armedEffect,
   ) {
-    final EdgeInsets padding = EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.small);
-    final BoxConstraints? constraints = minimal ? const BoxConstraints() : null;
-
     if (descriptor.effect != null) {
       final SelectionEffect effect = descriptor.effect!;
-      return AppButtonIcon(
+      return AppButtonIcon.toolOption(
         key: ValueKey<SelectionEffect>(effect),
         icon: descriptor.icon,
+        compact: minimal,
         isSelected: appProvider.activeTool == descriptor,
         tooltip: descriptor.label(l10n),
-        constraints: constraints,
-        padding: padding,
         onPressed: () => armedEffect == effect ? appProvider.disarmEffectBrush() : appProvider.armEffectBrush(effect),
       );
     }
 
     final ActionType action = descriptor.action!;
-    return AppButtonIcon(
+    return AppButtonIcon.toolOption(
       key: _gestureToolKey(action),
       icon: descriptor.icon,
+      compact: minimal,
       // Suppressed while an effect brush is armed — only one tool is active.
       isSelected: appProvider.activeTool == descriptor,
       tooltip: tooltipWithShortcut(descriptor.label(l10n), descriptor.shortcut),
-      constraints: constraints,
-      padding: padding,
       onPressed: () => appProvider.activateTool(descriptor),
     );
   }

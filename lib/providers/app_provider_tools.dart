@@ -7,8 +7,7 @@ bool isFloodFillOriginModifierPressedForPlatform({
   required bool isAltPressed,
   required bool isControlPressed,
 }) {
-  final bool isApplePlatform = platform == TargetPlatform.macOS || platform == TargetPlatform.iOS;
-  return isApplePlatform ? isAltPressed : isControlPressed;
+  return isApplePlatformFor(platform) ? isAltPressed : isControlPressed;
 }
 
 /// Returns whether the platform-specific modifier combination requests the
@@ -24,8 +23,7 @@ bool isBrushSizeDragModifierPressedForPlatform({
   required bool isControlPressed,
   required bool isMetaPressed,
 }) {
-  final bool isApplePlatform = platform == TargetPlatform.macOS || platform == TargetPlatform.iOS;
-  final bool isPrimaryPressed = isApplePlatform ? isMetaPressed : isControlPressed;
+  final bool isPrimaryPressed = isApplePlatformFor(platform) ? isMetaPressed : isControlPressed;
   return isPrimaryPressed && isAltPressed;
 }
 
@@ -167,6 +165,16 @@ extension AppProviderTools on AppProvider {
     );
   }
 
+  /// A fresh [MyBrush] snapshot of the current brush settings (color, size,
+  /// style and hatch geometry) for a new stroke.
+  MyBrush get currentBrush => MyBrush(
+    color: brushColor,
+    size: brushSize,
+    style: brushStyle,
+    hatch: hatchPattern,
+    marks: hatchMarks,
+  );
+
   /// Activates the eyedropper via keyboard shortcut (Alt / Option).
   void activateEyeDropShortcut({Offset? position}) {
     isEyeDropShortcutActive = true;
@@ -183,6 +191,23 @@ extension AppProviderTools on AppProvider {
     isEyeDropShortcutActive = false;
     eyeDropPositionForBrush = null;
     eyeDropPositionForFill = null;
+  }
+
+  /// Moves the armed eyedropper loupe to [screenPosition]; the brush
+  /// eyedropper wins when both are armed.
+  ///
+  /// Returns `true` when the brush eyedropper moved, `false` when the fill
+  /// eyedropper moved, and `null` when no eyedropper is armed.
+  bool? moveActiveEyeDrop(Offset screenPosition) {
+    if (eyeDropPositionForBrush != null) {
+      eyeDropPositionForBrush = screenPosition;
+      return true;
+    }
+    if (eyeDropPositionForFill != null) {
+      eyeDropPositionForFill = screenPosition;
+      return false;
+    }
+    return null;
   }
 
   /// Whether the single-shot pick-layer mode is armed, either by the
@@ -208,17 +233,13 @@ extension AppProviderTools on AppProvider {
   /// The largest brush size the armed tool accepts. The smudge/blur pixel
   /// brushes and an armed effect brush work at much larger radii than the
   /// paint tools, matching the range their side-panel slider offers.
-  double get activeBrushSizeMax {
-    final bool isPixelBrush =
-        effectBrushModel.isArmed || selectedAction == ActionType.smudge || selectedAction == ActionType.blurBrush;
-    return isPixelBrush ? AppLimits.pixelBrushSizeMax.toDouble() : AppLimits.percentMax.toDouble();
-  }
+  double get activeBrushSizeMax => _activeBrushSizeRange.max;
 
   /// The smallest brush size the armed tool accepts, matching its slider. An
   /// armed effect brush overrides the underlying tool's range.
-  double get activeBrushSizeMin => selectedAction == ActionType.pencil && !effectBrushModel.isArmed
-      ? AppMath.one.toDouble()
-      : AppInteraction.minCanvasScale;
+  double get activeBrushSizeMin => _activeBrushSizeRange.min;
+
+  BrushSizeRange get _activeBrushSizeRange => brushSizeRangeFor(selectedAction, effectArmed: effectBrushModel.isArmed);
 
   /// Applies a computed brush [size] to the armed tool if it differs from the
   /// current one. Returns the applied size.
@@ -386,7 +407,7 @@ extension AppProviderTools on AppProvider {
         ],
         action: last.action,
         brush: last.brush ?? MyBrush(color: brushColor, size: brushSize),
-        clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
+        clipPath: selectorModel.activeClipPath,
       ),
     );
   }
@@ -415,12 +436,7 @@ extension AppProviderTools on AppProvider {
       return false;
     }
 
-    selectorModel.isVisible = true;
-    selectorModel.isDrawing = false;
-    selectorModel.path1 = region.path.shift(region.offset);
-    selectorModel.path2 = null;
-    selectorModel.points.clear();
-    selectorModel.math = SelectorMath.replace;
+    selectorModel.replacePath(region.path.shift(region.offset));
     update();
     return true;
   }
@@ -465,7 +481,7 @@ extension AppProviderTools on AppProvider {
       halftoneMaxDotSizeFactor: fillModel.halftoneMaxDotSizeFactor,
       hatchPattern: fillModel.hatchEnabled ? hatchPattern.copyWith(crossed: fillModel.hatchCrossed) : null,
       tolerance: tolerance,
-      clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
+      clipPath: selectorModel.activeClipPath,
       regionPathOverride: _selectionRegionFloodFillOverridePath,
     );
     return (action.path?.getBounds().isEmpty ?? true) ? null : action;
@@ -483,7 +499,7 @@ extension AppProviderTools on AppProvider {
       imageData: imageData,
       fillModel: fillModel,
       tolerance: tolerance,
-      clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
+      clipPath: selectorModel.activeClipPath,
       toCanvas: toCanvas,
       regionPathOverride: _selectionRegionFloodFillOverridePath,
     );

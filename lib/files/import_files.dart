@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/files/export_file_name.dart';
 import 'package:fpaint/files/file_heic.dart' if (dart.library.html) 'package:fpaint/files/file_heic_web.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
 import 'package:fpaint/files/file_ora.dart';
@@ -25,18 +26,6 @@ import 'package:logging/logging.dart';
 
 const String _defaultCanvasDimension = '800';
 
-/// Returns the lower-case extension of [fileName], without the leading dot.
-///
-/// `PlatformFile` no longer exposes an `extension` getter, so it is derived from
-/// the file name here.
-String _fileExtensionFromName(String fileName) {
-  final int dotIndex = fileName.lastIndexOf('.');
-  if (dotIndex < 0 || dotIndex == fileName.length - 1) {
-    return '';
-  }
-  return fileName.substring(dotIndex + 1).toLowerCase();
-}
-
 const String _loadedImageDefaultName = 'Loaded Image';
 
 final Logger _log = Logger(logNameImportFiles);
@@ -52,6 +41,50 @@ void _showImportError(String message) {
   );
 }
 
+/// Replaces the current document with the clipboard image and fits it to the
+/// view.
+///
+/// Performs no discard confirmation — use [newDocumentFromClipboardGuarded]
+/// unless the caller has already confirmed discarding unsaved work.
+/// Completes with `true` when a new document was created.
+Future<bool> createDocumentFromClipboard(
+  AppProvider appProvider,
+  ShellProvider shellProvider,
+) async {
+  final bool created = await appProvider.newDocumentFromClipboardImage();
+  if (created) {
+    shellProvider.requestCanvasFit();
+  }
+  return created;
+}
+
+/// The single "New from clipboard" entry point for menus, shortcuts and
+/// dialogs.
+///
+/// Does nothing when the clipboard holds no image. Otherwise asks the user to
+/// confirm discarding unsaved changes (if any), then creates the document via
+/// [createDocumentFromClipboard] and fits the canvas to the view.
+///
+/// [appProvider] and [shellProvider] default to the instances found in
+/// [context]; pass them explicitly when [context] sits above the editor scope.
+/// Completes with `true` when a new document was created.
+Future<bool> newDocumentFromClipboardGuarded(
+  BuildContext context, {
+  AppProvider? appProvider,
+  ShellProvider? shellProvider,
+}) async {
+  final AppProvider app = appProvider ?? AppProvider.of(context);
+  final ShellProvider shell = shellProvider ?? ShellProvider.of(context);
+
+  if (!await clipboardHasImage() || !context.mounted) {
+    return false;
+  }
+  if (!await confirmDiscardIfChanged(context, app.layers)) {
+    return false;
+  }
+  return createDocumentFromClipboard(app, shell);
+}
+
 /// Handles the creation of a new file within the application.
 ///
 /// This asynchronous function is triggered when the user opts to create a
@@ -64,7 +97,7 @@ Future<void> onFileNew(BuildContext context) async {
   final ShellProvider shellProvider = ShellProvider.of(context);
   final AppLocalizations l10n = context.l10n;
 
-  if (appProvider.layers.hasChanged && await confirmDiscardCurrentWork(context) == false) {
+  if (!await confirmDiscardIfChanged(context, appProvider.layers)) {
     return;
   }
 
@@ -102,9 +135,8 @@ Future<void> onFileNew(BuildContext context) async {
             if (offNewDocFromClipboard)
               AppRowSecondaryButton(
                 onPressed: () {
-                  // Handle creating new document from clipboard image
-                  appProvider.newDocumentFromClipboardImage();
-                  shellProvider.requestCanvasFit();
+                  // Discard was already confirmed at the top of onFileNew.
+                  createDocumentFromClipboard(appProvider, shellProvider);
                   Navigator.of(context).pop();
                 },
                 text: l10n.newFromClipboard,
@@ -155,7 +187,7 @@ Future<void> onFileOpen(BuildContext context) async {
   // never reaches back into a possibly-defunct BuildContext.
   final AppPreferences preferences = AppPreferences.of(context);
 
-  if (layers.hasChanged && await confirmDiscardCurrentWork(context) == false) {
+  if (!await confirmDiscardIfChanged(context, layers)) {
     return;
   }
 
@@ -188,7 +220,7 @@ Future<void> onFileOpen(BuildContext context) async {
       if (kIsWeb) {
         final Uint8List bytes = await result.readAsBytes();
         final String fileName = result.name; // Get filename for naming the layer
-        final String extension = _fileExtensionFromName(fileName);
+        final String extension = fileExtensionOf(fileName);
         final ImportFileFormat? format = ImportFileFormat.fromExtension(extension);
         if (format != null) {
           switch (format.decodeKind) {
@@ -213,6 +245,8 @@ Future<void> onFileOpen(BuildContext context) async {
               await readImageFileFromBytes(layers, bytes, l10n, imageName: fileName);
           }
         }
+        layers.clearHasChanged();
+        shellProvider.requestCanvasFit();
       } else {
         final String path = result.path!;
         shellProvider.loadedFileName = path;
@@ -224,11 +258,13 @@ Future<void> onFileOpen(BuildContext context) async {
             preferences: preferences,
           );
         }
-        shellProvider.loadedFileName = path;
-        await preferences.addRecentFile(path);
+        await finishDocumentOpen(
+          shellProvider: shellProvider,
+          layers: layers,
+          preferences: preferences,
+          path: path,
+        );
       }
-      layers.clearHasChanged();
-      shellProvider.requestCanvasFit();
     }
   } catch (e) {
     // Handle any errors that occur during file picking/loading
@@ -264,13 +300,34 @@ Future<void> _openInPlaceDocument({
         preferences: preferences,
       ),
     );
-    shellProvider.loadedFileName = document.path;
-    await preferences.addRecentFile(document.path, bookmark: document.bookmark);
-    layers.clearHasChanged();
-    shellProvider.requestCanvasFit();
+    await finishDocumentOpen(
+      shellProvider: shellProvider,
+      layers: layers,
+      preferences: preferences,
+      path: document.path,
+      bookmark: document.bookmark,
+    );
   } catch (e) {
     _log.severe('Error opening file in place', e);
   }
+}
+
+/// Completes opening the document at [path]: records it as the loaded file,
+/// marks the canvas clean, fits it to the view and adds it to the recent files
+/// (keeping [bookmark] when the document was opened through one).
+///
+/// The shared tail of every open flow (picker, in-place, drop, recent files).
+Future<void> finishDocumentOpen({
+  required ShellProvider shellProvider,
+  required LayersProvider layers,
+  required AppPreferences preferences,
+  required String path,
+  String? bookmark,
+}) async {
+  shellProvider.loadedFileName = path;
+  layers.clearHasChanged();
+  shellProvider.requestCanvasFit();
+  await preferences.addRecentFile(path, bookmark: bookmark);
 }
 
 /// Opens a file from the specified file path.
@@ -299,7 +356,7 @@ Future<bool> openFileFromPath({
   // Capture localization up front so the rest of the flow never touches the
   // BuildContext across the await points below.
   final AppLocalizations l10n = context.l10n;
-  final String extension = path.split('.').last.toLowerCase();
+  final String extension = fileExtensionOf(path);
 
   final ImportFileFormat? format = ImportFileFormat.fromExtension(extension);
   if (format == null) {
@@ -309,7 +366,7 @@ Future<bool> openFileFromPath({
   }
 
   try {
-    final String fileName = path.split(Platform.pathSeparator).last;
+    final String fileName = fileNameOf(path);
     switch (format.decodeKind) {
       case ImportDecodeKind.ora:
         // ORA embeds the selected layer, restored inside the reader.
@@ -395,14 +452,11 @@ Future<bool> _decodeAndApplyImage(
   String imageName = _loadedImageDefaultName,
 }) async {
   try {
-    final ui.Image image = await decodeImageFromList(imageBytes);
+    final ui.Image image = await fromBytesToImage(imageBytes);
 
     await layers.replaceAll(
       canvasSize: Size(image.width.toDouble(), image.height.toDouble()),
-      addLayers: () async {
-        layers.addTop(name: imageName);
-        layers.selectedLayer.addImage(imageToAdd: image);
-      },
+      addLayers: () async => _addImageAsTopLayer(layers, image, imageName),
     );
 
     return true; // Success
@@ -410,6 +464,16 @@ Future<bool> _decodeAndApplyImage(
     _showImportError(l10n.failedToLoadImage(e.toString()));
     return false; // Failure
   }
+}
+
+/// Adds [image] as a new top layer named [name] and selects it.
+void _addImageAsTopLayer(
+  LayersProvider layers,
+  ui.Image image,
+  String name,
+) {
+  layers.addTop(name: name);
+  layers.selectedLayer.addImage(imageToAdd: image);
 }
 
 /// Reads an image from the specified file path.
@@ -501,7 +565,7 @@ Future<void> onFileDropped({
   final ShellProvider shellProvider = ShellProvider.of(context);
   final AppPreferences preferences = AppPreferences.of(context);
 
-  final String extension = path.split('.').last.toLowerCase();
+  final String extension = fileExtensionOf(path);
   if (!isFileExtensionSupported(extension)) {
     _showImportError(context.l10n.fileFormatNotSupported(extension));
     return;
@@ -550,10 +614,12 @@ Future<void> onFileDropped({
   // Open the file, replacing the current content.
   if (context.mounted) {
     await openFileFromPath(context: context, layers: layers, path: path, preferences: preferences);
-    shellProvider.loadedFileName = path;
-    layers.clearHasChanged();
-    shellProvider.requestCanvasFit();
-    await preferences.addRecentFile(path);
+    await finishDocumentOpen(
+      shellProvider: shellProvider,
+      layers: layers,
+      preferences: preferences,
+      path: path,
+    );
   }
 }
 
@@ -564,15 +630,12 @@ Future<void> addFileAsLayer({
   required LayersProvider layers,
   required String path,
 }) async {
-  final String fileName = path.split(Platform.pathSeparator).last;
+  final String fileName = fileNameOf(path);
   final AppLocalizations l10n = context.l10n;
 
   try {
     final Uint8List fileBytes = await File(path).readAsBytes();
-    final ui.Image image = await decodeImageFromList(fileBytes);
-
-    layers.addTop(name: fileName);
-    layers.selectedLayer.addImage(imageToAdd: image);
+    _addImageAsTopLayer(layers, await fromBytesToImage(fileBytes), fileName);
     layers.update();
   } catch (e) {
     _showImportError(l10n.failedToLoadImage(e.toString()));

@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 
 const int _topLeftCornerIndex = 0;
@@ -118,19 +119,11 @@ Future<ui.Image> renderTransformedImage(
     ...corners,
     ...?edgeMidpoints,
   ];
-  double minX = controlPoints[0].dx;
-  double maxX = controlPoints[0].dx;
-  double minY = controlPoints[0].dy;
-  double maxY = controlPoints[0].dy;
-  for (final Offset point in controlPoints) {
-    minX = min(minX, point.dx);
-    maxX = max(maxX, point.dx);
-    minY = min(minY, point.dy);
-    maxY = max(maxY, point.dy);
-  }
-
-  final double width = maxX - minX;
-  final double height = maxY - minY;
+  final Rect bounds = boundsOfPoints(controlPoints) ?? Rect.zero;
+  final double minX = bounds.left;
+  final double minY = bounds.top;
+  final double width = bounds.width;
+  final double height = bounds.height;
 
   return renderCanvasImage(
     width: max(1, width.ceil()),
@@ -283,13 +276,7 @@ void triggerRotationSnapHaptic(
   double previousDegrees,
   double currentDegrees,
 ) {
-  const double interval = AppMath.rotationSnapInterval;
-
-  // Which snap bucket each value falls in (floor towards −∞).
-  final int prevSlot = (previousDegrees / interval).floor();
-  final int currSlot = (currentDegrees / interval).floor();
-
-  if (prevSlot != currSlot) {
+  if (_crossesSnapInterval(previousDegrees, currentDegrees, AppMath.rotationSnapInterval)) {
     _performHaptic();
   }
 }
@@ -303,15 +290,15 @@ void triggerScaleSnapHaptic(
   double previousPercent,
   double currentPercent,
 ) {
-  const double interval = AppMath.scaleSnapInterval;
-
-  // Which snap bucket each value falls in (floor towards −∞).
-  final int prevSlot = (previousPercent / interval).floor();
-  final int currSlot = (currentPercent / interval).floor();
-
-  if (prevSlot != currSlot) {
+  if (_crossesSnapInterval(previousPercent, currentPercent, AppMath.scaleSnapInterval)) {
     _performHaptic();
   }
+}
+
+/// Whether [previous] and [current] fall in different [interval]-wide snap
+/// buckets (floored towards −∞), i.e. a multiple of [interval] was crossed.
+bool _crossesSnapInterval(double previous, double current, double interval) {
+  return (previous / interval).floor() != (current / interval).floor();
 }
 
 /// Fires haptic feedback when the selection crosses the perfect-square

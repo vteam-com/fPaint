@@ -552,7 +552,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String percentageValue(Object value) {
-    return 'Echelle : $value %';
+    return '$value %';
   }
 
   @override

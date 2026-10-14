@@ -6,6 +6,7 @@ import 'package:fpaint/helpers/shortcut_tooltip.dart';
 import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
+import 'package:fpaint/models/app_command.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/panels/side_panel/menu.dart';
@@ -269,6 +270,43 @@ Widget _buildResponsiveToolbarGroupWidget(_ToolbarActionGroup group) {
   return Flexible(child: groupWidget);
 }
 
+/// Wraps one icon-sized [child] as a toolbar entry of [importance].
+_ToolbarActionEntry _iconEntry(
+  Widget child,
+  InteractionLayoutProfile interactionProfile,
+  _ToolbarActionImportance importance,
+) {
+  return _ToolbarActionEntry(
+    child: child,
+    estimatedWidth: _iconActionWidth(interactionProfile),
+    importance: importance,
+  );
+}
+
+/// Builds a lowest-priority canvas transform entry that runs [transform] with
+/// its undo label [label], then refits the canvas to the view.
+_ToolbarActionEntry _canvasTransformEntry({
+  required ShellProvider shellProvider,
+  required InteractionLayoutProfile interactionProfile,
+  required String label,
+  required AppIcon icon,
+  required Future<void> Function(String label) transform,
+}) {
+  return _iconEntry(
+    buildToolbarIconButton(
+      tooltip: label,
+      icon: icon,
+      interactionProfile: interactionProfile,
+      onPressed: () async {
+        await transform(label);
+        shellProvider.requestCanvasFit();
+      },
+    ),
+    interactionProfile,
+    _ToolbarActionImportance.lowest,
+  );
+}
+
 /// Builds the primary document actions shown on wide desktop toolbars.
 List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
   BuildContext context,
@@ -279,96 +317,70 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
   final AppLocalizations l10n = context.l10n;
 
   return <_ToolbarActionEntry>[
-    _ToolbarActionEntry(
-      child: buildToolbarIconButton(
+    _iconEntry(
+      buildToolbarIconButton(
         tooltip: l10n.startOverTooltip,
-        icon: AppIcon.powerSettingsNew,
+        icon: AppCommand.newDocument.icon,
         interactionProfile: interactionProfile,
         onPressed: () => onFileNew(context),
       ),
-      estimatedWidth: _iconActionWidth(interactionProfile),
-      importance: _ToolbarActionImportance.lowest,
+      interactionProfile,
+      _ToolbarActionImportance.lowest,
     ),
-    _ToolbarActionEntry(
-      child: buildToolbarIconButton(
+    _iconEntry(
+      buildToolbarIconButton(
         tooltip: l10n.importTooltip,
-        icon: AppIcon.fileDownload,
+        icon: AppCommand.importFile.icon,
         interactionProfile: interactionProfile,
-        onPressed: () => showAppBottomSheet<void>(
-          context: context,
-          builder: (BuildContext _) {
-            return ImportDialog(parentContext: context);
-          },
-        ),
+        onPressed: () => showImportSheet(context),
       ),
-      estimatedWidth: _iconActionWidth(interactionProfile),
-      importance: _ToolbarActionImportance.low,
+      interactionProfile,
+      _ToolbarActionImportance.low,
     ),
-    _ToolbarActionEntry(
-      child: buildToolbarIconButton(
+    _iconEntry(
+      buildToolbarIconButton(
         key: Keys.sidePanelExportButton,
         tooltip: l10n.exportTooltip,
-        icon: AppIcon.iosShare,
+        icon: AppCommand.exportFile.icon,
         interactionProfile: interactionProfile,
         onPressed: () => sharePanel(context),
       ),
-      estimatedWidth: _iconActionWidth(interactionProfile),
-      importance: _ToolbarActionImportance.low,
+      interactionProfile,
+      _ToolbarActionImportance.low,
     ),
-    _ToolbarActionEntry(
-      child: buildToolbarIconButton(
+    _iconEntry(
+      buildToolbarIconButton(
         key: Keys.floatActionPaste,
-        tooltip: tooltipWithShortcut(
-          l10n.paste,
-          primaryModifiedShortcut(ShortcutKeys.v),
-        ),
-        icon: AppIcon.clipboardPaste,
+        tooltip: AppCommand.paste.tooltip(l10n.paste),
+        icon: AppCommand.paste.icon,
         interactionProfile: interactionProfile,
         onPressed: () {
           Future<void>.microtask(() => appProvider.paste());
         },
       ),
-      estimatedWidth: _iconActionWidth(interactionProfile),
-      importance: _ToolbarActionImportance.low,
+      interactionProfile,
+      _ToolbarActionImportance.low,
     ),
-    _ToolbarActionEntry(
-      child: buildToolbarIconButton(
-        tooltip: l10n.rotateCanvasTooltip,
-        icon: AppIcon.rotate90DegreesCw,
-        interactionProfile: interactionProfile,
-        onPressed: () async {
-          await appProvider.rotateCanvas90(l10n.rotateCanvasTooltip);
-          shellProvider.requestCanvasFit();
-        },
-      ),
-      estimatedWidth: _iconActionWidth(interactionProfile),
-      importance: _ToolbarActionImportance.lowest,
+    _canvasTransformEntry(
+      shellProvider: shellProvider,
+      interactionProfile: interactionProfile,
+      label: l10n.rotateCanvasTooltip,
+      icon: AppIcon.rotate90DegreesCw,
+      transform: appProvider.rotateCanvas90,
     ),
-    _ToolbarActionEntry(
-      child: buildToolbarIconButton(
-        tooltip: l10n.flipHorizontalTooltip,
-        icon: AppIcon.flipHorizontal,
-        interactionProfile: interactionProfile,
-        onPressed: () async {
-          await appProvider.flipCanvasHorizontal(l10n.flipHorizontalTooltip);
-          shellProvider.requestCanvasFit();
-        },
-      ),
-      estimatedWidth: _iconActionWidth(interactionProfile),
-      importance: _ToolbarActionImportance.lowest,
+    _canvasTransformEntry(
+      shellProvider: shellProvider,
+      interactionProfile: interactionProfile,
+      label: l10n.flipHorizontalTooltip,
+      icon: AppIcon.flipHorizontal,
+      transform: appProvider.flipCanvasHorizontal,
     ),
-    _ToolbarActionEntry(
-      child: buildToolbarIconButton(
-        tooltip: l10n.flipVerticalTooltip,
-        icon: AppIcon.flipVertical,
-        interactionProfile: interactionProfile,
-        onPressed: () async {
-          await appProvider.flipCanvasVertical(l10n.flipVerticalTooltip);
-          shellProvider.requestCanvasFit();
-        },
-      ),
-      estimatedWidth: _iconActionWidth(interactionProfile),
-      importance: _ToolbarActionImportance.lowest,
+    _canvasTransformEntry(
+      shellProvider: shellProvider,
+      interactionProfile: interactionProfile,
+      label: l10n.flipVerticalTooltip,
+      icon: AppIcon.flipVertical,
+      transform: appProvider.flipCanvasVertical,
     ),
   ];
 }
@@ -466,13 +478,8 @@ Widget _buildSelectorToggleButton({
 }) {
   return buildToolbarIconButton(
     key: Keys.floatActionSelector,
-    tooltip: hasActiveSelection
-        ? l10n.cancel
-        : tooltipWithShortcut(
-            l10n.toolSelector,
-            singleKeyShortcut(ShortcutKeys.s),
-          ),
-    icon: hasActiveSelection ? AppIcon.selectorCancel : AppIcon.selector,
+    tooltip: hasActiveSelection ? l10n.cancel : AppCommand.selector.tooltip(l10n.toolSelector),
+    icon: hasActiveSelection ? AppIcon.selectorCancel : AppCommand.selector.icon,
     interactionProfile: interactionProfile,
     useSourceColors: hasActiveSelection,
     onPressed: () {
@@ -489,18 +496,14 @@ Widget _buildUndoRedoButton({
   required InteractionLayoutProfile interactionProfile,
   required bool enabled,
   required Key key,
-  required AppIcon icon,
+  required AppCommand command,
   required String historyLabel,
-  required String shortcutKey,
   required void Function() action,
 }) {
   return _buildHistoryButton(
     key: key,
-    icon: icon,
-    tooltip: tooltipWithShortcut(
-      historyLabel,
-      primaryModifiedShortcut(shortcutKey),
-    )!,
+    icon: command.icon,
+    tooltip: command.tooltip(historyLabel),
     action: action,
     interactionProfile: interactionProfile,
     enabled: enabled,
@@ -534,22 +537,19 @@ Widget _buildZoomButton({
   required ShellProvider shellProvider,
   required AppProvider appProvider,
   required InteractionLayoutProfile interactionProfile,
-  required String tooltip,
-  required AppIcon icon,
+  required AppCommand command,
+  required String label,
   required double scaleDelta,
 }) {
   return buildToolbarIconButton(
     key: key,
-    tooltip: tooltip,
-    icon: icon,
+    tooltip: command.tooltip(label),
+    icon: command.icon,
     interactionProfile: interactionProfile,
     onPressed: () {
       Future<void>.microtask(() {
         shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-        appProvider.applyScaleToCanvas(
-          scaleDelta: scaleDelta,
-          anchorPoint: appProvider.canvasCenter,
-        );
+        appProvider.zoomAboutCenter(scaleDelta);
       });
     },
   );

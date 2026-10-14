@@ -381,14 +381,18 @@ int _encodeSketchBookPosition(double coordinate) {
 /// Encodes a list of integers as little-endian LONG values.
 Uint8List _encodeLongValues(List<int> values) {
   final ByteData data = ByteData(values.length * AppMath.bytesPerPixel);
+  _writeLongValues(data, values);
+  return data.buffer.asUint8List();
+}
+
+/// Writes [values] as consecutive little-endian LONGs from the start of [data].
+void _writeLongValues(ByteData data, List<int> values) {
   int offset = TiffConstants.noValue;
 
   for (final int value in values) {
     data.setUint32(offset, value, Endian.little);
     offset += AppMath.bytesPerPixel;
   }
-
-  return data.buffer.asUint8List();
 }
 
 /// Wraps a LONG array payload in a TIFF data block.
@@ -428,43 +432,25 @@ Uint8List _encodeAssociatedRgbaPixels(
   required bool writeBottomUp,
   required bool storeBgra,
 }) {
-  final Uint8List pixelBytes = Uint8List(
-    image.width * image.height * AppMath.bytesPerPixel,
-  );
-  int offset = TiffConstants.noValue;
+  final Uint8List straightPixels = toRgba8PackageImage(image).getBytes(order: img.ChannelOrder.rgba);
+  final int rowBytes = image.width * AppMath.bytesPerPixel;
+  final Uint8List pixelBytes = Uint8List(image.height * rowBytes);
 
+  // Copy rows in storage order first, so the in-place passes below never touch
+  // the source image's own buffer.
   for (int row = TiffConstants.noValue; row < image.height; row++) {
-    final int y = writeBottomUp ? image.height - 1 - row : row;
-    for (int x = TiffConstants.noValue; x < image.width; x++) {
-      final img.Pixel pixel = image.getPixel(x, y);
-      final int alpha = pixel.a.toInt();
-      final int red = _premultiplyChannel(pixel.r.toInt(), alpha);
-      final int blue = _premultiplyChannel(pixel.b.toInt(), alpha);
-      pixelBytes[offset++] = storeBgra ? blue : red;
-      pixelBytes[offset++] = _premultiplyChannel(pixel.g.toInt(), alpha);
-      pixelBytes[offset++] = storeBgra ? red : blue;
-      pixelBytes[offset++] = alpha;
-    }
+    final int sourceRow = writeBottomUp ? image.height - AppMath.one - row : row;
+    final int rowStart = row * rowBytes;
+    pixelBytes.setRange(rowStart, rowStart + rowBytes, straightPixels, sourceRow * rowBytes);
+  }
+
+  premultiplyRgbaInPlace(pixelBytes);
+
+  if (storeBgra) {
+    _swapRedBlueInPlace(pixelBytes);
   }
 
   return pixelBytes;
-}
-
-/// Premultiplies one color channel against its alpha value.
-int _premultiplyChannel(
-  int channel,
-  int alpha,
-) {
-  if (alpha <= TiffConstants.noValue) {
-    return TiffConstants.noValue;
-  }
-
-  if (alpha >= AppLimits.rgbChannelMax) {
-    return channel;
-  }
-
-  final int premultiplied = ((channel * alpha) / AppLimits.rgbChannelMax).round();
-  return premultiplied.clamp(TiffConstants.noValue, AppLimits.rgbChannelMax).toInt();
 }
 
 /// Encodes a NUL-terminated ASCII payload for TIFF text fields.
@@ -547,13 +533,7 @@ class _TiffDirectoryLayout {
       return;
     }
 
-    final ByteData data = ByteData.sublistView(subIfdBlock!.bytes);
-    int offset = TiffConstants.noValue;
-
-    for (final int subIfdOffset in offsets) {
-      data.setUint32(offset, subIfdOffset, Endian.little);
-      offset += AppMath.bytesPerPixel;
-    }
+    _writeLongValues(ByteData.sublistView(subIfdBlock!.bytes), offsets);
 
     if (offsets.length == 1) {
       subIfdEntry!.inlineBytes = Uint8List.fromList(subIfdBlock!.bytes);

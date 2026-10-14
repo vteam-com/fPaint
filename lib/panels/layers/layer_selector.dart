@@ -4,6 +4,7 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/panels/layers/blend_mode.dart';
+import 'package:fpaint/panels/layers/layer_actions.dart';
 import 'package:fpaint/panels/layers/layer_thumbnail.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
@@ -11,19 +12,9 @@ import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/container_slider.dart';
+import 'package:fpaint/widgets/locked_layer_guard.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/truncated_text.dart';
-
-const String _menuActionRename = 'rename';
-const String _menuActionModify = 'modify';
-const String _menuActionAdd = 'add';
-const String _menuActionDelete = 'delete';
-const String _menuActionMerge = 'merge';
-const String _menuActionBlend = 'blend';
-const String _menuActionLock = 'lock';
-const String _menuActionVisibility = 'visibility';
-const String _menuActionAllHide = 'allHide';
-const String _menuActionAllShow = 'allShow';
 
 /// A widget that displays a layer in the layer selector panel.
 class LayerSelector extends StatelessWidget {
@@ -136,6 +127,25 @@ class LayerSelector extends StatelessWidget {
     layer.name = newName;
   }
 
+  /// Builds the inline button for [action], labelled with [tooltip] (the
+  /// action's menu label by default) and tinted [defaultColor] when the action
+  /// has no state tint.
+  Widget _buildActionButton(
+    LayerAction action,
+    LayersProvider layers, {
+    Key? key,
+    String? tooltip,
+    Color? defaultColor,
+  }) {
+    return AppButtonIcon(
+      key: key,
+      tooltip: tooltip ?? action.label(context.l10n, layer),
+      icon: action.icon(layer),
+      color: action.iconColor(layer) ?? defaultColor,
+      onPressed: () => _performAction(action, layers),
+    );
+  }
+
   /// Builds the layer selector for a large surface.
   Widget _buildForLargeSurface(
     BuildContext context,
@@ -149,26 +159,16 @@ class LayerSelector extends StatelessWidget {
         return Row(
           mainAxisSize: hasBoundedWidth ? MainAxisSize.max : MainAxisSize.min,
           children: <Widget>[
-            if (hasBoundedWidth)
-              Expanded(
-                child: Column(
-                  children: <Widget>[
-                    _buildLayerName(layers),
-                    if (isSelected) _buildLayerControls(context, layers, layer, allowRemoveLayer),
-                  ],
-                ),
-              )
-            else
-              Flexible(
-                fit: FlexFit.loose,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    _buildLayerName(layers),
-                    if (isSelected) _buildLayerControls(context, layers, layer, allowRemoveLayer),
-                  ],
-                ),
+            _flexibleForWidth(
+              hasBoundedWidth: hasBoundedWidth,
+              child: Column(
+                mainAxisSize: hasBoundedWidth ? MainAxisSize.max : MainAxisSize.min,
+                children: <Widget>[
+                  _buildLayerName(layers),
+                  if (isSelected) _buildLayerControls(context, layers, layer, allowRemoveLayer),
+                ],
               ),
+            ),
             _buildThumbnailPreviewAndVisibility(
               layers,
               layer,
@@ -208,41 +208,16 @@ class LayerSelector extends StatelessWidget {
     return Wrap(
       alignment: WrapAlignment.center,
       children: <Widget>[
-        AppButtonIcon(
-          key: Keys.layerAddAboveButton,
-          tooltip: l10n.layerAddAbove,
-          icon: AppIcon.playlistAdd,
-          onPressed: () => _onAddLayer(layers),
-        ),
-        if (allowRemoveLayer)
-          AppButtonIcon(
-            tooltip: l10n.layerDelete,
-            icon: AppIcon.playlistRemove,
-            onPressed: () => layers.remove(layer),
-          ),
-        if (allowRemoveLayer)
-          AppButtonIcon(
-            tooltip: l10n.layerMergeBelow,
-            icon: AppIcon.layers,
-            onPressed: layer == layers.list.last
-                ? () {}
-                : () => _onMergeLayer(
-                    layers,
-                    layers.selectedLayerIndex,
-                    layers.selectedLayerIndex + 1,
-                  ),
-          ),
-        if (allowRemoveLayer)
-          AppButtonIcon(
+        _buildActionButton(LayerAction.addAbove, layers, key: Keys.layerAddAboveButton),
+        if (allowRemoveLayer) ...<Widget>[
+          _buildActionButton(LayerAction.delete, layers),
+          _buildActionButton(LayerAction.mergeBelow, layers),
+          _buildActionButton(
+            LayerAction.blendMode,
+            layers,
             tooltip: '${l10n.layerBlendMode}\n"${blendModeToText(layer.blendMode, AppLocalizations.of(context))}"',
-            icon: AppIcon.blender,
-            onPressed: () async {
-              layer.blendMode = await showBlendModeMenu(
-                context: context,
-                selectedBlendMode: layer.blendMode,
-              );
-            },
           ),
+        ],
         if (this.layer.backgroundColor != null)
           Padding(
             padding: const EdgeInsets.only(left: AppSpacing.largest),
@@ -262,12 +237,7 @@ class LayerSelector extends StatelessWidget {
               },
             ),
           ),
-        AppButtonIcon(
-          key: Keys.layerModifyButton,
-          tooltip: l10n.layerModify,
-          icon: AppIcon.transform,
-          onPressed: () => _onModifyLayer(layers),
-        ),
+        _buildActionButton(LayerAction.modify, layers, key: Keys.layerModifyButton),
       ],
     );
   }
@@ -286,49 +256,33 @@ class LayerSelector extends StatelessWidget {
                 opacity: AppVisual.half,
                 child: AppText('${layer.parentGroupName}.'),
               ),
-            if (hasBoundedWidth)
-              Expanded(
-                child: GestureDetector(
-                  onLongPress: () async {
-                    await renameLayer();
-                  },
-                  child: AppText(
-                    layer.name,
-                    variant: AppTextVariant.bodyBold,
-                    color: isSelected ? AppColors.blueShade100 : AppColors.grey400,
-                  ),
-                ),
-              )
-            else
-              Flexible(
-                fit: FlexFit.loose,
-                child: GestureDetector(
-                  onLongPress: () async {
-                    await renameLayer();
-                  },
-                  child: AppText(
-                    layer.name,
-                    variant: AppTextVariant.bodyBold,
-                    color: isSelected ? AppColors.blueShade100 : AppColors.grey400,
-                  ),
+            _flexibleForWidth(
+              hasBoundedWidth: hasBoundedWidth,
+              child: GestureDetector(
+                onLongPress: () async {
+                  await renameLayer();
+                },
+                child: AppText(
+                  layer.name,
+                  variant: AppTextVariant.bodyBold,
+                  color: isSelected ? AppColors.blueShade100 : AppColors.grey400,
                 ),
               ),
-            AppButtonIcon(
+            ),
+            _buildActionButton(
+              LayerAction.lock,
+              layers,
               key: Keys.layerToggleLockButton,
-              tooltip: layer.isLocked ? l10n.layerUnlockEdits : l10n.layerLockEdits,
-              icon: layer.isLocked ? AppIcon.lock : AppIcon.lockOpen,
-              color: layer.isLocked ? AppColors.layerHiddenWarning : AppColors.grey400,
-              onPressed: () => layers.layersToggleLock(layer),
+              defaultColor: AppColors.grey400,
             ),
-            AppButtonIcon(
+            _buildActionButton(
+              LayerAction.visibility,
+              layers,
               tooltip: l10n.layerToggleVisibility,
-              icon: layer.isVisible ? AppIcon.visibility : AppIcon.visibilityOff,
-              color: layer.isVisible ? AppColors.primary : AppColors.layerHiddenWarning,
-              onPressed: () => layers.layersToggleVisibility(layer),
             ),
-            AppPopupMenuButton<String>(
+            AppPopupMenuButton<LayerAction>(
               itemBuilder: (BuildContext _) => _buildPopupMenuItems(),
-              onSelected: (String value) => _handlePopupMenuSelection(value, layers),
+              onSelected: (LayerAction action) => _performAction(action, layers),
               child: const AppSvgIcon(icon: AppIcon.moreVert),
             ),
           ],
@@ -338,118 +292,17 @@ class LayerSelector extends StatelessWidget {
   }
 
   /// Builds the popup menu items for the layer selector.
-  List<AppPopupMenuItem<String>> _buildPopupMenuItems() {
+  List<AppPopupMenuItem<LayerAction>> _buildPopupMenuItems() {
     final AppLocalizations l10n = context.l10n;
-    return <AppPopupMenuItem<String>>[
-      AppPopupMenuItem<String>(
-        value: _menuActionRename,
-        child: Row(
-          children: <Widget>[
-            const AppSvgIcon(icon: AppIcon.edit),
-            const SizedBox(width: AppSpacing.small),
-            AppText(l10n.layerRename),
-          ],
-        ),
-      ),
-      AppPopupMenuItem<String>(
-        value: _menuActionModify,
-        child: Row(
-          children: <Widget>[
-            const AppSvgIcon(icon: AppIcon.transform),
-            const SizedBox(width: AppSpacing.small),
-            AppText(l10n.layerModify),
-          ],
-        ),
-      ),
-      AppPopupMenuItem<String>(
-        value: _menuActionAdd,
-        child: Row(
-          children: <Widget>[
-            const AppSvgIcon(icon: AppIcon.playlistAdd),
-            const SizedBox(width: AppSpacing.small),
-            AppText(l10n.layerAddAbove),
-          ],
-        ),
-      ),
-      if (allowRemoveLayer)
-        AppPopupMenuItem<String>(
-          value: _menuActionDelete,
-          child: Row(
-            children: <Widget>[
-              const AppSvgIcon(icon: AppIcon.playlistRemove),
-              const SizedBox(width: AppSpacing.small),
-              AppText(l10n.layerDelete),
-            ],
+    return <AppPopupMenuItem<LayerAction>>[
+      for (final LayerAction action in LayerAction.values)
+        if (allowRemoveLayer || !action.requiresRemovableLayer)
+          buildMenuItem<LayerAction>(
+            value: action,
+            text: action.label(l10n, layer),
+            icon: action.icon(layer),
+            iconColor: action.iconColor(layer),
           ),
-        ),
-      if (allowRemoveLayer)
-        AppPopupMenuItem<String>(
-          value: _menuActionMerge,
-          child: Row(
-            children: <Widget>[
-              const AppSvgIcon(icon: AppIcon.layers),
-              const SizedBox(width: AppSpacing.small),
-              AppText(l10n.layerMergeBelow),
-            ],
-          ),
-        ),
-      if (allowRemoveLayer)
-        AppPopupMenuItem<String>(
-          value: _menuActionBlend,
-          child: Row(
-            children: <Widget>[
-              const AppSvgIcon(icon: AppIcon.blender),
-              const SizedBox(width: AppSpacing.small),
-              AppText(l10n.layerChangeBlendMode),
-            ],
-          ),
-        ),
-      AppPopupMenuItem<String>(
-        value: _menuActionLock,
-        child: Row(
-          children: <Widget>[
-            AppSvgIcon(
-              icon: layer.isLocked ? AppIcon.lock : AppIcon.lockOpen,
-              color: layer.isLocked ? AppColors.layerHiddenWarning : null,
-            ),
-            const SizedBox(width: AppSpacing.small),
-            AppText(layer.isLocked ? l10n.layerUnlockEdits : l10n.layerLockEdits),
-          ],
-        ),
-      ),
-      AppPopupMenuItem<String>(
-        value: _menuActionVisibility,
-        child: Row(
-          children: <Widget>[
-            AppSvgIcon(
-              icon: layer.isVisible ? AppIcon.visibility : AppIcon.visibilityOff,
-              color: layer.isVisible ? AppColors.primary : AppColors.layerHiddenWarning,
-            ),
-            const SizedBox(width: AppSpacing.small),
-            AppText(layer.isVisible ? l10n.layerHide : l10n.layerShow),
-          ],
-        ),
-      ),
-      AppPopupMenuItem<String>(
-        value: _menuActionAllHide,
-        child: Row(
-          children: <Widget>[
-            const AppSvgIcon(icon: AppIcon.visibilityOff),
-            const SizedBox(width: AppSpacing.small),
-            AppText(l10n.layerHideAllOthers),
-          ],
-        ),
-      ),
-      AppPopupMenuItem<String>(
-        value: _menuActionAllShow,
-        child: Row(
-          children: <Widget>[
-            const AppSvgIcon(icon: AppIcon.visibility),
-            const SizedBox(width: AppSpacing.small),
-            AppText(l10n.layerShowAll),
-          ],
-        ),
-      ),
     ];
   }
 
@@ -488,13 +341,13 @@ class LayerSelector extends StatelessWidget {
   ) {
     return GestureDetector(
       onLongPress: () {
-        showAppMenu<String>(
+        showAppMenu<LayerAction>(
           context: context,
           position: const RelativeRect.fromLTRB(0, 0, 0, 0),
           items: _buildPopupMenuItems(),
-        ).then((String? value) {
-          if (value != null) {
-            _handlePopupMenuSelection(value, layers);
+        ).then((LayerAction? action) {
+          if (action != null) {
+            _performAction(action, layers);
           }
         });
       },
@@ -509,8 +362,11 @@ class LayerSelector extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  if (layer.isLocked) const AppSvgIcon(icon: AppIcon.lock, color: AppColors.layerHiddenWarning),
-                  if (!layer.isVisible) const AppSvgIcon(icon: AppIcon.visibilityOff, color: AppColors.red),
+                  for (final LayerAction badge in <LayerAction>[
+                    if (layer.isLocked) LayerAction.lock,
+                    if (!layer.isVisible) LayerAction.visibility,
+                  ])
+                    AppSvgIcon(icon: badge.icon(layer), color: badge.iconColor(layer)),
                 ],
               ),
             ),
@@ -519,56 +375,13 @@ class LayerSelector extends StatelessWidget {
     );
   }
 
-  /// Handles the selection of a popup menu item.
-  Future<void> _handlePopupMenuSelection(
-    String value,
-    LayersProvider layers,
-  ) async {
-    switch (value) {
-      case _menuActionRename:
-        await renameLayer();
-        break;
-      case _menuActionModify:
-        await _onModifyLayer(layers);
-        break;
-      case _menuActionAdd:
-        _onAddLayer(layers);
-        break;
-      case _menuActionDelete:
-        if (allowRemoveLayer) {
-          layers.remove(layer);
-        }
-        break;
-      case _menuActionMerge:
-        if (layer != layers.list.last) {
-          _onMergeLayer(
-            layers,
-            layers.selectedLayerIndex,
-            layers.selectedLayerIndex + 1,
-          );
-        }
-        break;
-      case _menuActionBlend:
-        layer.blendMode = await showBlendModeMenu(
-          context: context,
-          selectedBlendMode: layer.blendMode,
-        );
-        break;
-      case _menuActionLock:
-        layers.layersToggleLock(layer);
-        break;
-      case _menuActionVisibility:
-        layers.layersToggleVisibility(layer);
-        break;
-      case _menuActionAllHide:
-        layers.hideShowAllExcept(layer, false);
-        layers.update();
-        break;
-      case _menuActionAllShow:
-        layers.hideShowAllExcept(layer, true);
-        layers.update();
-        break;
-    }
+  /// Wraps [child] to fill the row when its width is bounded, or to shrink-wrap
+  /// it otherwise (an unbounded row cannot host an [Expanded]).
+  Widget _flexibleForWidth({required bool hasBoundedWidth, required Widget child}) {
+    return Flexible(
+      fit: hasBoundedWidth ? FlexFit.tight : FlexFit.loose,
+      child: child,
+    );
   }
 
   /// Method to insert a new layer above the currently selected one
@@ -593,31 +406,63 @@ class LayerSelector extends StatelessWidget {
     );
   }
 
-  /// Method to flatten all layers
-  void _onMergeLayer(
-    LayersProvider layers,
-    int indexFrom,
-    int indexTo,
-  ) {
-    layers.mergeLayers(indexFrom, indexTo);
-  }
-
   /// Floats the current layer into modify mode.
   Future<void> _onModifyLayer(LayersProvider layers) async {
     final AppProvider appProvider = AppProvider.of(context);
     layers.selectedLayerIndex = layers.getLayerIndex(layer);
 
-    if (appProvider.isSelectedLayerLocked) {
-      _showLockedLayerMessage(appProvider);
+    if (!guardSelectedLayerUnlocked(context, appProvider)) {
       return;
     }
 
     await appProvider.modifySelectedLayer();
   }
 
-  void _showLockedLayerMessage(AppProvider appProvider) {
-    context.showSnackBarMessage(
-      context.l10n.layerLockedForEditing(appProvider.layers.selectedLayer.name),
+  /// Performs [action] on this layer, from either its button or its menu.
+  Future<void> _performAction(
+    LayerAction action,
+    LayersProvider layers,
+  ) async {
+    switch (action) {
+      case LayerAction.rename:
+        await renameLayer();
+      case LayerAction.modify:
+        await _onModifyLayer(layers);
+      case LayerAction.addAbove:
+        _onAddLayer(layers);
+      case LayerAction.delete:
+        if (allowRemoveLayer) {
+          layers.remove(layer);
+        }
+      case LayerAction.mergeBelow:
+        if (layer != layers.list.last) {
+          layers.mergeLayers(layers.selectedLayerIndex, layers.selectedLayerIndex + 1);
+        }
+      case LayerAction.blendMode:
+        await _pickBlendMode(context, layer);
+      case LayerAction.lock:
+        layers.layersToggleLock(layer);
+      case LayerAction.visibility:
+        layers.layersToggleVisibility(layer);
+      case LayerAction.hideOthers:
+        layers.hideShowAllExcept(layer, false);
+        layers.update();
+      case LayerAction.showAll:
+        layers.hideShowAllExcept(layer, true);
+        layers.update();
+    }
+  }
+
+  /// Opens the blend-mode menu for [targetLayer] and applies the choice.
+  ///
+  /// Dismissing the menu leaves the current blend mode untouched.
+  Future<void> _pickBlendMode(BuildContext menuContext, LayerProvider targetLayer) async {
+    final BlendMode? picked = await showBlendModeMenu(
+      context: menuContext,
+      selectedBlendMode: targetLayer.blendMode,
     );
+    if (picked != null) {
+      targetLayer.blendMode = picked;
+    }
   }
 }

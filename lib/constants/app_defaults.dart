@@ -1,10 +1,10 @@
-import 'app_interaction.dart';
+import 'app_effects.dart';
 
 /// Shared persisted/default app values.
 class AppDefaults {
   static const double brushSize = 5.0;
-  static const double smudgeIntensity = AppInteraction.pixelBrushDefaultIntensity;
-  static const double blurBrushIntensity = AppInteraction.pixelBrushDefaultIntensity;
+  static const double smudgeIntensity = AppEffects.defaultIntensity;
+  static const double blurBrushIntensity = AppEffects.defaultIntensity;
   // Starting raw tolerance for the Edge Detection wand's sample tap; the user
   // then drags on the canvas to grow/shrink the selection from there.
   static const int tolerance = 6;
