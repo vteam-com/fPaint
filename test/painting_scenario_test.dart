@@ -3,7 +3,6 @@ library;
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -16,7 +15,8 @@ import 'package:fpaint/main.dart';
 import 'package:fpaint/main_screen.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/fill_model.dart';
-import 'package:fpaint/models/halftone_fill.dart';
+import 'package:fpaint/models/hatch_marks.dart';
+import 'package:fpaint/models/hatch_pattern.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
@@ -35,26 +35,30 @@ import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helpers/painting_test_helpers.dart';
+import 'helpers/showcase_painting_helpers.dart';
 
-part 'painting_scenario_layers/paint_layer_birds.dart';
-part 'painting_scenario_layers/paint_layer_clouds.dart';
-part 'painting_scenario_layers/paint_layer_fence.dart';
-part 'painting_scenario_layers/paint_layer_house.dart';
-part 'painting_scenario_layers/paint_layer_lake.dart';
-part 'painting_scenario_layers/paint_layer_land.dart';
-part 'painting_scenario_layers/paint_layer_mountains.dart';
-part 'painting_scenario_layers/paint_layer_shadows.dart';
-part 'painting_scenario_layers/paint_layer_signature.dart';
-part 'painting_scenario_layers/paint_layer_sky.dart';
-part 'painting_scenario_layers/paint_layer_sun.dart';
 part 'painting_scenario_layers/scenario_coverage_exercises.dart';
 part 'painting_scenario_layers/scenario_crop_canvas.dart';
 part 'painting_scenario_layers/scenario_export_outputs.dart';
-part 'painting_scenario_layers/scenario_post_crop_vignette.dart';
 part 'painting_scenario_layers/scenario_validate_scene.dart';
+part 'painting_scenario_layers/showcase_birds.dart';
+part 'painting_scenario_layers/showcase_cabin.dart';
+part 'painting_scenario_layers/showcase_clouds.dart';
+part 'painting_scenario_layers/showcase_geometry.dart';
+part 'painting_scenario_layers/showcase_lake.dart';
+part 'painting_scenario_layers/showcase_mist.dart';
+part 'painting_scenario_layers/showcase_mountains.dart';
+part 'painting_scenario_layers/showcase_shore.dart';
+part 'painting_scenario_layers/showcase_shoreline.dart';
+part 'painting_scenario_layers/showcase_signature.dart';
+part 'painting_scenario_layers/showcase_sky.dart';
+part 'painting_scenario_layers/showcase_vignette.dart';
 
 // ---------------------------------------------------------------------------
-// Test constants
+// Showcase scenario: "Alpenglow" — an alpine lake at sunset, painted end to
+// end through the real UI. It doubles as the visual regression check (a human
+// reviews test/output/final.*) and the product demo (test/output/
+// unit_test_video.mp4 replays every interaction at high speed).
 // ---------------------------------------------------------------------------
 
 const String _testLanguageCode = 'en';
@@ -70,313 +74,30 @@ const Duration _paintingScenarioTestTimeout = Duration(minutes: 20);
 const int _scenarioTimingSecondsPerMinute = 60;
 const int _scenarioTimingMillisecondsPerSecond = 1000;
 
-// Sky layer
-const String _skyLayerName = 'Sky';
-const Offset _skyGradientTop = Offset(0, -20);
-const Offset _skyGradientBottom = Offset(0, -240);
-const Color _skyColorTop = ui.Color.fromARGB(255, 14, 52, 120); // deep navy at zenith
-const Color _skyColorUpperMid = Color.fromARGB(255, 27, 87, 155); // royal blue (upper third)
-const Color _skyColorLowerMid = Color.fromARGB(255, 56, 119, 200); // medium sky blue (lower two-thirds)
-const Color _skyColorBottom = Color.fromARGB(255, 110, 161, 219); // pale horizon blue
-const double _skyUpperMidStopPosition = 0.25;
-const double _skyLowerMidStopPosition = 0.60;
+/// Paints only the scene (skipping the coverage exercises) when run with
+/// `--dart-define=FPAINT_SHOWCASE_ONLY=true` — handy while iterating on the art.
+const bool _showcaseOnly = bool.fromEnvironment('FPAINT_SHOWCASE_ONLY');
 
-// Mountains layer
-const String _mountainsLayerName = 'Mountains';
-const String _mountainsMiddleLayerName = 'Mountains Middle Draft';
-const String _mountainsFrontLayerName = 'Mountains Front Draft';
-const Color _mountainGradientTopColor = ui.Color.fromARGB(255, 232, 247, 242);
-const Color _mountainGradientUpperSlopeColor = ui.Color.fromARGB(255, 154, 208, 197);
-const Color _mountainGradientLowerSlopeColor = ui.Color.fromARGB(255, 67, 168, 156);
-const Color _mountainGradientBaseColor = ui.Color.fromARGB(255, 34, 114, 58);
-const Color _mountainSnowCapColor = ui.Color.fromARGB(255, 247, 250, 252);
-const double _mountainSnowTransitionFactor = 0.40;
-const double _mountainFoothillTransitionFactor = 0.62;
-const double _mountainSnowCapEdgeFactor = 0.22;
-const double _mountainSnowCapBottomFactor = 0.30;
-
-const Offset _mountainBackBaseLeft = Offset(-40, 98);
-const Offset _mountainBackPeak = Offset(88, -166);
-const Offset _mountainBackPeakLeftCurve = Offset(64, -146);
-const Offset _mountainBackPeakRightCurve = Offset(116, -146);
-const Offset _mountainBackBaseRight = Offset(252, 98);
-const Offset _mountainBackGradientQuickDropPoint = Offset(88, -138);
-const Offset _mountainBackFillPoint = Offset(98, -52);
-const double _mountainBackBlurIntensity = 0.38;
-
-const Offset _mountainMiddleBaseLeft = Offset(-220, 98);
-const Offset _mountainMiddlePeak = Offset(-90, -138);
-const Offset _mountainMiddlePeakLeftCurve = Offset(-112, -118);
-const Offset _mountainMiddlePeakRightCurve = Offset(-66, -118);
-const Offset _mountainMiddleBaseRight = Offset(80, 98);
-const Offset _mountainMiddleGradientQuickDropPoint = Offset(-90, -114);
-const Offset _mountainMiddleFillPoint = Offset(-80, -20);
-const double _mountainMiddleBlurIntensity = 0.20;
-
-const Offset _mountainFrontBaseLeft = Offset(-300, 98);
-const Offset _mountainFrontPeak = Offset(-236, -114);
-const Offset _mountainFrontPeakLeftCurve = Offset(-252, -98);
-const Offset _mountainFrontPeakRightCurve = Offset(-220, -98);
-const Offset _mountainFrontBaseRight = Offset(-170, 98);
-const Offset _mountainFrontGradientQuickDropPoint = Offset(-236, -84);
-const Offset _mountainFrontFillPoint = Offset(-228, 34);
-const List<Offset> _mountainBackSelectionPoints = <Offset>[
-  _mountainBackBaseLeft,
-  _mountainBackPeakLeftCurve,
-  _mountainBackPeak,
-  _mountainBackPeakRightCurve,
-  _mountainBackBaseRight,
-  _mountainBackBaseLeft,
-];
-const List<Offset> _mountainMiddleSelectionPoints = <Offset>[
-  _mountainMiddleBaseLeft,
-  _mountainMiddlePeakLeftCurve,
-  _mountainMiddlePeak,
-  _mountainMiddlePeakRightCurve,
-  _mountainMiddleBaseRight,
-  _mountainMiddleBaseLeft,
-];
-const List<Offset> _mountainFrontSelectionPoints = <Offset>[
-  _mountainFrontBaseLeft,
-  _mountainFrontPeakLeftCurve,
-  _mountainFrontPeak,
-  _mountainFrontPeakRightCurve,
-  _mountainFrontBaseRight,
-  _mountainFrontBaseLeft,
-];
-
-// Clouds layer (drawn with 5 circles and bottom trimmed by selection erase)
-const String _cloudsLayerName = 'Clouds';
-const Color _cloudFillColor = Color.fromARGB(130, 255, 255, 255);
-const Offset _cloud1Center = Offset(110, -182);
-const double _cloud1Radius = 30.0;
-const Offset _cloud2Center = Offset(130, -190);
-const double _cloud2Radius = 58.0;
-const Offset _cloud3Center = Offset(200, -212);
-const double _cloud3Radius = 100.0;
-const Offset _cloud4Center = Offset(270, -190);
-const double _cloud4Radius = 60.0;
-const Offset _cloud5Center = Offset(290, -180);
-const double _cloud5Radius = 44.0;
-const Offset _cloudBottomCutoutStart = Offset(80, -180);
-const Offset _cloudBottomCutoutEnd = Offset(320, -40);
-
-// Sun layer
-const String _sunLayerName = 'Sun';
-const Offset _sunOffset = Offset(-200, -220);
-const double _sunRadius = 50.0;
-const Color _sunRayColorCenter = Color.fromARGB(100, 255, 242, 1);
-const Color _sunRayColorEdge = Color.fromARGB(0, 198, 242, 0);
-const Color _sunBodyColor = Color.fromARGB(179, 241, 226, 179);
-const double _sunSoftenIntensity = 0.5;
-
-// Land layer
-const String _landLayerName = 'Land';
-const double _landTopY = 10.0;
-const double _landBottomY = 300.0;
-const Offset _landTopLeft = Offset(-300, _landTopY);
-const Offset _landBottomRight = Offset(300, _landBottomY);
-const double _landBorderBrushSize = 0.0;
-const double _landNoiseIntensity = 1.0;
-
-// Lake layer (temporary layer merged into land)
-const String _pondDraftLayerName = 'Lake Draft';
-const String _pondLayerName = 'Lake';
-const double _pondVerticalInsetFactor = 0.2;
-const double _pondVerticalBandStartY = _landTopY;
-const double _pondVerticalBandEndY = 140;
-const double _pondVerticalBandHeight = _pondVerticalBandEndY - _pondVerticalBandStartY;
-const double _pondVerticalInset = _pondVerticalBandHeight * _pondVerticalInsetFactor;
-const double _pondTopY = _pondVerticalBandStartY + _pondVerticalInset;
-const double _pondBottomY = _pondVerticalBandEndY - _pondVerticalInset;
-const double _pondCenterY = (_pondTopY + _pondBottomY) / AppMath.pair;
-// drawCircleWithHumanGestures passes a horizontal span that becomes the rendered circle diameter.
-const double _pondBaseCircleRadius = _pondBottomY - _pondTopY;
-const double _pondWidthFactor = 3.0;
-const double _pondTargetWidth = _pondBaseCircleRadius * _pondWidthFactor;
-const double _pondHorizontalExpansion = (_pondTargetWidth - _pondBaseCircleRadius) / AppMath.pair;
-const double _pondCornerHorizontalExpansionFactor = 0.75;
-const double _pondCornerHorizontalExpansion = _pondHorizontalExpansion * _pondCornerHorizontalExpansionFactor;
-const double _pondCornerVerticalNudge = 2.0;
-const double _pondCenterX = -164.0;
-const double _pondGradientHalfWidth = _pondTargetWidth / AppMath.pair;
-const int _pondWandTolerance = 12;
-const Color _pondBaseColor = Color.fromARGB(255, 56, 132, 201);
-const Map<TransformOverlayHandle, Offset> _pondTransformHandleDeltas = <TransformOverlayHandle, Offset>{
-  TransformOverlayHandle.topLeft: Offset(-_pondCornerHorizontalExpansion, _pondCornerVerticalNudge),
-  TransformOverlayHandle.topRight: Offset(_pondCornerHorizontalExpansion, _pondCornerVerticalNudge),
-  TransformOverlayHandle.right: Offset(_pondHorizontalExpansion, 0),
-  TransformOverlayHandle.bottomRight: Offset(_pondCornerHorizontalExpansion, -_pondCornerVerticalNudge),
-  TransformOverlayHandle.bottomLeft: Offset(-_pondCornerHorizontalExpansion, -_pondCornerVerticalNudge),
-  TransformOverlayHandle.left: Offset(-_pondHorizontalExpansion, 0),
-};
-const Offset _pondGradientCenter = Offset(_pondCenterX, _pondCenterY);
-const Offset _pondGradientStart = Offset(
-  _pondCenterX - _pondGradientHalfWidth,
-  _pondCenterY,
-);
-const Offset _pondGradientEnd = Offset(
-  _pondCenterX + _pondGradientHalfWidth,
-  _pondCenterY,
-);
-const Color _pondColorLight = Color.fromARGB(255, 116, 192, 247);
-const Color _pondColorMid = Color.fromARGB(255, 49, 132, 206);
-const Color _pondColorDark = Color.fromARGB(255, 8, 58, 132);
-const double _pondMidStopPosition = 0.65;
-const double _pondHighlightBrushSize = AppStroke.thin;
-const Color _pondHighlightColor = Color.fromARGB(200, 255, 255, 255);
-const double _pondSunReflectionCenterX = (-200.0 + _pondCenterX) / AppMath.pair;
-const Color _pondSunReflectionColor = Color.fromARGB(150, 255, 245, 190);
-const double _pondSunReflectionBrushSize = 8.0;
-const double _pondRippleSoftenIntensity = 0.6;
-const double _pondReflectionPixelateIntensity = 0.6;
-const double _pondReflectionBlurIntensity = 0.7;
-const List<Offset> _pondSunReflectionStreak1 = <Offset>[
-  Offset(_pondSunReflectionCenterX - 55, 46),
-  Offset(_pondSunReflectionCenterX - 30, 52),
-  Offset(_pondSunReflectionCenterX, 49),
-  Offset(_pondSunReflectionCenterX + 30, 55),
-  Offset(_pondSunReflectionCenterX + 55, 51),
-];
-const List<Offset> _pondSunReflectionStreak2 = <Offset>[
-  Offset(_pondSunReflectionCenterX - 65, 64),
-  Offset(_pondSunReflectionCenterX - 35, 70),
-  Offset(_pondSunReflectionCenterX, 67),
-  Offset(_pondSunReflectionCenterX + 35, 72),
-  Offset(_pondSunReflectionCenterX + 65, 68),
-];
-const List<Offset> _pondSunReflectionStreak3 = <Offset>[
-  Offset(_pondSunReflectionCenterX - 70, 84),
-  Offset(_pondSunReflectionCenterX - 38, 90),
-  Offset(_pondSunReflectionCenterX, 87),
-  Offset(_pondSunReflectionCenterX + 38, 92),
-  Offset(_pondSunReflectionCenterX + 70, 88),
-];
-const List<Offset> _pondSunReflectionStreak4 = <Offset>[
-  Offset(_pondSunReflectionCenterX - 60, 104),
-  Offset(_pondSunReflectionCenterX - 32, 110),
-  Offset(_pondSunReflectionCenterX, 107),
-  Offset(_pondSunReflectionCenterX + 32, 112),
-  Offset(_pondSunReflectionCenterX + 60, 108),
-];
-const List<Offset> _pondHighlightWave1 = <Offset>[
-  Offset(-236, 63),
-  Offset(-220, 57),
-  Offset(-204, 63),
-  Offset(-188, 57),
-  Offset(-172, 62),
-  Offset(-156, 56),
-];
-const List<Offset> _pondHighlightWave2 = <Offset>[
-  Offset(-224, 81),
-  Offset(-206, 75),
-  Offset(-188, 81),
-  Offset(-170, 75),
-  Offset(-152, 80),
-  Offset(-134, 74),
-];
-const List<Offset> _pondHighlightWave3 = <Offset>[
-  Offset(-206, 101),
-  Offset(-188, 95),
-  Offset(-170, 101),
-  Offset(-152, 95),
-  Offset(-134, 100),
-  Offset(-116, 94),
-];
-
-// House layer
-const String _houseLayerName = 'House';
-const double _houseHorizontalShift = 20.0;
-const Offset _houseBodyStart = Offset(_houseHorizontalShift, 0);
-const Offset _houseBodyEnd = Offset(200 + _houseHorizontalShift, 100);
-const Color _houseBodyHalftoneBackgroundColor = Color.fromARGB(255, 255, 216, 229);
-const Color _houseBodyHalftoneDotColor = Color.fromARGB(255, 248, 163, 191);
-const double _houseBodyHalftoneMaxDotSizeFactor = AppVisual.half;
-const Offset _houseDoorStart = Offset(130 + _houseHorizontalShift, 24);
-const Offset _houseDoorEnd = Offset(180 + _houseHorizontalShift, 100);
-const Offset _houseWindowStart = Offset(20 + _houseHorizontalShift, 30);
-const Offset _houseWindowEnd = Offset(80 + _houseHorizontalShift, 50);
-
-// Roof — converging vertical stripes drawn on the House layer.
-// Bottom edge of the roof (wider).
-const double _roofBaseLeft = -10.0 + _houseHorizontalShift;
-const double _roofBaseRight = 210.0 + _houseHorizontalShift;
-const double _roofBaseY = 2.0;
-// Top edge of the roof (narrower, creating perspective).
-const double _roofTopLeft = 45.0 + _houseHorizontalShift;
-const double _roofTopRight = 155.0 + _houseHorizontalShift;
-const double _roofTopY = -108.0;
-const int _roofStripeCount = 18;
-const double _roofStripeBrushSize = 14.0;
-
-// Fence shadow via wand-select + fill + skew
-const Color _shadowColor = Color.fromARGB(50, 100, 0, 180);
-
-// House Shadow layer (wand-select + fill + skew, same technique as fence shadow)
-const String _houseShadowLayerName = 'House Shadow';
-const int _houseShadowWandTolerance = 75;
-const double _houseHeight = 200.0;
-const double _houseShadowGroundOffset = 100.0;
-const double _houseShadowTopHandleDelta = _houseHeight + _houseShadowGroundOffset;
-const double _houseShadowTopLeftHandleXDelta = 20.0;
-const double _houseShadowTopRightHandleXDelta = 30.0;
-const double _houseShadowTopEdgeHandleXDelta =
-    (_houseShadowTopLeftHandleXDelta + _houseShadowTopRightHandleXDelta) / AppMath.pair;
-const double _houseShadowLeftEdgeHandleXDelta = _houseShadowTopLeftHandleXDelta / AppMath.pair;
-const double _houseShadowRightEdgeHandleXDelta = _houseShadowTopRightHandleXDelta / AppMath.pair;
-const double _houseShadowSideEdgeHandleYDelta = _houseShadowTopHandleDelta / AppMath.pair;
-final Offset _houseShadowWandTapOffset = Offset(
-  (_houseBodyStart.dx + _houseBodyEnd.dx) / AppMath.pair,
-  (_houseBodyStart.dy + _houseBodyEnd.dy) / AppMath.pair,
-);
-
-// Birds layer
-const String _birdsLayerName = 'Birds';
-const double _birdBrushSize = 4.0;
-const double _birdsVerticalShiftUp = 80.0;
-const Offset _bird1Offset = Offset(-20, -170 - _birdsVerticalShiftUp);
-const Offset _bird2Offset = Offset(80, -210 - _birdsVerticalShiftUp);
-const Offset _bird3Offset = Offset(150, -150 - _birdsVerticalShiftUp);
-const Offset _birdPivot = Offset(30, 11);
-const double _bird1Scale = 0.9;
-const double _bird2Scale = 0.65;
-const double _bird3Scale = 1.2;
-const double _bird1RotationRadians = -0.08;
-const double _bird2RotationRadians = 0.22;
-const double _bird3RotationRadians = -0.18;
-const double _bird1BrushSize = _birdBrushSize;
-const double _bird2BrushSize = 3.0;
-const double _bird3BrushSize = 5.0;
-const Offset _birdLine1Start = Offset(4, 18);
-const Offset _birdLine1End = Offset(18, 4);
-const Offset _birdLine2Start = Offset(18, 4);
-const Offset _birdLine2End = Offset(30, 18);
-const Offset _birdLine3Start = Offset(30, 18);
-const Offset _birdLine3End = Offset(42, 6);
-const Offset _birdLine4Start = Offset(42, 6);
-const Offset _birdLine4End = Offset(56, 18);
-
-// Signature
-const String _signatureLayerName = 'Signature';
-
-// Post-crop vignette
-const double _vignetteIntensity = 0.3;
-
-// Text
-const String _signatureText = 'fPaint';
-// The family name a font is REGISTERED under, not the pubspec `family:` key.
-// Fonts from a package are namespaced as `packages/<pkg>/<family>`; the bare
-// 'Inter' resolves to nothing and silently falls back to the test harness's
-// block font, which renders the signature as a solid filled rectangle.
-const String _signatureFontFamily = appFontFamily;
-const double _signatureFontSize = 24.0;
-const double _signatureMarginRight = 10.0;
-const double _signatureMarginBottom = 10.0;
-const double _signaturePositionTolerance = 1.0;
-
-// Expected: background + sky + mountains + clouds + sun + land + house + house shadow + fence + fence shadow + birds + signature = 12
 const String _backgroundLayerName = 'Background';
-const int _expectedLayerCountAfterScene = 12;
+
+/// Expected stack, top to bottom, once the scene is finished.
+const List<String> _expectedSceneLayerNames = <String>[
+  _signatureLayerName,
+  _birdsLayerName,
+  _vignetteLayerName,
+  _cabinLayerName,
+  _shoreLayerName,
+  _shorelineLayerName,
+  _reflectionLayerName,
+  _lakeLayerName,
+  _mistLayerName,
+  _mountainsLayerName,
+  _cloudsLayerName,
+  _sunLayerName,
+  _skyLayerName,
+  _backgroundLayerName,
+];
+final int _expectedLayerCountAfterScene = _expectedSceneLayerNames.length;
 
 // Screenshot filenames
 const String _finalOraFilename = 'final.ora';
@@ -384,63 +105,6 @@ const String _finalPngFilename = 'final.png';
 const String _finalJpegFilename = 'final.jpg';
 const String _finalTiffFilename = 'final.tif';
 const String _finalWebpFilename = 'final.webp';
-
-Offset _transformBirdPoint(
-  Offset topLeft,
-  Offset point, {
-  required double scale,
-  required double rotationRadians,
-}) {
-  final Offset centeredPoint = point - _birdPivot;
-  final Offset scaledPoint = Offset(
-    centeredPoint.dx * scale,
-    centeredPoint.dy * scale,
-  );
-  final double cosine = math.cos(rotationRadians);
-  final double sine = math.sin(rotationRadians);
-  final Offset rotatedPoint = Offset(
-    (scaledPoint.dx * cosine) - (scaledPoint.dy * sine),
-    (scaledPoint.dx * sine) + (scaledPoint.dy * cosine),
-  );
-
-  return topLeft + _birdPivot + rotatedPoint;
-}
-
-Future<void> _drawBird(
-  WidgetTester tester, {
-  required Offset canvasCenter,
-  required Offset topLeftOffset,
-  required double scale,
-  required double rotationRadians,
-  required double brushSize,
-}) async {
-  final Offset birdTopLeft = canvasCenter + topLeftOffset;
-
-  for (final (Offset start, Offset end) in const <(Offset, Offset)>[
-    (_birdLine1Start, _birdLine1End),
-    (_birdLine2Start, _birdLine2End),
-    (_birdLine3Start, _birdLine3End),
-    (_birdLine4Start, _birdLine4End),
-  ]) {
-    await drawLineWithHumanGestures(
-      tester,
-      startPosition: _transformBirdPoint(
-        birdTopLeft,
-        start,
-        scale: scale,
-        rotationRadians: rotationRadians,
-      ),
-      endPosition: _transformBirdPoint(
-        birdTopLeft,
-        end,
-        scale: scale,
-        rotationRadians: rotationRadians,
-      ),
-      brushSize: brushSize,
-      brushColor: Colors.black,
-    );
-  }
-}
 
 class PaintingScenarioSession {
   const PaintingScenarioSession({
@@ -452,24 +116,6 @@ class PaintingScenarioSession {
   final WidgetTester tester;
   final Offset canvasCenter;
   final UnitTestVideoRecorder videoRecorder;
-}
-
-Future<void> _setLayerVisibilityByName(
-  WidgetTester tester, {
-  required String layerName,
-  required bool isVisible,
-}) async {
-  final BuildContext context = tester.element(find.byType(MainView));
-  final LayersProvider layersProvider = LayersProvider.of(context);
-
-  for (int i = 0; i < layersProvider.length; i++) {
-    if (layersProvider.get(i).name == layerName) {
-      layersProvider.get(i).isVisible = isVisible;
-      layersProvider.update();
-      await tester.pump();
-      break;
-    }
-  }
 }
 
 class _ScenarioPhaseTiming {
@@ -553,7 +199,7 @@ void main() {
 
   group('Painting Scenario (Unit Test)', () {
     /// Painting scenario runs entirely in unit tests without a simulator
-    testWidgets('Draw house', (WidgetTester tester) async {
+    testWidgets('Paint alpine lake showcase', (WidgetTester tester) async {
       // ---------------------------------------------------------------
       // Boot the full app — no simulator, no emulator, just widget test
       // ---------------------------------------------------------------
@@ -569,6 +215,7 @@ void main() {
       await tester.pumpWidget(MyApp());
       await pumpForUnitTestUiSettle(tester);
       await prepareCanvasViewport(tester);
+      await showActualSizeCentered(tester);
 
       final UnitTestVideoRecorder videoRecorder = UnitTestVideoRecorder(tester);
       await videoRecorder.start();
@@ -583,61 +230,31 @@ void main() {
       final Stopwatch scenarioStopwatch = Stopwatch()..start();
       final List<_ScenarioPhaseTiming> phaseTimings = <_ScenarioPhaseTiming>[];
 
-      await _runTimedScenarioPhase(
-        phaseTimings,
-        label: 'sky',
-        phase: () => paintLayerSky(session),
-      );
-      await _runTimedScenarioPhase(
-        phaseTimings,
-        label: 'mountains',
-        phase: () => paintLayerMountains(session),
-      );
-      await _runTimedScenarioPhase(
-        phaseTimings,
-        label: 'clouds',
-        phase: () => paintLayerClouds(session),
-      );
-      await _runTimedScenarioPhase(
-        phaseTimings,
-        label: 'sun',
-        phase: () => paintLayerSun(session),
-      );
-      await _runTimedScenarioPhase(
-        phaseTimings,
-        label: 'land',
-        phase: () => paintLayerLand(session),
-      );
-      await _runTimedScenarioPhase(
-        phaseTimings,
-        label: 'lake',
-        phase: () => paintLayerLake(session),
-      );
-      await _runTimedScenarioPhase(
-        phaseTimings,
-        label: 'house',
-        phase: () => paintLayerHouse(session),
-      );
-      await _runTimedScenarioPhase(
-        phaseTimings,
-        label: 'house shadow',
-        phase: () => paintLayerHouseShadow(session),
-      );
-      await _runTimedScenarioPhase(
-        phaseTimings,
-        label: 'fence',
-        phase: () => paintLayerFence(session),
-      );
-      await _runTimedScenarioPhase(
-        phaseTimings,
-        label: 'fence shadow',
-        phase: () => paintLayerFenceShadow(session),
-      );
-      await _runTimedScenarioPhase(
-        phaseTimings,
-        label: 'birds',
-        phase: () => paintLayerBirds(session),
-      );
+      final List<(String, Future<void> Function(PaintingScenarioSession))> scenePhases =
+          <(String, Future<void> Function(PaintingScenarioSession))>[
+            ('sky', paintShowcaseSky),
+            ('sun', paintShowcaseSun),
+            ('clouds', paintShowcaseClouds),
+            ('mountains', paintShowcaseMountains),
+            ('mist', paintShowcaseMist),
+            ('lake', paintShowcaseLake),
+            ('reflection', paintShowcaseReflection),
+            ('shoreline', paintShowcaseShoreline),
+            ('shore', paintShowcaseShore),
+            ('cabin', paintShowcaseCabin),
+            ('vignette', paintShowcaseVignette),
+            ('birds', paintShowcaseBirds),
+          ];
+      for (final (String label, Future<void> Function(PaintingScenarioSession) paint) in scenePhases) {
+        await _runTimedScenarioPhase(
+          phaseTimings,
+          label: label,
+          phase: () async {
+            await paint(session);
+            await session.videoRecorder.captureFrame();
+          },
+        );
+      }
 
       final LayersProvider layersProvider = await _runTimedScenarioPhaseWithValue<LayersProvider>(
         phaseTimings,
@@ -646,13 +263,8 @@ void main() {
       );
       await _runTimedScenarioPhase(
         phaseTimings,
-        label: 'vignette',
-        phase: () => applyPostCropVignette(session),
-      );
-      await _runTimedScenarioPhase(
-        phaseTimings,
         label: 'signature',
-        phase: () => paintLayerSignature(session, layersProvider: layersProvider),
+        phase: () => paintShowcaseSignature(session, layersProvider: layersProvider),
       );
       await _runTimedScenarioPhase(
         phaseTimings,
@@ -665,53 +277,48 @@ void main() {
         phase: () => exportScenarioOutputs(session),
       );
 
-      // Capture the scene state before coverage exercises.
-      final int layerCountBefore = layersProvider.length;
-      final double canvasWidthBefore = layersProvider.width;
-      final double canvasHeightBefore = layersProvider.height;
-      final List<String> layerNamesBefore = <String>[
-        for (int i = 0; i < layersProvider.length; i++) layersProvider.get(i).name,
-      ];
-      final List<int> actionCountsBefore = <int>[
-        for (int i = 0; i < layersProvider.length; i++) layersProvider.get(i).actionStack.length,
-      ];
+      if (!_showcaseOnly) {
+        // Capture the scene state before coverage exercises.
+        final int layerCountBefore = layersProvider.length;
+        final double canvasWidthBefore = layersProvider.width;
+        final double canvasHeightBefore = layersProvider.height;
+        final List<String> layerNamesBefore = <String>[
+          for (int i = 0; i < layersProvider.length; i++) layersProvider.get(i).name,
+        ];
+        final List<int> actionCountsBefore = <int>[
+          for (int i = 0; i < layersProvider.length; i++) layersProvider.get(i).actionStack.length,
+        ];
 
-      videoRecorder.pauseAutoCapture();
-      await _runTimedScenarioPhase(
-        phaseTimings,
-        label: 'coverage exercises',
-        phase: () => exerciseCoverageScenarios(session),
-      );
-      videoRecorder.resumeAutoCapture();
+        videoRecorder.pauseAutoCapture();
+        await _runTimedScenarioPhase(
+          phaseTimings,
+          label: 'coverage exercises',
+          phase: () => exerciseCoverageScenarios(session),
+        );
+        videoRecorder.resumeAutoCapture();
 
-      // Each exercise cleans up after itself. Verify the scene is unchanged.
-      expect(layersProvider.length, layerCountBefore);
-      expect(layersProvider.width, canvasWidthBefore);
-      expect(layersProvider.height, canvasHeightBefore);
-      for (int i = 0; i < layerCountBefore; i++) {
-        expect(layersProvider.get(i).name, layerNamesBefore[i]);
-        expect(
-          layersProvider.get(i).isVisible,
-          isTrue,
-          reason: 'Layer "${layersProvider.get(i).name}" at index $i should be visible',
-        );
-        expect(
-          layersProvider.get(i).actionStack.length,
-          actionCountsBefore[i],
-          reason:
-              'Layer "${layersProvider.get(i).name}" actionStack changed from ${actionCountsBefore[i]} to ${layersProvider.get(i).actionStack.length}',
-        );
+        // Each exercise cleans up after itself. Verify the scene is unchanged.
+        expect(layersProvider.length, layerCountBefore);
+        expect(layersProvider.width, canvasWidthBefore);
+        expect(layersProvider.height, canvasHeightBefore);
+        for (int i = 0; i < layerCountBefore; i++) {
+          expect(layersProvider.get(i).name, layerNamesBefore[i]);
+          expect(
+            layersProvider.get(i).isVisible,
+            isTrue,
+            reason: 'Layer "${layersProvider.get(i).name}" at index $i should be visible',
+          );
+          expect(
+            layersProvider.get(i).actionStack.length,
+            actionCountsBefore[i],
+            reason:
+                'Layer "${layersProvider.get(i).name}" actionStack changed from ${actionCountsBefore[i]} to ${layersProvider.get(i).actionStack.length}',
+          );
+        }
       }
 
-      // Reset the view so the final video frame shows the restored house.
-      final AppProvider appProvider = AppProvider.of(
-        tester.element(find.byType(MainView)),
-        listen: false,
-      );
-      appProvider.resetView();
-      await tester.pump();
-      await tester.pump();
-      await tester.pump();
+      // End the video on the finished painting, pixel for pixel.
+      await showActualSizeCentered(tester);
 
       await _runTimedScenarioPhase(
         phaseTimings,

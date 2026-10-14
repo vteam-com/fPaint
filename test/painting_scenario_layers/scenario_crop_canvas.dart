@@ -1,35 +1,34 @@
 part of '../painting_scenario_test.dart';
 
+/// Final framing: trims the edges where strokes were allowed to bleed, keeping
+/// the composition centred.
+const Size _cropTargetSize = Size(1000, 700);
+
 Future<LayersProvider> cropScenarioCanvas(PaintingScenarioSession session) async {
   final BuildContext context = session.tester.element(find.byType(MainScreen));
   final LayersProvider layersProvider = LayersProvider.of(context);
   final Size preCropCanvasSize = layersProvider.size;
   final int layerCountBeforeCrop = layersProvider.length;
-  final Size cropTargetSize = Size(
-    _landBottomRight.dx - _landTopLeft.dx,
-    (preCropCanvasSize.height / AppMath.pair) + _landBottomRight.dy,
-  );
 
   debugPrint(
     '📐 Cropping canvas: $preCropCanvasSize → '
-    '${cropTargetSize.width.toInt()}x${cropTargetSize.height.toInt()}',
+    '${_cropTargetSize.width.toInt()}x${_cropTargetSize.height.toInt()}',
   );
 
   await resizeCanvasViaUI(
     session.tester,
-    width: cropTargetSize.width.toInt(),
-    height: cropTargetSize.height.toInt(),
-    position: CanvasResizePosition.top,
+    width: _cropTargetSize.width.toInt(),
+    height: _cropTargetSize.height.toInt(),
+    position: CanvasResizePosition.center,
   );
-  await prepareCanvasViewport(session.tester);
-  await pumpForUnitTestUiSettle(session.tester);
+  await showActualSizeCentered(session.tester);
 
-  expect(layersProvider.size, cropTargetSize);
+  expect(layersProvider.size, _cropTargetSize);
   expect(layersProvider.length, layerCountBeforeCrop);
   for (int i = 0; i < layersProvider.length; i++) {
     expect(
       layersProvider.get(i).size,
-      cropTargetSize,
+      _cropTargetSize,
       reason: 'Layer "${layersProvider.get(i).name}" size must match canvas after crop',
     );
   }

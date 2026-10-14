@@ -7,26 +7,17 @@ Future<void> validateScenarioScene(
   await PaintingLayerHelpers.printLayerStructure(session.tester);
 
   expect(
-    layersProvider.length,
-    _expectedLayerCountAfterScene,
-    reason: 'Should have background + sky + mountains + clouds + sun + land + house + house shadow + fence + fence shadow + birds + signature',
-  );
-
-  expect(
     layersProvider.list.map((LayerProvider layer) => layer.name).toList(),
-    <String>[
-      _signatureLayerName,
-      _birdsLayerName,
-      _fenceShadowLayerName,
-      _fenceLayerName,
-      _houseLayerName,
-      _houseShadowLayerName,
-      _landLayerName,
-      _sunLayerName,
-      _cloudsLayerName,
-      _mountainsLayerName,
-      _skyLayerName,
-      _backgroundLayerName,
-    ],
+    _expectedSceneLayerNames,
+    reason: 'The finished showcase should have exactly the expected layer stack',
   );
+  expect(layersProvider.length, _expectedLayerCountAfterScene);
+
+  // Every layer that holds paint should have visible content.
+  for (final LayerProvider layer in layersProvider.list) {
+    if (layer.name == _backgroundLayerName) {
+      continue;
+    }
+    expect(layer.actionStack, isNotEmpty, reason: 'Layer "${layer.name}" should hold paint');
+  }
 }

@@ -3,8 +3,8 @@
 // coverage:ignore-file
 
 const Map<String, String> dependencyVersions = <String, String>{
-  'android_file_picker': '2.0.1',
-  'archive': '4.5.1',
+  'android_file_picker': '2.1.0',
+  'archive': '4.5.2',
   'args': '2.7.0',
   'async': '2.13.1',
   'boolean_selector': '2.1.2',
@@ -22,9 +22,9 @@ const Map<String, String> dependencyVersions = <String, String>{
   'fake_async': '1.3.3',
   'ffi_leak_tracker': '0.1.2',
   'ffi': '2.2.0',
-  'file_picker_darwin': '2.2.0',
+  'file_picker_darwin': '2.3.1',
   'file_picker_linux': '2.0.0',
-  'file_picker_platform_interface': '4.1.0',
+  'file_picker_platform_interface': '4.2.0',
   'file_picker_web': '4.1.0',
   'file_picker': '13.1.0',
   'file': '7.0.1',
@@ -98,7 +98,7 @@ const Map<String, String> dependencyVersions = <String, String>{
   'url_launcher_windows': '3.1.6',
   'url_launcher': '6.3.3',
   'vector_graphics_codec': '1.1.13',
-  'vector_graphics_compiler': '1.3.0',
+  'vector_graphics_compiler': '1.3.1',
   'vector_graphics': '1.2.3',
   'vector_math': '2.4.3',
   'vm_service': '15.3.0',

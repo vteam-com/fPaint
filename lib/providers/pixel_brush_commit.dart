@@ -87,9 +87,13 @@ void compactPixelBrushLayerHistory({
     return;
   }
 
+  // Flatten BEFORE clearing: cascade sections run in order, so building the
+  // image inside `..add(...)` after `..clear()` would flatten an empty stack
+  // and silently erase the layer.
+  final ImageAction flattened = targetLayer.flattenToImageAction(targetLayer.size);
   targetLayer.actionStack
     ..clear()
-    ..add(targetLayer.flattenToImageAction(targetLayer.size));
+    ..add(flattened);
   targetLayer.redoStack.clear();
   targetLayer.hasChanged = true;
   targetLayer.clearCache();
