@@ -4,6 +4,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.1] - 2026-10-15
+
+### Add
+
+- Selection Brush. A new selection mode that lets you paint the selection on: drag over the canvas and a round band the size of the brush is added to the selection. It works with Add and Remove like the other selection modes.
+
+### Change
+
+- Desktop density with a mouse. When you use a mouse, toolbar icons and buttons are smaller and closer together, like a native desktop app, across every page, dialog, and popup. Touch and pen keep the larger targets.
+- Updated dependencies, including `archive` 4.5.2.
+
+### Fix
+
+- A quick tap with the paint bucket could leave the fill preview stuck over the canvas. A tap now simply fills (or, for a gradient, places its handles).
+- Making a selection no longer leaks a full-canvas image each time, which grew memory use over a session.
+- Cancelling the blend-mode menu no longer resets the layer to Normal.
+- Rotating the canvas 90° no longer turns pasted and placed images the opposite way to the rest of the drawing.
+- "New from clipboard" now asks before discarding unsaved changes and fits the canvas to the image, from every menu and shortcut.
+- Corrected the French and Spanish wording of percentage values.
+
 ## [2.1.0] - 2026-10-13
 
 ### Add
