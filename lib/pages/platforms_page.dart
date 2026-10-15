@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -15,14 +16,18 @@ const String _platformIOS = 'iOS';
 const String _urlMacOSDownload = 'https://paint.vteam.com/downloads/flutter-macos-app.zip';
 const String _urlWindowsDownload = 'https://paint.vteam.com/downloads/flutter-windows-app.zip';
 const String _urlLinuxDownload = 'https://paint.vteam.com/downloads/flutter-linux-app.zip';
-const String _urlIOSApp = 'https://apps.apple.com/us/app/cooking-timer-by-vteam/id1188460815';
-const String _urlAndroidApp = 'https://play.google.com/store/apps/details?id=com.vteam.cookingtimerflutter';
+// The App Store link needs the numeric Apple ID assigned once the listing is
+// live; until then the info page carries the store badges.
+const String _urlIOSApp = AppConfig.infoPageUrl;
+const String _urlAndroidApp = AppConfig.googlePlayUrl;
 const String _urlWebApp = 'https://paint.vteam.com';
 
 /// A page that displays the available platforms for the application.
+///
+/// The iOS build leaves out the Google Play entry: App Review rejects apps
+/// that reference other mobile platforms (guideline 2.3.10).
 class PlatformsPage extends StatelessWidget {
   const PlatformsPage({super.key});
-
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = context.l10n;
@@ -59,12 +64,13 @@ class PlatformsPage extends StatelessWidget {
             l10n.mobileApp,
             _urlIOSApp,
           ),
-          platformItem(
-            _platformAndroid,
-            'assets/images/platforms/platformMobileAndroid.png',
-            l10n.mobileApp,
-            _urlAndroidApp,
-          ),
+          if (!_isIOS)
+            platformItem(
+              _platformAndroid,
+              'assets/images/platforms/platformMobileAndroid.png',
+              l10n.mobileApp,
+              _urlAndroidApp,
+            ),
           const SizedBox(
             height: AppSpacing.largest,
           ),
@@ -131,4 +137,6 @@ class PlatformsPage extends StatelessWidget {
       ),
     );
   }
+
+  static bool get _isIOS => !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
 }

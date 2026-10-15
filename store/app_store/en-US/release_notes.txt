@@ -1,0 +1,5 @@
+Selection Brush: paint the selection on, with Add and Remove like the other selection modes.
+Fixed: a quick paint-bucket tap could leave the fill preview stuck on the canvas.
+Fixed: making a selection no longer grows memory use over a session.
+Fixed: cancelling the blend-mode menu no longer resets the layer to Normal.
+Fixed: rotating the canvas 90° now turns pasted images the same way as the drawing.

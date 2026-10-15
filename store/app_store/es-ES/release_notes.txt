@@ -1,0 +1,5 @@
+Pincel de selección: pinta la selección, con Añadir y Quitar como en los demás modos de selección.
+Corregido: un toque rápido con el bote de pintura podía dejar la vista previa del relleno fija en el lienzo.
+Corregido: crear una selección ya no aumenta el uso de memoria durante la sesión.
+Corregido: cancelar el menú de modos de fusión ya no restablece la capa a Normal.
+Corregido: girar el lienzo 90° ahora gira las imágenes pegadas en el mismo sentido que el dibujo.

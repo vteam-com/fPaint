@@ -207,7 +207,7 @@
       "layerName": {}
     }
   },
-  "layerLockEdits": "Bloquear edicion de la capa",
+  "layerLockEdits": "Bloquear edición de la capa",
   "layerMergeBelow": "Fusionar con la capa inferior",
   "layerModify": "Modificar",
   "layerNameTitle": "Nombre de la capa",
@@ -224,7 +224,7 @@
   "layerShow": "Mostrar capa",
   "layerShowAll": "Mostrar todas las capas",
   "layerToggleVisibility": "Ocultar/Mostrar esta capa",
-  "layerUnlockEdits": "Desbloquear edicion de la capa",
+  "layerUnlockEdits": "Desbloquear edición de la capa",
   "menuTooltip": "Menu principal",
   "mobileApp": "Aplicacion movil.",
   "newCanvasSize": "Tamano del nuevo lienzo",
@@ -248,6 +248,7 @@
   },
   "platforms": "Disponible en...",
   "previewUnavailable": "Vista previa no disponible",
+  "privacyPolicy": "Política de privacidad",
   "quitWithoutSaving": "Salir sin guardar",
   "recentFilesLabel": "Recientes",
   "resetViewRotation": "Restablecer rotación",

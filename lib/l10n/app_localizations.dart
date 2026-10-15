@@ -1118,6 +1118,12 @@ abstract class AppLocalizations {
   /// **'Preview unavailable'**
   String get previewUnavailable;
 
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicy;
+
   /// No description provided for @quitWithoutSaving.
   ///
   /// In en, this message translates to:

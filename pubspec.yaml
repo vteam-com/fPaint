@@ -25,7 +25,7 @@ repository: https://github.com/vteam-com/fPaint
 homepage: https://github.com/vteam-com/fPaint
 issue_tracker: https://github.com/vteam-com/fPaint/issues
 
-version: 2.1.1+1
+version: 2.1.2+1
 
 environment:
   sdk: ">=3.13.3"
@@ -76,7 +76,11 @@ flutter_launcher_icons:
   ios:
     remove_alpha_ios: true
   image_path: "../fpaint_assets/assets/app_icon.png"
-  min_sdk_android: 21
+  min_sdk_android: 24
+  # The legacy icon is a full-bleed square, so it doubles as the adaptive
+  # foreground (inset 16%) on a background matching its edge colour.
+  adaptive_icon_background: "#6E3212"
+  adaptive_icon_foreground: "packages/fpaint_assets/assets/app_icon.png"
   web:
     generate: true
     image_path: "packages/fpaint_assets/assets/app_icon.png"

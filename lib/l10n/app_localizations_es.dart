@@ -478,7 +478,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get layerLockEdits => 'Bloquear edicion de la capa';
+  String get layerLockEdits => 'Bloquear edición de la capa';
 
   @override
   String get layerMergeBelow => 'Fusionar con la capa inferior';
@@ -516,7 +516,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get layerToggleVisibility => 'Ocultar/Mostrar esta capa';
 
   @override
-  String get layerUnlockEdits => 'Desbloquear edicion de la capa';
+  String get layerUnlockEdits => 'Desbloquear edición de la capa';
 
   @override
   String get menuTooltip => 'Menu principal';
@@ -561,6 +561,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get previewUnavailable => 'Vista previa no disponible';
+
+  @override
+  String get privacyPolicy => 'Política de privacidad';
 
   @override
   String get quitWithoutSaving => 'Salir sin guardar';

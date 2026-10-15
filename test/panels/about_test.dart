@@ -41,6 +41,7 @@ void main() {
       expect(find.text('(c) 2025 VTeam'), findsOneWidget);
       expect(find.textContaining('fPaint $packageVersion'), findsOneWidget);
       expect(find.text('Attribution'), findsOneWidget);
+      expect(find.text('Privacy Policy'), findsOneWidget);
       expect(find.textContaining('fPaint'), findsWidgets);
 
       // Dismiss.

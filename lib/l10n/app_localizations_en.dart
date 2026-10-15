@@ -565,6 +565,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get previewUnavailable => 'Preview unavailable';
 
   @override
+  String get privacyPolicy => 'Privacy Policy';
+
+  @override
   String get quitWithoutSaving => 'Quit Without Saving';
 
   @override

@@ -4,6 +4,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.2]
+
+### Add
+
+- Store readiness for the App Store and Google Play: listing text in English, Spanish and French, store screenshots, a Play feature graphic, and a submission checklist in `store/README.md`.
+- Privacy policy at paint.vteam.com/privacy, linked from the About box.
+- Android: opening an image with fPaint from another app (Files, e-mail, "Open with") now loads it.
+- Android adaptive launcher icon.
+- iOS privacy manifest declaring the file-timestamp access used by Recent files and save backups.
+
+### Fix
+
+- The iOS and Android entries on the Platforms page linked to an unrelated app. Android now links to fPaint on Google Play; the iOS build no longer lists Google Play.
+- Android app name now shows as "fPaint" rather than "fpaint", and release builds are signed with the upload key from `android/key.properties`.
+
 ## [2.1.1] - 2026-10-15
 
 ### Add

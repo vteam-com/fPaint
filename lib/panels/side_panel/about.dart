@@ -12,7 +12,8 @@ import 'package:url_launcher/url_launcher.dart';
 ///
 /// This function shows a dialog box that includes the application's name,
 /// version, legal information, and an icon. It also displays the device's
-/// screen resolution and a link to the application's GitHub repository.
+/// screen resolution and links to the application's GitHub repository and
+/// privacy policy.
 ///
 /// The [context] parameter is the [BuildContext] used to show the dialog.
 void showAboutBox(BuildContext context) {
@@ -32,6 +33,10 @@ void showAboutBox(BuildContext context) {
             const AppLogoImage(size: AppLayout.appIconSize),
             const SizedBox(height: AppSpacing.medium),
             const AppText(AppConfig.applicationCopyright),
+            AppButtonText(
+              onPressed: () => launchUrl(Uri.parse(AppConfig.privacyPolicyUrl)),
+              text: l10n.privacyPolicy,
+            ),
             const SizedBox(height: AppSpacing.large),
             AppText(l10n.deviceScreenResolution(screenResolution)),
           ],

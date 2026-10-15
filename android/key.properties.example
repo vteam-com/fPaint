@@ -1,0 +1,6 @@
+# Copy to android/key.properties (git-ignored) and fill in. Paths are relative
+# to the android/ directory, or absolute. Keep the keystore out of the repo.
+storeFile=/absolute/path/to/fpaint-upload-keystore.jks
+storePassword=
+keyAlias=upload
+keyPassword=

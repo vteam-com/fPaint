@@ -112,4 +112,19 @@ void main() {
     expect(find.text('Android'), findsOneWidget);
     expect(find.text('Web Browser'), findsOneWidget);
   });
+
+  testWidgets('PlatformsPage leaves out the Google Play entry on iOS', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: PlatformsPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AppCard), findsNWidgets(5));
+    expect(find.text('iOS'), findsOneWidget);
+    expect(find.text('Android'), findsNothing);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 }

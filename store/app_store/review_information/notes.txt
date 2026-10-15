@@ -1,0 +1,5 @@
+fPaint is a free painting and drawing app. It needs no account, sign-in or network connection, and has no in-app purchases.
+
+To try it: tap anywhere on the white canvas with the Brush tool selected (left panel) and draw. The Layers panel above the tools adds and manages layers. The menu (top-left) opens and saves images; the share button exports PNG, JPEG, TIFF or WEBP.
+
+Photo library access (NSPhotoLibraryUsageDescription) is used only when the user chooses to open an image from Photos.

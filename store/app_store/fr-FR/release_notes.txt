@@ -1,0 +1,5 @@
+Pinceau de sélection : peignez la sélection, avec Ajouter et Retirer comme les autres modes de sélection.
+Corrigé : un appui rapide avec le pot de peinture pouvait laisser l'aperçu du remplissage figé sur la toile.
+Corrigé : créer une sélection n'augmente plus la mémoire utilisée au fil de la session.
+Corrigé : annuler le menu des modes de fusion ne remet plus le calque en Normal.
+Corrigé : faire pivoter la toile de 90° tourne désormais les images collées dans le même sens que le dessin.

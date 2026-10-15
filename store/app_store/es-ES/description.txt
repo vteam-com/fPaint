@@ -1,0 +1,39 @@
+fPaint es una aplicación de pintura y dibujo gratuita y de código abierto, con las herramientas que esperas de un estudio profesional y nada que te estorbe: sin anuncios, sin cuentas, sin suscripciones y sin rastreo.
+
+PINCELES Y EFECTOS
+• Lápiz, pincel y borrador sensibles a la presión del lápiz óptico
+• Difuminado para mezclar colores como lo harías con el dedo
+• Efectos que se pintan como cualquier pincel: desenfoque, nitidez, brillo, contraste, saturación, tono, escala de grises, ruido, pixelado, sombra y viñeta
+• Líneas, rectángulos, círculos y texto
+
+CAPAS
+• Todas las capas que necesites, con modos de fusión, opacidad, visibilidad y bloqueo
+• Renombra, reordena y combina
+• Miniaturas en vivo de cada capa
+
+SELECCIÓN Y TRANSFORMACIÓN
+• Rectángulo, elipse, lazo, varita mágica y pincel de selección
+• Añade o quita de cualquier selección
+• Mueve, escala, gira y deforma el contenido seleccionado; copia, corta, pega y duplica
+• Cada pincel y efecto se mantiene dentro de la selección activa
+
+COLOR Y RELLENO
+• Rueda de color, paletas, colores recientes y cuentagotas
+• Rellenos sólidos y degradados lineales y radiales con vista previa en vivo
+
+UN LIENZO ÁGIL
+• Pellizca para hacer zoom, desplazar y girar la vista libremente
+• Menú rápido radial con tus herramientas, colores y tamaño de pincel recientes
+• Deshacer y rehacer completos para experimentar sin miedo
+• Recuperación automática del trabajo no guardado
+
+TUS ARCHIVOS, TUS FORMATOS
+• Abre archivos PNG, JPEG, TIFF, WEBP, HEIC, OpenRaster (ORA) y Photoshop (PSD)
+• Guarda trabajos con capas en ORA o TIFF y exporta a PNG, JPEG, TIFF y WEBP
+• Edita archivos en su ubicación original desde Archivos y unidades en la nube
+
+PRIVADA POR DISEÑO
+fPaint funciona sin conexión y no recopila ningún dato. Tus obras nunca salen de tu dispositivo a menos que las compartas.
+
+CÓDIGO ABIERTO
+fPaint tiene licencia MIT y se desarrolla en abierto. Lee el código, informa de un problema o contribuye en github.com/vteam-com/fPaint.

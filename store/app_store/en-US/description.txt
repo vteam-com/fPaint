@@ -1,0 +1,39 @@
+fPaint is a free, open-source painting and drawing app with the tools you expect from a professional studio, and nothing in the way: no ads, no accounts, no subscriptions, no tracking.
+
+BRUSHES AND EFFECTS
+• Pencil, brush and eraser with pressure sensitivity for stylus and pen
+• Smudge to blend colors the way you would with your finger
+• Effects you paint on like any brush: blur, sharpen, brightness, contrast, saturation, hue, grayscale, noise, pixelate, shadow and vignette
+• Lines, rectangles, circles and text
+
+LAYERS
+• As many layers as you need, with blend modes, opacity, visibility and locking
+• Rename, reorder and merge
+• Live thumbnails of every layer
+
+SELECTIONS AND TRANSFORM
+• Rectangle, ellipse, lasso, magic wand and a selection brush
+• Add to and subtract from any selection
+• Move, scale, rotate and reshape selected content; copy, cut, paste and duplicate
+• Every brush and effect stays inside the active selection
+
+COLOR AND FILL
+• Color wheel, palettes, recent colors and an eyedropper
+• Solid, linear gradient and radial gradient fills with a live preview
+
+A CANVAS THAT KEEPS UP
+• Pinch to zoom, pan and rotate the view freely, then snap back upright
+• A radial quick menu with your recent tools, colors and brush size
+• Full undo and redo, so you can experiment
+• Automatic recovery of unsaved work if the app is closed
+
+YOUR FILES, YOUR FORMATS
+• Open PNG, JPEG, TIFF, WEBP, HEIC, OpenRaster (ORA) and Photoshop (PSD) files
+• Save layered work as ORA or TIFF and export to PNG, JPEG, TIFF and WEBP
+• Edit files in place from the Files app and cloud drives
+
+PRIVATE BY DESIGN
+fPaint works offline and collects no data at all. Your artwork never leaves your device unless you share it.
+
+OPEN SOURCE
+fPaint is MIT-licensed and built in the open. Read the code, report an issue or contribute at github.com/vteam-com/fPaint.

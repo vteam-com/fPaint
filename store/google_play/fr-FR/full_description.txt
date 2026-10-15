@@ -1,0 +1,38 @@
+fPaint est une application de dessin et de peinture gratuite et open source, avec les outils d'un atelier professionnel et rien qui vous gêne : ni publicité, ni compte, ni abonnement, ni pistage.
+
+PINCEAUX ET EFFETS
+• Crayon, pinceau et gomme sensibles à la pression du stylet
+• Estompe pour fondre les couleurs comme du bout du doigt
+• Des effets qui se peignent comme n'importe quel pinceau : flou, netteté, luminosité, contraste, saturation, teinte, niveaux de gris, bruit, pixellisation, ombre et vignette
+• Lignes, rectangles, cercles et texte
+
+CALQUES
+• Autant de calques que nécessaire, avec modes de fusion, opacité, visibilité et verrouillage
+• Renommez, réordonnez et fusionnez
+• Vignettes en direct de chaque calque
+
+SÉLECTION ET TRANSFORMATION
+• Rectangle, ellipse, lasso, baguette magique et pinceau de sélection
+• Ajoutez à une sélection ou retirez-en
+• Déplacez, redimensionnez, faites pivoter et déformez le contenu sélectionné ; copiez, coupez, collez et dupliquez
+• Chaque pinceau et effet reste dans la sélection active
+
+COULEUR ET REMPLISSAGE
+• Roue chromatique, palettes, couleurs récentes et pipette
+• Remplissages uni, dégradé linéaire et dégradé radial avec aperçu en direct
+
+UNE TOILE RÉACTIVE
+• Pincez pour zoomer, déplacer et faire pivoter librement la vue
+• Menu rapide circulaire avec vos outils, couleurs et tailles de pinceau récents
+• Historique complet d'annulation pour expérimenter librement
+• Récupération automatique du travail non enregistré
+
+VOS FICHIERS, VOS FORMATS
+• Ouvrez des fichiers PNG, JPEG, TIFF, WEBP, HEIC, OpenRaster (ORA) et Photoshop (PSD)
+• Enregistrez vos œuvres avec calques en ORA ou TIFF et exportez en PNG, JPEG, TIFF et WEBP
+
+CONFIDENTIELLE PAR CONCEPTION
+fPaint fonctionne hors ligne et ne collecte aucune donnée. Vos œuvres ne quittent jamais votre appareil, sauf si vous les partagez.
+
+OPEN SOURCE
+fPaint est sous licence MIT et développée en open source. Lisez le code, signalez un problème ou contribuez sur github.com/vteam-com/fPaint.
