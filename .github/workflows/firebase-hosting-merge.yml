@@ -129,6 +129,13 @@ jobs:
           cp desktop-artifacts/flutter-windows-app/flutter-windows-app.zip build/web/downloads/
           cp desktop-artifacts/flutter-macos-app/flutter-macos-app.zip build/web/downloads/
 
+      # The /info page (web/info/index.html) plays the painting session that
+      # the scenario test records; GitHub would only offer the MP4 as a download.
+      - name: Copy painting session video into the info page
+        run: |
+          cp test/output/unit_test_video.mp4 build/web/info/painting_session.mp4
+          cp test/output/unit_test_video_poster.png build/web/info/painting_session.png
+
       - name: Configure Firebase credentials
         run: |
           cat > "$RUNNER_TEMP/firebase-service-account.json" <<'EOF'
