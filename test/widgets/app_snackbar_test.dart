@@ -1,8 +1,11 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
+import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/app_progress.dart';
 import 'package:fpaint/widgets/app_snackbar.dart';
 import 'package:material_ui/material_ui.dart';
@@ -47,6 +50,13 @@ Widget _buildNestedOverlayTestApp({
 /// The yellow Flutter underlines text with when it falls back to
 /// [WidgetsApp.textStyle] for want of a [DefaultTextStyle] ancestor.
 const Color _debugFallbackUnderline = Color(0xFFFFFF00);
+
+const String _copyableMessage = 'Export failed';
+const String _copyableSubtitle = 'disk full';
+const String _clipboardSetDataMethod = 'Clipboard.setData';
+const String _clipboardTextKey = 'text';
+const String _progressMessage = 'Working';
+const Duration _autoDismissWait = Duration(seconds: 5);
 
 void main() {
   group('AppNotificationOverlay', () {
@@ -373,6 +383,69 @@ void main() {
 
       expect(find.text('Saving...'), findsNothing);
       expect(find.text('Saved'), findsNothing);
+      expect(find.byType(AppProgressIndicator), findsNothing);
+    });
+  });
+  group('global copyable and progress helpers', () {
+    testWidgets('showGlobalSnackBarMessage with copyable copies message and subtitle', (
+      WidgetTester tester,
+    ) async {
+      final List<String> copiedTexts = <String>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (MethodCall call) async {
+          if (call.method == _clipboardSetDataMethod) {
+            final Map<Object?, Object?> arguments = call.arguments as Map<Object?, Object?>;
+            copiedTexts.add(arguments[_clipboardTextKey]! as String);
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null),
+      );
+
+      await tester.pumpWidget(
+        _buildSnackbarTestApp(
+          navigatorKey: appSnackBarNavigatorKey,
+          child: const SizedBox(),
+        ),
+      );
+
+      showGlobalSnackBarMessage(_copyableMessage, subtitle: _copyableSubtitle, copyable: true);
+      await tester.pump();
+
+      expect(find.text(_copyableMessage), findsOneWidget);
+      await tester.tap(
+        find.byWidgetPredicate((Widget widget) => widget is AppSvgIcon && widget.icon == AppIcon.copy),
+      );
+      await tester.pump();
+
+      expect(copiedTexts, <String>['$_copyableMessage\n$_copyableSubtitle']);
+
+      await tester.pump(_autoDismissWait);
+      await tester.pump();
+      expect(find.text(_copyableMessage), findsNothing);
+    });
+
+    testWidgets('runWithGlobalProgressSnackBar without a success message dismisses the progress', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildSnackbarTestApp(
+          navigatorKey: appSnackBarNavigatorKey,
+          child: const SizedBox(),
+        ),
+      );
+
+      final Future<int> task = runWithGlobalProgressSnackBar<int>(
+        task: () async => 1,
+        showInProgress: () => showGlobalProgressSnackBarMessage(_progressMessage),
+      );
+      expect(await task, 1);
+      await tester.pump();
+
+      expect(find.text(_progressMessage), findsNothing);
       expect(find.byType(AppProgressIndicator), findsNothing);
     });
   });

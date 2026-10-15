@@ -31,6 +31,9 @@ const Set<String> _heicMajorBrands = <String>{
   'msf1',
 };
 
+/// Bytes no image decoder (including `sips`) can read.
+const List<int> _notAnImageBytes = <int>[0, 1, 2, 3];
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -71,6 +74,17 @@ void main() {
         );
         expect(brand, isIn(<String>['heic', 'heix', 'mif1']));
       });
+
+      test(
+        'reports a sips failure as a HeicConversionException on macOS',
+        () async {
+          await expectLater(
+            encodeToHeic(Uint8List.fromList(_notAnImageBytes)),
+            throwsA(isA<HeicConversionException>()),
+          );
+        },
+        skip: !Platform.isMacOS,
+      );
 
       test('isHeicExportSupported reflects macOS', () {
         expect(isHeicExportSupported, Platform.isMacOS);

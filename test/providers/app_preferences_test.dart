@@ -7,6 +7,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 const String _testRecentFilePath = '/tmp/a.png';
 const String _testRecentFileBookmark = 'bookmark-a';
+const String _testSecondRecentFilePath = '/tmp/b.png';
+const double _outOfRangeIntensity = 2.5;
+const double _midIntensity = 0.4;
 
 void main() {
   late AppPreferences preferences;
@@ -448,6 +451,46 @@ void main() {
       await prefs2.getPref();
       expect(prefs2.lastSelectedLayerFor('/tmp/a.png'), isNull);
       expect(prefs2.lastSelectedLayerFor('/tmp/b.jpg'), 2);
+    });
+  });
+  group('blur brush intensity', () {
+    test('clamps, exposes, and persists the value', () async {
+      await preferences.setBlurBrushIntensity(_outOfRangeIntensity);
+      expect(preferences.blurBrushIntensity, AppEffects.maxIntensity);
+
+      await preferences.setBlurBrushIntensity(_midIntensity);
+      expect(preferences.blurBrushIntensity, _midIntensity);
+      final SharedPreferences prefs = await preferences.getPref();
+      expect(prefs.getDouble(AppPreferences.keyBlurBrushIntensity), _midIntensity);
+    });
+  });
+
+  group('removeRecentFile', () {
+    test('drops the entry and its bookmark, keeping the rest persisted', () async {
+      int notifications = 0;
+      preferences.addListener(() => notifications++);
+      await preferences.addRecentFile(_testRecentFilePath, bookmark: _testRecentFileBookmark);
+      await preferences.addRecentFile(_testSecondRecentFilePath);
+
+      await preferences.removeRecentFile(_testRecentFilePath);
+
+      expect(preferences.recentFiles, <String>[_testSecondRecentFilePath]);
+      expect(preferences.getBookmark(_testRecentFilePath), isNull);
+      final SharedPreferences prefs = await preferences.getPref();
+      expect(prefs.getStringList(AppPreferences.keyRecentFiles), <String>[_testSecondRecentFilePath]);
+      expect(prefs.getStringList(AppPreferences.keyRecentFileBookmarks), <String>['']);
+      expect(notifications, greaterThan(0));
+    });
+
+    test('removing the last entry clears the persisted bookmark list', () async {
+      await preferences.addRecentFile(_testRecentFilePath, bookmark: _testRecentFileBookmark);
+
+      await preferences.removeRecentFile(_testRecentFilePath);
+
+      expect(preferences.recentFiles, isEmpty);
+      final SharedPreferences prefs = await preferences.getPref();
+      expect(prefs.getStringList(AppPreferences.keyRecentFiles), isEmpty);
+      expect(prefs.containsKey(AppPreferences.keyRecentFileBookmarks), isFalse);
     });
   });
 }

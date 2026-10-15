@@ -15,6 +15,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 const MethodChannel _fileChannel = MethodChannel('com.vteam.fpaint/file');
 const String _bookmarkPath = '/tmp/bookmarked.ora';
 const String _bookmarkValue = 'bookmark-a';
+const String _createBookmarkMethod = 'createBookmark';
+const String _resolveBookmarkMethod = 'resolveBookmark';
+const String _previousContent = 'old-content';
+const String _partialContent = 'partial';
+const String _saveFailureMessage = 'disk full';
+const String _edgeCaseTempDirPrefix = 'fpaint_save_edge_cases_';
+const ui.Size _edgeCaseCanvasSize = ui.Size(4, 4);
+const String _unsupportedSaveName = 'art.gif';
+const String _longTiffName = 'art.tiff';
+const String _shortTiffName = 'art.tif';
+const String _missingDirPngName = 'missing/art.png';
+const String _missingDirOraName = 'missing/art.ora';
+const String _feedbackPngName = 'feedback.png';
 
 // Mock classes to test saveFile routing logic
 class MockLayersProvider {
@@ -449,6 +462,41 @@ void main() {
       expect(await currentFile.readAsString(), 'new-content');
       expect(backupFiles, isEmpty);
     });
+
+    test('restores the backup when the save fails', () async {
+      final File currentFile = File(filePath);
+      await currentFile.writeAsString(_previousContent);
+
+      await expectLater(
+        saveWithOptionalBackup(
+          filePath: filePath,
+          preferences: preferences,
+          saveAction: (String resolvedPath) async {
+            await File(resolvedPath).writeAsString(_partialContent);
+            throw const FileSystemException(_saveFailureMessage);
+          },
+        ),
+        throwsA(isA<FileSystemException>()),
+      );
+
+      expect(await currentFile.readAsString(), _previousContent);
+    });
+
+    test('restores the backup when the failed save wrote nothing', () async {
+      final File currentFile = File(filePath);
+      await currentFile.writeAsString(_previousContent);
+
+      await expectLater(
+        saveWithOptionalBackup(
+          filePath: filePath,
+          preferences: preferences,
+          saveAction: (String _) async => throw const FileSystemException(_saveFailureMessage),
+        ),
+        throwsA(isA<FileSystemException>()),
+      );
+
+      expect(await currentFile.readAsString(), _previousContent);
+    });
   });
 
   group('saveFile remembers flat-format selection', () {
@@ -499,6 +547,99 @@ void main() {
 
       expect(await File(filePath).exists(), isTrue);
       expect(preferences.lastSelectedLayerFor(filePath), isNull);
+    });
+  });
+
+  group('saveFile edge cases', () {
+    late Directory tempDirectory;
+    late AppPreferences preferences;
+    late ShellProvider shellProvider;
+    late LayersProvider layers;
+    late TargetPlatform? previousPlatform;
+
+    setUp(() async {
+      previousPlatform = debugDefaultTargetPlatformOverride;
+      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+      tempDirectory = await Directory.systemTemp.createTemp(_edgeCaseTempDirPrefix);
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      preferences = AppPreferences();
+      await preferences.getPref();
+      shellProvider = ShellProvider();
+      layers = LayersProvider()..size = _edgeCaseCanvasSize;
+    });
+
+    tearDown(() async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(_fileChannel, null);
+      debugDefaultTargetPlatformOverride = previousPlatform;
+      if (await tempDirectory.exists()) {
+        await tempDirectory.delete(recursive: true);
+      }
+    });
+
+    String pathOf(String name) => '${tempDirectory.path}${Platform.pathSeparator}$name';
+
+    test('rejects a loaded file whose extension cannot be saved', () async {
+      shellProvider.loadedFileName = pathOf(_unsupportedSaveName);
+
+      await expectLater(
+        saveFile(shellProvider, layers, preferences),
+        throwsA(isA<UnsupportedSaveFormatException>()),
+      );
+    });
+
+    test('retargets a .tiff document to the canonical .tif it wrote', () async {
+      shellProvider.loadedFileName = pathOf(_longTiffName);
+
+      await saveFile(shellProvider, layers, preferences);
+
+      expect(shellProvider.loadedFileName, pathOf(_shortTiffName));
+      expect(await File(pathOf(_shortTiffName)).exists(), isTrue);
+    });
+
+    test('wraps unexpected write failures in a FileOperationException', () async {
+      for (final String name in <String>[_missingDirPngName, _missingDirOraName]) {
+        shellProvider.loadedFileName = pathOf(name);
+
+        await expectLater(
+          saveFile(shellProvider, layers, preferences),
+          throwsA(isA<FileOperationException>()),
+          reason: name,
+        );
+      }
+    });
+
+    test('saveLoadedFileWithFeedback saves the loaded document', () async {
+      shellProvider.loadedFileName = pathOf(_feedbackPngName);
+      layers.markAllChanged();
+
+      await saveLoadedFileWithFeedback(shellProvider, layers, preferences);
+
+      expect(await File(pathOf(_feedbackPngName)).exists(), isTrue);
+      expect(layers.hasChanged, isFalse);
+    });
+
+    test('records a newly bookmarked file as recent on macOS', () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      final String filePath = pathOf(_feedbackPngName);
+      shellProvider.loadedFileName = filePath;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        _fileChannel,
+        (MethodCall methodCall) async {
+          switch (methodCall.method) {
+            case _createBookmarkMethod:
+              return _bookmarkValue;
+            case _resolveBookmarkMethod:
+              return filePath;
+            default:
+              return null;
+          }
+        },
+      );
+
+      await saveFile(shellProvider, layers, preferences);
+
+      expect(preferences.recentFiles, contains(filePath));
+      expect(preferences.getBookmark(filePath), _bookmarkValue);
     });
   });
 }

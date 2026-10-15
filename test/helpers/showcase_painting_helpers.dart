@@ -15,9 +15,11 @@ import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/panels/layers/layer_thumbnail.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/widgets/brush_intensity_picker.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
+import 'package:fpaint/widgets/hatch_settings_picker.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -73,6 +75,9 @@ const int _gradientHandlePlacementAttempts = 3;
 
 /// Canvas-pixel distance at which a gradient knob counts as placed.
 const double _gradientHandleCanvasTolerance = 1.5;
+
+/// Screen-pixel nudge applied while placing the layer picker puck.
+const double _pickerNudge = 12;
 
 /// Tolerance fill colours are compared with when verifying an eyedrop.
 const int _eyedropChannelTolerance = 2;
@@ -215,6 +220,22 @@ Future<void> setBrushIntensityViaSlider(WidgetTester tester, double intensity) a
   await tester.pump();
 }
 
+/// Sets the smudge / blur-brush intensity through the picker dialog opened by
+/// the intensity row's button, then closes the dialog.
+Future<void> setBrushIntensityViaPicker(WidgetTester tester, double intensity) async {
+  await tapByKey(tester, Keys.toolBrushIntensityButton);
+  final Finder picker = find.byType(BrushIntensityPicker);
+  await pumpUntilIdle(tester, () => picker.evaluate().isNotEmpty);
+  await pumpForDialogTransition(tester);
+  final Finder slider = find.descendant(of: picker, matching: find.byType(AppSlider));
+  InteractionTracker.recordTap(tester.getCenter(slider.first));
+  tester.widget<AppSlider>(slider.first).onChanged?.call(intensity);
+  await tester.pump();
+  await captureShowcaseFrame(tester);
+  Navigator.of(tester.element(picker)).pop();
+  await pumpForDialogTransition(tester);
+}
+
 /// Opens the colour picker behind [previewKey], types [color] as hex, and
 /// applies it — the same path a user takes to dial in an exact colour.
 Future<void> pickColorViaDialog(
@@ -249,6 +270,63 @@ Future<void> pickColorViaDialog(
 /// Picks the brush colour through the colour dialog.
 Future<void> pickBrushColorViaUi(WidgetTester tester, Color color) =>
     pickColorViaDialog(tester, previewKey: Keys.toolPanelBrushColor1, color: color);
+
+/// Opens the brush's Hatching sheet, dials in the pattern with its sliders and
+/// cross-hatch switch, then closes the sheet. The active brush style must be
+/// Hatch or Cross-hatch; the switch flips between the two.
+Future<void> configureBrushHatchViaSheet(
+  WidgetTester tester, {
+  required int angleDegrees,
+  required int spacing,
+  required int lineWidth,
+  required bool crossed,
+}) async {
+  await tapByKey(tester, Keys.toolBrushHatchButton);
+  final Finder controls = find.byType(HatchSettingsControls);
+  await pumpUntilIdle(tester, () => controls.evaluate().isNotEmpty);
+  await pumpForDialogTransition(tester);
+
+  for (final (Key key, int value) in <(Key, int)>[
+    (Keys.hatchAngleSlider, angleDegrees),
+    (Keys.hatchSpacingSlider, spacing),
+    (Keys.hatchLineWidthSlider, lineWidth),
+  ]) {
+    final Finder slider = find.byKey(key);
+    InteractionTracker.recordTap(tester.getCenter(slider));
+    tester.widget<AppSlider>(slider).onChanged?.call(value.toDouble());
+    await tester.pump();
+  }
+  final bool isCrossed = appProviderFromTester(tester).brushStyle == BrushStyle.crossHatch;
+  if (isCrossed != crossed) {
+    await tapByKey(tester, Keys.hatchCrossedToggle);
+  }
+  await captureShowcaseFrame(tester);
+
+  Navigator.of(tester.element(controls)).pop();
+  await pumpForDialogTransition(tester);
+  expect(appProviderFromTester(tester).hatchPattern.spacing, spacing);
+}
+
+/// Turns the paint bucket's Halftone mode on or off and sets its dot size
+/// with the inline slider. The paint bucket must be the active tool.
+Future<void> setFillHalftoneViaUi(
+  WidgetTester tester, {
+  required bool enabled,
+  int? dotSizePercent,
+}) async {
+  final AppProvider appProvider = appProviderFromTester(tester);
+  if (appProvider.fillModel.halftoneEnabled != enabled) {
+    await tapByKey(tester, Keys.toolFillHalftoneToggle);
+  }
+  expect(appProvider.fillModel.halftoneEnabled, enabled, reason: 'Halftone toggle should follow the switch');
+  if (dotSizePercent != null) {
+    final Finder slider = find.byKey(Keys.toolFillHalftoneSlider);
+    InteractionTracker.recordTap(tester.getCenter(slider));
+    tester.widget<AppSlider>(slider).onChanged?.call(dotSizePercent.toDouble());
+    await tester.pump();
+    expect(appProvider.fillModel.halftoneMaxDotSizePercent, dotSizePercent);
+  }
+}
 
 /// Sets the Text tool's font size through its font-size slider.
 Future<void> setTextSizeViaUi(WidgetTester tester, double size) async {
@@ -706,6 +784,73 @@ Future<void> renameSelectedLayerViaUi(WidgetTester tester, String name) async {
   tester.binding.focusManager.primaryFocus?.unfocus();
   await tester.pump();
   expect(layers.selectedLayer.name, name);
+}
+
+/// Arms the Layers panel's picker puck, presses at [canvasPoint], nudges the
+/// puck into place and releases: the layer owning that pixel gets selected.
+Future<String> pickLayerWithPuckViaUi(WidgetTester tester, Offset canvasPoint) async {
+  final LayersProvider layers = layersProviderFromTester(tester);
+  await tapByKey(tester, Keys.layerPickerToggleButton);
+  final Offset target = canvasToScreen(tester, canvasPoint);
+  final Offset press = target - const Offset(_pickerNudge, _pickerNudge);
+  InteractionTracker.recordDrag(press, target);
+  final TestGesture gesture = await tester.startGesture(press, kind: PointerDeviceKind.mouse, buttons: kPrimaryButton);
+  await tester.pump(_strokeMovePump);
+  await gesture.moveTo(target);
+  await tester.pump(_strokeMovePump);
+  await captureShowcaseFrame(tester);
+  final int before = layers.selectedLayerIndex;
+  await gesture.up();
+  await pumpUntilIdle(tester, () => layers.selectedLayerIndex != before);
+  await pumpForUnitTestUiSettle(tester);
+  return layers.selectedLayer.name;
+}
+
+/// Shift+Alt-clicks [canvasPoint]: the keyboard shortcut for picking the layer
+/// that owns the pixel under the pointer.
+Future<String> pickLayerWithShortcutViaUi(WidgetTester tester, Offset canvasPoint) async {
+  final LayersProvider layers = layersProviderFromTester(tester);
+  final int before = layers.selectedLayerIndex;
+  await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+  await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+  await tester.pump();
+  await tapLikeHumanWithoutSettling(tester, canvasToScreen(tester, canvasPoint));
+  await pumpUntilIdle(tester, () => layers.selectedLayerIndex != before);
+  await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+  await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+  await pumpForUnitTestUiSettle(tester);
+  return layers.selectedLayer.name;
+}
+
+/// Edge-detection wand with the tap-then-scrub gesture: press at
+/// [canvasPoint] and drag horizontally by [toleranceDragDx] screen pixels to
+/// widen the colour tolerance live before releasing.
+Future<void> selectWandWithToleranceDragViaUi(
+  WidgetTester tester, {
+  required Offset canvasPoint,
+  required double toleranceDragDx,
+}) async {
+  final AppProvider appProvider = appProviderFromTester(tester);
+  await clearSelectionViaUi(tester);
+  await activateSelectorTool(tester);
+  await tapByKey(tester, Keys.toolSelectorModeWand);
+  final int toleranceBefore = appProvider.tolerance;
+  final Offset start = canvasToScreen(tester, canvasPoint);
+  final TestGesture gesture = await tester.startGesture(start, kind: PointerDeviceKind.mouse, buttons: kPrimaryButton);
+  await pumpUntilIdle(tester, () => !appProvider.wandSelection.isInProgress);
+  for (int step = 1; step <= _handleDragSteps; step++) {
+    await gesture.moveTo(start + Offset(toleranceDragDx * step / _handleDragSteps, 0));
+    await tester.pump(_strokeMovePump);
+  }
+  InteractionTracker.recordDrag(start, start + Offset(toleranceDragDx, 0));
+  await captureShowcaseFrame(tester);
+  await gesture.up();
+  await pumpUntilIdle(
+    tester,
+    () => !appProvider.wandSelection.isInProgress && !appProvider.wandSelection.hasPendingRequest,
+  );
+  expect(appProvider.selectorModel.isVisible, isTrue, reason: 'The wand should leave a selection');
+  expect(appProvider.tolerance, isNot(toleranceBefore), reason: 'Scrubbing should change the tolerance');
 }
 
 /// Selects a layer by tapping its row thumbnail.

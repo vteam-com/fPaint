@@ -24,6 +24,10 @@ const Offset _sidingTap = Offset(842, 694);
 const List<Offset> _cabinRoof = <Offset>[Offset(788, 655), Offset(841, 613), Offset(894, 655)];
 const Color _cabinRoofColor = Color(0xFF231917);
 const Offset _cabinRoofTap = Offset(841, 640);
+
+/// Shingle texture: halftone dots, a shade lighter than the roof.
+const Color _shingleColor = Color(0xFF4A3428);
+const int _shingleDotSizePercent = 45;
 const Color _cabinRimColor = Color(0xF2F0A070);
 const double _cabinRimSize = 2;
 
@@ -34,6 +38,9 @@ const Rect _cabinWindow = Rect.fromLTRB(810, 665, 832, 685);
 const Color _cabinWindowBaseColor = Color(0xFFFFB14A);
 const List<Color> _cabinWindowGlow = <Color>[Color(0xFFFFF3C4), Color(0xFFFF9A3A)];
 const int _cabinWindowWandTolerance = 30;
+
+/// Screen pixels the wand is scrubbed right to widen its tolerance a little.
+const double _cabinWindowWandScrub = 24;
 const Color _cabinLightSpillColor = Color(0x55FFB347);
 const double _cabinLightSpillSize = 30;
 
@@ -101,6 +108,11 @@ Future<void> paintShowcaseCabin(PaintingScenarioSession session) async {
   // Roof: click the three corners of a straight-edge marquee, then fill it.
   await selectPolygonViaUi(tester, _cabinRoof);
   await solidFillViaUi(tester, canvasPoint: _cabinRoofTap, color: _cabinRoofColor);
+
+  // Shingles: a second, halftone pass of dots over the roof.
+  await setFillHalftoneViaUi(tester, enabled: true, dotSizePercent: _shingleDotSizePercent);
+  await solidFillViaUi(tester, canvasPoint: _cabinRoofTap, color: _shingleColor);
+  await setFillHalftoneViaUi(tester, enabled: false);
   await clearSelectionViaUi(tester);
 
   await selectToolByKey(tester, Keys.toolRectangle);
@@ -123,10 +135,11 @@ Future<void> paintShowcaseCabin(PaintingScenarioSession session) async {
     ..brushColor = _cabinTrimColor;
   await setBrushSizeViaSlider(tester, _cabinTrimSize);
   await dragCanvasShape(tester, from: _cabinWindow.topLeft, to: _cabinWindow.bottomRight);
-  await selectWandArea(
+  appProvider.tolerance = _cabinWindowWandTolerance;
+  await selectWandWithToleranceDragViaUi(
     tester,
-    position: canvasToScreen(tester, _cabinWindow.center),
-    tolerance: _cabinWindowWandTolerance,
+    canvasPoint: _cabinWindow.center,
+    toleranceDragDx: _cabinWindowWandScrub,
   );
   await gradientFillViaUi(
     tester,
@@ -190,4 +203,12 @@ Future<void> paintShowcaseCabin(PaintingScenarioSession session) async {
   }
 
   await showActualSizeCentered(tester);
+
+  // Which layer is that? Pick the peak with the panel's picker puck, then
+  // Shift+Alt-click the cabin to come back to it.
+  expect(await pickLayerWithPuckViaUi(tester, _pickerMountainPoint), _mountainsLayerName);
+  expect(await pickLayerWithShortcutViaUi(tester, _cabinBody.center), _cabinLayerName);
 }
+
+/// A pixel only the mountains own (the west peak's shadow face, above the trees).
+const Offset _pickerMountainPoint = Offset(200, 330);

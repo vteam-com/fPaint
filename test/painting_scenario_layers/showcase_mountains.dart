@@ -153,6 +153,21 @@ const List<Offset> _peakEastLitRidge = <Offset>[
   Offset(756, 323),
 ];
 
+/// Ink hatching on the shadow faces.
+const Color _shadowHatchColor = Color(0x5A16122C);
+const double _shadowHatchSize = 34;
+const int _shadowHatchAngle = 60;
+const int _shadowHatchSpacing = 6;
+const int _shadowHatchLineWidth = 1;
+const List<List<Offset>> _eastShadowHatchStrokes = <List<Offset>>[
+  <Offset>[Offset(872, 250), Offset(900, 290), Offset(930, 330), Offset(960, 370), Offset(990, 400)],
+  <Offset>[Offset(910, 300), Offset(950, 320), Offset(990, 340), Offset(1030, 360)],
+];
+const List<List<Offset>> _westShadowHatchStrokes = <List<Offset>>[
+  <Offset>[Offset(300, 200), Offset(270, 240), Offset(240, 280), Offset(200, 320), Offset(160, 360)],
+  <Offset>[Offset(250, 300), Offset(200, 340), Offset(150, 380), Offset(100, 410)],
+];
+
 /// Short smudges that drag snow down into the rock.
 const double _snowlineSmudgeSize = 12;
 const double _snowlineSmudgeIntensity = 0.55;
@@ -271,6 +286,35 @@ Future<void> paintShowcaseMountains(PaintingScenarioSession session) async {
   await setBrushSizeViaSlider(tester, _ridgeLightSize);
   await paintCanvasStroke(tester, _peakWestLitRidge);
   await paintCanvasStroke(tester, _peakEastLitRidge);
+
+  // Pen-and-ink shading on the faces turned away from the sun: parallel
+  // hatching on the east peak, then the sheet's switch flips to cross-hatch
+  // for the deeper shadow of the west peak.
+  await selectBrushTool(tester);
+  await selectBrushStyleViaUi(tester, BrushStyle.hatch);
+  appProviderFromTester(tester).brushColor = _shadowHatchColor;
+  await setBrushSizeViaSlider(tester, _shadowHatchSize);
+  await configureBrushHatchViaSheet(
+    tester,
+    angleDegrees: _shadowHatchAngle,
+    spacing: _shadowHatchSpacing,
+    lineWidth: _shadowHatchLineWidth,
+    crossed: false,
+  );
+  for (final List<Offset> stroke in _eastShadowHatchStrokes) {
+    await paintCanvasStroke(tester, stroke);
+  }
+  await configureBrushHatchViaSheet(
+    tester,
+    angleDegrees: _shadowHatchAngle,
+    spacing: _shadowHatchSpacing,
+    lineWidth: _shadowHatchLineWidth,
+    crossed: true,
+  );
+  expect(appProviderFromTester(tester).brushStyle, BrushStyle.crossHatch);
+  for (final List<Offset> stroke in _westShadowHatchStrokes) {
+    await paintCanvasStroke(tester, stroke);
+  }
 
   // Drag the snow down into the rock.
   await selectToolByKey(tester, Keys.toolSmudge);

@@ -164,4 +164,84 @@ void main() {
 
     await confirmPress.up();
   });
+  group('overlay placement with feedback', () {
+    const double viewportHeight = 100;
+    const double tallViewportHeight = 1000;
+    const Widget buttonsRow = SizedBox(key: Key('buttons'));
+    const Widget feedbackBubble = SizedBox(key: Key('feedback'));
+    const Widget feedbackSpacer = SizedBox(key: Key('spacer'));
+
+    test('flipped-to-bottom placement orders buttons, spacer, then feedback', () {
+      final OverlayPlacement placement = computeOverlayPlacement(
+        viewportHeight: tallViewportHeight,
+        idealTop: -AppInteraction.imagePlacementButtonSize,
+        bottomTop: viewportHeight,
+        isFeedbackVisible: true,
+      );
+
+      expect(placement.isFlippedToBottom, isTrue);
+      expect(
+        placement.orderedColumnChildren(
+          buttonsRow: buttonsRow,
+          isFeedbackVisible: true,
+          feedbackBubble: feedbackBubble,
+          feedbackSpacer: feedbackSpacer,
+        ),
+        <Widget>[buttonsRow, feedbackSpacer, feedbackBubble],
+      );
+    });
+
+    test('centred placement offsets the buttons below the feedback bubble', () {
+      final OverlayPlacement placement = computeOverlayPlacement(
+        viewportHeight: viewportHeight,
+        idealTop: -AppInteraction.imagePlacementButtonSize,
+        bottomTop: viewportHeight,
+        isFeedbackVisible: true,
+      );
+
+      expect(placement.isCentered, isTrue);
+      expect(
+        placement.controlsTop,
+        placement.centeredTop + AppInteraction.imagePlacementButtonSize + AppInteraction.imagePlacementButtonSpacing,
+      );
+    });
+  });
+
+  testWidgets('circle buttons re-tint an AppSvgIcon child and wrap other children in the content style', (
+    WidgetTester tester,
+  ) async {
+    const Key iconChildKey = Key('icon-child');
+    const Key plainChildKey = Key('plain-child');
+    const String plainLabel = 'Aa';
+    const String iconChildTooltip = 'Icon child';
+    const String plainChildTooltip = 'Plain child';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Row(
+            children: <Widget>[
+              buildOverlayCircleButton(
+                cursor: SystemMouseCursors.click,
+                tooltip: iconChildTooltip,
+                contentSemantic: AppButtonContentSemantic.dangerous,
+                child: const AppSvgIcon(key: iconChildKey, icon: AppIcon.close),
+              ),
+              buildOverlayCircleButton(
+                cursor: SystemMouseCursors.click,
+                tooltip: plainChildTooltip,
+                child: const Text(plainLabel, key: plainChildKey),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.widget<AppSvgIcon>(find.byKey(iconChildKey).first).color, AppColors.buttonDanger);
+    final DefaultTextStyle plainStyle = tester.widget<DefaultTextStyle>(
+      find.ancestor(of: find.byKey(plainChildKey), matching: find.byType(DefaultTextStyle)).first,
+    );
+    expect(plainStyle.style.color, AppColors.buttonEnable);
+  });
 }

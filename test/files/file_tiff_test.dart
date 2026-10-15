@@ -34,6 +34,13 @@ const List<ui.Size> _expectedSketchBookLayerSizes = <ui.Size>[
 const List<double> _sketchBookYPositions = <double>[1430, 1347, 1183];
 const ui.Size _croppedLayerCanvasSize = ui.Size(20, 20);
 const ui.Offset _croppedLayerOffset = ui.Offset(5, 7);
+const int _flatTiffWidth = 3;
+const int _flatTiffHeight = 2;
+const String _plainLayerName = 'Pencil sketch';
+const String _jsonLayerName = 'From JSON';
+const String _blankLayerName = 'Blank';
+const int _closingBraceCode = 0x7D; // '}'
+const int _fillerCode = 0x78; // 'x'
 const ui.Size _croppedLayerImageSize = ui.Size(4, 3);
 
 void main() {
@@ -376,6 +383,72 @@ void main() {
       );
     });
 
+    group('flat (frame-based) TIFFs', () {
+      Future<LayersProvider> readFlatTiff({String? description}) async {
+        final img.Image frame = img.Image(width: _flatTiffWidth, height: _flatTiffHeight);
+        if (description != null) {
+          frame.exif.imageIfd[TiffConstants.tagImageDescription] = img.IfdValueAscii(description);
+        }
+        final LayersProvider layers = LayersProvider()..clear();
+        await readTiffFileFromBytes(layers, img.encodeTiff(frame));
+        return layers;
+      }
+
+      test('names an undescribed frame with the fallback layer name', () async {
+        final LayersProvider layers = await readFlatTiff();
+
+        expect(layers.size, const ui.Size(_flatTiffWidth * 1.0, _flatTiffHeight * 1.0));
+        expect(layers.length, 1);
+        expect(
+          layers.get(0).name,
+          '${TiffConstants.fallbackLayerNamePrefix}${TiffConstants.fallbackLayerNameSeparator}1',
+        );
+      });
+
+      test('uses a plain-text description as the layer name', () async {
+        final LayersProvider layers = await readFlatTiff(description: _plainLayerName);
+
+        expect(layers.get(0).name, _plainLayerName);
+      });
+
+      test('restores JSON metadata from the description', () async {
+        final LayersProvider layers = await readFlatTiff(
+          description: jsonEncode(<String, Object>{
+            TiffConstants.metaKeyName: _jsonLayerName,
+            TiffConstants.metaKeyVisible: false,
+          }),
+        );
+
+        expect(layers.get(0).name, _jsonLayerName);
+        expect(layers.get(0).isVisible, isFalse);
+      });
+    });
+
+    test('exports a blank layer at full canvas size and reads malformed JSON names verbatim', () async {
+      final LayersProvider source = LayersProvider()
+        ..clear()
+        ..size = _layeredExportCanvasSize;
+      source.addTop(name: _blankLayerName);
+      final Uint8List bytes = await convertLayersToTiff(source);
+
+      // Corrupt the layer's JSON description in place (same length) so it
+      // still starts with '{' but no longer parses.
+      final List<int> marker = utf8.encode('{"${TiffConstants.metaKeyName}":"$_blankLayerName"');
+      final int start = _indexOfBytes(bytes, marker);
+      expect(start, isNonNegative);
+      final int end = bytes.indexOf(_closingBraceCode, start);
+      for (int index = start + 1; index <= end; index++) {
+        bytes[index] = _fillerCode;
+      }
+      final String corruptedDescription = String.fromCharCodes(bytes.sublist(start, end + 1));
+
+      final LayersProvider layers = LayersProvider()..clear();
+      await readTiffFileFromBytes(layers, bytes);
+
+      expect(layers.size, _layeredExportCanvasSize);
+      expect(layers.get(0).name, corruptedDescription);
+    });
+
     // Note: readTiffFileFromBytes and readTiffFromFilePath are complex functions that
     // involve LayersProvider and file operations, making them suitable for
     // integration testing rather than unit testing.
@@ -413,4 +486,18 @@ Future<List<int>> _readRawPixel(
   final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
   final int offset = (y * image.width + x) * 4;
   return List<int>.generate(4, (int index) => byteData!.getUint8(offset + index));
+}
+
+/// Returns the first index of [pattern] in [bytes], or -1 when absent.
+int _indexOfBytes(List<int> bytes, List<int> pattern) {
+  for (int start = 0; start <= bytes.length - pattern.length; start++) {
+    int matched = 0;
+    while (matched < pattern.length && bytes[start + matched] == pattern[matched]) {
+      matched++;
+    }
+    if (matched == pattern.length) {
+      return start;
+    }
+  }
+  return -1;
 }

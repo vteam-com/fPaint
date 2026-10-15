@@ -5,8 +5,14 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/dependency_versions.dart';
 import 'package:fpaint/models/version.dart';
 import 'package:fpaint/panels/side_panel/about.dart';
+import 'package:fpaint/panels/side_panel/attribution_dialog.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:material_ui/material_ui.dart' show MaterialApp, Scaffold;
+
+const String _expandablePackage = 'args';
+const String _firstLicenseParagraph = 'Copyright 2019 Args Authors.';
+const String _secondLicenseParagraph = 'Licensed under the Args Terms.';
+const String _otherLicense = 'Args alternate notice without a date.';
 
 void main() {
   group('showAboutBox', () {
@@ -86,6 +92,49 @@ void main() {
       expect(find.text(l10n.close), findsOneWidget);
       await tester.tap(find.text(l10n.close));
       await tester.pumpAndSettle();
+    });
+  });
+  group('showAttributionDialog', () {
+    testWidgets('tapping a package heading expands and collapses its license texts', (WidgetTester tester) async {
+      LicenseRegistry.addLicense(() async* {
+        yield const LicenseEntryWithLineBreaks(
+          <String>[_expandablePackage],
+          '$_firstLicenseParagraph\n\n$_secondLicenseParagraph',
+        );
+        yield const LicenseEntryWithLineBreaks(<String>[_expandablePackage], _otherLicense);
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () => showAttributionDialog(context),
+                  child: const AppText('Show Attribution'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Show Attribution'));
+      await tester.pumpAndSettle();
+
+      final String heading = '$_expandablePackage (v${dependencyVersions[_expandablePackage]})';
+      expect(find.text(_otherLicense), findsNothing);
+
+      await tester.tap(find.text(heading));
+      await tester.pumpAndSettle();
+      expect(find.text('$_firstLicenseParagraph\n$_secondLicenseParagraph'), findsOneWidget);
+      expect(find.text(_otherLicense), findsOneWidget);
+
+      await tester.tap(find.text(heading));
+      await tester.pumpAndSettle();
+      expect(find.text(_otherLicense), findsNothing);
     });
   });
 }

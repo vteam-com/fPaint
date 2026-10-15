@@ -172,23 +172,11 @@ const List<String> _unitTestWebpAllowedExtensions = <String>[FileExtensions.webp
 /// Subdirectory for unit test screenshot output within [_unitTestOutputDirectoryPath].
 const String _unitTestScreenshotDirectoryName = 'screenshots';
 
-/// Prefix used for the temporary directory that stages video frames.
-const String _videoFrameTemporaryDirectoryPrefix = 'fpaint_unit_test_video_frames_';
-
-/// Prefix for video frame filenames.
-const String _videoFrameFilenamePrefix = 'frame_';
-
-/// File extension for video frame images.
-const String _videoFrameFileExtension = 'png';
-
 /// Filename for the assembled MP4 video.
 const String _videoOutputFilename = 'unit_test_video.mp4';
 
 /// Frames per second for the assembled video.
 const int _videoFramesFps = 30;
-
-/// Width of the zero-padded frame index in filenames.
-const int _videoFrameIndexPadding = 6;
 
 /// Fixed creation-time metadata embedded in the MP4 container so the output
 /// is byte-identical across test runs.
@@ -216,6 +204,14 @@ const int _fnv1a64Prime = 0x100000001B3;
 /// Mask used to keep the frame-signature hash in 64 bits.
 const int _fnv1a64Mask = 0xFFFFFFFFFFFFFFFF;
 
+/// Bit width, mask and hex width of each half of the 64-bit frame signature.
+const int _halfSignatureBits = _videoFrameSignatureBitWidth ~/ 2;
+const int _halfSignatureMask = 0xFFFFFFFF;
+const int _halfSignatureHexLength = _videoFrameSignatureHexLength ~/ 2;
+
+/// Bytes per 64-bit word hashed at a time from raw frame pixels.
+const int _frameSignatureWordBytes = 8;
+
 /// Executable name used to locate ffmpeg on the host.
 const String _whichExecutableName = 'which';
 
@@ -234,8 +230,34 @@ const String _ffmpegBitExactValue = '+bitexact';
 /// ffmpeg flag used to set the input frame rate.
 const String _ffmpegFrameRateFlag = '-framerate';
 
-/// ffmpeg flag used to provide the image-sequence input pattern.
+/// ffmpeg flag used to name an input.
 const String _ffmpegInputFlag = '-i';
+
+/// ffmpeg flag used to force the input container format.
+const String _ffmpegInputFormatFlag = '-f';
+
+/// ffmpeg input format for frames streamed as raw pixels.
+const String _ffmpegRawVideoFormat = 'rawvideo';
+
+/// Pixel layout of the streamed raw frames.
+const String _ffmpegRawPixelFormat = 'rgba';
+
+/// ffmpeg flag used to declare the raw frame size.
+const String _ffmpegFrameSizeFlag = '-s';
+
+/// Executable that creates the named pipe frames are streamed through.
+const String _mkfifoExecutableName = 'mkfifo';
+
+/// Temporary directory prefix and file name of that named pipe.
+const String _videoPipeDirectoryPrefix = 'fpaint_unit_test_video_';
+const String _videoPipeName = 'frames.rgba';
+
+/// ffmpeg flag/value used to copy streams without re-encoding.
+const String _ffmpegStreamCopyFlag = '-c';
+const String _ffmpegStreamCopyValue = 'copy';
+
+/// Separator between width and height in ffmpeg's frame size value.
+const String _ffmpegFrameSizeSeparator = 'x';
 
 /// ffmpeg flag used to drop input metadata.
 const String _ffmpegStripMetadataFlag = '-map_metadata';
@@ -251,6 +273,11 @@ const String _ffmpegCodecFlag = '-c:v';
 
 /// ffmpeg codec used for the committed unit-test video artifact.
 const String _ffmpegCodecValue = 'libx264';
+
+/// x264 speed preset: fast enough that the single-threaded (deterministic)
+/// encoder keeps pace with the test instead of back-pressuring it.
+const String _ffmpegPresetFlag = '-preset';
+const String _ffmpegPresetValue = 'veryfast';
 
 /// ffmpeg flag used to request bit-exact video encoding.
 const String _ffmpegVideoFlagsFlag = '-flags:v';
@@ -278,6 +305,9 @@ const String _videoFrameSignatureMetadataPrefix = 'frame_signature:';
 
 /// Suffix used for temporary output files before a successful rename.
 const String _temporaryVideoOutputSuffix = 'tmp';
+
+/// Suffix of the intermediate encode, before the signature is stamped in.
+const String _unsignedVideoOutputSuffix = 'unsigned';
 
 /// Debug message prefix emitted when no visual change was detected.
 const String _videoFrameSignatureKeepExistingMessagePrefix = '🎬 Video frames unchanged, keeping ';
@@ -2490,9 +2520,51 @@ String buildUnitTestVideoFrameSignatureComment(String frameSignature) {
   return '$_videoFrameSignatureMetadataPrefix$frameSignature';
 }
 
-/// Builds the deterministic ffmpeg arguments used to assemble the MP4 artifact.
-List<String> buildUnitTestVideoAssemblyArguments({
-  required String framesDirectoryPath,
+/// Builds the deterministic ffmpeg arguments that encode raw RGBA frames,
+/// streamed through the named pipe at [inputPath], into [outputPath] while
+/// the test runs.
+List<String> buildUnitTestVideoEncodeArguments({
+  required int width,
+  required int height,
+  required String inputPath,
+  required String outputPath,
+}) {
+  return <String>[
+    _ffmpegOverwriteOutputFlag,
+    _ffmpegBitExactFlag,
+    _ffmpegBitExactValue,
+    _ffmpegInputFormatFlag,
+    _ffmpegRawVideoFormat,
+    _ffmpegPixelFormatFlag,
+    _ffmpegRawPixelFormat,
+    _ffmpegFrameSizeFlag,
+    '$width$_ffmpegFrameSizeSeparator$height',
+    _ffmpegFrameRateFlag,
+    '$_videoFramesFps',
+    _ffmpegInputFlag,
+    inputPath,
+    _ffmpegStripMetadataFlag,
+    _ffmpegDisableSourceMappingValue,
+    _ffmpegStripChaptersFlag,
+    _ffmpegDisableSourceMappingValue,
+    _ffmpegCodecFlag,
+    _ffmpegCodecValue,
+    _ffmpegPresetFlag,
+    _ffmpegPresetValue,
+    _ffmpegVideoFlagsFlag,
+    _ffmpegBitExactValue,
+    _ffmpegThreadCountFlag,
+    '$_ffmpegThreadCount',
+    _ffmpegPixelFormatFlag,
+    _ffmpegPixelFormatValue,
+    outputPath,
+  ];
+}
+
+/// Builds the ffmpeg arguments that copy [inputPath] to [outputPath] without
+/// re-encoding, stamping the fixed creation time and [frameSignature].
+List<String> buildUnitTestVideoSignArguments({
+  required String inputPath,
   required String outputPath,
   required String frameSignature,
 }) {
@@ -2500,22 +2572,16 @@ List<String> buildUnitTestVideoAssemblyArguments({
     _ffmpegOverwriteOutputFlag,
     _ffmpegBitExactFlag,
     _ffmpegBitExactValue,
-    _ffmpegFrameRateFlag,
-    '$_videoFramesFps',
     _ffmpegInputFlag,
-    '$framesDirectoryPath/$_videoFrameFilenamePrefix%0${_videoFrameIndexPadding}d.$_videoFrameFileExtension',
+    inputPath,
     _ffmpegStripMetadataFlag,
     _ffmpegDisableSourceMappingValue,
     _ffmpegStripChaptersFlag,
     _ffmpegDisableSourceMappingValue,
-    _ffmpegCodecFlag,
-    _ffmpegCodecValue,
+    _ffmpegStreamCopyFlag,
+    _ffmpegStreamCopyValue,
     _ffmpegVideoFlagsFlag,
     _ffmpegBitExactValue,
-    _ffmpegThreadCountFlag,
-    '$_ffmpegThreadCount',
-    _ffmpegPixelFormatFlag,
-    _ffmpegPixelFormatValue,
     _ffmpegMetadataFlag,
     _ffmpegCreationTimeMetadataValue,
     _ffmpegMetadataFlag,
@@ -2524,32 +2590,50 @@ List<String> buildUnitTestVideoAssemblyArguments({
   ];
 }
 
-String buildUnitTestTemporaryVideoOutputPath(String outputPath) {
+String buildUnitTestTemporaryVideoOutputPath(String outputPath, {String suffix = _temporaryVideoOutputSuffix}) {
   final int extensionSeparatorIndex = outputPath.lastIndexOf('.');
   if (extensionSeparatorIndex == -1) {
-    return '$outputPath.$_temporaryVideoOutputSuffix';
+    return '$outputPath.$suffix';
   }
 
   final String filePathPrefix = outputPath.substring(0, extensionSeparatorIndex);
   final String filePathSuffix = outputPath.substring(extensionSeparatorIndex);
-  return '$filePathPrefix.$_temporaryVideoOutputSuffix$filePathSuffix';
+  return '$filePathPrefix.$suffix$filePathSuffix';
 }
 
-/// Computes a deterministic signature from the captured PNG frames.
-Future<String> computeUnitTestVideoFrameSignature(Directory framesDirectory) async {
-  final List<File> frameFiles = (await framesDirectory.list().toList()).whereType<File>().toList()
-    ..sort((File left, File right) => left.path.compareTo(right.path));
+/// Incremental, deterministic signature over the raw frames of a recording.
+///
+/// Hashes whole 64-bit words (FNV-style xor-multiply) rather than single
+/// bytes, so a 1600 × 1200 RGBA frame costs about a million steps, not eight.
+class UnitTestVideoFrameSignature {
+  int _hash = _fnv1a64OffsetBasis;
 
-  int hash = _fnv1a64OffsetBasis;
-  for (final File frameFile in frameFiles) {
-    hash = _updateUnitTestVideoFrameSignatureHash(hash, utf8.encode(frameFile.uri.pathSegments.last));
-    hash = _updateUnitTestVideoFrameSignatureHash(hash, await frameFile.readAsBytes());
+  /// Folds one frame's raw [pixels] into the signature.
+  void addFrame(Uint8List pixels) {
+    final int wordCount = pixels.lengthInBytes ~/ _frameSignatureWordBytes;
+    final ByteData data = ByteData.sublistView(pixels);
+    int hash = _hash;
+    for (int word = 0; word < wordCount; word++) {
+      hash ^= data.getUint64(word * _frameSignatureWordBytes, Endian.little);
+      hash = (hash * _fnv1a64Prime) & _fnv1a64Mask;
+    }
+    for (int index = wordCount * _frameSignatureWordBytes; index < pixels.lengthInBytes; index++) {
+      hash ^= pixels[index];
+      hash = (hash * _fnv1a64Prime) & _fnv1a64Mask;
+    }
+    _hash = hash;
   }
 
-  return hash
-      .toUnsigned(_videoFrameSignatureBitWidth)
-      .toRadixString(_videoFrameSignatureRadix)
-      .padLeft(_videoFrameSignatureHexLength, '0');
+  /// The signature as fixed-width lowercase hex.
+  ///
+  /// Formatted as two 32-bit halves: Dart's 64-bit `int` is signed, so a hash
+  /// with the top bit set would otherwise print with a leading minus sign and
+  /// never match on the next run.
+  String get hex {
+    final String high = (_hash >>> _halfSignatureBits).toRadixString(_videoFrameSignatureRadix);
+    final String low = (_hash & _halfSignatureMask).toRadixString(_videoFrameSignatureRadix);
+    return high.padLeft(_halfSignatureHexLength, '0') + low.padLeft(_halfSignatureHexLength, '0');
+  }
 }
 
 /// Reads the embedded frame signature from an existing MP4 artifact, if present.
@@ -2590,15 +2674,6 @@ String? extractUnitTestVideoFrameSignature(Uint8List videoBytes) {
   return null;
 }
 
-int _updateUnitTestVideoFrameSignatureHash(int hash, List<int> bytes) {
-  int nextHash = hash;
-  for (final int byte in bytes) {
-    nextHash ^= byte;
-    nextHash = (nextHash * _fnv1a64Prime) & _fnv1a64Mask;
-  }
-  return nextHash;
-}
-
 bool _matchesBytesAt(Uint8List haystack, Uint8List needle, int startIndex) {
   for (int index = 0; index < needle.length; index += 1) {
     if (haystack[startIndex + index] != needle[index]) {
@@ -2616,8 +2691,12 @@ bool _isValidUnitTestVideoFrameSignature(String candidate) {
   return candidate == candidate.toLowerCase() && int.tryParse(candidate, radix: _videoFrameSignatureRadix) != null;
 }
 
-/// Records numbered PNG frames at each test checkpoint and assembles them
-/// into an MP4 video using ffmpeg when [stop] is called.
+/// Records a frame at each test checkpoint and streams it, as raw RGBA, into
+/// an ffmpeg process that encodes the MP4 while the test keeps running.
+///
+/// Streaming replaces the old per-frame PNG files: encoding ~500 full-screen
+/// PNGs on the test's critical path, writing them, and assembling them at the
+/// end was ~85 % of the painting scenario's wall time.
 ///
 /// When active, tap helpers automatically capture a frame with the red
 /// target overlay drawn at the tap position.
@@ -2630,7 +2709,14 @@ class UnitTestVideoRecorder {
   final WidgetTester _tester;
   int _frameIndex = 0;
   int _frameErrors = 0;
-  late final Directory _framesDirectory;
+  bool _hasEncoder = false;
+  Directory? _pipeDirectory;
+  RandomAccessFile? _encoderInput;
+  Future<int>? _encoderExit;
+  final StringBuffer _encoderLog = StringBuffer();
+  Size? _frameSize;
+  final UnitTestVideoFrameSignature _signature = UnitTestVideoFrameSignature();
+  final File _outputFile = File('$_unitTestOutputDirectoryPath/$_videoOutputFilename');
 
   /// The currently active recorder, if any.
   ///
@@ -2650,18 +2736,28 @@ class UnitTestVideoRecorder {
     }
   }
 
-  /// Initialize a temporary directory for staging video frames.
+  String get _unsignedOutputPath =>
+      buildUnitTestTemporaryVideoOutputPath(_outputFile.path, suffix: _unsignedVideoOutputSuffix);
+
+  /// Checks for ffmpeg; the encoder itself starts on the first frame, once the
+  /// frame size is known.
   Future<void> start() async {
     await _tester.runAsync(() async {
-      _framesDirectory = await Directory.systemTemp.createTemp(
-        _videoFrameTemporaryDirectoryPrefix,
+      final ProcessResult whichResult = await Process.run(
+        _whichExecutableName,
+        <String>[_ffmpegExecutableName],
       );
+      _hasEncoder = whichResult.exitCode == 0;
+      await _outputFile.parent.create(recursive: true);
     });
+    if (!_hasEncoder) {
+      debugPrint('⚠️ ffmpeg not found — the scenario runs without recording video');
+    }
 
     _frameIndex = 0;
     _frameErrors = 0;
     _active = this;
-    debugPrint('🎬 Video recorder started — frames: ${_framesDirectory.path}');
+    debugPrint('🎬 Video recorder started');
   }
 
   /// Temporarily disables automatic post-interaction frame capture.
@@ -2682,10 +2778,10 @@ class UnitTestVideoRecorder {
     _active = this;
   }
 
-  /// Captures the current app screenshot boundary as a numbered PNG frame.
+  /// Captures the app screenshot boundary and streams it to the encoder.
   ///
   /// Any pending [InteractionTracker] records are composited as overlays
-  /// (red tap targets, blue drag arrows) before saving.
+  /// (red tap targets, blue drag arrows) before streaming.
   Future<void> captureFrame({bool settle = true}) async {
     if (settle) {
       await pumpForUnitTestUiSettle(_tester);
@@ -2694,8 +2790,11 @@ class UnitTestVideoRecorder {
     }
 
     final Finder boundaryFinder = find.byKey(Keys.appScreenshotBoundary);
-    if (boundaryFinder.evaluate().isEmpty) {
-      _frameErrors++;
+    if (!_hasEncoder || boundaryFinder.evaluate().isEmpty) {
+      InteractionTracker.clear();
+      if (_hasEncoder) {
+        _frameErrors++;
+      }
       return;
     }
 
@@ -2717,22 +2816,20 @@ class UnitTestVideoRecorder {
           image = composited;
         }
 
-        final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+        final Size size = Size(image.width.toDouble(), image.height.toDouble());
+        final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
         image.dispose();
-
-        if (byteData == null) {
+        if (byteData == null || (_frameSize != null && _frameSize != size)) {
           _frameErrors++;
           return;
         }
 
-        final String paddedIndex = _frameIndex.toString().padLeft(_videoFrameIndexPadding, '0');
-        final File frameFile = File(
-          '${_framesDirectory.path}/$_videoFrameFilenamePrefix$paddedIndex.$_videoFrameFileExtension',
-        );
-        await frameFile.writeAsBytes(
-          byteData.buffer.asUint8List(),
-          flush: true,
-        );
+        final RandomAccessFile encoder = await _ensureEncoder(size);
+        final Uint8List pixels = byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes);
+        _signature.addFrame(pixels);
+        // A blocking write into the named pipe ffmpeg reads from: a straight
+        // kernel copy, with no event-loop round trips per chunk.
+        encoder.writeFromSync(pixels);
         _frameIndex++;
       } catch (e) {
         _frameErrors++;
@@ -2741,8 +2838,41 @@ class UnitTestVideoRecorder {
     });
   }
 
-  /// Stops recording, assembles the frames into an MP4 using ffmpeg,
-  /// and cleans up the frames directory on success.
+  /// Starts the streaming encoder for frames of [size] on first use: ffmpeg
+  /// reads raw frames from a named pipe that this recorder writes into.
+  Future<RandomAccessFile> _ensureEncoder(Size size) async {
+    final RandomAccessFile? running = _encoderInput;
+    if (running != null) {
+      return running;
+    }
+    _frameSize = size;
+    final Directory pipeDirectory = await Directory.systemTemp.createTemp(_videoPipeDirectoryPrefix);
+    _pipeDirectory = pipeDirectory;
+    final String pipePath = '${pipeDirectory.path}/$_videoPipeName';
+    final ProcessResult fifo = await Process.run(_mkfifoExecutableName, <String>[pipePath]);
+    if (fifo.exitCode != 0) {
+      throw StateError('mkfifo failed: ${fifo.stderr}');
+    }
+    final Process encoder = await Process.start(
+      _ffmpegExecutableName,
+      buildUnitTestVideoEncodeArguments(
+        width: size.width.toInt(),
+        height: size.height.toInt(),
+        inputPath: pipePath,
+        outputPath: _unsignedOutputPath,
+      ),
+    );
+    encoder.stdout.drain<void>();
+    encoder.stderr.transform(utf8.decoder).listen(_encoderLog.write);
+    _encoderExit = encoder.exitCode;
+    // Opening a FIFO for writing waits for its reader, which ffmpeg opens on start.
+    final RandomAccessFile input = await File(pipePath).open(mode: FileMode.writeOnly);
+    _encoderInput = input;
+    return input;
+  }
+
+  /// Stops recording, finishes the encode, and stamps the frame signature into
+  /// the MP4 — or keeps the existing file when the frames are unchanged.
   Future<void> stop() async {
     // Capture pending UI state first (may include a final interaction marker).
     await captureFrame();
@@ -2757,68 +2887,54 @@ class UnitTestVideoRecorder {
       '🎬 Video recorder stopped: $_frameIndex frames, $_frameErrors errors',
     );
 
-    if (_frameIndex == 0) {
+    final RandomAccessFile? encoderInput = _encoderInput;
+    if (encoderInput == null) {
       debugPrint('🎬 No frames to assemble');
       return;
     }
 
     await _tester.runAsync(() async {
-      final ProcessResult whichResult = await Process.run(
-        _whichExecutableName,
-        <String>[_ffmpegExecutableName],
-      );
-      if (whichResult.exitCode != 0) {
-        debugPrint(
-          '⚠️ ffmpeg not found — frames saved in: ${_framesDirectory.path}',
-        );
+      await encoderInput.close();
+      final int exitCode = await _encoderExit!;
+      await _pipeDirectory?.delete(recursive: true);
+      final File unsigned = File(_unsignedOutputPath);
+      if (exitCode != 0) {
+        debugPrint('⚠️ ffmpeg encode failed: $_encoderLog');
+        await _deleteIfExists(unsigned);
         return;
       }
 
-      final Directory outputDir = Directory(_unitTestOutputDirectoryPath);
-      await outputDir.create(recursive: true);
-      final File outputFile = File('${outputDir.path}/$_videoOutputFilename');
-      final String frameSignature = await computeUnitTestVideoFrameSignature(
-        _framesDirectory,
-      );
-      final String? existingFrameSignature = await readUnitTestVideoFrameSignature(
-        outputFile,
-      );
-
-      if (existingFrameSignature == frameSignature) {
-        debugPrint('$_videoFrameSignatureKeepExistingMessagePrefix${outputFile.path}');
-        await _framesDirectory.delete(recursive: true);
+      final String frameSignature = _signature.hex;
+      if (await readUnitTestVideoFrameSignature(_outputFile) == frameSignature) {
+        debugPrint('$_videoFrameSignatureKeepExistingMessagePrefix${_outputFile.path}');
+        await _deleteIfExists(unsigned);
         return;
       }
 
-      final String temporaryOutputPath = buildUnitTestTemporaryVideoOutputPath(outputFile.path);
-      final File temporaryOutputFile = File(temporaryOutputPath);
-      if (await temporaryOutputFile.exists()) {
-        await temporaryOutputFile.delete();
-      }
-
+      final File signed = File(buildUnitTestTemporaryVideoOutputPath(_outputFile.path));
       final ProcessResult result = await Process.run(
         _ffmpegExecutableName,
-        buildUnitTestVideoAssemblyArguments(
-          framesDirectoryPath: _framesDirectory.path,
-          outputPath: temporaryOutputPath,
+        buildUnitTestVideoSignArguments(
+          inputPath: unsigned.path,
+          outputPath: signed.path,
           frameSignature: frameSignature,
         ),
       );
-
-      if (result.exitCode == 0) {
-        if (await outputFile.exists()) {
-          await outputFile.delete();
-        }
-        await temporaryOutputFile.rename(outputFile.path);
-        debugPrint('🎬 Video assembled: ${outputFile.path} ($_frameIndex frames)');
-        await _framesDirectory.delete(recursive: true);
-      } else {
-        if (await temporaryOutputFile.exists()) {
-          await temporaryOutputFile.delete();
-        }
-        debugPrint('⚠️ ffmpeg failed — frames preserved in: ${_framesDirectory.path}');
-        debugPrint('ffmpeg stderr: ${result.stderr}');
+      await _deleteIfExists(unsigned);
+      if (result.exitCode != 0) {
+        await _deleteIfExists(signed);
+        debugPrint('⚠️ ffmpeg signing failed: ${result.stderr}');
+        return;
       }
+      await _deleteIfExists(_outputFile);
+      await signed.rename(_outputFile.path);
+      debugPrint('🎬 Video assembled: ${_outputFile.path} ($_frameIndex frames)');
     });
+  }
+
+  static Future<void> _deleteIfExists(File file) async {
+    if (await file.exists()) {
+      await file.delete();
+    }
   }
 }

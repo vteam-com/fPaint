@@ -96,7 +96,7 @@ Future<void> paintShowcaseClouds(PaintingScenarioSession session) async {
   // gestures lands on this layer, so it also exercises history compaction.
   await selectToolByKey(tester, Keys.toolSmudge);
   await setBrushSizeViaSlider(tester, _cloudSmudgeSize);
-  await setBrushIntensityViaSlider(tester, _cloudSmudgeIntensity);
+  await setBrushIntensityViaPicker(tester, _cloudSmudgeIntensity);
   for (final _CloudBand band in _cloudBodies) {
     final Offset start = Offset.lerp(band.from, band.to, AppVisual.half)!;
     await paintCanvasStroke(

@@ -12,6 +12,23 @@ import 'package:fpaint/providers/layers_provider.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:xml/xml.dart';
 
+const double _smallCanvasSide = 4;
+const String _looseLayerName = 'Loose';
+const String _groupedLayerName = 'Grouped';
+const String _groupName = 'Folder';
+const String _stackXmlEntry = 'stack.xml';
+const String _stackElement = 'stack';
+const String _layerElement = 'layer';
+const String _nameAttribute = 'name';
+const String _pngSuffix = '.png';
+const String _corruptPngEntry = 'data/corrupt.png';
+const String _inheritLayerName = 'Inherited';
+const String _inheritVisibilityStackXml =
+    '<?xml version="1.0"?><image version="0.0.1" w="4" h="4"><stack>'
+    '<layer name="$_inheritLayerName" visibility="inherit" src="$_corruptPngEntry" x="0" y="0"/>'
+    '</stack></image>';
+const List<int> _garbageBytes = <int>[0, 1, 2, 3, 4, 5, 6, 7];
+
 void main() {
   test('getBlendModeFromOraCompositOp returns correct blend modes', () {
     expect(
@@ -489,5 +506,46 @@ void main() {
 
     // Layer with missing PNG should be created without image.
     expect(layers.length, 1);
+  });
+
+  test('createOraArchive nests grouped layers and tolerates an all-empty stack', () async {
+    final LayersProvider layers = LayersProvider()
+      ..clear()
+      ..size = const ui.Size(_smallCanvasSide, _smallCanvasSide);
+    layers.addTop(name: _looseLayerName);
+    layers.addTop(name: _groupedLayerName).parentGroupName = _groupName;
+
+    final Archive archive = ZipDecoder().decodeBytes(await createOraArchive(layers, includePreviews: false));
+    final ArchiveFile stackFile = archive.files.firstWhere((ArchiveFile file) => file.name == _stackXmlEntry);
+    final XmlDocument stack = XmlDocument.parse(utf8.decode(stackFile.content as List<int>));
+
+    final XmlElement group = stack
+        .findAllElements(_stackElement)
+        .firstWhere(
+          (XmlElement element) => element.getAttribute(_nameAttribute) == _groupName,
+        );
+    expect(
+      group.findElements(_layerElement).map((XmlElement layer) => layer.getAttribute(_nameAttribute)),
+      <String>[_groupedLayerName],
+    );
+    expect(archive.files.where((ArchiveFile file) => file.name.endsWith(_pngSuffix)), isEmpty);
+  });
+
+  test('readOraFileFromBytes treats inherit visibility as visible and skips undecodable PNGs', () async {
+    final Archive archive = Archive()
+      ..addFile(ArchiveFile.bytes(_stackXmlEntry, utf8.encode(_inheritVisibilityStackXml)))
+      ..addFile(ArchiveFile.bytes(_corruptPngEntry, Uint8List.fromList(_garbageBytes)));
+    final LayersProvider layers = LayersProvider();
+
+    await readOraFileFromBytes(layers, Uint8List.fromList(ZipEncoder().encode(archive)));
+
+    expect(layers.length, 1);
+    expect(layers.get(0).name, _inheritLayerName);
+    expect(layers.get(0).isVisible, isTrue);
+    expect(layers.get(0).actionStack, isEmpty);
+  });
+
+  test('extractOraPreviewPngBytes returns null for bytes that are not a zip', () async {
+    expect(await extractOraPreviewPngBytes(_garbageBytes), isNull);
   });
 }
