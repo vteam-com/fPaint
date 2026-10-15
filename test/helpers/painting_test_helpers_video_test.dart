@@ -5,6 +5,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'painting_test_helpers.dart';
 
 const String _testFrameSignature = '0123456789abcdef';
+
+/// A 64-bit signature at or above 2^63, which `int.tryParse` cannot hold.
+const String _highBitFrameSignature = '89d9d37da9e6cf5f';
 const String _testUnsignedVideoPath = '/tmp/unit_test_video.unsigned.mp4';
 const String _testSignedVideoPath = '/tmp/unit_test_video.tmp.mp4';
 const String _testVideoPath = '/tmp/unit_test_video.mp4';
@@ -66,6 +69,14 @@ void main() {
 
       expect(extractUnitTestVideoFrameSignature(bytes), _testFrameSignature);
       expect(extractUnitTestVideoFrameSignature(Uint8List(0)), isNull);
+    });
+
+    test('accepts signatures with the top bit set', () {
+      final Uint8List bytes = Uint8List.fromList(
+        buildUnitTestVideoFrameSignatureComment(_highBitFrameSignature).codeUnits,
+      );
+
+      expect(extractUnitTestVideoFrameSignature(bytes), _highBitFrameSignature);
     });
 
     test('hashes frame pixels deterministically and order-sensitively', () {

@@ -67,8 +67,16 @@ const double _reedSize = 1.4;
 const double _reedHeadSize = 4;
 const double _reedHeadLength = 6;
 
-/// Film-grain texture over the whole bank layer.
-const double _shoreNoiseStrength = 0.15;
+/// Earthy texture: low-alpha Grain-brush passes over the banks. (Grain is a
+/// fixed-seed, canvas-locked tile; the Noise effect is randomized per apply,
+/// which would make the regression image differ on every run.)
+const Color _shoreGrainColor = Color(0x40B89A6A);
+const double _shoreGrainSize = 60;
+const List<List<Offset>> _shoreGrainStrokes = <List<Offset>>[
+  <Offset>[Offset(10, 680), Offset(120, 650), Offset(220, 670), Offset(300, 720)],
+  <Offset>[Offset(10, 740), Offset(140, 720), Offset(260, 750)],
+  <Offset>[Offset(780, 750), Offset(880, 720), Offset(1010, 700)],
+];
 
 Future<void> paintShowcaseShore(PaintingScenarioSession session) async {
   final WidgetTester tester = session.tester;
@@ -163,9 +171,14 @@ Future<void> paintShowcaseShore(PaintingScenarioSession session) async {
   }
   await captureShowcaseFrame(tester);
 
-  // Texture: a fine noise over the whole bank layer, from the effects menu.
-  await applyEffectViaUi(tester, SelectionEffect.noise, strength: _shoreNoiseStrength, requireApply: true);
-  await clearSelectionViaUi(tester);
+  // Texture: low-alpha grain-brush passes across the banks.
+  await selectBrushTool(tester);
+  await selectBrushStyleViaUi(tester, BrushStyle.grain);
+  appProviderFromTester(tester).brushColor = _shoreGrainColor;
+  await setBrushSizeViaSlider(tester, _shoreGrainSize);
+  for (final List<Offset> stroke in _shoreGrainStrokes) {
+    await paintCanvasStroke(tester, stroke);
+  }
 }
 
 /// Rocks' rim highlight sits just inside the silhouette.

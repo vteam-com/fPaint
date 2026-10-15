@@ -175,6 +175,9 @@ const String _unitTestScreenshotDirectoryName = 'screenshots';
 /// Filename for the assembled MP4 video.
 const String _videoOutputFilename = 'unit_test_video.mp4';
 
+/// Filename of the video's last frame, saved as a PNG for the README.
+const String _videoPosterFilename = 'unit_test_video_poster.png';
+
 /// Frames per second for the assembled video.
 const int _videoFramesFps = 30;
 
@@ -208,6 +211,9 @@ const int _fnv1a64Mask = 0xFFFFFFFFFFFFFFFF;
 const int _halfSignatureBits = _videoFrameSignatureBitWidth ~/ 2;
 const int _halfSignatureMask = 0xFFFFFFFF;
 const int _halfSignatureHexLength = _videoFrameSignatureHexLength ~/ 2;
+
+/// A frame signature is lowercase hexadecimal only.
+final RegExp _lowercaseHexPattern = RegExp(r'^[0-9a-f]+$');
 
 /// Bytes per 64-bit word hashed at a time from raw frame pixels.
 const int _frameSignatureWordBytes = 8;
@@ -2688,7 +2694,9 @@ bool _isValidUnitTestVideoFrameSignature(String candidate) {
     return false;
   }
 
-  return candidate == candidate.toLowerCase() && int.tryParse(candidate, radix: _videoFrameSignatureRadix) != null;
+  // Validate the characters, not the value: `int.tryParse` rejects any 64-bit
+  // signature at or above 2^63, which would discard half of all valid ones.
+  return _lowercaseHexPattern.hasMatch(candidate);
 }
 
 /// Records a frame at each test checkpoint and streams it, as raw RGBA, into
@@ -2717,6 +2725,7 @@ class UnitTestVideoRecorder {
   Size? _frameSize;
   final UnitTestVideoFrameSignature _signature = UnitTestVideoFrameSignature();
   final File _outputFile = File('$_unitTestOutputDirectoryPath/$_videoOutputFilename');
+  final File _posterFile = File('$_unitTestOutputDirectoryPath/$_videoPosterFilename');
 
   /// The currently active recorder, if any.
   ///
@@ -2782,7 +2791,11 @@ class UnitTestVideoRecorder {
   ///
   /// Any pending [InteractionTracker] records are composited as overlays
   /// (red tap targets, blue drag arrows) before streaming.
-  Future<void> captureFrame({bool settle = true}) async {
+  ///
+  /// With [savePoster], the frame is also written as a PNG next to the video
+  /// (the README's preview image), straight from the capture rather than
+  /// decoded back out of the compressed MP4.
+  Future<void> captureFrame({bool settle = true, bool savePoster = false}) async {
     if (settle) {
       await pumpForUnitTestUiSettle(_tester);
     } else {
@@ -2817,6 +2830,12 @@ class UnitTestVideoRecorder {
         }
 
         final Size size = Size(image.width.toDouble(), image.height.toDouble());
+        if (savePoster) {
+          final ByteData? posterBytes = await image.toByteData(format: ui.ImageByteFormat.png);
+          if (posterBytes != null) {
+            await _posterFile.writeAsBytes(posterBytes.buffer.asUint8List(), flush: true);
+          }
+        }
         final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
         image.dispose();
         if (byteData == null || (_frameSize != null && _frameSize != size)) {
@@ -2877,9 +2896,10 @@ class UnitTestVideoRecorder {
     // Capture pending UI state first (may include a final interaction marker).
     await captureFrame();
 
-    // Append one extra clean frame so the video ends on a stable final view.
+    // Append one extra clean frame so the video ends on a stable final view,
+    // and keep it as the poster image.
     InteractionTracker.clear();
-    await captureFrame();
+    await captureFrame(savePoster: true);
 
     _active = null;
 

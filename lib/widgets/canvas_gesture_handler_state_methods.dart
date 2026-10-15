@@ -473,7 +473,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     }
 
     if (appProvider.selectedAction == ActionType.fill) {
-      await _handleFillPointerStart(appProvider, event.localPosition, adjustedPosition);
+      await _handleFillPointerStart(appProvider, event.localPosition, adjustedPosition, pointer: event.pointer);
       return;
     }
 

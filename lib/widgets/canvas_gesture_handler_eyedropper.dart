@@ -63,8 +63,9 @@ extension _CanvasGestureHandlerStateEyedropperMethods on _CanvasGestureHandlerSt
   Future<void> _handleFillPointerStart(
     AppProvider appProvider,
     ui.Offset screenPosition,
-    ui.Offset adjustedPosition,
-  ) async {
+    ui.Offset adjustedPosition, {
+    required int pointer,
+  }) async {
     final bool sampleAllLayers = _isSampleAllLayersModifierPressed();
 
     if (await appProvider.prepareFloodFillSelection(
@@ -74,9 +75,20 @@ extension _CanvasGestureHandlerStateEyedropperMethods on _CanvasGestureHandlerSt
       return;
     }
 
+    // The await above can let this pointer's release run first (a quick tap
+    // delivered as one down+up packet). There is then no drag to anchor:
+    // starting the live preview / pointer lock now would orphan them over the
+    // canvas, so a solid tap simply fills and a gradient tap only seeds its
+    // handles.
+    final bool wasReleased = _activePointerId != pointer;
+
     if (appProvider.fillModel.mode == FillMode.solid) {
       appProvider.fillModel.gradientPoints.clear();
       appProvider.fillModel.sampleAllLayers = sampleAllLayers;
+      if (wasReleased) {
+        appProvider.floodFillSolidAction(adjustedPosition, sampleAllLayers: sampleAllLayers);
+        return;
+      }
       _startFillToleranceDrag(appProvider, screenPosition, adjustedPosition, sampleAllLayers: sampleAllLayers);
       appProvider.updateSolidFillPreview(adjustedPosition, sampleAllLayers: sampleAllLayers);
       return;
@@ -87,7 +99,9 @@ extension _CanvasGestureHandlerStateEyedropperMethods on _CanvasGestureHandlerSt
     if (appProvider.fillModel.gradientPoints.isEmpty) {
       _initializeGradientFill(appProvider, adjustedPosition, sampleAllLayers: sampleAllLayers);
     }
-    _startFillToleranceDrag(appProvider, screenPosition, adjustedPosition, sampleAllLayers: sampleAllLayers);
+    if (!wasReleased) {
+      _startFillToleranceDrag(appProvider, screenPosition, adjustedPosition, sampleAllLayers: sampleAllLayers);
+    }
   }
 
   /// Anchors a tap-to-fill / drag-to-adjust-tolerance gesture (shared by solid

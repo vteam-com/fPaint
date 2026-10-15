@@ -80,6 +80,10 @@ const bool _showcaseOnly = bool.fromEnvironment('FPAINT_SHOWCASE_ONLY');
 
 const String _backgroundLayerName = 'Background';
 
+/// Where the mouse rests for the closing frame: inside the canvas area's
+/// bottom-right corner, clear of the canvas and every control.
+const Offset _mouseParkingInset = Offset(24, 24);
+
 /// Expected stack, top to bottom, once the scene is finished.
 const List<String> _expectedSceneLayerNames = <String>[
   _signatureLayerName,
@@ -317,7 +321,22 @@ void main() {
         }
       }
 
-      // End the video on the finished painting, pixel for pixel.
+      // Nothing transient may outlive the exercises: a held fill preview or a
+      // tolerance pointer lock would be drawn over the finished painting.
+      final AppProvider appProvider = appProviderFromTester(tester);
+      expect(appProvider.fillPreviewAction, isNull, reason: 'No fill preview should be left over the canvas');
+      expect(appProvider.tolerancePointerAnchor, isNull, reason: 'No tolerance drag should be left locked');
+
+      // End the video on the finished painting, pixel for pixel, with the mouse
+      // parked over the empty canvas area so no hover tooltip is left showing.
+      // The test mouse is already added (every gesture helper shares it), so
+      // move it with a plain hover event rather than adding a new pointer.
+      tester.binding.handlePointerEvent(
+        PointerHoverEvent(
+          position: tester.getBottomRight(find.byType(MainView)) - _mouseParkingInset,
+        ),
+      );
+      await tester.pump();
       await showActualSizeCentered(tester);
 
       await _runTimedScenarioPhase(
