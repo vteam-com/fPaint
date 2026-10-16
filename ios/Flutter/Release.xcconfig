@@ -1,1 +1,3 @@
 #include "Generated.xcconfig"
+// Signing team, kept out of the repo: see Signing.xcconfig.example.
+#include? "Signing.xcconfig"

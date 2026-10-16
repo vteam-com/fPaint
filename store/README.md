@@ -60,10 +60,11 @@ place from the Files app" bullet.
 
 ### Apple App Store
 
-- [ ] **Choose one signing team.** The iOS project signs with team
-      `XXXXXXXXXX`, but `tool/testflight/ExportOptions.plist` exports with
-      `XXXXXXXXXX` (the team macOS used). Set both to the team that owns
-      `com.vteam.fpaint` in App Store Connect.
+- [ ] **Signing team**: copy `ios/Flutter/Signing.xcconfig.example` to
+      `ios/Flutter/Signing.xcconfig` (git-ignored) and set your Team ID. Xcode
+      signs with it and `tool/build_testflight.sh` exports with it, so the
+      public repo carries no personal Team ID. The App Store Connect record
+      for `com.vteam.fpaint` must belong to that team.
 - [ ] App Store Connect → the app → **App Information**: name, subtitle,
       categories, content rights ("does not contain third-party content").
 - [ ] **App Privacy**: "Data Not Collected". Matches `ios/Runner/PrivacyInfo.xcprivacy`

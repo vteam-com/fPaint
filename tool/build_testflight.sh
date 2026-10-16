@@ -5,6 +5,9 @@
 # Upload them with Apple's Transporter app, or with
 #   xcrun altool --upload-app -t ios|macos -f <file> --apiKey ... --apiIssuer ...
 #
+# Signs with the team in ios/Flutter/Signing.xcconfig (git-ignored, so the
+# repo carries no personal Team ID; copy Signing.xcconfig.example).
+#
 # Usage: tool/build_testflight.sh [build-number]
 # The version comes from pubspec.yaml. Every upload of the same version needs
 # a higher build number than the last one App Store Connect has seen.
@@ -12,11 +15,23 @@
 set -e
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-EXPORT_OPTIONS="$ROOT_DIR/tool/testflight/ExportOptions.plist"
+SIGNING_XCCONFIG="$ROOT_DIR/ios/Flutter/Signing.xcconfig"
+EXPORT_OPTIONS_TEMPLATE="$ROOT_DIR/tool/testflight/ExportOptions.plist"
+EXPORT_OPTIONS="$ROOT_DIR/build/ExportOptions.plist"
 MACOS_ARCHIVE="$ROOT_DIR/build/macos/Runner.xcarchive"
 MACOS_EXPORT_DIR="$ROOT_DIR/build/macos/export"
 
 cd "$ROOT_DIR"
+
+TEAM_ID="$(sed -n 's/^[[:space:]]*DEVELOPMENT_TEAM[[:space:]]*=[[:space:]]*\([A-Z0-9]*\).*/\1/p' "$SIGNING_XCCONFIG" 2>/dev/null | head -1)"
+if [ -z "$TEAM_ID" ] || [ "$TEAM_ID" = "YOUR_TEAM_ID" ]; then
+	echo "Set DEVELOPMENT_TEAM in ios/Flutter/Signing.xcconfig (see Signing.xcconfig.example)."
+	exit 1
+fi
+mkdir -p build
+cp "$EXPORT_OPTIONS_TEMPLATE" "$EXPORT_OPTIONS"
+plutil -insert teamID -string "$TEAM_ID" "$EXPORT_OPTIONS"
+
 rm -rf build/ios/ipa
 
 BUILD_NUMBER_ARGS=""
@@ -37,7 +52,7 @@ flutter build macos --release $BUILD_NUMBER_ARGS
 
 echo "--- macOS: archive"
 xcodebuild -workspace macos/Runner.xcworkspace -scheme Runner -configuration Release \
-	-archivePath "$MACOS_ARCHIVE" -allowProvisioningUpdates archive
+	-archivePath "$MACOS_ARCHIVE" -allowProvisioningUpdates DEVELOPMENT_TEAM="$TEAM_ID" archive
 
 echo "--- macOS: App Store package"
 rm -rf "$MACOS_EXPORT_DIR"

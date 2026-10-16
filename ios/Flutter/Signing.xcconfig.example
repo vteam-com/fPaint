@@ -1,0 +1,4 @@
+// Copy to ios/Flutter/Signing.xcconfig (git-ignored) and set your Apple
+// Developer Team ID (Membership details on developer.apple.com). Xcode signs
+// with it, and tool/build_testflight.sh exports with it.
+DEVELOPMENT_TEAM = YOUR_TEAM_ID

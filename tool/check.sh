@@ -149,6 +149,11 @@ echo --- fCheck
 dart pub global activate fcheck "$FCHECK_VERSION" > /dev/null
 dart pub global run fcheck --strict --svg --fix --list full
 fcheck_exit_code="$?"
+# fcheck writes absolute paths into the SVG tooltips; keep them repo-relative so
+# the committed reports don't reveal the local home folder.
+for fcheck_svg in "$ROOT_DIR"/fcheck_*.svg; do
+	[ -f "$fcheck_svg" ] && sed -i.bak "s|$ROOT_DIR/||g" "$fcheck_svg" && rm -f "$fcheck_svg.bak"
+done
 
 case "$fcheck_exit_code" in
 	0)
