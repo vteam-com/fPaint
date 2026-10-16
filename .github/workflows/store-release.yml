@@ -1,0 +1,180 @@
+# Builds signed store releases and uploads them: iOS to App Store Connect
+# (TestFlight), Android to a Google Play track.
+#
+# Nothing personal lives in the repo. Every Team ID, key and password comes
+# from secrets of the "store-release" environment (Settings > Environments),
+# which only the maintainer can approve. See store/CI_RELEASE.md for setup.
+#
+# The repo is public, so its logs and artifacts are too: secrets are masked in
+# logs, nothing is uploaded as an artifact, and key files go to the runner's
+# temp folder, which is wiped when the job ends.
+name: Store Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Which store to release to
+        type: choice
+        options: [both, ios, android]
+        default: both
+      build_number:
+        description: Build number (iOS CFBundleVersion and Android versionCode); must exceed every earlier upload
+        required: true
+      play_track:
+        description: Google Play track
+        type: choice
+        options: [internal, alpha, beta, production]
+        default: internal
+      play_status:
+        description: Play release status ("draft" until the app has been published once)
+        type: choice
+        options: [draft, completed]
+        default: draft
+
+permissions:
+  contents: read
+
+concurrency:
+  group: store-release
+  cancel-in-progress: false
+
+jobs:
+  ios:
+    name: iOS to App Store Connect
+    if: ${{ inputs.platform != 'android' }}
+    runs-on: macos-latest
+    environment: store-release
+    timeout-minutes: 60
+    env:
+      BUILD_NUMBER: ${{ inputs.build_number }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set temp paths
+        run: |
+          {
+            echo "ARCHIVE_PATH=$RUNNER_TEMP/Runner.xcarchive"
+            echo "EXPORT_OPTIONS=$RUNNER_TEMP/ExportOptions.plist"
+            echo "ASC_KEY_PATH=$RUNNER_TEMP/AuthKey.p8"
+          } >> "$GITHUB_ENV"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .flutter-version
+          cache: true
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Write signing config from secrets
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          printf 'DEVELOPMENT_TEAM = %s\n' "$APPLE_TEAM_ID" > ios/Flutter/Signing.xcconfig
+          printf '%s\n' "$ASC_KEY_P8" > "$ASC_KEY_PATH"
+          cp tool/testflight/ExportOptions.plist "$EXPORT_OPTIONS"
+          plutil -insert teamID -string "$APPLE_TEAM_ID" "$EXPORT_OPTIONS"
+          # Export straight to App Store Connect instead of to a local .ipa.
+          plutil -replace destination -string upload "$EXPORT_OPTIONS"
+
+      - name: Generate Xcode build settings
+        run: flutter build ios --release --config-only --build-number="$BUILD_NUMBER"
+
+      # Signing is automatic: the App Store Connect API key lets Xcode create or
+      # fetch the distribution certificate and profile, so no .p12 or profile
+      # has to be exported from the maintainer's Mac.
+      - name: Archive
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath "$ARCHIVE_PATH" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            -quiet archive
+
+      - name: Upload to App Store Connect
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          xcodebuild -exportArchive -archivePath "$ARCHIVE_PATH" \
+            -exportOptionsPlist "$EXPORT_OPTIONS" -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+
+      - name: Remove key material
+        if: always()
+        run: rm -f "$ASC_KEY_PATH" "$EXPORT_OPTIONS" ios/Flutter/Signing.xcconfig
+
+  android:
+    name: Android to Google Play
+    if: ${{ inputs.platform != 'ios' }}
+    runs-on: ubuntu-latest
+    environment: store-release
+    timeout-minutes: 45
+    env:
+      BUILD_NUMBER: ${{ inputs.build_number }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set temp paths
+        run: echo "KEYSTORE_PATH=$RUNNER_TEMP/upload-keystore.jks" >> "$GITHUB_ENV"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .flutter-version
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Write upload key from secrets
+        env:
+          PLAY_UPLOAD_KEYSTORE_BASE64: ${{ secrets.PLAY_UPLOAD_KEYSTORE_BASE64 }}
+          PLAY_UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.PLAY_UPLOAD_KEYSTORE_PASSWORD }}
+          PLAY_UPLOAD_KEY_ALIAS: ${{ secrets.PLAY_UPLOAD_KEY_ALIAS }}
+          PLAY_UPLOAD_KEY_PASSWORD: ${{ secrets.PLAY_UPLOAD_KEY_PASSWORD }}
+        run: |
+          printf '%s' "$PLAY_UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+          {
+            printf 'storeFile=%s\n' "$KEYSTORE_PATH"
+            printf 'storePassword=%s\n' "$PLAY_UPLOAD_KEYSTORE_PASSWORD"
+            printf 'keyAlias=%s\n' "$PLAY_UPLOAD_KEY_ALIAS"
+            printf 'keyPassword=%s\n' "$PLAY_UPLOAD_KEY_PASSWORD"
+          } > android/key.properties
+
+      - name: Build App Bundle
+        run: flutter build appbundle --release --build-number="$BUILD_NUMBER"
+
+      - name: Check the bundle is signed with the upload key
+        run: |
+          if jarsigner -verify -certs build/app/outputs/bundle/release/app-release.aab | grep -q "CN=Android Debug"; then
+            echo "Bundle is signed with the debug key; check the PLAY_UPLOAD_* secrets." >&2
+            exit 1
+          fi
+
+      - name: Upload to Google Play
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.vteam.fpaint
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: ${{ inputs.play_track }}
+          status: ${{ inputs.play_status }}
+
+      - name: Remove key material
+        if: always()
+        run: rm -f "$KEYSTORE_PATH" android/key.properties

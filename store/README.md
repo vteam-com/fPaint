@@ -126,6 +126,12 @@ place from the Files app" bullet.
       `build/app/outputs/bundle/release/app-release.aab`, then create a release
       on the track and paste `changelogs/<versionCode>.txt` as release notes.
 
+## Automated releases (GitHub Actions)
+
+`.github/workflows/store-release.yml` builds and uploads both stores from
+GitHub, with every key and Team ID held in encrypted environment secrets.
+Setup and usage: [CI_RELEASE.md](CI_RELEASE.md).
+
 ## Uploading listing text with fastlane (optional)
 
 ```sh

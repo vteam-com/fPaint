@@ -61,3 +61,6 @@ coverage/merged_lcov.info
 
 # Generated unit-test frame staging artifacts
 test/output/screenshots/video_frames/
+
+# App Store Connect API keys (never commit)
+*.p8
