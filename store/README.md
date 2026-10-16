@@ -82,9 +82,9 @@ place from the Files app" bullet.
       empty.
 - [ ] Build and upload: `tool/build_testflight.sh <build-number>`, then
       Transporter. Select the build on the version page and submit.
-- [ ] **After approval**: put the numeric Apple ID into the Platforms page
-      (`lib/pages/platforms_page.dart`, `_urlIOSApp`), which points at the info
-      page until then.
+- [x] App record created: Apple ID `6823639668`, listing URL
+      <https://apps.apple.com/app/id6823639668> (live once approved). The
+      Platforms page already links to it.
 
 ### Google Play
 

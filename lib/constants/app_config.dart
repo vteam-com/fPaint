@@ -5,8 +5,8 @@ class AppConfig {
   /// Public privacy policy, linked from the About box and both store listings.
   static const String privacyPolicyUrl = 'https://paint.vteam.com/privacy/';
 
-  /// Product page with store badges and desktop downloads.
-  static const String infoPageUrl = 'https://paint.vteam.com/info/';
+  /// App Store listing, from the Apple ID App Store Connect assigned to fPaint.
+  static const String appStoreUrl = 'https://apps.apple.com/app/id6823639668';
 
   /// Google Play listing; the URL is derived from the Android application ID.
   static const String googlePlayUrl = 'https://play.google.com/store/apps/details?id=com.vteam.fpaint';

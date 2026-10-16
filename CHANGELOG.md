@@ -16,7 +16,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fix
 
-- The iOS and Android entries on the Platforms page linked to an unrelated app. Android now links to fPaint on Google Play; the iOS build no longer lists Google Play.
+- The iOS and Android entries on the Platforms page linked to an unrelated app. They now link to fPaint on the App Store and Google Play, and the iOS build no longer lists Google Play.
 - Android app name now shows as "fPaint" rather than "fpaint", and release builds are signed with the upload key from `android/key.properties`.
 
 ## [2.1.1] - 2026-10-15

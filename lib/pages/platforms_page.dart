@@ -16,9 +16,7 @@ const String _platformIOS = 'iOS';
 const String _urlMacOSDownload = 'https://paint.vteam.com/downloads/flutter-macos-app.zip';
 const String _urlWindowsDownload = 'https://paint.vteam.com/downloads/flutter-windows-app.zip';
 const String _urlLinuxDownload = 'https://paint.vteam.com/downloads/flutter-linux-app.zip';
-// The App Store link needs the numeric Apple ID assigned once the listing is
-// live; until then the info page carries the store badges.
-const String _urlIOSApp = AppConfig.infoPageUrl;
+const String _urlIOSApp = AppConfig.appStoreUrl;
 const String _urlAndroidApp = AppConfig.googlePlayUrl;
 const String _urlWebApp = 'https://paint.vteam.com';
 
