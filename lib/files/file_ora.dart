@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io' show Platform;
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -7,7 +6,11 @@ import 'dart:ui' as ui;
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/files/decoded_layer_document.dart';
+import 'package:fpaint/files/decoded_layer_pixels.dart';
+import 'package:fpaint/files/decoded_raster_layer.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
+import 'package:fpaint/files/png_encoder.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
@@ -19,6 +22,8 @@ import 'package:xml/xml.dart';
 final Logger _log = Logger(logNameFileOra);
 
 // ORA file format element and attribute identifiers
+/// Name given to an ORA layer that stores none.
+const String _oraUnnamedLayer = 'Unnamed';
 const String _oraElementImage = 'image';
 const String _oraElementStack = 'stack';
 const String _oraElementLayer = 'layer';
@@ -47,8 +52,6 @@ const String _oraStackXmlEntry = 'stack.xml';
 const String _oraMergedImageEntry = 'mergedimage.png';
 const String _oraThumbnailEntry = 'Thumbnails/thumbnail.png';
 const String _oraThumbnailEntryLowercase = 'thumbnails/thumbnail.png';
-const String _errorOraFileNotFoundPrefix = 'ORA file not found:';
-const String _errorOraReadFilePrefix = 'Failed to read ORA file:';
 const String _errorOraReadBytes = 'Failed to read ORA bytes.';
 const String _errorOraMissingStackXml = 'stack.xml not found in ORA file.';
 const String _errorOraMissingImageElement = 'image element not found in ORA stack.xml.';
@@ -57,13 +60,6 @@ const String _errorOraLayerEncodingFailed = 'Failed to encode ORA layer PNG.';
 const String _oraLayerImageEntryPrefix = 'data/layer-';
 const String _oraLayerImageEntrySuffix = '.png';
 const String _oraLayerMetaParentGroupName = 'parentGroupName';
-const int _oraParallelLayerExportCap = AppMath.four;
-
-/// Most layer pixels exported concurrently. Each in-flight layer holds a GPU
-/// render, a CPU readback for the PNG encoder and the PNG itself, so on a large
-/// canvas the CPU-count cap alone overran iOS's per-app memory limit during
-/// draft autosave.
-const int _oraParallelLayerExportPixelBudget = 16000000;
 
 const List<String> _oraPreviewEntries = <String>[
   _oraThumbnailEntry,
@@ -90,24 +86,22 @@ ArchiveFile _storedNeutralArchiveFile(String name, List<int> data) {
 /// the cropped image's original canvas offset for ORA `x`/`y` metadata.
 Future<({Uint8List bytes, ui.Offset offset})> _prepareOraLayerExport({
   required LayerProvider layer,
-}) async {
+  required PngEncodePool pool,
+}) {
   final ui.Rect exportBounds = layer.estimateContentBoundsForStorage();
-  final ui.Image layerImage = layer.toImageForStorageBounds(exportBounds);
-  try {
-    final ByteData byteData = await requireImageByteData<OraFileException>(
-      image: layerImage,
-      format: ui.ImageByteFormat.png,
-      errorMessage: _errorOraLayerEncodingFailed,
-      exceptionBuilder: OraFileException.new,
+  final int pixels = (exportBounds.width * exportBounds.height).ceil();
+  // Rendered only once the pool admits it, so at most the budgeted layers
+  // hold a full-size GPU render and readback at a time.
+  return pool.run(pixels, () async {
+    final Uint8List? bytes = await encodeImageToPngFast(
+      layer.toImageForStorageBounds(exportBounds),
+      disposeAfterReadback: true,
     );
-
-    return (
-      bytes: byteData.buffer.asUint8List(),
-      offset: exportBounds.topLeft,
-    );
-  } finally {
-    layerImage.dispose();
-  }
+    if (bytes == null) {
+      throw const OraFileException(_errorOraLayerEncodingFailed);
+    }
+    return (bytes: bytes, offset: exportBounds.topLeft);
+  });
 }
 
 // SVG composite operation identifiers used in the ORA format
@@ -161,29 +155,6 @@ final Map<ui.BlendMode, String> _oraBlendModeCompositeOps = <ui.BlendMode, Strin
   for (final MapEntry<String, ui.BlendMode> entry in _oraCompositeOpBlendModes.entries) entry.value: entry.key,
 };
 
-/// Reads an ORA file and updates the provided [AppProvider] with its contents.
-///
-/// This function asynchronously reads the ORA file located at the given [filePath]
-/// and updates the [shellProvider] with the data extracted from the file.
-///
-/// - Parameters:
-///   - appProvider: The application model to be updated with the ORA file's contents.
-///   - filePath: The path to the ORA file to be read.
-///
-/// - Returns: A [Future] that completes when the file has been read and the model updated.
-Future<void> readImageFromFilePathOra(
-  LayersProvider layers,
-  String filePath,
-) {
-  return readLayeredFileFromPath<OraFileException>(
-    path: filePath,
-    readBytes: (Uint8List bytes) => readOraFileFromBytes(layers, bytes),
-    fileNotFoundPrefix: _errorOraFileNotFoundPrefix,
-    readFailedPrefix: _errorOraReadFilePrefix,
-    exceptionBuilder: OraFileException.new,
-  );
-}
-
 /// Read the file from  bytes
 Future<void> readOraFileFromBytes(
   LayersProvider layers,
@@ -207,16 +178,7 @@ Future<void> readOraFileFromBytes(
         String.fromCharCodes(stackFile.content),
       );
 
-      final ui.Size canvasSize = _extractOraCanvasSize(_requireOraImageElement(xmlDoc));
-
-      LayerProvider? selectedLayer;
-      await layers.replaceAll(
-        canvasSize: canvasSize,
-        addLayers: () async {
-          selectedLayer = await importFromOraXml(archive, layers, xmlDoc);
-        },
-      );
-      layers.selectLayerIfPresent(selectedLayer);
+      await applyDecodedDocument(layers, await decodeOraStack(archive, xmlDoc));
     },
   );
 }
@@ -241,97 +203,77 @@ ui.Size _extractOraCanvasSize(XmlElement xmlElementImage) {
   return ui.Size(double.parse(width), double.parse(height));
 }
 
-/// Imports image metadata and root stack information from an ORA XML document.
+/// Decodes an ORA stack document into a layered document, without touching
+/// any canvas state.
 ///
-/// Returns the layer flagged as `selected` in the document, or null when no
-/// layer carries the marker.
-Future<LayerProvider?> importFromOraXml(
+/// Layers come out bottom-to-top, the order [applyDecodedDocument] stacks
+/// them in; ORA lists them top-first.
+Future<DecodedRasterDocument> decodeOraStack(
   Archive archive,
-  LayersProvider layers,
   XmlDocument xmlDoc,
 ) async {
   final XmlElement xmlElementImage = _requireOraImageElement(xmlDoc);
-  layers.size = _extractOraCanvasSize(xmlElementImage);
-
-  final XmlElement? xmlElementTopStack = xmlElementImage.getElement(_oraElementStack);
-  return importStack(archive, layers, xmlElementTopStack);
+  final List<DecodedRasterLayer> topFirst = <DecodedRasterLayer>[];
+  await _decodeStack(archive, xmlElementImage.getElement(_oraElementStack), topFirst);
+  return DecodedRasterDocument(
+    size: _extractOraCanvasSize(xmlElementImage),
+    layers: topFirst.reversed.toList(),
+  );
 }
 
-/// Recursively imports a stack node and its child stacks and layers.
-///
-/// Returns the layer marked `selected` within this subtree, or null.
-Future<LayerProvider?> importStack(
+/// Recursively decodes a stack node, appending its layers to [topFirst] in
+/// document (top-first) order.
+Future<void> _decodeStack(
   Archive archive,
-  LayersProvider layers,
-  XmlElement? xmlElementTopStack,
+  XmlElement? xmlStack,
+  List<DecodedRasterLayer> topFirst,
 ) async {
-  LayerProvider? selectedLayer;
-  if (xmlElementTopStack != null) {
-    final String stackName = xmlElementTopStack.getAttribute(_oraAttrName) ?? '';
-    for (final XmlElement xmlElementChild in xmlElementTopStack.childElements) {
-      if (xmlElementChild.localName == _oraElementStack) {
-        final LayerProvider? nested = await importStack(archive, layers, xmlElementChild);
-        if (nested != null) {
-          selectedLayer = nested;
-        }
-      } else {
-        if (xmlElementChild.localName == _oraElementLayer) {
-          final LayerProvider addedLayer = await addLayer(archive, layers, stackName, xmlElementChild);
-          if (xmlElementChild.getAttribute(_oraAttrSelected) == _booleanTextTrue) {
-            selectedLayer = addedLayer;
-          }
-        }
-      }
+  if (xmlStack == null) {
+    return;
+  }
+  final String stackName = xmlStack.getAttribute(_oraAttrName) ?? '';
+  for (final XmlElement xmlElementChild in xmlStack.childElements) {
+    if (xmlElementChild.localName == _oraElementStack) {
+      await _decodeStack(archive, xmlElementChild, topFirst);
+    } else if (xmlElementChild.localName == _oraElementLayer) {
+      topFirst.add(await _decodeLayer(archive, stackName, xmlElementChild));
     }
   }
-  return selectedLayer;
 }
 
-/// Creates and configures a layer from an ORA layer XML node.
-///
-/// Returns the created [LayerProvider] so callers can track the selection.
-Future<LayerProvider> addLayer(
+/// Decodes one ORA layer node and its embedded PNG.
+Future<DecodedRasterLayer> _decodeLayer(
   Archive archive,
-  LayersProvider layers,
   String stackName,
   XmlElement xmlLayer,
 ) async {
-  final String name = xmlLayer.getAttribute(_oraAttrName) ?? 'Unnamed';
   final String opacityAsText = xmlLayer.getAttribute(_oraAttrOpacity) ?? '1';
   final String visibleAsText = xmlLayer.getAttribute(_oraAttrVisibility) ?? _oraVisibilityVisible;
-  final String compositeOp = xmlLayer.getAttribute(_oraAttrCompositeOp) ?? _svgSrcOverLegacy;
-
-  final bool preserveAlpha = xmlLayer.getAttribute(_oraAttrAlphaPreserve) == _booleanTextTrue;
-  final bool isLocked = xmlLayer.getAttribute(_oraAttrEditLocked) == _booleanTextTrue;
-
-  final LayerProvider newLayer = layers.addBottom(name);
-  newLayer.parentGroupName = stackName;
-  newLayer.isVisible = _isLayerVisible(visibleAsText);
-  newLayer.isLocked = isLocked;
-  newLayer.opacity = double.parse(opacityAsText);
-
-  // is there an image on this layer?
   final String? src = xmlLayer.getAttribute(_oraAttrSrc);
-  if (src != null) {
-    final String? xAsText = xmlLayer.getAttribute(_oraAttrX);
-    final String? yAsText = xmlLayer.getAttribute(_oraAttrY);
+  // Placement is only meaningful (and only parsed) for a layer with pixels.
+  final ui.Offset offset = src == null
+      ? ui.Offset.zero
+      : ui.Offset(
+          double.parse(xmlLayer.getAttribute(_oraAttrX) ?? '0'),
+          double.parse(xmlLayer.getAttribute(_oraAttrY) ?? '0'),
+        );
 
-    final ui.Offset offset = ui.Offset(
-      double.parse(xAsText ?? '0'),
-      double.parse(yAsText ?? '0'),
-    );
-
-    newLayer.blendMode = getBlendModeFromOraCompositOp(compositeOp);
-    newLayer.preserveAlpha = preserveAlpha;
-
-    await addImageToLayer(
-      archive: archive,
-      layer: newLayer,
-      imageName: src,
-      offset: offset,
-    );
-  }
-  return newLayer;
+  // Blend mode and alpha preservation are only stored on layers with pixels;
+  // an empty layer keeps the defaults.
+  return DecodedRasterLayer(
+    pixels: src == null ? null : await _decodeLayerPixels(archive, src),
+    name: xmlLayer.getAttribute(_oraAttrName) ?? _oraUnnamedLayer,
+    offset: offset,
+    opacity: double.parse(opacityAsText),
+    blendMode: src == null
+        ? ui.BlendMode.srcOver
+        : getBlendModeFromOraCompositOp(xmlLayer.getAttribute(_oraAttrCompositeOp) ?? _svgSrcOverLegacy),
+    visible: _isLayerVisible(visibleAsText),
+    locked: xmlLayer.getAttribute(_oraAttrEditLocked) == _booleanTextTrue,
+    selected: xmlLayer.getAttribute(_oraAttrSelected) == _booleanTextTrue,
+    parentGroupName: stackName,
+    preserveAlpha: src == null || xmlLayer.getAttribute(_oraAttrAlphaPreserve) == _booleanTextTrue,
+  );
 }
 
 /// Converts ORA visibility text into a layer-visible flag.
@@ -372,35 +314,22 @@ String _getOraCompositeOpFromBlendMode(ui.BlendMode blendMode) {
   return _oraBlendModeCompositeOps[blendMode] ?? _svgSourceOver;
 }
 
-/// Adds an image to a specified layer from an archive.
+/// Decodes the archive entry [imageName] with the engine's image decoder.
 ///
-/// This function retrieves an image file from the provided [archive] using the
-/// specified [imageName]. If the image is found, it decodes the image bytes
-/// into a [ui.Image] and adds it to the given [layer] at the specified [offset].
-///
-/// If the image is not found in the archive, a debug message is printed.
-/// Any errors during the process are caught and logged.
-Future<void> addImageToLayer({
-  required Archive archive,
-  required LayerProvider layer,
-  required String imageName,
-  required ui.Offset offset,
-}) async {
+/// A missing or undecodable entry is logged and yields null, so the layer
+/// still opens (empty) rather than failing the whole document.
+Future<DecodedLayerPixels?> _decodeLayerPixels(Archive archive, String imageName) async {
   try {
     final ArchiveFile? file = archive.files.toList().findFirstMatch((ArchiveFile f) => f.name == imageName);
-    if (file != null) {
-      final List<int> bytes = file.content as List<int>;
-      final ui.Image image = await fromBytesToImage(bytes is Uint8List ? bytes : Uint8List.fromList(bytes));
-
-      layer.addImage(
-        imageToAdd: image,
-        offset: offset,
-      );
-    } else {
+    if (file == null) {
       _log.warning('$imageName not found in the archive');
+      return null;
     }
+    final List<int> bytes = file.content as List<int>;
+    return UiImagePixels(await fromBytesToImage(bytes is Uint8List ? bytes : Uint8List.fromList(bytes)));
   } catch (e) {
-    _log.severe('Failed to add image to layer', e);
+    _log.severe('Failed to decode layer image', e);
+    return null;
   }
 }
 
@@ -507,10 +436,17 @@ Future<List<int>> createOraArchive(
     );
   }
 
-  final List<_OraLayerExportResult> exportResults = await _exportOraLayersInBatches(
-    requests: exportRequests,
-    pixelsPerLayer: (layers.size.width * layers.size.height).ceil(),
+  // Layers and previews share one memory-bounded pool and encode in
+  // parallel; results are added in a fixed order so the archive stays
+  // deterministic.
+  final PngEncodePool pool = PngEncodePool(pixelBudget: PngEncodePool.platformPixelBudget);
+  final Future<List<_OraLayerExportResult>> layerExports = Future.wait(
+    exportRequests.map((_OraLayerExportRequest request) => _exportOraLayer(request, pool)),
   );
+  final Future<List<ArchiveFile>> previewFiles = includePreviews
+      ? _encodeOraPreviewFiles(layers: layers, pool: pool)
+      : Future<List<ArchiveFile>>.value(<ArchiveFile>[]);
+  final List<_OraLayerExportResult> exportResults = await layerExports;
 
   for (final _OraLayerExportResult result in exportResults) {
     archive.addFile(
@@ -526,9 +462,7 @@ Future<List<int>> createOraArchive(
     layerData[_oraAttrY] = result.offset.dy.toInt();
   }
 
-  if (includePreviews) {
-    await _addOraPreviewFiles(archive: archive, layers: layers);
-  }
+  (await previewFiles).forEach(archive.addFile);
 
   // Create stack.xml synchronously
   builder.processing(_oraXmlProcessingTarget, _oraXmlEncoding);
@@ -621,52 +555,11 @@ class _OraLayerExportResult {
   final Uint8List bytes;
 }
 
-/// Exports non-empty ORA layer PNGs in bounded parallel batches.
-///
-/// Batch processing keeps memory pressure predictable while still overlapping
-/// async PNG encoding across several layers to reduce total save latency.
-///
-/// [pixelsPerLayer] is the worst-case export size of one layer (the canvas
-/// area); it bounds how many layers are rendered and encoded at once.
-Future<List<_OraLayerExportResult>> _exportOraLayersInBatches({
-  required List<_OraLayerExportRequest> requests,
-  required int pixelsPerLayer,
-}) async {
-  if (requests.isEmpty) {
-    return <_OraLayerExportResult>[];
-  }
-
-  final List<_OraLayerExportResult> results = <_OraLayerExportResult>[];
-  final int batchSize = _computeOraLayerExportBatchSize(
-    requestCount: requests.length,
-    pixelsPerLayer: pixelsPerLayer,
-  );
-
-  for (int start = AppMath.zero; start < requests.length; start += batchSize) {
-    final int end = math.min(start + batchSize, requests.length);
-    final List<_OraLayerExportResult> batchResults = await Future.wait(
-      requests.sublist(start, end).map((_OraLayerExportRequest request) => _exportOraLayer(request)),
-    );
-    results.addAll(batchResults);
-  }
-
-  return results;
-}
-
-int _computeOraLayerExportBatchSize({
-  required int requestCount,
-  required int pixelsPerLayer,
-}) {
-  final int processorCount = math.max(Platform.numberOfProcessors, AppMath.one);
-  final int boundedByCpu = math.min(processorCount, _oraParallelLayerExportCap);
-  final int boundedByMemory = _oraParallelLayerExportPixelBudget ~/ math.max(pixelsPerLayer, AppMath.one);
-  return math.max(AppMath.one, math.min(requestCount, math.min(boundedByCpu, boundedByMemory)));
-}
-
 /// Exports one ORA layer image.
-Future<_OraLayerExportResult> _exportOraLayer(_OraLayerExportRequest request) async {
+Future<_OraLayerExportResult> _exportOraLayer(_OraLayerExportRequest request, PngEncodePool pool) async {
   final ({Uint8List bytes, ui.Offset offset}) exportedLayer = await _prepareOraLayerExport(
     layer: request.layer,
+    pool: pool,
   );
 
   return _OraLayerExportResult(
@@ -682,51 +575,41 @@ bool _isOraLayerImageEmpty(LayerProvider layer) {
   return layer.backgroundColor == null && layer.actionStack.isEmpty;
 }
 
-/// Writes standard merged and thumbnail preview PNGs into the ORA [archive].
-Future<void> _addOraPreviewFiles({
-  required Archive archive,
+/// Encodes the standard merged and thumbnail preview PNGs, in archive order.
+///
+/// Previews are optional in ORA, so an encode failure skips them rather than
+/// failing the save.
+Future<List<ArchiveFile>> _encodeOraPreviewFiles({
   required LayersProvider layers,
+  required PngEncodePool pool,
 }) async {
   // Owned by the provider (layers.cachedImage): never dispose it here.
   final ui.Image mergedImage = await layers.captureCompositeForExport();
-  final Uint8List? mergedPngBytes = await _safeImageToPngBytes(mergedImage, _oraMergedImageEntry);
-  if (mergedPngBytes == null) {
-    return;
-  }
-
-  archive.addFile(
-    _storedNeutralArchiveFile(
-      _oraMergedImageEntry,
-      mergedPngBytes,
-    ),
-  );
-
   final ui.Image thumbnailImage = _createOraThumbnailImage(mergedImage);
-  try {
-    final Uint8List? thumbnailPngBytes = await _safeImageToPngBytes(thumbnailImage, _oraThumbnailEntry);
-    if (thumbnailPngBytes == null) {
-      return;
-    }
-
-    archive.addFile(
-      _storedNeutralArchiveFile(
-        _oraThumbnailEntry,
-        thumbnailPngBytes,
-      ),
-    );
-  } finally {
-    thumbnailImage.dispose();
+  final List<Uint8List?> encoded = await Future.wait(<Future<Uint8List?>>[
+    pool.run(mergedImage.width * mergedImage.height, () => _safeImageToPngBytes(mergedImage, _oraMergedImageEntry)),
+    _safeImageToPngBytes(thumbnailImage, _oraThumbnailEntry, dispose: true),
+  ]);
+  final Uint8List? mergedPngBytes = encoded.first;
+  final Uint8List? thumbnailPngBytes = encoded.last;
+  if (mergedPngBytes == null) {
+    return <ArchiveFile>[];
   }
+  return <ArchiveFile>[
+    _storedNeutralArchiveFile(_oraMergedImageEntry, mergedPngBytes),
+    if (thumbnailPngBytes != null) _storedNeutralArchiveFile(_oraThumbnailEntry, thumbnailPngBytes),
+  ];
 }
 
-/// Converts [image] to PNG bytes while tolerating transient engine failures.
+/// Converts [image] to PNG bytes while tolerating transient engine failures,
+/// disposing it afterwards when [dispose] is set.
 ///
 /// Some test runs can hit an engine assertion inside [ui.Image.toByteData]
 /// under heavy image churn. In that case previews are skipped, while the ORA
 /// layer payload remains valid.
-Future<Uint8List?> _safeImageToPngBytes(ui.Image image, String entryName) async {
+Future<Uint8List?> _safeImageToPngBytes(ui.Image image, String entryName, {bool dispose = false}) async {
   try {
-    return await encodeImageToPng(image);
+    return await encodeImageToPngFast(image, disposeAfterReadback: dispose);
   } on Object catch (error, stackTrace) {
     _log.warning('Skipping ORA preview entry "$entryName" due to PNG encode failure.', error, stackTrace);
     return null;

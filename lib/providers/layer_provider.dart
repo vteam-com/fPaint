@@ -18,6 +18,7 @@ import 'package:fpaint/models/user_action_drawing.dart';
 part 'layer_provider_display_cache.dart';
 part 'layer_provider_live_preview.dart';
 part 'layer_provider_snapshot.dart';
+part 'layer_provider_stroke_fold.dart';
 part 'layer_provider_transform.dart';
 
 /// Represents a layer in the painting application.
@@ -31,6 +32,7 @@ class LayerProvider extends ChangeNotifier {
     required this._name,
     required Size size,
     required this.onThumbnailChanged,
+    this.onDisplayInvalidated,
     this.isThumbnailVisible,
     this.parentGroupName = '',
     this.id = '',
@@ -126,6 +128,13 @@ class LayerProvider extends ChangeNotifier {
 
   /// A callback function that is called when the thumbnail image changes.
   final void Function() onThumbnailChanged;
+
+  /// Called when the layer's on-screen projection is dropped because its
+  /// content changed. The canvas sits behind its own repaint boundary and
+  /// repaints only on an explicit signal, so without this an edit that only
+  /// notifies the app shell (e.g. a painted effect) stays invisible until the
+  /// next unrelated canvas repaint.
+  final void Function()? onDisplayInvalidated;
 
   /// Whether the layers panel is on screen. When it is not, thumbnail rebuilds
   /// are deferred (see [thumbnailNeedsRebuild]) instead of run. Null means
@@ -296,6 +305,21 @@ class LayerProvider extends ChangeNotifier {
     hasChanged = true;
   }
 
+  /// Inserts [userAction] at [index] in the action stack (used to restore an
+  /// action removed from the middle of the stack).
+  void insertDrawingAction(int index, UserActionDrawing userAction) {
+    actionStack.insert(index, userAction);
+    hasChanged = true;
+    clearCache();
+  }
+
+  /// Removes the action at [index] from the action stack.
+  void removeDrawingActionAt(int index) {
+    actionStack.removeAt(index);
+    hasChanged = true;
+    clearCache();
+  }
+
   /// Adds an image to the layer.
   UserActionDrawing addImage({
     required ui.Image imageToAdd,
@@ -385,14 +409,27 @@ class LayerProvider extends ChangeNotifier {
   int _strokeBaselineActionCount = 0;
 
   // Fold cursor for the in-progress stroke: tracks how much of the live stroke
-  // has already been baked into [_strokeBaseline]. Each frame only the new
-  // segments past this cursor are composited in, so per-frame cost stays
-  // O(new points) instead of replaying the whole growing stroke (O(stroke) per
-  // frame -> O(stroke^2) over a long drag). [_strokeFoldedActionIndex] is the
-  // action currently being folded; [_strokeFoldedPointCount] is how many of its
-  // points are already baked.
+  // has already been baked into [_strokeBaselineDisplay] (see the
+  // `LayerStrokeFold` extension). Each frame only the segments past this cursor
+  // are composited in, so per-frame cost stays O(threshold) instead of
+  // replaying the whole growing stroke (O(stroke) per frame -> O(stroke^2) over
+  // a long drag). [_strokeFoldedActionIndex] is the action currently being
+  // folded; [_strokeFoldedPointCount] is how many of its points are baked.
   int _strokeFoldedActionIndex = 0;
   int _strokeFoldedPointCount = 0;
+
+  /// Guards against overlapping mid-stroke folds.
+  bool _liveStrokeFoldInFlight = false;
+
+  /// The display baseline captured at stroke start, kept while mid-stroke folds
+  /// replace [_strokeBaselineDisplay] so the pen-up fold renders the whole
+  /// stroke once, exactly, without any mid-stroke fold seams.
+  ui.Image? _strokeBaselineDisplayOrigin;
+
+  // Finished-stroke fold in flight (see the `LayerStrokeFold` extension,
+  // layer_provider_stroke_fold.dart): the action stack it covers, or null when
+  // no fold is pending.
+  ({int actionCount, UserActionDrawing lastAction})? _strokeFold;
 
   //------------------------------------------------------
   // Thumbnail image
@@ -440,6 +477,17 @@ class LayerProvider extends ChangeNotifier {
     // which null-checks it every paint, so dropping it here can't be drawn stale.
     _cachedImage?.dispose();
     _cachedImage = null;
+    // A finished stroke is being folded into the display projection, and the
+    // stack is exactly what that fold draws: the fold installs the projection
+    // and refreshes the thumbnail itself, so skip the full-history replay.
+    if (_isStrokeFoldCurrent) {
+      return;
+    }
+    // Anything else invalidates an in-flight fold; drop its baseline now so no
+    // frame shows the pre-edit stroke.
+    if (_strokeFold != null) {
+      clearStrokePreview();
+    }
     // The live-display projection is derived from the same content, so a general
     // edit invalidates it too; the painter rebuilds it on the next frame. (The
     // pixel-brush commit does NOT go through clearCache — it updates the display
@@ -485,6 +533,7 @@ class LayerProvider extends ChangeNotifier {
   /// `saveLayer` when the baseline is composited.
   void beginStrokePreview() {
     _disposeStrokeBaselines();
+    _strokeFold = null;
 
     _strokeBaselineActionCount = actionStack.length;
     _strokeFoldedActionIndex = _strokeBaselineActionCount;
@@ -494,6 +543,7 @@ class LayerProvider extends ChangeNotifier {
     // appendDrawingAction/clearCache from disposing it immediately afterwards.
     if (_displayCache != null) {
       _strokeBaselineDisplay = _displayCache;
+      _strokeBaselineDisplayOrigin = _displayCache;
       _displayCache = null;
       _displayCacheScale = 0.0;
       return;
@@ -522,6 +572,10 @@ class LayerProvider extends ChangeNotifier {
   void _disposeStrokeBaselines() {
     _strokeBaseline?.dispose();
     _strokeBaseline = null;
+    if (!identical(_strokeBaselineDisplayOrigin, _strokeBaselineDisplay)) {
+      _strokeBaselineDisplayOrigin?.dispose();
+    }
+    _strokeBaselineDisplayOrigin = null;
     _strokeBaselineDisplay?.dispose();
     _strokeBaselineDisplay = null;
     _strokeBaselinePicture?.dispose();
@@ -536,52 +590,10 @@ class LayerProvider extends ChangeNotifier {
   /// is captured.
   void clearStrokePreview() {
     _disposeStrokeBaselines();
+    _strokeFold = null;
     _strokeBaselineActionCount = 0;
     _strokeFoldedActionIndex = 0;
     _strokeFoldedPointCount = 0;
-  }
-
-  /// Draws the in-progress actions/segments not yet folded into the baseline,
-  /// starting at ([_strokeFoldedActionIndex], [_strokeFoldedPointCount]).
-  void _renderInProgressTail(ui.Canvas canvas) {
-    final int count = actionStack.length;
-    int index = _strokeFoldedActionIndex;
-    int fromPoint = _strokeFoldedPointCount;
-    while (index < count) {
-      final UserActionDrawing action = actionStack[index];
-      if (fromPoint < action.positions.length) {
-        if (fromPoint <= AppMath.zero) {
-          _renderAction(canvas, action);
-        } else {
-          _renderFreehandActionTail(canvas, action, fromPoint);
-        }
-      }
-      if (index < count - AppMath.one) {
-        index++;
-        fromPoint = AppMath.zero;
-      } else {
-        break;
-      }
-    }
-  }
-
-  /// Renders only the undrawn tail of a growing pencil/eraser [action], starting
-  /// one point back from [fromPoint] so the new segments connect to the already
-  /// folded ones without re-drawing them. Only pencil/eraser grow point-by-point;
-  /// other action types are always folded whole (via [_renderAction]).
-  void _renderFreehandActionTail(
-    ui.Canvas canvas,
-    UserActionDrawing action,
-    int fromPoint,
-  ) {
-    final List<Offset> tail = action.positions.sublist(fromPoint - AppMath.one);
-    // Only freehand strokes can be extended incrementally; every other variant
-    // re-renders whole.
-    if (action is StrokeAction && (action.action == ActionType.pencil || action.action == ActionType.eraser)) {
-      _renderStrokeAction(canvas, action, tail);
-      return;
-    }
-    _renderAction(canvas, action);
   }
 
   /// Converts the layer to an image for storage.
@@ -688,21 +700,7 @@ class LayerProvider extends ChangeNotifier {
     // synchronous full-canvas rasterization while pointer events are arriving.
     if ((_strokeBaseline != null || _strokeBaselineDisplay != null || _strokeBaselinePicture != null) &&
         isUserDrawing) {
-      final ui.Image? baseline = _strokeBaseline;
-      if (baseline != null) {
-        canvas.drawImage(baseline, Offset.zero, Paint());
-      } else if (_strokeBaselineDisplay != null) {
-        final ui.Image displayBaseline = _strokeBaselineDisplay!;
-        canvas.drawImageRect(
-          displayBaseline,
-          Rect.fromLTWH(0, 0, displayBaseline.width.toDouble(), displayBaseline.height.toDouble()),
-          Offset.zero & size,
-          Paint()..filterQuality = FilterQuality.medium,
-        );
-      } else {
-        canvas.drawPicture(_strokeBaselinePicture!);
-      }
-      _renderInProgressTail(canvas);
+      _renderStrokeBaselineAndTail(canvas);
       return;
     }
 
@@ -710,6 +708,29 @@ class LayerProvider extends ChangeNotifier {
       canvas.drawImage(_cachedImage!, Offset.zero, Paint());
     } else {
       _renderActionStack(canvas);
+    }
+  }
+
+  /// Draws the frozen stroke baseline (whichever form was captured) plus the
+  /// strokes not yet folded into it.
+  void _renderStrokeBaselineAndTail(Canvas canvas) {
+    final ui.Image? baseline = _strokeBaseline;
+    final ui.Image? displayBaseline = _strokeBaselineDisplay;
+    if (baseline != null) {
+      canvas.drawImage(baseline, Offset.zero, Paint());
+    } else if (displayBaseline != null) {
+      canvas.drawImageRect(
+        displayBaseline,
+        Rect.fromLTWH(0, 0, displayBaseline.width.toDouble(), displayBaseline.height.toDouble()),
+        Offset.zero & size,
+        Paint()..filterQuality = FilterQuality.medium,
+      );
+    } else {
+      canvas.drawPicture(_strokeBaselinePicture!);
+    }
+    _renderInProgressTail(canvas);
+    if (displayBaseline != null && isUserDrawing) {
+      _foldLiveStrokeIfTailLarge(displayBaseline);
     }
   }
 
@@ -735,7 +756,7 @@ class LayerProvider extends ChangeNotifier {
 
   /// Replays the full action stack onto [canvas], first painting the optional
   /// background fill.
-  void _renderActionStack(Canvas canvas) {
+  void _renderActionStack(Canvas canvas, {int? actionCount}) {
     if (backgroundColor != null) {
       final Paint bgPaint = Paint();
       bgPaint.color = backgroundColor!;
@@ -745,8 +766,9 @@ class LayerProvider extends ChangeNotifier {
       );
     }
 
-    for (final UserActionDrawing userAction in actionStack) {
-      _renderAction(canvas, userAction);
+    final int count = actionCount ?? actionStack.length;
+    for (int index = AppMath.zero; index < count; index++) {
+      _renderAction(canvas, actionStack[index]);
     }
   }
 
@@ -871,7 +893,6 @@ class LayerProvider extends ChangeNotifier {
       case ActionType.region:
       case ActionType.cut:
       case ActionType.image:
-      case ActionType.selector:
       case ActionType.text:
         // Not stroke-rendered: these arrive as their own action variants.
         break;
@@ -880,7 +901,7 @@ class LayerProvider extends ChangeNotifier {
 
   /// Draws an [ImageAction]: a stamped image, or a committed smudge/blur patch.
   void _renderImageAction(Canvas canvas, ImageAction userAction) {
-    if (userAction.action == ActionType.smudge || userAction.action == ActionType.blurBrush) {
+    if (userAction.action.isPixelBrush) {
       applyAction(
         canvas,
         userAction.clipPath,

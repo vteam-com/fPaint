@@ -20,6 +20,15 @@ extension LayersProviderDocument on LayersProvider {
     }
   }
 
+  /// Captures the selected layer so an undo can restore it exactly (same-layer
+  /// duplicate, layer modify, pixel-brush commits).
+  ImagePlacementLayerRestoreState captureSelectedLayerRestoreState() {
+    return ImagePlacementLayerRestoreState(
+      layerIndex: selectedLayerIndex,
+      layerState: selectedLayer.captureSnapshot(),
+    );
+  }
+
   /// Returns the flattened canvas for export, reusing [LayersProvider.cachedImage]
   /// when nothing changed since it was rendered.
   ///

@@ -7,6 +7,7 @@ import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -286,7 +287,7 @@ void main() {
 
       await appProvider.modifySelectedLayer();
 
-      expect(appProvider.selectedAction, ActionType.selector);
+      expect(appProvider.selectedTool, ToolKind.selector);
       expect(appProvider.selectorModel.isVisible, isTrue);
       expect(appProvider.selectorModel.path1, isNotNull);
       expect(appProvider.imagePlacementModel.isVisible, isFalse);
@@ -718,8 +719,8 @@ void main() {
 
       // Picking any tool cancels the armed effect brush so a stroke is never
       // ambiguous (gesture tool vs. effect brush).
-      appProvider.selectedAction = ActionType.brush;
-      expect(appProvider.selectedAction, ActionType.brush);
+      appProvider.selectedTool = ToolKind.brush;
+      expect(appProvider.selectedTool, ToolKind.brush);
       expect(appProvider.effectBrushModel.isArmed, isFalse);
     });
 
@@ -954,8 +955,8 @@ void main() {
       expect(appProvider.selectorModel.isVisible, isTrue);
 
       // Switching to a gesture tool must NOT clear the selection.
-      appProvider.selectedAction = ActionType.brush;
-      expect(appProvider.selectedAction, ActionType.brush);
+      appProvider.selectedTool = ToolKind.brush;
+      expect(appProvider.selectedTool, ToolKind.brush);
       expect(appProvider.selectorModel.isVisible, isTrue);
 
       // A stroke on the gesture tool is clipped to the persistent selection.
@@ -990,17 +991,15 @@ void main() {
       }
 
       // Orphan every committed texture: drop the layer content that holds the
-      // crop results and the undo record that can resurrect them, then run the
-      // reachability sweep. Nothing references the crop textures now, so they
-      // must be reclaimed rather than leaked. (Driving the sweep directly keeps
-      // this independent of the layers<->undo callback wiring, which the default
-      // test constructor leaves unlinked; production shares one provider.)
+      // crop results, then clear the undo record that can resurrect them. The
+      // layers and the app share one undo history, so clearing it runs the
+      // reachability sweep; nothing references the crop textures now, so they
+      // must be reclaimed rather than leaked.
       for (final LayerProvider layer in appProvider.layers.list) {
         layer.actionStack.clear();
         layer.redoStack.clear();
       }
       appProvider.undoProvider.clear();
-      appProvider.layers.disposeCommittedImagesIfUnreferenced(retained);
       for (final Image image in retained) {
         expect(image.debugDisposed, isTrue, reason: 'orphaned crop texture must be reclaimed');
       }

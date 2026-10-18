@@ -55,4 +55,30 @@ extension LayerSnapshot on LayerProvider {
       canvasSize: canvasSize,
     );
   }
+
+  /// Async, raw-content counterpart of [flattenToImageAction] for history
+  /// compaction: renders the action stack (no layer opacity/blend baked in)
+  /// with `toImage`, never a chained `toImageSync`.
+  Future<ImageAction> flattenToImageActionAsync() async {
+    final ui.Image image = await renderCanvasImage(
+      width: size.width.toInt(),
+      height: size.height.toInt(),
+      draw: _renderActionStack,
+    );
+    return ImageAction.flattened(image: image, canvasSize: size);
+  }
+
+  /// Rasterizes the background plus the first [actionCount] actions inside
+  /// [bounds] at native resolution — cost O(bounds), not O(canvas). [bounds]
+  /// must lie on whole pixels.
+  Future<ui.Image> renderActionsInRegion({required Rect bounds, required int actionCount}) {
+    return renderCanvasImage(
+      width: bounds.width.toInt(),
+      height: bounds.height.toInt(),
+      draw: (ui.Canvas canvas) {
+        canvas.translate(-bounds.left, -bounds.top);
+        _renderActionStack(canvas, actionCount: actionCount);
+      },
+    );
+  }
 }

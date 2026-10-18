@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/trackpad_pressure.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -15,6 +16,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/widget_test_harness.dart';
 
 const int _pointer = 7;
+
+/// How long the hidden-layer notice stays up before dismissing itself.
+const Duration _snackBarDismissDuration = Duration(seconds: 4);
 
 Widget _buildHarness({
   required AppPreferences preferences,
@@ -98,8 +102,8 @@ void main() {
     shellProvider = ShellProvider();
   });
 
-  Future<Offset> pumpCanvas(WidgetTester tester, ActionType tool) async {
-    appProvider.selectedAction = tool;
+  Future<Offset> pumpCanvas(WidgetTester tester, ToolKind tool) async {
+    appProvider.selectedTool = tool;
     await tester.pumpWidget(
       _buildHarness(preferences: preferences, appProvider: appProvider, shellProvider: shellProvider),
     );
@@ -112,7 +116,7 @@ void main() {
   testWidgets('a pen stroke with the Brush tool records one pressure sample per point', (
     WidgetTester tester,
   ) async {
-    final Offset center = await pumpCanvas(tester, ActionType.brush);
+    final Offset center = await pumpCanvas(tester, ToolKind.brush);
 
     await _pressureStroke(tester, center, PointerDeviceKind.stylus, <double>[0.2, 0.5, 0.9]);
 
@@ -124,8 +128,23 @@ void main() {
     expect(stroke.pressures!.last, closeTo(0.9, 1e-9));
   });
 
+  testWidgets('a stroke refused on a hidden layer draws nothing while dragged', (WidgetTester tester) async {
+    final Offset center = await pumpCanvas(tester, ToolKind.pencil);
+    await _pressureStroke(tester, center, PointerDeviceKind.mouse, <double>[0.5, 0.5, 0.5]);
+    final int actionsBefore = appProvider.layers.selectedLayer.actionStack.length;
+    expect(actionsBefore, greaterThan(0));
+
+    appProvider.layers.selectedLayer.isVisible = false;
+    await _pressureStroke(tester, center, PointerDeviceKind.mouse, <double>[0.5, 0.5, 0.5]);
+
+    // The refused pointer-down must not leave the drag extending the layer's
+    // previous stroke onto the hidden layer.
+    expect(appProvider.layers.selectedLayer.actionStack, hasLength(actionsBefore));
+    await tester.pump(_snackBarDismissDuration);
+  });
+
   testWidgets('a mouse stroke with the Brush tool stays pressure-less', (WidgetTester tester) async {
-    final Offset center = await pumpCanvas(tester, ActionType.brush);
+    final Offset center = await pumpCanvas(tester, ToolKind.brush);
 
     await _pressureStroke(tester, center, PointerDeviceKind.mouse, <double>[0.2, 0.5, 0.9]);
 
@@ -135,7 +154,7 @@ void main() {
   testWidgets('lifting the pen off a fading press tapers the committed tip to the hairline', (
     WidgetTester tester,
   ) async {
-    final Offset center = await pumpCanvas(tester, ActionType.brush);
+    final Offset center = await pumpCanvas(tester, ToolKind.brush);
 
     await _pressureStroke(tester, center, PointerDeviceKind.stylus, <double>[0.9, 0.5, 0.1]);
 
@@ -145,7 +164,7 @@ void main() {
   });
 
   testWidgets('other tools ignore pen pressure', (WidgetTester tester) async {
-    final Offset center = await pumpCanvas(tester, ActionType.pencil);
+    final Offset center = await pumpCanvas(tester, ToolKind.pencil);
 
     await _pressureStroke(tester, center, PointerDeviceKind.stylus, <double>[0.2, 0.5, 0.9]);
 
@@ -164,7 +183,7 @@ void main() {
     }
 
     testWidgets('a held trackpad click makes a Brush stroke pressure-sensitive', (WidgetTester tester) async {
-      final Offset center = await pumpCanvas(tester, ActionType.brush);
+      final Offset center = await pumpCanvas(tester, ToolKind.brush);
       await pushTrackpadPressure(1.0);
 
       await _pressureStroke(tester, center, PointerDeviceKind.mouse, <double>[0.5, 0.5, 0.5]);
@@ -176,7 +195,7 @@ void main() {
     }, variant: macOS);
 
     testWidgets('pressure arriving after the click is back-filled over the start', (WidgetTester tester) async {
-      final Offset center = await pumpCanvas(tester, ActionType.brush);
+      final Offset center = await pumpCanvas(tester, ToolKind.brush);
       tester.binding.handlePointerEvent(
         PointerDownEvent(pointer: _pointer, kind: PointerDeviceKind.mouse, position: center),
       );
@@ -204,7 +223,7 @@ void main() {
     }, variant: macOS);
 
     testWidgets('a plain mouse never sends pressure and keeps constant width', (WidgetTester tester) async {
-      final Offset center = await pumpCanvas(tester, ActionType.brush);
+      final Offset center = await pumpCanvas(tester, ToolKind.brush);
 
       await _pressureStroke(tester, center, PointerDeviceKind.mouse, <double>[0.5, 0.5, 0.5]);
 
@@ -213,7 +232,7 @@ void main() {
 
     testWidgets('the setting turns trackpad pressure off', (WidgetTester tester) async {
       await preferences.setTrackpadPressure(false);
-      final Offset center = await pumpCanvas(tester, ActionType.brush);
+      final Offset center = await pumpCanvas(tester, ToolKind.brush);
       await pushTrackpadPressure(1.0);
 
       await _pressureStroke(tester, center, PointerDeviceKind.mouse, <double>[0.5, 0.5, 0.5]);
@@ -222,7 +241,7 @@ void main() {
     }, variant: macOS);
 
     testWidgets('the Pencil ignores trackpad pressure', (WidgetTester tester) async {
-      final Offset center = await pumpCanvas(tester, ActionType.pencil);
+      final Offset center = await pumpCanvas(tester, ToolKind.pencil);
       await pushTrackpadPressure(1.0);
 
       await _pressureStroke(tester, center, PointerDeviceKind.mouse, <double>[0.5, 0.5, 0.5]);

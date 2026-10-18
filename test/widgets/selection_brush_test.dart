@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/selector_model.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
@@ -70,7 +70,7 @@ void main() {
     expect(selection.isVisible, isTrue);
     expect(selection.path1!.contains(middle), isTrue);
     expect(selection.path1!.contains(farAbove), isFalse);
-    expect(appProvider.selectedAction, ActionType.selector);
+    expect(appProvider.selectedTool, ToolKind.selector);
     expect(appProvider.layers.selectedLayer.lastUserAction, isNull, reason: 'Selecting must not paint.');
 
     // Let the size ring that rode along the stroke fade out and the layer

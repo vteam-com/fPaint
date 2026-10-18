@@ -67,14 +67,14 @@ void main() {
       expect(newLayer.name, 'TopLayer');
     });
 
-    test('addBottom creates a new layer at the bottom and selects it', () {
+    test('insertAt the end creates a new layer at the bottom and selects it', () {
       final int initialLength = layersProvider.length;
       final LayerProvider firstLayer = layersProvider.get(0);
-      final LayerProvider newLayer = layersProvider.addBottom('BottomLayer');
+      final LayerProvider newLayer = layersProvider.insertAt(layersProvider.length, 'BottomLayer');
 
       expect(layersProvider.length, initialLength + 1);
       // The new layer is added at the end, but selection might change.
-      // addBottom -> insertAt(length) -> selectedLayerIndex = getLayerIndex(newLayer)
+      // insertAt(length) -> selectedLayerIndex = getLayerIndex(newLayer)
       expect(layersProvider.get(layersProvider.length - 1), newLayer);
       expect(layersProvider.selectedLayer, newLayer);
       expect(layersProvider.get(0), firstLayer); // Original first layer should still be at 0

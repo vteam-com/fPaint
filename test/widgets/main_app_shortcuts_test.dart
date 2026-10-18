@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/tool_family.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
@@ -76,10 +76,10 @@ void main() {
     await tester.pumpAndSettle();
 
     for (final ToolShortcut tool in kToolShortcuts) {
-      appProvider.selectedAction = ActionType.pencil;
+      appProvider.selectedTool = ToolKind.pencil;
       await tester.sendKeyEvent(tool.key);
       await tester.pump();
-      expect(appProvider.selectedAction, tool.action, reason: tool.label);
+      expect(appProvider.selectedTool, tool.tool, reason: tool.label);
     }
   });
 
@@ -132,13 +132,13 @@ void main() {
     await tester.pumpWidget(buildTestWidget());
     await tester.pumpAndSettle();
 
-    appProvider.selectedAction = ActionType.selector;
+    appProvider.selectedTool = ToolKind.selector;
     appProvider.quickMenuModel.open(_quickMenuAnchor);
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pump();
 
     expect(appProvider.quickMenuModel.isOpen, isFalse);
-    expect(appProvider.selectedAction, ActionType.selector);
+    expect(appProvider.selectedTool, ToolKind.selector);
   });
 
   testWidgets('Escape clears the selection, restores the tool and drops the eyedropper', (
@@ -147,15 +147,15 @@ void main() {
     await tester.pumpWidget(buildTestWidget());
     await tester.pumpAndSettle();
 
-    appProvider.selectedAction = ActionType.brush;
-    appProvider.selectedAction = ActionType.selector;
+    appProvider.selectedTool = ToolKind.brush;
+    appProvider.selectedTool = ToolKind.selector;
     appProvider.selectorModel.isVisible = true;
     appProvider.activateEyeDropShortcut();
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pump();
 
     expect(appProvider.selectorModel.isVisible, isFalse);
-    expect(appProvider.selectedAction, ActionType.brush);
+    expect(appProvider.selectedTool, ToolKind.brush);
     expect(appProvider.isEyeDropShortcutActive, isFalse);
   });
 

@@ -6,6 +6,7 @@ import 'package:fpaint/models/quick_menu_slot.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/tool_descriptor.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -15,9 +16,9 @@ const Offset _anchor = Offset(200, 150);
 const Color _paletteColor = Color(0xFF3366CC);
 const double _strengthDragPixels = AppInteraction.quickMenuStrengthDragPixelsPerUnit;
 const double _strengthTolerance = 0.0001;
-const ToolDescriptor _brush = ToolDescriptor.gesture(ActionType.brush);
-const ToolDescriptor _eraser = ToolDescriptor.gesture(ActionType.eraser);
-const ToolDescriptor _text = ToolDescriptor.gesture(ActionType.text);
+const ToolDescriptor _brush = ToolDescriptor.gesture(ToolKind.brush);
+const ToolDescriptor _eraser = ToolDescriptor.gesture(ToolKind.eraser);
+const ToolDescriptor _text = ToolDescriptor.gesture(ToolKind.text);
 const ToolDescriptor _blur = ToolDescriptor.adjust(SelectionEffect.blur);
 const ToolDescriptor _brightness = ToolDescriptor.adjust(SelectionEffect.brightness);
 const QuickMenuSlot _select = QuickMenuSlot.command(QuickMenuCommand.selection);
@@ -80,7 +81,7 @@ void main() {
 
   group('applyPaletteColor', () {
     test('sets the fill color while the paint bucket is active', () {
-      appProvider.selectedAction = ActionType.fill;
+      appProvider.selectedTool = ToolKind.fill;
 
       appProvider.applyPaletteColor(_paletteColor);
 
@@ -88,7 +89,7 @@ void main() {
     });
 
     test('sets the brush color for brushes', () {
-      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectedTool = ToolKind.brush;
 
       appProvider.applyPaletteColor(_paletteColor);
 
@@ -149,7 +150,7 @@ void main() {
 
     test('opening with the selector active leaves the recent tools alone', () {
       final List<ToolDescriptor> before = appProvider.quickMenuModel.recentTools;
-      appProvider.selectedAction = ActionType.selector;
+      appProvider.selectedTool = ToolKind.selector;
 
       appProvider.openQuickMenu(_anchor);
 
@@ -214,7 +215,7 @@ void main() {
       appProvider.pickQuickMenuSlot(_select);
 
       expect(appProvider.quickMenuModel.submenu, QuickMenuSubmenu.selection);
-      expect(appProvider.selectedAction, ActionType.brush);
+      expect(appProvider.selectedTool, ToolKind.brush);
       expect(appProvider.isQuickMenuSlotSelected(_select, inSubmenu: false), isTrue);
 
       appProvider.pickQuickMenuSlot(_select);
@@ -229,7 +230,7 @@ void main() {
 
       appProvider.pickQuickMenuSlot(lasso);
 
-      expect(appProvider.selectedAction, ActionType.selector);
+      expect(appProvider.selectedTool, ToolKind.selector);
       expect(appProvider.selectorModel.mode, SelectorMode.lasso);
       expect(appProvider.quickMenuModel.isOpen, isFalse);
       expect(appProvider.isQuickMenuSlotSelected(lasso, inSubmenu: true), isTrue);
@@ -280,7 +281,7 @@ void main() {
       appProvider.pickQuickMenuSlot(_cancel);
 
       expect(appProvider.selectorModel.isVisible, isFalse);
-      expect(appProvider.selectedAction, ActionType.brush);
+      expect(appProvider.selectedTool, ToolKind.brush);
       expect(appProvider.quickMenuModel.isOpen, isFalse);
     });
 

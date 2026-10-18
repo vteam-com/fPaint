@@ -6,8 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as flutter_material show MaterialLocalizations, TimeOfDay;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
-import 'package:fpaint/files/file_ora.dart';
-import 'package:fpaint/files/file_psd.dart';
+import 'package:fpaint/files/import_file_format.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
@@ -25,8 +24,6 @@ import 'package:logging/logging.dart';
 
 final Logger _log = Logger(logNameRecentFiles);
 
-const String _oraFileSuffix = '.${FileExtensions.ora}';
-const String _psdFileSuffix = '.${FileExtensions.psd}';
 const String _logMetadataFailed = 'Failed to read recent file metadata';
 const String _logThumbnailFailed = 'Failed to load recent file thumbnail';
 
@@ -36,25 +33,14 @@ typedef RecentFileMetadataLoader = Future<RecentFileMetadata> Function(String pa
 /// Loads the MRU thumbnail of the file at `path` (resolved via `bookmark`).
 typedef RecentFileThumbnailLoader = Future<ui.Image?> Function(String path, String? bookmark);
 
-/// Returns thumbnail-ready bytes for MRU previews.
-///
-/// ORA and PSD are containers the image decoder cannot read directly, so their
-/// embedded composite preview is extracted first. Every other format is already
-/// decodable as-is.
+/// Returns thumbnail-ready bytes for MRU previews; see
+/// [ImportFileFormat.previewBytes]. Unknown formats are returned as-is.
 Future<Uint8List?> resolveRecentFileThumbnailBytes({
   required Uint8List fileBytes,
   required String path,
 }) async {
-  final String normalized = path.toLowerCase();
-
-  if (normalized.endsWith(_oraFileSuffix)) {
-    return extractOraPreviewPngBytes(fileBytes);
-  }
-  if (normalized.endsWith(_psdFileSuffix)) {
-    return extractPsdPreviewPngBytes(fileBytes);
-  }
-
-  return fileBytes;
+  final ImportFileFormat? format = ImportFileFormat.fromFileName(path);
+  return format == null ? fileBytes : format.previewBytes(fileBytes);
 }
 
 /// Opens the unified [ImportDialog] as a bottom sheet anchored to [context].

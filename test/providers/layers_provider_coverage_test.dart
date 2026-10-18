@@ -269,8 +269,8 @@ void main() {
       expect(layers.get(layers.length - 1).name, 'Appended');
     });
 
-    test('addBottom adds at the end', () {
-      final LayerProvider layer = layers.addBottom('Bottom');
+    test('insertAt the length adds at the end', () {
+      final LayerProvider layer = layers.insertAt(layers.length, 'Bottom');
       expect(layers.get(layers.length - 1).name, 'Bottom');
       expect(layer.name, 'Bottom');
     });
@@ -328,7 +328,7 @@ void main() {
 
     test('mergeLayers merges two layers', () {
       layers.addTop(name: 'Top');
-      layers.addBottom('Bottom');
+      layers.insertAt(layers.length, 'Bottom');
       final int initialLength = layers.length;
       layers.mergeLayers(0, 1);
       // Merge should reduce layer count.

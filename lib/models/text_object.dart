@@ -48,6 +48,19 @@ class TextObject {
     );
   }
 
+  /// Overwrites every field with [other]'s, keeping this instance's identity so
+  /// the action that owns it (and any selection pointing at it) stays valid.
+  void assignFrom(TextObject other) {
+    text = other.text;
+    position = other.position;
+    color = other.color;
+    size = other.size;
+    fontFamily = other.fontFamily;
+    fontWeight = other.fontWeight;
+    fontStyle = other.fontStyle;
+    textAlign = other.textAlign;
+  }
+
   /// Builds a paragraph using the same style and layout settings as rendering.
   ui.Paragraph buildParagraph() {
     final ui.ParagraphBuilder paragraphBuilder =

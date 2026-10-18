@@ -299,7 +299,6 @@ class MyApp extends StatelessWidget {
   late final AppProvider appProvider = AppProvider(
     preferences: appPreferences,
     layersProvider: layersProvider,
-    undoProvider: undoProvider,
   );
 
   /// Manages autosave snapshots and startup draft recovery.

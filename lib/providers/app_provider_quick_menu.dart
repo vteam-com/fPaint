@@ -11,7 +11,7 @@ extension AppProviderQuickMenu on AppProvider {
   /// The single active tool: the armed effect brush, else the gesture tool.
   ToolDescriptor get activeTool {
     final SelectionEffect? armedEffect = effectBrushModel.effect;
-    return armedEffect != null ? ToolDescriptor.adjust(armedEffect) : ToolDescriptor.gesture(selectedAction);
+    return armedEffect != null ? ToolDescriptor.adjust(armedEffect) : ToolDescriptor.gesture(selectedTool);
   }
 
   /// Makes [tool] the active tool: arms an effect, or selects a gesture tool
@@ -24,15 +24,13 @@ extension AppProviderQuickMenu on AppProvider {
       }
       return;
     }
-    selectedAction = tool.action!;
+    selectedTool = tool.tool!;
   }
 
   /// Applies a palette [color] to whichever color the active tool paints with:
   /// the fill color for shapes and the paint bucket, else the brush color.
   void applyPaletteColor(Color color) {
-    if (selectedAction == ActionType.rectangle ||
-        selectedAction == ActionType.circle ||
-        selectedAction == ActionType.fill) {
+    if (selectedTool == ToolKind.rectangle || selectedTool == ToolKind.circle || selectedTool == ToolKind.fill) {
       fillColor = color;
     } else {
       brushColor = color;
@@ -83,7 +81,7 @@ extension AppProviderQuickMenu on AppProvider {
       QuickMenuCommand.selectAdd ||
       QuickMenuCommand.selectRemove ||
       QuickMenuCommand.invertSelection => selectorModel.isVisible,
-      QuickMenuCommand.cancelSelection => selectorModel.isVisible || selectedAction == ActionType.selector,
+      QuickMenuCommand.cancelSelection => selectorModel.isVisible || selectedTool == ToolKind.selector,
       QuickMenuCommand.selection || null => true,
     };
   }
@@ -97,11 +95,11 @@ extension AppProviderQuickMenu on AppProvider {
     }
     final SelectorMode? mode = slot.selectorMode;
     if (mode != null) {
-      return selectedAction == ActionType.selector && selectorModel.mode == mode;
+      return selectedTool == ToolKind.selector && selectorModel.mode == mode;
     }
     return switch (slot.command!) {
       QuickMenuCommand.selection =>
-        selectedAction == ActionType.selector || quickMenuModel.submenu == QuickMenuSubmenu.selection,
+        selectedTool == ToolKind.selector || quickMenuModel.submenu == QuickMenuSubmenu.selection,
       QuickMenuCommand.undo => !inSubmenu && quickMenuModel.submenu == QuickMenuSubmenu.history,
       QuickMenuCommand.selectAdd => selectorModel.math == SelectorMath.add,
       QuickMenuCommand.selectRemove => selectorModel.math == SelectorMath.remove,

@@ -3,7 +3,7 @@ part of 'app_provider.dart';
 /// Selection, region, transform, effect, and crop operations.
 extension AppProviderSelection on AppProvider {
   bool get _isSelectionToggleInCancelState {
-    return selectedAction == ActionType.selector || selectorModel.isVisible;
+    return selectedTool == ToolKind.selector || selectorModel.isVisible;
   }
 
   /// Toggles selection overlay behavior from the FAB without coupling to tool state.
@@ -99,55 +99,24 @@ extension AppProviderSelection on AppProvider {
   }
 
   /// Duplicates the current selection without touching system clipboard data.
-  Future<void> regionDuplicate() async {
-    await _startDuplicateTransform(commitMode: ImagePlacementCommitMode.newLayer);
-  }
+  Future<void> regionDuplicate() =>
+      transformController.duplicateSelection(commitMode: ImagePlacementCommitMode.newLayer);
 
   /// Duplicates the current selection into the same selected layer.
   Future<void> regionDuplicateSameLayer() async {
     if (isSelectedLayerLocked) {
       return;
     }
-
-    await _startDuplicateTransform(commitMode: ImagePlacementCommitMode.selectedLayer);
+    await transformController.duplicateSelection(commitMode: ImagePlacementCommitMode.selectedLayer);
   }
 
   /// Duplicates the current selection and applies an initial move offset to the
   /// new transform session without forcing translate mode to stay selected.
-  Future<void> regionDuplicateMove(Offset offset, {bool onNewLayer = true}) async {
-    if (onNewLayer) {
-      await regionDuplicate();
-    } else {
-      await regionDuplicateSameLayer();
-    }
-    if (!transformModel.isVisible) {
-      return;
-    }
-
-    transformModel.moveAll(offset);
-    update();
-  }
+  Future<void> regionDuplicateMove(Offset offset, {bool onNewLayer = true}) =>
+      transformController.duplicateSelectionMoved(offset, onNewLayer: onNewLayer);
 
   /// Floats the entire selected layer into a transform session before committing back.
-  Future<void> modifySelectedLayer() async {
-    if (isSelectedLayerLocked) {
-      return;
-    }
-
-    final bool wasLayerModifyMode = isLayerModifyMode;
-
-    cancelEffectPreview();
-    activateSelectionAction();
-    selectAll();
-
-    final ImagePlacementLayerRestoreState restoreState = _captureSelectedLayerRestoreState();
-
-    imagePlacementModel.clear();
-    imagePlacementModel.commitMode = ImagePlacementCommitMode.replaceLayer;
-    imagePlacementModel.layerRestoreState = restoreState;
-    notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
-    await startTransform();
-  }
+  Future<void> modifySelectedLayer() => transformController.modifySelectedLayer();
 
   /// Pastes an image from the clipboard onto the canvas.
   Future<void> paste() async {
@@ -155,11 +124,7 @@ extension AppProviderSelection on AppProvider {
     if (image == null) {
       return;
     }
-
-    await _beginPreparedImageTransform(
-      image,
-      source: TransformSessionSource.clipboardPaste,
-    );
+    await transformController.beginPaste(image);
   }
 
   /// Renders the active selection bounds into a standalone clipped image.
@@ -183,367 +148,26 @@ extension AppProviderSelection on AppProvider {
     );
   }
 
-  /// Captures the selected layer so same-layer duplicate and layer modify undo
-  /// can restore it exactly.
-  ImagePlacementLayerRestoreState _captureSelectedLayerRestoreState() {
-    return ImagePlacementLayerRestoreState(
-      layerIndex: layers.selectedLayerIndex,
-      layerState: layers.selectedLayer.captureSnapshot(),
-    );
-  }
-
-  /// Prepares image placement state for follow-up transform or commit flows.
-  void _prepareImagePlacement(
-    ui.Image image, {
-    Offset? initialPosition,
-    ImagePlacementCommitMode commitMode = ImagePlacementCommitMode.newLayer,
-    ImagePlacementLayerRestoreState? layerRestoreState,
-  }) {
-    // An image from outside the document has no relationship to this canvas's
-    // size — a Retina screenshot is routinely several times wider than the
-    // default 1024x768. Placed at 1:1 and centred, it would start mostly off
-    // canvas with its transform handles out of reach, reading as "paste did
-    // nothing". Shrink it to fit so the whole thing is visible and grabbable;
-    // the session still starts in transform, so the user can scale it back up.
-    // Only ever scales down: an image that already fits is placed untouched.
-    final double initialScale = _fitToCanvasScale(image);
-    final double displayWidth = image.width * initialScale;
-    final double displayHeight = image.height * initialScale;
-
-    final Offset center = Offset(
-      layers.size.width / AppMath.pair,
-      layers.size.height / AppMath.pair,
-    );
-    final Offset resolvedInitialPosition =
-        initialPosition ??
-        Offset(
-          center.dx - displayWidth / AppMath.pair,
-          center.dy - displayHeight / AppMath.pair,
-        );
-
-    imagePlacementModel.start(
-      imageToPlace: image,
-      initialPosition: resolvedInitialPosition,
-      commitMode: commitMode,
-      layerRestoreState: layerRestoreState,
-    );
-    imagePlacementModel.scale = initialScale;
-    update();
-  }
-
-  /// The scale that fits [image] inside the canvas, never above 1.
-  ///
-  /// Returns 1 when the image already fits, so a paste that needs no help is
-  /// placed at its true pixel size.
-  double _fitToCanvasScale(ui.Image image) {
-    final double canvasWidth = layers.size.width;
-    final double canvasHeight = layers.size.height;
-    if (image.width <= canvasWidth && image.height <= canvasHeight) {
-      return AppMath.one.toDouble();
-    }
-    if (image.width <= 0 || image.height <= 0) {
-      return AppMath.one.toDouble();
-    }
-    return min(canvasWidth / image.width, canvasHeight / image.height);
-  }
-
-  /// Starts a duplicate transform using [commitMode] for the eventual commit.
-  Future<void> _startDuplicateTransform({
-    required ImagePlacementCommitMode commitMode,
-  }) async {
-    final ui.Image? clippedImage = await createSelectionImage();
-    final Path? selectionPath = selectorModel.path1;
-    if (clippedImage == null || selectionPath == null) {
-      return;
-    }
-
-    final ImagePlacementLayerRestoreState? layerRestoreState = commitMode == ImagePlacementCommitMode.selectedLayer
-        ? _captureSelectedLayerRestoreState()
-        : null;
-
-    await _beginPreparedImageTransform(
-      clippedImage,
-      initialPosition: selectionPath.getBounds().topLeft,
-      source: TransformSessionSource.duplicateSelection,
-      commitMode: commitMode,
-      layerRestoreState: layerRestoreState,
-    );
-  }
-
-  /// Prepares [image] and immediately enters a transform session from it.
-  Future<void> _beginPreparedImageTransform(
-    ui.Image image, {
-    required TransformSessionSource source,
-    Offset? initialPosition,
-    ImagePlacementCommitMode commitMode = ImagePlacementCommitMode.newLayer,
-    ImagePlacementLayerRestoreState? layerRestoreState,
-  }) async {
-    _prepareImagePlacement(
-      image,
-      initialPosition: initialPosition,
-      commitMode: commitMode,
-      layerRestoreState: layerRestoreState,
-    );
-    await _startPreparedImageTransform(source: source);
-  }
-
-  /// Starts a transform session from [image] constrained to [bounds].
-  void _startTransformSession({
-    required ui.Image image,
-    required Rect bounds,
-    TransformSessionSource source = TransformSessionSource.selection,
-  }) {
-    transformModel.start(
-      image: image,
-      bounds: bounds,
-      source: source,
-    );
-    update();
-  }
-
-  /// Starts a transform session from the prepared image placement state.
-  Future<void> _startPreparedImageTransform({
-    required TransformSessionSource source,
-  }) async {
-    final ui.Image? sourceImage = imagePlacementModel.image;
-    if (sourceImage == null) {
-      return;
-    }
-
-    final ui.Image bakedImage = await renderPlacedImage(
-      sourceImage: sourceImage,
-      outWidth: imagePlacementModel.displayWidth,
-      outHeight: imagePlacementModel.displayHeight,
-      rotation: imagePlacementModel.rotation,
-    );
-
-    final Rect transformBounds = Rect.fromLTWH(
-      imagePlacementModel.position.dx,
-      imagePlacementModel.position.dy,
-      bakedImage.width.toDouble(),
-      bakedImage.height.toDouble(),
-    );
-
-    imagePlacementModel.isVisible = false;
-    _startTransformSession(
-      image: bakedImage,
-      bounds: transformBounds,
-      source: source,
-    );
-  }
-
   /// Confirms the active layer-modify session, even during async startup handoff.
-  Future<void> confirmLayerModifySession() async {
-    if (transformModel.isVisible) {
-      await confirmTransform();
-      return;
-    }
-
-    await confirmImagePlacement();
-  }
+  Future<void> confirmLayerModifySession() => transformController.confirmLayerModifySession();
 
   /// Commits the interactively placed image using the active placement mode.
-  Future<void> confirmImagePlacement() async {
-    final bool wasLayerModifyMode = isLayerModifyMode;
-    final ui.Image? sourceImage = imagePlacementModel.image;
-    if (sourceImage == null) {
-      imagePlacementModel.clear();
-      notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
-      update();
-      return;
-    }
-
-    final double outWidth = imagePlacementModel.displayWidth;
-    final double outHeight = imagePlacementModel.displayHeight;
-    final double rotation = imagePlacementModel.rotation;
-    final ImagePlacementCommitMode commitMode = imagePlacementModel.commitMode;
-    final ImagePlacementLayerRestoreState? layerRestoreState = imagePlacementModel.layerRestoreState;
-
-    final ui.Image bakedImage = await renderPlacedImage(
-      sourceImage: sourceImage,
-      outWidth: outWidth,
-      outHeight: outHeight,
-      rotation: rotation,
-    );
-
-    final Offset offset = imagePlacementModel.position;
-    commitPlacedImage(
-      this,
-      image: bakedImage,
-      offset: offset,
-      commitMode: commitMode,
-      layerRestoreState: layerRestoreState,
-    );
-
-    imagePlacementModel.clear();
-    notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
-    update();
-  }
+  Future<void> confirmImagePlacement() => transformController.confirmImagePlacement();
 
   /// Cancels an in-progress image placement.
-  void cancelImagePlacement() {
-    final bool wasLayerModifyMode = isLayerModifyMode;
-    final ImagePlacementLayerRestoreState? layerRestoreState = imagePlacementModel.layerRestoreState;
-    if (imagePlacementModel.commitMode == ImagePlacementCommitMode.replaceLayer && layerRestoreState != null) {
-      final LayerProvider targetLayer = layers.get(layerRestoreState.layerIndex);
-      layers.selectedLayerIndex = layerRestoreState.layerIndex;
-      targetLayer.restoreFromSnapshot(layerRestoreState.layerState);
-    }
-
-    imagePlacementModel.clear();
-    notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
-    update();
-  }
+  void cancelImagePlacement() => transformController.cancelImagePlacement();
 
   /// Cancels the active layer-modify session, even during async startup handoff.
-  void cancelLayerModifySession() {
-    if (transformModel.isVisible) {
-      cancelTransform();
-      return;
-    }
-
-    cancelImagePlacement();
-  }
+  void cancelLayerModifySession() => transformController.cancelLayerModifySession();
 
   /// Begins a perspective/skew transform on the current selection.
-  Future<void> startTransform() async {
-    // Layer-modify sessions always float the selected layer alone, even while
-    // the "All layers" scope is active.
-    if (selectorModel.allLayers && !isLayerModifyMode) {
-      await startTransformAllLayers();
-      return;
-    }
+  Future<void> startTransform() => transformController.startTransform();
 
-    if (isSelectedLayerLocked) {
-      return;
-    }
+  /// Commits the current transform; see [TransformSessionController.confirmTransform].
+  Future<void> confirmTransform() => transformController.confirmTransform();
 
-    cancelEffectPreview();
-    final ui.Image? clippedImage = await createSelectionImage();
-    if (clippedImage == null || selectorModel.path1 == null) {
-      return;
-    }
-
-    final Rect bounds = selectorModel.path1!.getBounds();
-    if (bounds.width <= 0 || bounds.height <= 0) {
-      return;
-    }
-
-    _startTransformSession(image: clippedImage, bounds: bounds);
-  }
-
-  /// Commits the current transform, erasing the original selection region
-  /// and placing the warped result as a new image action. Dispatches on the
-  /// [TransformSessionKind] so each session flavor owns its own commit path.
-  Future<void> confirmTransform() async {
-    final bool wasLayerModifyMode = isLayerModifyMode;
-    cancelEffectPreview();
-    final ui.Image? sourceImage = transformModel.sourceImage;
-    if (sourceImage == null) {
-      transformModel.clear();
-      _endTransformSession(wasLayerModifyMode: wasLayerModifyMode);
-      return;
-    }
-
-    switch (transformSession.kind) {
-      case TransformSessionKind.crossLayer:
-        await confirmTransformAllLayers();
-        selectorModel.clear();
-        transformModel.clear();
-        // The merged overlay preview was never committed anywhere; free it.
-        sourceImage.dispose();
-      case TransformSessionKind.preparedImage:
-        await _confirmPreparedImageTransform();
-      case TransformSessionKind.layerModify:
-      case TransformSessionKind.selection:
-        await _confirmSelectionRegionTransform();
-    }
-
-    _endTransformSession(wasLayerModifyMode: wasLayerModifyMode);
-  }
-
-  /// Commits a duplicate/paste transform through the image-placement pipeline.
-  Future<void> _confirmPreparedImageTransform() async {
-    final ui.Image transformedImage = await _renderConfirmedTransformImage();
-    final Rect quadBounds = transformModel.quadBounds;
-    final SelectionStateSnapshot selectionSnapshot = captureSelectionState(this);
-
-    commitPlacedImage(
-      this,
-      image: transformedImage,
-      offset: Offset(quadBounds.left, quadBounds.top),
-      commitMode: imagePlacementModel.commitMode,
-      layerRestoreState: imagePlacementModel.layerRestoreState,
-      selectionSnapshot: selectionSnapshot,
-      selectionBounds: quadBounds,
-    );
-
-    transformModel.clear();
-    imagePlacementModel.clear();
-  }
-
-  /// Commits a selection (or layer-modify) transform by erasing the original
-  /// region and placing the warped result on the selected layer.
-  Future<void> _confirmSelectionRegionTransform() async {
-    final ui.Image transformedImage = await _renderConfirmedTransformImage();
-    final Rect quadBounds = transformModel.quadBounds;
-    final Path erasePath = Path.from(selectorModel.path1!);
-
-    replaceRegion(
-      name: 'Transform',
-      erasePath: erasePath,
-      replacement: transformedImage,
-      offset: Offset(quadBounds.left, quadBounds.top),
-    );
-
-    selectorModel.clear();
-    transformModel.clear();
-    if (transformSession.isLayerModifyMode) {
-      imagePlacementModel.clear();
-    }
-  }
-
-  /// Renders the transform overlay's source image warped by the current corners.
-  Future<ui.Image> _renderConfirmedTransformImage() {
-    return renderTransformedImage(
-      transformModel.sourceImage!,
-      transformModel.corners,
-      AppInteraction.transformGridSubdivisions,
-      edgeMidpoints: transformModel.effectiveEdgeMidpoints,
-    );
-  }
-
-  /// Shared transform-session epilogue: refresh layer-modify chrome and the app.
-  void _endTransformSession({required bool wasLayerModifyMode}) {
-    notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
-    update();
-  }
-
-  /// Cancels an in-progress transform operation, dispatching on the
-  /// [TransformSessionKind] so each session flavor cleans up its own state.
-  void cancelTransform() {
-    final bool wasLayerModifyMode = isLayerModifyMode;
-    cancelEffectPreview();
-
-    switch (transformSession.kind) {
-      case TransformSessionKind.crossLayer:
-        final ui.Image? mergedPreview = transformModel.sourceImage;
-        transformSession.disposeCrossLayerLift();
-        transformModel.clear();
-        mergedPreview?.dispose();
-      case TransformSessionKind.preparedImage:
-        transformModel.clear();
-        imagePlacementModel.clear();
-      case TransformSessionKind.layerModify:
-        selectorModel.clear();
-        transformModel.clear();
-        imagePlacementModel.clear();
-      case TransformSessionKind.selection:
-        transformModel.clear();
-    }
-
-    _endTransformSession(wasLayerModifyMode: wasLayerModifyMode);
-  }
+  /// Cancels an in-progress transform operation.
+  void cancelTransform() => transformController.cancelTransform();
 
   /// Flips the selected region horizontally (left ↔ right).
   ///
@@ -758,7 +382,7 @@ extension AppProviderSelection on AppProvider {
           continue;
         }
 
-        if (selectedAction != ActionType.selector || selectorModel.mode != SelectorMode.wand) {
+        if (selectedTool != ToolKind.selector || selectorModel.mode != SelectorMode.wand) {
           continue;
         }
 

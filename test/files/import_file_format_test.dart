@@ -1,6 +1,17 @@
+import 'dart:typed_data';
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/import_file_format.dart';
+import 'package:fpaint/providers/layers_provider.dart';
+
+import '../helpers/file_flow_harness.dart';
+
+const int _pngWidth = 6;
+const int _pngHeight = 4;
+const String _layerName = 'imported';
+const List<int> _garbageBytes = <int>[0, 1, 2, 3, 4, 5, 6, 7];
 
 void main() {
   group('ImportFileFormat.fromExtension', () {
@@ -59,14 +70,41 @@ void main() {
   });
 
   group('ImportFileFormat metadata', () {
-    test('decodeKind routes each format to the right reader', () {
-      expect(ImportFileFormat.ora.decodeKind, ImportDecodeKind.ora);
-      expect(ImportFileFormat.psd.decodeKind, ImportDecodeKind.psd);
-      expect(ImportFileFormat.tiff.decodeKind, ImportDecodeKind.tiff);
-      expect(ImportFileFormat.heic.decodeKind, ImportDecodeKind.heif);
-      expect(ImportFileFormat.png.decodeKind, ImportDecodeKind.image);
-      expect(ImportFileFormat.jpeg.decodeKind, ImportDecodeKind.image);
-      expect(ImportFileFormat.webp.decodeKind, ImportDecodeKind.image);
+    testWidgets('a flat reader replaces the document with one named layer', (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        final LayersProvider layers = LayersProvider();
+        final Uint8List bytes = await encodeSolidPng(width: _pngWidth, height: _pngHeight);
+
+        await ImportFileFormat.png.read(layers, bytes, _layerName);
+
+        expect(layers.size, const Size(_pngWidth * 1.0, _pngHeight * 1.0));
+        expect(layers.list.map((LayerProvider layer) => layer.name), contains(_layerName));
+        layers.dispose();
+      });
+    });
+
+    testWidgets('every reader rejects undecodable bytes', (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        for (final ImportFileFormat format in ImportFileFormat.values) {
+          final LayersProvider layers = LayersProvider();
+          await expectLater(
+            format.read(layers, Uint8List.fromList(_garbageBytes), _layerName),
+            throwsA(anything),
+            reason: '$format must reject garbage',
+          );
+          layers.dispose();
+        }
+      });
+    });
+
+    test('previewBytes passes decodable formats through and extracts container previews', () async {
+      final Uint8List bytes = Uint8List.fromList(_garbageBytes);
+
+      expect(await ImportFileFormat.png.previewBytes(bytes), same(bytes));
+      expect(await ImportFileFormat.tiff.previewBytes(bytes), same(bytes));
+      // ORA and PSD extract their embedded composite; garbage carries none.
+      expect(await ImportFileFormat.ora.previewBytes(bytes), isNull);
+      expect(await ImportFileFormat.psd.previewBytes(bytes), isNull);
     });
 
     test('only the layered formats report supportsLayers', () {

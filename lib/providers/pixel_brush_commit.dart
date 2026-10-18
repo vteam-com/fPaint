@@ -24,11 +24,6 @@ ActionType pixelBrushActionType(PixelBrushMode mode) {
   return mode == PixelBrushMode.smudge ? ActionType.smudge : ActionType.blurBrush;
 }
 
-/// Returns whether [actionType] is a persisted pixel-brush action.
-bool isPixelBrushPersistedActionType(ActionType actionType) {
-  return actionType == ActionType.smudge || actionType == ActionType.blurBrush;
-}
-
 /// Restores the target layer baseline state and applies [patch] as the latest
 /// pixel-brush action for [mode].
 void applyPixelBrushPatchToLayer({
@@ -68,33 +63,114 @@ void applyPixelBrushPatchToLayer({
   );
 }
 
-/// Compacts historical pixel-brush actions by flattening the layer when the
-/// number of persisted smudge/blur gestures exceeds [maxGestureCount].
+/// Compacts historical pixel-brush actions once the layer holds more than
+/// [maxGestureCount] smudge/blur gestures, keeping replay cost and retained
+/// patch textures bounded over long sessions.
 ///
-/// This keeps redraw cost bounded over long drawing sessions.
-void compactPixelBrushLayerHistory({
+/// The common case — consecutive smudge/blur strokes — merges that run of
+/// patches into one patch over their union bounds (cost O(union), not
+/// O(canvas)). Only patches interleaved with other actions fall back to a full
+/// flatten. Both render async and leave the layer's pixels unchanged, so every
+/// cache (display projection, full-res raster, thumbnail) stays valid. The
+/// result is discarded if the stack changed while rendering.
+///
+/// [applyCompaction], when given, runs the stack splice it is handed, letting
+/// the caller carry state keyed on the action stack across it (the smudge
+/// source-cache signature counts actions).
+Future<void> compactPixelBrushLayerHistory({
   required LayerProvider targetLayer,
   required int maxGestureCount,
-}) {
-  int persistedPixelBrushCount = AppMath.zero;
-  for (final UserActionDrawing action in targetLayer.actionStack) {
-    if (isPixelBrushPersistedActionType(action.action)) {
-      persistedPixelBrushCount++;
-    }
-  }
-
-  if (persistedPixelBrushCount <= maxGestureCount) {
+  void Function(void Function() splice)? applyCompaction,
+}) async {
+  final List<UserActionDrawing> stack = List<UserActionDrawing>.of(targetLayer.actionStack);
+  final int pixelBrushCount = stack.where((UserActionDrawing action) => action.action.isPixelBrush).length;
+  if (pixelBrushCount <= maxGestureCount) {
     return;
   }
 
-  // Flatten BEFORE clearing: cascade sections run in order, so building the
-  // image inside `..add(...)` after `..clear()` would flatten an empty stack
-  // and silently erase the layer.
-  final ImageAction flattened = targetLayer.flattenToImageAction(targetLayer.size);
-  targetLayer.actionStack
-    ..clear()
-    ..add(flattened);
-  targetLayer.redoStack.clear();
-  targetLayer.hasChanged = true;
-  targetLayer.clearCache();
+  final ({int start, int end})? run = _longestPixelBrushRun(stack);
+  final int start;
+  final int end;
+  final ImageAction replacement;
+  if (run != null) {
+    final ui.Rect bounds = _unionPixelBounds(stack.sublist(run.start, run.end));
+    final ui.Image merged = await targetLayer.renderActionsInRegion(bounds: bounds, actionCount: run.end);
+    start = run.start;
+    end = run.end;
+    replacement = ImageAction.placed(action: stack[run.end - AppMath.one].action, bounds: bounds, image: merged);
+  } else {
+    start = AppMath.zero;
+    end = stack.length;
+    replacement = await targetLayer.flattenToImageActionAsync();
+  }
+
+  if (!_sameActions(targetLayer.actionStack, stack)) {
+    replacement.image.dispose();
+    return;
+  }
+  void splice() {
+    targetLayer.actionStack.replaceRange(start, end, <UserActionDrawing>[replacement]);
+    if (run == null) {
+      targetLayer.redoStack.clear();
+    }
+    targetLayer.hasChanged = true;
+  }
+
+  if (applyCompaction == null) {
+    splice();
+  } else {
+    applyCompaction(splice);
+  }
+}
+
+/// The longest run (at least two) of consecutive pixel-brush actions in
+/// [stack], as a half-open index range, or null when none are adjacent.
+({int start, int end})? _longestPixelBrushRun(List<UserActionDrawing> stack) {
+  ({int start, int end})? best;
+  int index = AppMath.zero;
+  while (index < stack.length) {
+    if (!stack[index].action.isPixelBrush) {
+      index++;
+      continue;
+    }
+    final int runStart = index;
+    while (index < stack.length && stack[index].action.isPixelBrush) {
+      index++;
+    }
+    final int length = index - runStart;
+    if (length >= AppMath.pair && (best == null || length > best.end - best.start)) {
+      best = (start: runStart, end: index);
+    }
+  }
+  return best;
+}
+
+/// The whole-pixel union of the [patches]' image footprints.
+ui.Rect _unionPixelBounds(List<UserActionDrawing> patches) {
+  ui.Rect? union;
+  for (final UserActionDrawing patch in patches) {
+    final ImageAction action = patch as ImageAction;
+    final ui.Rect bounds =
+        action.positions.first & ui.Size(action.image.width.toDouble(), action.image.height.toDouble());
+    union = union?.expandToInclude(bounds) ?? bounds;
+  }
+  return ui.Rect.fromLTRB(
+    union!.left.floorToDouble(),
+    union.top.floorToDouble(),
+    union.right.ceilToDouble(),
+    union.bottom.ceilToDouble(),
+  );
+}
+
+/// Whether [current] still holds exactly the [expected] action instances.
+bool _sameActions(List<UserActionDrawing> current, List<UserActionDrawing> expected) {
+  if (current.length != expected.length) {
+    return false;
+  }
+  for (int index = AppMath.zero; index < current.length; index++) {
+    if (!identical(current[index], expected[index])) {
+      return false;
+    }
+  }
+  return true;
 }

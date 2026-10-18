@@ -10,6 +10,7 @@ import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/models/canvas_resize.dart';
+import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/layer_state_snapshot.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
@@ -68,6 +69,10 @@ class LayersProvider extends ChangeNotifier {
     clearHasChanged();
   }
   final UndoProvider _undoProvider;
+
+  /// The undo history this document records into; editors working on the
+  /// document share it so there is exactly one undo stack.
+  UndoProvider get undoProvider => _undoProvider;
   final ChangeNotifier _canvasRepaintNotifier = ChangeNotifier();
   final ChangeNotifier _layerListStructureNotifier = ChangeNotifier();
   final ChangeNotifier _topColorsNotifier = ChangeNotifier();
@@ -532,6 +537,7 @@ class LayersProvider extends ChangeNotifier {
       name: name,
       size: _size,
       onThumbnailChanged: _onLayerThumbnailChanged,
+      onDisplayInvalidated: repaintCanvas,
       isThumbnailVisible: () => _thumbnailsVisible,
     );
   }
@@ -583,9 +589,6 @@ class LayersProvider extends ChangeNotifier {
 
   /// Adds a layer to the top of the canvas.
   LayerProvider addTop({String? name}) => this.insertAt(0, name);
-
-  /// Adds a layer to the bottom of the canvas.
-  LayerProvider addBottom([String? name]) => this.insertAt(this.length, name);
 
   /// Inserts a layer at the given index.
   void insert(int index, LayerProvider layerToInsert) {

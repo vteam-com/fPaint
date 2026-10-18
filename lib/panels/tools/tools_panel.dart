@@ -7,7 +7,7 @@ import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/hatch_marks.dart';
 import 'package:fpaint/models/hatch_pattern.dart';
-import 'package:fpaint/models/tool_family.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/panels/tools/hatch_tool_option.dart';
 import 'package:fpaint/panels/tools/tool_family_rail.dart';
@@ -55,7 +55,7 @@ class ToolsPanel extends StatelessWidget {
             gestureParams: ListenableBuilder(
               listenable: appProvider.toolOptionsRepaintListenable,
               builder: (BuildContext _, Widget? _) {
-                final ActionType selectedTool = appProvider.selectedAction;
+                final ToolKind selectedTool = appProvider.selectedTool;
 
                 return AnimatedSwitcher(
                   duration: AppDefaults.toolPanelRevealAnimationDuration,
@@ -72,7 +72,7 @@ class ToolsPanel extends StatelessWidget {
                     );
                   },
                   child: KeyedSubtree(
-                    key: ValueKey<ActionType>(selectedTool),
+                    key: ValueKey<ToolKind>(selectedTool),
                     child: Padding(
                       padding: const EdgeInsets.only(left: AppSpacing.medium),
                       child: Wrap(
@@ -97,10 +97,10 @@ class ToolsPanel extends StatelessWidget {
               appProvider.toolOptionsRepaintListenable,
             ]),
             builder: (BuildContext context, Widget? _) {
-              final ActionType selectedTool = appProvider.selectedAction;
+              final ToolKind selectedTool = appProvider.selectedTool;
               final bool showTopColors =
                   appProvider.effectBrushModel.effect == null &&
-                  selectedTool != ActionType.text &&
+                  selectedTool != ToolKind.text &&
                   selectedTool.isSupported(ActionOptions.topColors);
               if (!showTopColors) {
                 return const SizedBox.shrink();
@@ -225,10 +225,10 @@ class ToolsPanel extends StatelessWidget {
   }) {
     final List<Widget> widgets = <Widget>[];
     final AppLocalizations l10n = context.l10n;
-    final ActionType selectedTool = appProvider.selectedAction;
+    final ToolKind selectedTool = appProvider.selectedTool;
 
     switch (selectedTool) {
-      case ActionType.fill:
+      case ToolKind.fill:
         widgets.add(
           ToolAttributeWidget(
             compact: minimal,
@@ -295,21 +295,21 @@ class ToolsPanel extends StatelessWidget {
         widgets.add(addToolOptionTolerance(context, appProvider));
         break;
 
-      case ActionType.text:
+      case ToolKind.text:
         widgets.add(
           const TextAttributesWidget(
             minimal: false,
           ),
         );
         break;
-      case ActionType.selector:
+      case ToolKind.selector:
         // Selection tooling lives on the canvas (sub-toolbar + bottom sheets),
         // not in the side panel — see shell_selection_sub_toolbar.dart.
         break;
 
       default:
-        final String title = selectedTool == ActionType.pencil ? l10n.pencilSize : l10n.brushSize;
-        final BrushSizeRange sizeRange = brushSizeRangeFor(selectedTool);
+        final String title = selectedTool == ToolKind.pencil ? l10n.pencilSize : l10n.brushSize;
+        final BrushSizeRange sizeRange = selectedTool.brushSizeRange();
 
         // Brush Size
         if (selectedTool.isSupported(ActionOptions.brushSize)) {

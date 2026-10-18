@@ -90,9 +90,10 @@ extension AppProviderCrossLayerEraser on AppProvider {
     }
     for (final LayerProvider layer in stroke.targets) {
       layer.isUserDrawing = false;
-      layer.clearStrokePreview();
+      layer.finishStrokePreview();
       // The stroke grew after the append-time invalidation; re-render the
-      // committed raster and thumbnail from the final shared positions.
+      // committed raster and thumbnail from the final shared positions (a
+      // light no-op on the projection while the stroke fold covers it).
       layer.clearCache();
     }
     stroke.targets.clear();

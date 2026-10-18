@@ -6,6 +6,7 @@ import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/hatch_pattern.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -29,7 +30,7 @@ void main() {
     final AppPreferences preferences = AppPreferences();
     await preferences.getPref();
     appProvider = AppProvider(preferences: preferences);
-    appProvider.selectedAction = ActionType.fill;
+    appProvider.selectedTool = ToolKind.fill;
   });
 
   Future<void> pumpToolsPanel(
@@ -58,7 +59,7 @@ void main() {
     testWidgets('brush shows the hatch row only for a hatch style and the sheet edits it', (
       WidgetTester tester,
     ) async {
-      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectedTool = ToolKind.brush;
       await pumpToolsPanel(tester);
       expect(find.byKey(Keys.toolBrushHatchSlider), findsNothing);
 
@@ -85,7 +86,7 @@ void main() {
     });
 
     testWidgets('hatch marks style shows its own row and sheet', (WidgetTester tester) async {
-      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectedTool = ToolKind.brush;
       appProvider.brushStyle = BrushStyle.hatchMarks;
       await pumpToolsPanel(tester);
       expect(find.byKey(Keys.toolBrushHatchSlider), findsNothing);
@@ -105,7 +106,7 @@ void main() {
     });
 
     testWidgets('minimal brush panel shows the hatch button without a slider', (WidgetTester tester) async {
-      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectedTool = ToolKind.brush;
       appProvider.brushStyle = BrushStyle.crossHatch;
       await pumpToolsPanel(tester, minimal: true);
       expect(find.byKey(Keys.toolBrushHatchButton), findsOneWidget);
@@ -253,7 +254,7 @@ void main() {
 
   group('ToolsPanel minimal picker branding', () {
     testWidgets('shows the brush-size icon in the bottom-sheet header', (WidgetTester tester) async {
-      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectedTool = ToolKind.brush;
 
       await pumpToolsPanel(tester, minimal: true);
 
@@ -323,7 +324,7 @@ void main() {
       await tester.tap(find.byKey(Keys.toolSmudge));
       await tester.pumpAndSettle();
 
-      expect(appProvider.selectedAction, ActionType.smudge);
+      expect(appProvider.selectedTool, ToolKind.smudge);
       expect(find.byKey(Keys.toolBrushSizeTool), findsOneWidget);
       expect(find.byKey(Keys.toolBrushSizeButton), findsOneWidget);
       expect(find.byKey(Keys.toolBrushIntensityTool), findsOneWidget);
@@ -333,7 +334,7 @@ void main() {
     testWidgets('updates smudge intensity from the inline slider', (WidgetTester tester) async {
       await pumpToolsPanel(tester);
 
-      appProvider.selectedAction = ActionType.smudge;
+      appProvider.selectedTool = ToolKind.smudge;
       await tester.pump();
 
       final AppSlider slider = tester.widget<AppSlider>(find.byKey(Keys.toolBrushIntensitySlider));
@@ -343,7 +344,7 @@ void main() {
       expect(appProvider.brushIntensity, greaterThan(AppEffects.defaultIntensity));
     });
 
-    testWidgets('updates tool button selection when selectedAction changes externally', (
+    testWidgets('updates tool button selection when selectedTool changes externally', (
       WidgetTester tester,
     ) async {
       await pumpToolsPanel(tester);
@@ -351,7 +352,7 @@ void main() {
       expect(tester.widget<AppButtonIcon>(find.byKey(Keys.toolFill)).isSelected, isTrue);
       expect(tester.widget<AppButtonIcon>(find.byKey(Keys.toolSmudge)).isSelected, isFalse);
 
-      appProvider.selectedAction = ActionType.smudge;
+      appProvider.selectedTool = ToolKind.smudge;
       await tester.pump();
 
       expect(tester.widget<AppButtonIcon>(find.byKey(Keys.toolFill)).isSelected, isFalse);
@@ -442,7 +443,7 @@ void main() {
     });
 
     testWidgets('selection dismiss button is not shown in side panel', (WidgetTester tester) async {
-      appProvider.selectedAction = ActionType.smudge;
+      appProvider.selectedTool = ToolKind.smudge;
       appProvider.activateSelectionAction();
       appProvider.setSelectorMode(SelectorMode.circle);
       appProvider.selectorModel.isVisible = true;
@@ -454,7 +455,7 @@ void main() {
     });
 
     testWidgets('selection section no longer renders side-panel selector row', (WidgetTester tester) async {
-      appProvider.selectedAction = ActionType.selector;
+      appProvider.selectedTool = ToolKind.selector;
       appProvider.selectorModel.isVisible = true;
       appProvider.selectorModel.path1 = Path()..addRect(const Rect.fromLTWH(0, 0, 10, 10));
 

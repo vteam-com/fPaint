@@ -8,7 +8,7 @@ import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_mode_display.dart';
 import 'package:fpaint/models/selector_model.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/effect_preview_bottom_sheet.dart';
@@ -37,7 +37,7 @@ const int _selectionToggleButtonCount = AppMath.one;
 
 /// Returns whether the shell should show a dedicated selection sub-toolbar.
 bool shouldShowSelectionSubToolbar(AppProvider appProvider) {
-  return appProvider.selectedAction == ActionType.selector || appProvider.selectorModel.isVisible;
+  return appProvider.selectedTool == ToolKind.selector || appProvider.selectorModel.isVisible;
 }
 
 /// Estimates the width needed by the selection sub-toolbar.
@@ -75,7 +75,7 @@ Widget buildSelectionSubToolbar({
 }) {
   final AppLocalizations l10n = context.l10n;
   final bool hasVisibleSelection = appProvider.selectorModel.isVisible;
-  final bool isSelectionToolActive = appProvider.selectedAction == ActionType.selector;
+  final bool isSelectionToolActive = appProvider.selectedTool == ToolKind.selector;
 
   final List<Widget> buttons = <Widget>[
     for (final SelectorMode mode in SelectorMode.values)
@@ -112,7 +112,7 @@ Widget buildSelectionSubToolbar({
           l10n.cut,
           primaryModifiedShortcut(ShortcutKeys.x),
         ),
-        icon: ActionType.cut.icon,
+        icon: AppIcon.cropFree,
         interactionProfile: interactionProfile,
         color: AppColors.textPrimary,
         onPressed: () {

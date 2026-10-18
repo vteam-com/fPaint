@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/models/tool_family.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/locked_layer_guard.dart';
@@ -151,7 +151,7 @@ Widget shortCutsForMainApp(
 
       SelectToolIntent: CallbackAction<SelectToolIntent>(
         onInvoke: (SelectToolIntent intent) {
-          appProvider.selectedAction = intent.action;
+          appProvider.selectedTool = intent.tool;
           return null;
         },
       ),
@@ -372,13 +372,13 @@ class SelectAllIntent extends Intent {
   const SelectAllIntent();
 }
 
-/// An [Intent] that switches to the tool [action] (see [kToolShortcuts]).
+/// An [Intent] that switches to [tool] (see [kToolShortcuts]).
 class SelectToolIntent extends Intent {
-  /// Creates a [SelectToolIntent] for [action].
-  const SelectToolIntent(this.action);
+  /// Creates a [SelectToolIntent] for [tool].
+  const SelectToolIntent(this.tool);
 
   /// The tool to activate.
-  final ActionType action;
+  final ToolKind tool;
 }
 
 /// An [Intent] that triggers the new document from clipboard image action.
@@ -534,7 +534,7 @@ Map<ShortcutActivator, Intent> _buildShortcuts() {
 
   // Tools (bare keys, from the shared tool-shortcut table)
   for (final ToolShortcut tool in kToolShortcuts) {
-    shortcuts[SingleActivator(tool.key)] = SelectToolIntent(tool.action);
+    shortcuts[SingleActivator(tool.key)] = SelectToolIntent(tool.tool);
   }
 
   // Tab key (no duplicates needed)

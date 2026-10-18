@@ -22,7 +22,7 @@ extension AppProviderPixelBrush on AppProvider {
     pixelBrushSession.generation++;
     pixelBrushSession.mode = mode;
     pixelBrushSession.intensity = brushIntensity;
-    pixelBrushSession.layerRestoreState = _captureSelectedLayerRestoreState();
+    pixelBrushSession.layerRestoreState = layers.captureSelectedLayerRestoreState();
     pixelBrushSession.clipPath = selectorModel.copyActiveClipPath();
     pixelBrushSession.patchBounds = null;
     extendPixelBrushStroke(position);
@@ -328,6 +328,22 @@ extension AppProviderPixelBrush on AppProvider {
     session.setSourceSignature(_currentSmudgeSignature());
   }
 
+  /// Runs a history-compaction [splice] without invalidating the smudge source
+  /// cache: compaction keeps every pixel, but it changes the action count the
+  /// signature tracks, which would make the next stroke re-read the layer from
+  /// the GPU (a multi-second stall).
+  void _compactKeepingSourceCache(void Function() splice) {
+    final bool sourceCacheCurrent = isSmudgeSourceCacheCurrent;
+    splice();
+    if (sourceCacheCurrent) {
+      pixelBrushSession.setSourceSignature(_currentSmudgeSignature());
+    }
+  }
+
+  /// Whether the cached smudge/blur source still matches the document, so the
+  /// next stroke skips the multi-second GPU→CPU readback.
+  bool get isSmudgeSourceCacheCurrent => pixelBrushSession.matchesSourceSignature(_currentSmudgeSignature());
+
   /// A cheap fingerprint of the composite-through-selected-layer state. Changes
   /// when anything that affects the smudge source changes (action counts, layer
   /// visibility/opacity/blend, selection, canvas size) — but NOT on `clearCache`,
@@ -394,16 +410,25 @@ extension AppProviderPixelBrush on AppProvider {
         // it so any on-demand full-res consumer replays the appended action.
         targetLayer.invalidateFullResCache();
         targetLayer.refreshThumbnailFromDisplayCache();
-        compactPixelBrushLayerHistory(
-          targetLayer: targetLayer,
-          maxGestureCount: AppInteraction.pixelBrushMaxUndoGestures,
+        unawaited(
+          compactPixelBrushLayerHistory(
+            targetLayer: targetLayer,
+            maxGestureCount: AppInteraction.pixelBrushMaxUndoGestures,
+            applyCompaction: _compactKeepingSourceCache,
+          ),
         );
+        // The canvas painter listens to the layers, not this provider: without
+        // an explicit repaint it keeps showing the pre-stroke live preview until
+        // some unrelated layer notification (the thumbnail debounce, seconds
+        // later).
+        layers.repaintCanvas();
         update();
       },
       backward: () {
         final LayerProvider targetLayer = layers.get(layerRestoreState.layerIndex);
         layers.selectedLayerIndex = layerRestoreState.layerIndex;
         targetLayer.restoreFromSnapshot(layerRestoreState.layerState);
+        layers.repaintCanvas();
         update();
       },
     );

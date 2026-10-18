@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/models/selector_model.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -155,7 +156,7 @@ void main() {
       expect(selectedActionNotifications, 0);
 
       providerNotifications = 0;
-      appProvider.selectedAction = ActionType.line;
+      appProvider.selectedTool = ToolKind.line;
 
       expect(providerNotifications, 1);
       expect(selectedActionNotifications, 1);

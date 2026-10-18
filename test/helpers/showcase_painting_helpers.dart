@@ -12,6 +12,7 @@ import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/hatch_marks.dart';
 import 'package:fpaint/models/selection_effect.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/panels/layers/layer_thumbnail.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -966,4 +967,4 @@ void applyHatchMarks(WidgetTester tester, HatchMarks hatchMarks) {
 Color currentBrushColor(WidgetTester tester) => appProviderFromTester(tester).brushColor;
 
 /// Whether [action] is the currently selected gesture tool.
-bool isActionSelected(WidgetTester tester, ActionType action) => appProviderFromTester(tester).selectedAction == action;
+bool isActionSelected(WidgetTester tester, ToolKind action) => appProviderFromTester(tester).selectedTool == action;

@@ -4,7 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
@@ -86,7 +86,7 @@ void main() {
   testWidgets('shows brush-size preview at the drawing position while dragging', (
     WidgetTester tester,
   ) async {
-    appProvider.selectedAction = ActionType.brush;
+    appProvider.selectedTool = ToolKind.brush;
     appProvider.brushSize = 24.0;
 
     await tester.pumpWidget(
@@ -127,7 +127,7 @@ void main() {
   testWidgets('shows brush-size preview while hovering a mouse before drawing', (
     WidgetTester tester,
   ) async {
-    appProvider.selectedAction = ActionType.brush;
+    appProvider.selectedTool = ToolKind.brush;
     appProvider.brushSize = 24.0;
 
     await tester.pumpWidget(
@@ -157,7 +157,7 @@ void main() {
   testWidgets('Ctrl+Alt + mouse wheel resizes the brush instead of zooming the canvas', (
     WidgetTester tester,
   ) async {
-    appProvider.selectedAction = ActionType.brush;
+    appProvider.selectedTool = ToolKind.brush;
     appProvider.brushSize = 24.0;
 
     await tester.pumpWidget(

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/selection_effect.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
@@ -97,7 +97,7 @@ void main() {
     appProvider.selectorModel
       ..isVisible = true
       ..path1 = (Path()..addRect(const Rect.fromLTWH(50, 50, 300, 300)));
-    appProvider.selectedAction = ActionType.selector;
+    appProvider.selectedTool = ToolKind.selector;
     appProvider.armEffectBrush(SelectionEffect.blur);
     expect(appProvider.effectBrushModel.isArmed, isTrue);
 

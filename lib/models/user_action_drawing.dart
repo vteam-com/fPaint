@@ -2,7 +2,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
-import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/brush_style.dart';
 import 'package:fpaint/models/halftone_fill.dart';
 import 'package:fpaint/models/hatch_pattern.dart';
@@ -84,110 +83,31 @@ sealed class UserActionDrawing {
   }
 }
 
-/// Enum representing the different types of drawing actions.
+/// What a committed [UserActionDrawing] is.
+///
+/// A record kind, not a tool: tools are `ToolKind`s, and several records
+/// (pasted [image]s, [cut]s, [region]s) come from no tool at all.
 enum ActionType {
-  pencil(AppIcon.create),
-  brush(AppIcon.brush),
-  smudge(AppIcon.smudge),
-  blurBrush(AppIcon.waterDrop),
-  line(AppIcon.lineAxis),
-  circle(AppIcon.circle),
-  rectangle(AppIcon.cropSquare),
-  region(AppIcon.canvasCrop),
-  fill(AppIcon.formatColorFill),
-  eraser(AppIcon.eraser),
-  image(AppIcon.image),
-  cut(AppIcon.cropFree),
-  text(AppIcon.fontDownload),
-  selector(AppIcon.selector),
+  pencil,
+  brush,
+  smudge,
+  blurBrush,
+  line,
+  circle,
+  rectangle,
+  region,
+  fill,
+  eraser,
+  image,
+  cut,
+  text,
   ;
 
-  const ActionType(this.icon);
-
-  /// The [AppIcon] representing this action type.
-  final AppIcon icon;
-
-  /// Checks if the action type supports the given attribute.
-  bool isSupported(ActionOptions attribute) {
-    return toolsSupportedAttributes[this]?.contains(attribute) ?? false;
-  }
+  /// Whether this records a pixel-brush (smudge/blur) patch.
+  bool get isPixelBrush => this == ActionType.smudge || this == ActionType.blurBrush;
 
   @override
   String toString() {
     return name;
   }
 }
-
-/// Enum representing the different options for drawing actions.
-enum ActionOptions {
-  brushSize,
-  brushIntensity,
-  brushStyle,
-  brushColor,
-  colorFill,
-  tolerance,
-  topColors,
-  selectorOptions,
-}
-
-/// Map of action types to the set of action options they support.
-final Map<ActionType, Set<ActionOptions>> toolsSupportedAttributes = <ActionType, Set<ActionOptions>>{
-  ActionType.pencil: <ActionOptions>{
-    ActionOptions.brushSize,
-    ActionOptions.brushColor,
-    ActionOptions.topColors,
-  },
-  ActionType.brush: <ActionOptions>{
-    ActionOptions.brushSize,
-    ActionOptions.brushStyle,
-    ActionOptions.brushColor,
-    ActionOptions.topColors,
-  },
-  ActionType.smudge: <ActionOptions>{
-    ActionOptions.brushSize,
-    ActionOptions.brushIntensity,
-  },
-  ActionType.blurBrush: <ActionOptions>{
-    ActionOptions.brushSize,
-    ActionOptions.brushIntensity,
-  },
-  ActionType.line: <ActionOptions>{
-    ActionOptions.brushColor,
-    ActionOptions.brushSize,
-    ActionOptions.brushStyle,
-    ActionOptions.topColors,
-  },
-  ActionType.circle: <ActionOptions>{
-    ActionOptions.brushSize,
-    ActionOptions.brushStyle,
-    ActionOptions.brushColor,
-    ActionOptions.colorFill,
-    ActionOptions.topColors,
-  },
-  ActionType.rectangle: <ActionOptions>{
-    ActionOptions.brushSize,
-    ActionOptions.brushStyle,
-    ActionOptions.brushColor,
-    ActionOptions.colorFill,
-    ActionOptions.topColors,
-  },
-  ActionType.fill: <ActionOptions>{
-    ActionOptions.colorFill,
-    ActionOptions.tolerance,
-    ActionOptions.topColors,
-  },
-  ActionType.eraser: <ActionOptions>{
-    ActionOptions.brushSize,
-  },
-  ActionType.cut: <ActionOptions>{
-    // nothing to support yet
-  },
-  ActionType.selector: <ActionOptions>{
-    ActionOptions.selectorOptions,
-  },
-  ActionType.text: <ActionOptions>{
-    ActionOptions.brushColor,
-    ActionOptions.brushSize,
-    ActionOptions.topColors,
-  },
-};

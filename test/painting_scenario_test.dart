@@ -20,6 +20,7 @@ import 'package:fpaint/models/hatch_pattern.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/panels/layers/layer_thumbnail.dart';
 import 'package:fpaint/providers/app_preferences.dart';

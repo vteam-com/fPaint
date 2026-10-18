@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
@@ -25,7 +25,7 @@ void main() {
     await preferences.getPref();
     appProvider = AppProvider(preferences: preferences);
     appProvider.undoProvider.clear();
-    appProvider.selectedAction = ActionType.brush;
+    appProvider.selectedTool = ToolKind.brush;
     shellProvider = ShellProvider();
     shellProvider.shellMode = ShellMode.full;
   });

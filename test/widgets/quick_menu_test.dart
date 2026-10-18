@@ -6,6 +6,7 @@ import 'package:fpaint/models/quick_menu_model.dart';
 import 'package:fpaint/models/quick_menu_slot.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/tool_descriptor.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -95,7 +96,7 @@ void main() {
     preferences = AppPreferences();
     await preferences.getPref();
     appProvider = AppProvider(preferences: preferences);
-    appProvider.selectedAction = ActionType.brush;
+    appProvider.selectedTool = ToolKind.brush;
     shellProvider = ShellProvider();
   });
 
@@ -220,7 +221,7 @@ void main() {
       await gesture.up();
       await tester.pump();
 
-      expect(appProvider.selectedAction, ActionType.eraser);
+      expect(appProvider.selectedTool, ToolKind.eraser);
       expect(menu().isOpen, isFalse);
     });
 
@@ -230,7 +231,7 @@ void main() {
 
       await tapByKey(tester, _slotKey(_eraserSlot));
 
-      expect(appProvider.activeTool, const ToolDescriptor.gesture(ActionType.eraser));
+      expect(appProvider.activeTool, const ToolDescriptor.gesture(ToolKind.eraser));
       expect(menu().isOpen, isFalse);
     });
 
@@ -303,7 +304,7 @@ void main() {
 
       await tapByKey(tester, _submenuKey(SelectorMode.lasso.index));
 
-      expect(appProvider.selectedAction, ActionType.selector);
+      expect(appProvider.selectedTool, ToolKind.selector);
       expect(appProvider.selectorModel.mode, SelectorMode.lasso);
       expect(menu().isOpen, isFalse);
     });
@@ -321,7 +322,7 @@ void main() {
       await tapByKey(tester, _submenuKey(_selectionCancelIndex));
 
       expect(appProvider.selectorModel.isVisible, isFalse);
-      expect(appProvider.selectedAction, ActionType.brush);
+      expect(appProvider.selectedTool, ToolKind.brush);
       expect(menu().isOpen, isFalse);
     });
 
@@ -343,7 +344,7 @@ void main() {
 
       expect(menu().isOpen, isTrue);
       expect(menu().submenu, QuickMenuSubmenu.selection);
-      expect(appProvider.selectedAction, ActionType.brush);
+      expect(appProvider.selectedTool, ToolKind.brush);
     });
   });
 }

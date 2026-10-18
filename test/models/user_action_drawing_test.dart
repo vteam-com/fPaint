@@ -126,104 +126,21 @@ void main() {
       expect(ActionType.line.toString(), 'line');
     });
 
-    test('isSupported returns correct values for pencil', () {
-      expect(ActionType.pencil.isSupported(ActionOptions.brushSize), true);
-      expect(ActionType.pencil.isSupported(ActionOptions.brushColor), true);
-      expect(ActionType.pencil.isSupported(ActionOptions.topColors), true);
-      expect(ActionType.pencil.isSupported(ActionOptions.brushStyle), false);
-      expect(ActionType.pencil.isSupported(ActionOptions.colorFill), false);
-    });
-
-    test('isSupported returns correct values for brush', () {
-      expect(ActionType.brush.isSupported(ActionOptions.brushSize), true);
-      expect(ActionType.brush.isSupported(ActionOptions.brushStyle), true);
-      expect(ActionType.brush.isSupported(ActionOptions.brushColor), true);
-      expect(ActionType.brush.isSupported(ActionOptions.topColors), true);
-      expect(ActionType.brush.isSupported(ActionOptions.tolerance), false);
-    });
-
-    test('isSupported returns correct values for smudge', () {
-      expect(ActionType.smudge.isSupported(ActionOptions.brushSize), true);
-      expect(ActionType.smudge.isSupported(ActionOptions.brushColor), false);
-      expect(ActionType.smudge.isSupported(ActionOptions.brushStyle), false);
-    });
-
-    test('isSupported returns correct values for fill', () {
-      expect(ActionType.fill.isSupported(ActionOptions.colorFill), true);
-      expect(ActionType.fill.isSupported(ActionOptions.tolerance), true);
-      expect(ActionType.fill.isSupported(ActionOptions.topColors), true);
-      expect(ActionType.fill.isSupported(ActionOptions.brushSize), false);
-    });
-
-    test('isSupported returns correct values for eraser', () {
-      expect(ActionType.eraser.isSupported(ActionOptions.brushSize), true);
-      expect(ActionType.eraser.isSupported(ActionOptions.brushColor), false);
-    });
-
-    test('isSupported returns correct values for selector', () {
-      expect(ActionType.selector.isSupported(ActionOptions.selectorOptions), true);
-      expect(ActionType.selector.isSupported(ActionOptions.brushSize), false);
-    });
-
-    test('isSupported returns false for unsupported action types', () {
-      expect(ActionType.cut.isSupported(ActionOptions.brushSize), false);
-      expect(ActionType.image.isSupported(ActionOptions.brushSize), false);
+    test('isPixelBrush is true only for smudge and blur records', () {
+      expect(
+        ActionType.values.where((ActionType type) => type.isPixelBrush),
+        <ActionType>[ActionType.smudge, ActionType.blurBrush],
+      );
     });
   });
 
-  group('ActionType.icon', () {
-    test('returns correct icon for pencil', () {
-      expect(ActionType.pencil.icon, AppIcon.create);
-    });
-
-    test('returns correct icon for brush', () {
-      expect(ActionType.brush.icon, AppIcon.brush);
-    });
-
-    test('returns correct icon for smudge', () {
-      expect(ActionType.smudge.icon, AppIcon.smudge);
-    });
-
-    test('returns correct icon for eraser', () {
-      expect(ActionType.eraser.icon, AppIcon.eraser);
-    });
-
-    test('returns correct icon for selector', () {
-      expect(ActionType.selector.icon, AppIcon.selector);
-    });
-
+  group('AppSvgIcon', () {
     testWidgets('AppSvgIcon uses isSelected', (WidgetTester tester) async {
       const AppSvgIcon selected = AppSvgIcon(icon: AppIcon.create, isSelected: true);
       expect(selected.isSelected, true);
 
       const AppSvgIcon unselected = AppSvgIcon(icon: AppIcon.create, isSelected: false);
       expect(unselected.isSelected, false);
-    });
-  });
-
-  group('toolsSupportedAttributes', () {
-    test('contains all action types', () {
-      expect(toolsSupportedAttributes.length, 12);
-    });
-
-    test('pencil supports correct attributes', () {
-      final Set<ActionOptions> pencilAttributes = toolsSupportedAttributes[ActionType.pencil]!;
-      expect(pencilAttributes, contains(ActionOptions.brushSize));
-      expect(pencilAttributes, contains(ActionOptions.brushColor));
-      expect(pencilAttributes, contains(ActionOptions.topColors));
-      expect(pencilAttributes, isNot(contains(ActionOptions.brushStyle)));
-    });
-
-    test('circle supports fill color', () {
-      final Set<ActionOptions> circleAttributes = toolsSupportedAttributes[ActionType.circle]!;
-      expect(circleAttributes, contains(ActionOptions.colorFill));
-    });
-
-    test('text supports brush color and size', () {
-      final Set<ActionOptions> textAttributes = toolsSupportedAttributes[ActionType.text]!;
-      expect(textAttributes, contains(ActionOptions.brushColor));
-      expect(textAttributes, contains(ActionOptions.brushSize));
-      expect(textAttributes, contains(ActionOptions.topColors));
     });
   });
 }

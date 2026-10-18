@@ -30,10 +30,12 @@ class DraftRecoveryController with WidgetsBindingObserver implements DraftFlushe
     DraftRecoveryEncoder? encoder,
     DraftRecoveryRestorer? restorer,
     Duration? saveDebounce,
+    Duration? saveMaxWait,
   }) : _storage = storage ?? _createStorage(),
        _encoder = encoder ?? _encoderNotConfigured,
        _restorer = restorer ?? _restorerNotConfigured,
-       _saveDebounce = saveDebounce ?? AppDefaults.recoverySaveDebounce;
+       _saveDebounce = saveDebounce ?? AppDefaults.recoverySaveDebounce,
+       _saveMaxWait = saveMaxWait ?? AppDefaults.recoverySaveMaxWait;
 
   final AppPreferences preferences;
   final LayersProvider layers;
@@ -42,8 +44,13 @@ class DraftRecoveryController with WidgetsBindingObserver implements DraftFlushe
   final DraftRecoveryEncoder _encoder;
   final DraftRecoveryRestorer _restorer;
   final Duration _saveDebounce;
+  final Duration _saveMaxWait;
 
   Timer? _saveTimer;
+
+  /// Armed by the first unsaved change and never pushed back by later ones,
+  /// capping how long continuous edits can defer the debounced save.
+  Timer? _maxWaitTimer;
   bool _isInitialized = false;
   bool _isReconciling = false;
   bool _needsReconcile = false;
@@ -70,6 +77,7 @@ class DraftRecoveryController with WidgetsBindingObserver implements DraftFlushe
     }
 
     _saveTimer?.cancel();
+    _maxWaitTimer?.cancel();
     if (_isInitialized) {
       WidgetsBinding.instance.removeObserver(this);
       layers.removeListener(_handleLayersChanged);
@@ -163,6 +171,9 @@ class DraftRecoveryController with WidgetsBindingObserver implements DraftFlushe
     _saveTimer = Timer(_saveDebounce, () {
       unawaited(_reconcileDraft());
     });
+    _maxWaitTimer ??= Timer(_saveMaxWait, () {
+      unawaited(_reconcileDraft());
+    });
   }
 
   /// Synchronizes persisted recovery state with the current dirty-document state.
@@ -173,6 +184,9 @@ class DraftRecoveryController with WidgetsBindingObserver implements DraftFlushe
     }
 
     _isReconciling = true;
+    _saveTimer?.cancel();
+    _maxWaitTimer?.cancel();
+    _maxWaitTimer = null;
     try {
       do {
         _needsReconcile = false;

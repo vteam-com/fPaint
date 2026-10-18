@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/main.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
@@ -30,7 +30,7 @@ void main() {
     await tapByKey(tester, Keys.toolFill);
     await tapByKey(tester, Keys.toolFillModeSolid);
     appProvider.fillColor = _fillColor;
-    expect(appProvider.selectedAction, ActionType.fill);
+    expect(appProvider.selectedTool, ToolKind.fill);
 
     final LayerProvider layer = appProvider.layers.selectedLayer;
     final int actionsBefore = layer.actionStack.length;

@@ -9,6 +9,7 @@ import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/selector_model.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -88,7 +89,7 @@ Future<int> _committedPatchMinDisplayAlpha(Rect patchBounds, double scale) async
 }
 
 void main() {
-  testWidgets('pointer up flushes a recovery draft immediately', (WidgetTester tester) async {
+  testWidgets('pointer up leaves the recovery draft to the debounce', (WidgetTester tester) async {
     final AppPreferences preferences = await createRecoveryTestPreferences();
     final AppProvider appProvider = AppProvider(preferences: preferences);
     final ShellProvider shellProvider = ShellProvider();
@@ -140,6 +141,11 @@ void main() {
     await gesture.up();
     await tester.pump();
 
+    expect(storage.bytes, isNull, reason: 'Pen-up must not trigger a full draft encode.');
+
+    await tester.pump(const Duration(seconds: 10));
+    await tester.pump();
+
     expect(storage.bytes, Uint8List.fromList(<int>[1, 2, 3]));
 
     await tester.pump(AppDefaults.thumbnailDebounceDuration);
@@ -189,7 +195,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    appProvider.selectedAction = ActionType.text;
+    appProvider.selectedTool = ToolKind.text;
     await tester.pump();
 
     await tester.tap(find.byType(CanvasGestureHandler));
@@ -199,7 +205,7 @@ void main() {
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
 
-    appProvider.selectedAction = ActionType.brush;
+    appProvider.selectedTool = ToolKind.brush;
     await tester.pump();
 
     final Offset center = tester.getCenter(find.byType(CanvasGestureHandler));
@@ -262,7 +268,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    appProvider.selectedAction = ActionType.selector;
+    appProvider.selectedTool = ToolKind.selector;
     appProvider.selectorModel.mode = SelectorMode.line;
     await tester.pump();
 
@@ -344,7 +350,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    appProvider.selectedAction = ActionType.selector;
+    appProvider.selectedTool = ToolKind.selector;
     appProvider.selectorModel.mode = SelectorMode.line;
     await tester.pump();
 

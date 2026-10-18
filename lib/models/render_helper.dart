@@ -614,8 +614,24 @@ Path createDashedPath(
   required double dashGap,
   double phase = 0.0,
 }) {
+  return createDashedPathFromMetrics(
+    source.computeMetrics(),
+    dashWidth: dashWidth,
+    dashGap: dashGap,
+    phase: phase,
+  );
+}
+
+/// Same as [createDashedPath], but walks precomputed [metrics] so animated
+/// callers (marching ants) measure a static path once instead of every tick.
+Path createDashedPathFromMetrics(
+  Iterable<ui.PathMetric> metrics, {
+  required double dashWidth,
+  required double dashGap,
+  double phase = 0.0,
+}) {
   final Path dashedPath = Path();
-  for (final ui.PathMetric pathMetric in source.computeMetrics()) {
+  for (final ui.PathMetric pathMetric in metrics) {
     double distance = phase;
     while (distance < pathMetric.length) {
       final double nextDashLength = distance + dashWidth;

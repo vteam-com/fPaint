@@ -3,16 +3,16 @@ import 'package:flutter/painting.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/quick_menu_slot.dart';
 import 'package:fpaint/models/tool_descriptor.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/models/tool_kind.dart';
 
 /// Tools the quick menu offers before the artist has used any.
 const List<ToolDescriptor> _defaultRecentTools = <ToolDescriptor>[
-  ToolDescriptor.gesture(ActionType.brush),
-  ToolDescriptor.gesture(ActionType.eraser),
-  ToolDescriptor.gesture(ActionType.smudge),
-  ToolDescriptor.gesture(ActionType.pencil),
-  ToolDescriptor.gesture(ActionType.fill),
-  ToolDescriptor.gesture(ActionType.line),
+  ToolDescriptor.gesture(ToolKind.brush),
+  ToolDescriptor.gesture(ToolKind.eraser),
+  ToolDescriptor.gesture(ToolKind.smudge),
+  ToolDescriptor.gesture(ToolKind.pencil),
+  ToolDescriptor.gesture(ToolKind.fill),
+  ToolDescriptor.gesture(ToolKind.line),
 ];
 
 /// State of the on-canvas quick menu: where it is open, which ring slot a

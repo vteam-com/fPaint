@@ -330,7 +330,7 @@ Future<void> _exerciseToolSwitching(
   // Switch to pencil.
   await tapByTooltip(tester, l10n.toolPencil);
   await tester.pump();
-  expect(appProvider.selectedAction, ActionType.pencil);
+  expect(appProvider.selectedTool, ToolKind.pencil);
 
   // Draw a small pencil stroke.
   await drawFreehandStrokeWithHumanGestures(
@@ -346,7 +346,7 @@ Future<void> _exerciseToolSwitching(
   // Switch to eraser.
   await tapByTooltip(tester, l10n.toolEraser);
   await tester.pump();
-  expect(appProvider.selectedAction, ActionType.eraser);
+  expect(appProvider.selectedTool, ToolKind.eraser);
 
   // Draw a small eraser stroke.
   await drawFreehandStrokeWithHumanGestures(
@@ -355,14 +355,14 @@ Future<void> _exerciseToolSwitching(
       session.canvasCenter + const Offset(-20, -20),
       session.canvasCenter + const Offset(20, -20),
     ],
-    action: ActionType.eraser,
+    action: ToolKind.eraser,
     brushSize: _coverageEraserBrushSize,
   );
 
   // Switch to brush.
   await tapByTooltip(tester, l10n.toolBrush);
   await tester.pump();
-  expect(appProvider.selectedAction, ActionType.brush);
+  expect(appProvider.selectedTool, ToolKind.brush);
 
   // Undo the eraser and pencil strokes.
   // Each freehand stroke with 2 points creates 2 actions (initial + move),
@@ -1005,27 +1005,27 @@ Future<void> _exerciseMoreToolSwitching(
   // Line tool.
   await tapByKey(tester, Keys.toolLine);
   await tester.pump();
-  expect(appProvider.selectedAction, ActionType.line);
+  expect(appProvider.selectedTool, ToolKind.line);
 
   // Rectangle tool.
   await tapByKey(tester, Keys.toolRectangle);
   await tester.pump();
-  expect(appProvider.selectedAction, ActionType.rectangle);
+  expect(appProvider.selectedTool, ToolKind.rectangle);
 
   // Circle tool.
   await tapByKey(tester, Keys.toolCircle);
   await tester.pump();
-  expect(appProvider.selectedAction, ActionType.circle);
+  expect(appProvider.selectedTool, ToolKind.circle);
 
   // Fill tool.
   await tapByKey(tester, Keys.toolFill);
   await tester.pump();
-  expect(appProvider.selectedAction, ActionType.fill);
+  expect(appProvider.selectedTool, ToolKind.fill);
 
   // Text tool.
   await tapByKey(tester, Keys.toolText);
   await tester.pump();
-  expect(appProvider.selectedAction, ActionType.text);
+  expect(appProvider.selectedTool, ToolKind.text);
 
   // Switch fill sub-modes.
   await tapByKey(tester, Keys.toolFill);
@@ -1060,7 +1060,7 @@ Future<void> _exerciseShapeDrawing(
       session.canvasCenter + const Offset(-30, 0),
       session.canvasCenter + const Offset(30, 0),
     ],
-    action: ActionType.line,
+    action: ToolKind.line,
     brushSize: _coverageBrushSize,
   );
 
@@ -1076,7 +1076,7 @@ Future<void> _exerciseShapeDrawing(
       session.canvasCenter + const Offset(-25, -25),
       session.canvasCenter + const Offset(25, 25),
     ],
-    action: ActionType.rectangle,
+    action: ToolKind.rectangle,
     brushSize: _coverageBrushSize,
   );
 
@@ -1092,7 +1092,7 @@ Future<void> _exerciseShapeDrawing(
       session.canvasCenter + const Offset(-20, -20),
       session.canvasCenter + const Offset(20, 20),
     ],
-    action: ActionType.circle,
+    action: ToolKind.circle,
     brushSize: _coverageBrushSize,
   );
 

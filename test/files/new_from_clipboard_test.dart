@@ -46,7 +46,6 @@ void main() {
     app = AppProvider(
       preferences: AppPreferences(),
       layersProvider: layers,
-      undoProvider: undo,
     );
     shell = ShellProvider();
     fitRequests = 0;

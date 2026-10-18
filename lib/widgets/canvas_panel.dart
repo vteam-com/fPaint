@@ -27,20 +27,23 @@ class CanvasPanel extends StatelessWidget {
     // This render object stays viewport-sized; pan and zoom are applied inside
     // the painter. Keeping the document transform out of the widget tree stops
     // Impeller's raster cache from allocating a zoomed full-document texture.
-    // MainView provides the viewport-sized repaint boundary, while this
-    // painter's stable listenable limits redraws to actual pixel changes.
-    return CustomPaint(
-      size: Size.infinite,
-      painter: CanvasPanelPainter(
-        layers.list,
-        viewport: viewport,
-        includeTransparentBackground: true,
-        displayScale: displayScale,
-        visibleCanvasBounds: visibleCanvasBounds,
-        onNeedsDisplayCache: layers.scheduleDisplayCacheRebuild,
-        resolveStrokeComposite: layers.strokeComposite.resolve,
-        isInteractiveViewportChange: () => layers.isInteractiveViewportChange,
-        repaint: layers.canvasPainterRepaint,
+    // Its own repaint boundary keeps HUD, eyedropper and marching-ants repaints
+    // from re-recording every layer, while this painter's stable listenable
+    // limits redraws to actual pixel changes.
+    return RepaintBoundary(
+      child: CustomPaint(
+        size: Size.infinite,
+        painter: CanvasPanelPainter(
+          layers.list,
+          viewport: viewport,
+          includeTransparentBackground: true,
+          displayScale: displayScale,
+          visibleCanvasBounds: visibleCanvasBounds,
+          onNeedsDisplayCache: layers.scheduleDisplayCacheRebuild,
+          resolveStrokeComposite: layers.strokeComposite.resolve,
+          isInteractiveViewportChange: () => layers.isInteractiveViewportChange,
+          repaint: layers.canvasPainterRepaint,
+        ),
       ),
     );
   }

@@ -57,7 +57,7 @@ void main() {
       storage: storage,
       restorer: (LayersProvider targetLayers, Uint8List bytes) async {
         restoredBytes = bytes;
-        targetLayers.addBottom('Recovered Layer');
+        targetLayers.insertAt(targetLayers.length, 'Recovered Layer');
       },
       saveDebounce: Duration.zero,
     );
@@ -92,7 +92,7 @@ void main() {
       storage: storage,
       restorer: (LayersProvider targetLayers, Uint8List bytes) async {
         restoredBytes = bytes;
-        targetLayers.addBottom('Recovered Automatically');
+        targetLayers.insertAt(targetLayers.length, 'Recovered Automatically');
       },
       saveDebounce: Duration.zero,
     );
@@ -253,7 +253,7 @@ void main() {
       storage: storage,
       encoder: (LayersProvider _) async => <int>[7, 8, 9],
       restorer: (LayersProvider targetLayers, Uint8List bytes) async {
-        targetLayers.addBottom('Restored');
+        targetLayers.insertAt(targetLayers.length, 'Restored');
       },
       saveDebounce: Duration.zero,
     );
@@ -269,6 +269,41 @@ void main() {
     await tester.pump();
 
     expect(storage.bytes, isNull);
+    controller.dispose();
+  });
+
+  testWidgets('continuous edits still autosave once the max wait elapses', (WidgetTester tester) async {
+    const Duration debounce = Duration(seconds: 2);
+    const Duration maxWait = Duration(seconds: 5);
+    const Duration editInterval = Duration(seconds: 1);
+    const int editsBeforeMaxWait = 4;
+    final AppPreferences preferences = await createRecoveryTestPreferences();
+    final LayersProvider layers = createRecoveryTestLayers();
+    final MemoryDraftRecoveryStorage storage = MemoryDraftRecoveryStorage();
+    final DraftRecoveryController controller = DraftRecoveryController(
+      preferences: preferences,
+      layers: layers,
+      shellProvider: ShellProvider(),
+      storage: storage,
+      encoder: (LayersProvider _) async => <int>[4, 5, 6],
+      saveDebounce: debounce,
+      saveMaxWait: maxWait,
+    );
+
+    await controller.initialize();
+
+    // Each edit lands before the debounce expires, so only the cap can save.
+    for (int i = 0; i < editsBeforeMaxWait; i++) {
+      layers.markAllChanged();
+      await tester.pump(editInterval);
+    }
+    expect(storage.bytes, isNull);
+
+    layers.markAllChanged();
+    await tester.pump(editInterval);
+    await tester.pump();
+
+    expect(storage.bytes, <int>[4, 5, 6]);
     controller.dispose();
   });
 }

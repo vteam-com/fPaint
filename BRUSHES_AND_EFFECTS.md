@@ -46,7 +46,7 @@ Hue · Noise · Pixelate · Shadow · Vignette.
 
 | | Gesture tool | Effect |
 |---|---|---|
-| Backed by | `ActionType` | `SelectionEffect` |
+| Backed by | `ToolKind` | `SelectionEffect` |
 | Tapping it | selects it as the active tool | arms it as a brush (tap again to disarm) |
 | Options shown | that tool's params | brush **size** and **strength** |
 | How it applies | paint / place | paint the stroke |
@@ -242,7 +242,7 @@ change.
    palette.
 
 3. **One capability, one place.** A given effect must not be selectable twice.
-   (Blur is an effect only. The `blurBrush` `ActionType` and its pixel-brush
+   (Blur is an effect only. The `blurBrush` `ToolKind` and its pixel-brush
    engine are kept in code for rendering/export/prefs and a possible fast
    Apply-paint path, but it is **not** in the rail.)
 

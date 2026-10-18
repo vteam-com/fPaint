@@ -26,7 +26,6 @@ void main() {
     final AppProvider app = AppProvider(
       preferences: AppPreferences(),
       layersProvider: layers,
-      undoProvider: undo,
     );
     addTearDown(() {
       app.dispose();

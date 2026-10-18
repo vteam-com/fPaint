@@ -6,16 +6,27 @@ import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/tool_descriptor.dart';
-import 'package:fpaint/models/tool_family.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/tool_rail_port.dart';
 import 'package:fpaint/widgets/app_buttons.dart';
 import 'package:fpaint/widgets/app_divider.dart';
 import 'package:fpaint/widgets/app_slider.dart';
 import 'package:fpaint/widgets/side_panel_header.dart';
 
 /// Brush-size range of a painted effect brush.
-final BrushSizeRange _effectBrushSizeRange = brushSizeRangeFor(ActionType.brush, effectArmed: true);
+final BrushSizeRange _effectBrushSizeRange = ToolKind.brush.brushSizeRange(effectArmed: true);
+
+/// Widget keys existing tests tap; tools without a prior key keep none.
+const Map<ToolKind, Key> _railKeys = <ToolKind, Key>{
+  ToolKind.smudge: Keys.toolSmudge,
+  ToolKind.blurBrush: Keys.toolBlurBrush,
+  ToolKind.line: Keys.toolLine,
+  ToolKind.rectangle: Keys.toolRectangle,
+  ToolKind.circle: Keys.toolCircle,
+  ToolKind.fill: Keys.toolFill,
+  ToolKind.text: Keys.toolText,
+};
 
 /// The tool rail: two sections split by interaction shape.
 ///
@@ -32,6 +43,7 @@ class ToolFamilyRail extends StatelessWidget {
     super.key,
     required this.minimal,
     this.gestureParams,
+    this.port,
   });
 
   /// Parameter controls for the currently selected gesture tool.
@@ -39,20 +51,21 @@ class ToolFamilyRail extends StatelessWidget {
 
   /// Whether the rail is rendered in the compact (minimal) layout.
   final bool minimal;
+
+  /// The tool state the rail reads and changes; defaults to the app provider's
+  /// [AppProvider.toolRail].
+  final ToolRailPort? port;
   @override
   Widget build(BuildContext context) {
-    final AppProvider appProvider = AppProvider.of(context);
+    final ToolRailPort rail = port ?? AppProvider.of(context).toolRail;
 
     return ListenableBuilder(
       // Rebuild on tool change AND on effect arm/disarm + strength changes, so
       // the selection highlight and the options panel always reflect the single
       // active tool.
-      listenable: Listenable.merge(<Listenable>[
-        appProvider.selectedActionRepaintListenable,
-        appProvider.toolOptionsRepaintListenable,
-      ]),
+      listenable: rail.railChanges,
       builder: (BuildContext context, Widget? _) {
-        return _toolSections(context, appProvider);
+        return _toolSections(context, rail);
       },
     );
   }
@@ -61,7 +74,7 @@ class ToolFamilyRail extends StatelessWidget {
   /// is applied by painting it onto the canvas.
   Widget _effectControls(
     AppLocalizations l10n,
-    AppProvider appProvider,
+    ToolRailPort rail,
     SelectionEffect armedEffect,
   ) {
     return Padding(
@@ -72,60 +85,31 @@ class ToolFamilyRail extends StatelessWidget {
           AppSlider(
             key: Keys.effectPaintSizeSlider,
             label: l10n.brushSize,
-            value: appProvider.brushSize,
-            valueLabel: appProvider.brushSize.toStringAsFixed(AppMath.zero),
+            value: rail.brushSize,
+            valueLabel: rail.brushSize.toStringAsFixed(AppMath.zero),
             min: _effectBrushSizeRange.min,
             max: _effectBrushSizeRange.max,
-            onChanged: (double value) => appProvider.brushSize = value,
+            onChanged: (double value) => rail.brushSize = value,
           ),
           AppSlider(
             key: Keys.effectPaintStrengthSlider,
             label: effectLabel(l10n, armedEffect),
-            value: appProvider.effectBrushModel.strength,
-            valueLabel: formatFractionPercent(l10n, appProvider.effectBrushModel.strength),
+            value: rail.effectStrength,
+            valueLabel: formatFractionPercent(l10n, rail.effectStrength),
             min: armedEffect.bipolar ? -AppEffects.maxIntensity : AppEffects.minIntensity,
             max: AppEffects.maxIntensity,
-            onChanged: (double value) => appProvider.setEffectBrushStrength(value),
+            onChanged: (double value) => rail.setEffectStrength(value),
           ),
         ],
       ),
     );
   }
 
-  /// Preserves the widget keys existing tests tap; tools without a prior key
-  /// (pencil, brush, eraser) keep none.
-  static Key? _gestureToolKey(ActionType action) {
-    switch (action) {
-      case ActionType.smudge:
-        return Keys.toolSmudge;
-      case ActionType.blurBrush:
-        return Keys.toolBlurBrush;
-      case ActionType.line:
-        return Keys.toolLine;
-      case ActionType.rectangle:
-        return Keys.toolRectangle;
-      case ActionType.circle:
-        return Keys.toolCircle;
-      case ActionType.fill:
-        return Keys.toolFill;
-      case ActionType.text:
-        return Keys.toolText;
-      case ActionType.pencil:
-      case ActionType.brush:
-      case ActionType.eraser:
-      case ActionType.region:
-      case ActionType.image:
-      case ActionType.cut:
-      case ActionType.selector:
-        return null;
-    }
-  }
-
   /// A single rail button: a gesture tool that sets the active action, or an
   /// effect that arms/disarms itself as a brush.
   Widget _toolButton(
     AppLocalizations l10n,
-    AppProvider appProvider,
+    ToolRailPort rail,
     ToolDescriptor descriptor,
     SelectionEffect? armedEffect,
   ) {
@@ -135,28 +119,27 @@ class ToolFamilyRail extends StatelessWidget {
         key: ValueKey<SelectionEffect>(effect),
         icon: descriptor.icon,
         compact: minimal,
-        isSelected: appProvider.activeTool == descriptor,
+        isSelected: rail.activeTool == descriptor,
         tooltip: descriptor.label(l10n),
-        onPressed: () => armedEffect == effect ? appProvider.disarmEffectBrush() : appProvider.armEffectBrush(effect),
+        onPressed: () => armedEffect == effect ? rail.disarmEffectBrush() : rail.armEffectBrush(effect),
       );
     }
 
-    final ActionType action = descriptor.action!;
     return AppButtonIcon.toolOption(
-      key: _gestureToolKey(action),
+      key: _railKeys[descriptor.tool],
       icon: descriptor.icon,
       compact: minimal,
       // Suppressed while an effect brush is armed — only one tool is active.
-      isSelected: appProvider.activeTool == descriptor,
+      isSelected: rail.activeTool == descriptor,
       tooltip: tooltipWithShortcut(descriptor.label(l10n), descriptor.shortcut),
-      onPressed: () => appProvider.activateTool(descriptor),
+      onPressed: () => rail.activateTool(descriptor),
     );
   }
 
   /// A wrapped grid of tool buttons for one section.
   Widget _toolGrid(
     AppLocalizations l10n,
-    AppProvider appProvider,
+    ToolRailPort rail,
     List<ToolDescriptor> descriptors,
     SelectionEffect? armedEffect,
   ) {
@@ -165,7 +148,7 @@ class ToolFamilyRail extends StatelessWidget {
       runSpacing: minimal ? AppSpacing.thin : AppSpacing.small,
       alignment: WrapAlignment.center,
       children: <Widget>[
-        for (final ToolDescriptor descriptor in descriptors) _toolButton(l10n, appProvider, descriptor, armedEffect),
+        for (final ToolDescriptor descriptor in descriptors) _toolButton(l10n, rail, descriptor, armedEffect),
       ],
     );
   }
@@ -174,10 +157,10 @@ class ToolFamilyRail extends StatelessWidget {
   /// **Elements** (line, rectangle, circle, fill, text). Exactly one tool is
   /// active across both, so its controls (gesture params, or the armed effect's
   /// controls) render beneath whichever section owns it.
-  Widget _toolSections(BuildContext context, AppProvider appProvider) {
+  Widget _toolSections(BuildContext context, ToolRailPort rail) {
     final AppLocalizations l10n = context.l10n;
-    final SelectionEffect? armedEffect = appProvider.effectBrushModel.effect;
-    final ActionType selectedAction = appProvider.selectedAction;
+    final SelectionEffect? armedEffect = rail.armedEffect;
+    final ToolKind selectedTool = rail.selectedTool;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -193,10 +176,10 @@ class ToolFamilyRail extends StatelessWidget {
           // params show here.
           SidePanelHeader(title: l10n.toolSectionBrush, padding: EdgeInsets.zero),
           const SizedBox(height: AppSpacing.small),
-          _toolGrid(l10n, appProvider, brushSectionTools(), armedEffect),
+          _toolGrid(l10n, rail, brushSectionTools(), armedEffect),
           if (armedEffect != null)
-            _effectControls(l10n, appProvider, armedEffect)
-          else if (kBrushToolOrder.contains(selectedAction) && gestureParams != null)
+            _effectControls(l10n, rail, armedEffect)
+          else if (kBrushToolOrder.contains(selectedTool) && gestureParams != null)
             gestureParams!,
           // Divider separating the Brush and Elements sections.
           const SizedBox(height: AppSpacing.medium),
@@ -206,9 +189,8 @@ class ToolFamilyRail extends StatelessWidget {
           // owns these, so params only show for a selected element tool.
           SidePanelHeader(title: l10n.toolSectionElements, padding: EdgeInsets.zero),
           const SizedBox(height: AppSpacing.small),
-          _toolGrid(l10n, appProvider, elementSectionTools(), armedEffect),
-          if (armedEffect == null && kElementToolOrder.contains(selectedAction) && gestureParams != null)
-            gestureParams!,
+          _toolGrid(l10n, rail, elementSectionTools(), armedEffect),
+          if (armedEffect == null && kElementToolOrder.contains(selectedTool) && gestureParams != null) gestureParams!,
         ],
       ),
     );

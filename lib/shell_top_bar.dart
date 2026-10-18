@@ -8,11 +8,12 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_command.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/panels/side_panel/menu.dart';
 import 'package:fpaint/panels/side_panel/recent_files_dialog.dart';
 import 'package:fpaint/panels/side_panel/share_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/canvas_view_commands.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
@@ -366,21 +367,21 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
       interactionProfile: interactionProfile,
       label: l10n.rotateCanvasTooltip,
       icon: AppIcon.rotate90DegreesCw,
-      transform: appProvider.rotateCanvas90,
+      transform: appProvider.viewCommands.rotateCanvas90,
     ),
     _canvasTransformEntry(
       shellProvider: shellProvider,
       interactionProfile: interactionProfile,
       label: l10n.flipHorizontalTooltip,
       icon: AppIcon.flipHorizontal,
-      transform: appProvider.flipCanvasHorizontal,
+      transform: appProvider.viewCommands.flipCanvasHorizontal,
     ),
     _canvasTransformEntry(
       shellProvider: shellProvider,
       interactionProfile: interactionProfile,
       label: l10n.flipVerticalTooltip,
       icon: AppIcon.flipVertical,
-      transform: appProvider.flipCanvasVertical,
+      transform: appProvider.viewCommands.flipCanvasVertical,
     ),
   ];
 }
@@ -535,7 +536,7 @@ Widget _buildHistoryButton({
 Widget _buildZoomButton({
   required Key key,
   required ShellProvider shellProvider,
-  required AppProvider appProvider,
+  required CanvasViewCommands view,
   required InteractionLayoutProfile interactionProfile,
   required AppCommand command,
   required String label,
@@ -549,7 +550,7 @@ Widget _buildZoomButton({
     onPressed: () {
       Future<void>.microtask(() {
         shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-        appProvider.zoomAboutCenter(scaleDelta);
+        view.zoomAboutCenter(scaleDelta);
       });
     },
   );
@@ -574,7 +575,7 @@ Widget _buildCenterAndDimensionButton(
         '${tooltipWithShortcut(ShortcutActions.fitCanvasToView, primaryModifiedShortcut(ShortcutKeys.zero))!}\n$zoomAndSizeDetails',
     onPressed: () {
       Future<void>.microtask(() {
-        shellProvider.requestCanvasFitAndRepaint(appProvider.repaintViewport);
+        shellProvider.requestCanvasFitAndRepaint(appProvider.viewCommands.repaintViewport);
       });
     },
     child: Center(

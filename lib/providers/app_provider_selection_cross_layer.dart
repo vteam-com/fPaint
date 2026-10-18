@@ -1,20 +1,5 @@
 part of 'app_provider.dart';
 
-/// One layer's lifted selection content during an "All layers" transform
-/// session: the pixels clipped from [layer], sized to the selection bounds.
-class CrossLayerLiftEntry {
-  CrossLayerLiftEntry({
-    required this.layer,
-    required this.image,
-  });
-
-  /// The layer the lifted content came from and commits back onto.
-  final LayerProvider layer;
-
-  /// The layer's pixels clipped to the selection, selection-bounds sized.
-  final ui.Image image;
-}
-
 /// Cross-layer ("All layers") selection scope: the wand samples the merged
 /// composite, and transform/cut/copy act on every visible, unlocked layer
 /// instead of only the selected one — each layer keeps its own content, so
@@ -152,7 +137,7 @@ extension AppProviderSelectionCrossLayer on AppProvider {
     );
 
     transformSession.crossLayerLift = lift;
-    _startTransformSession(image: preview, bounds: bounds);
+    transformController.startSession(image: preview, bounds: bounds);
   }
 
   /// Commits an all-layers transform: warps each layer's lifted content, then

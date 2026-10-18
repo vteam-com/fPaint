@@ -1,4 +1,7 @@
-part of 'app_provider.dart';
+import 'package:fpaint/models/image_placement_layer_restore_state.dart';
+import 'package:fpaint/models/image_placement_model.dart';
+import 'package:fpaint/models/transform_model.dart';
+import 'package:fpaint/providers/cross_layer_lift_entry.dart';
 
 /// Which flavor of floating session the active transform overlay belongs to,
 /// in commit-precedence order. Resolved by [TransformSession.kind]; only
@@ -22,7 +25,7 @@ enum TransformSessionKind {
 /// transform overlay, the prepared image placement (duplicate, paste, layer
 /// modify), and the per-layer cross-layer lift.
 ///
-/// Follows the [WandSelectionManager] pattern: one class holds the session's
+/// Follows the `WandSelectionManager` pattern: one class holds the session's
 /// models and answers "which kind of session is this", so confirm/cancel
 /// dispatch is an exhaustive switch on [kind] instead of if-chains over three
 /// separate fields scattered across the app-wide provider.

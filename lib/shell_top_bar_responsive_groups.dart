@@ -54,8 +54,7 @@ List<_ToolbarActionGroup> _buildToolbarActionGroups({
   required _SelectionGroupLayout selectionLayout,
 }) {
   final AppLocalizations l10n = context.l10n;
-  final bool hasActiveSelection =
-      appProvider.selectedAction == ActionType.selector || appProvider.selectorModel.isVisible;
+  final bool hasActiveSelection = appProvider.selectedTool == ToolKind.selector || appProvider.selectorModel.isVisible;
   final bool canUndo = appProvider.undoProvider.canUndo;
   final bool canRedo = appProvider.undoProvider.canRedo;
   final bool showSelectionSubToolbar = shouldShowSelectionSubToolbar(appProvider);
@@ -140,7 +139,7 @@ List<_ToolbarActionGroup> _buildToolbarActionGroups({
           _buildZoomButton(
             key: Keys.floatActionZoomOut,
             shellProvider: shellProvider,
-            appProvider: appProvider,
+            view: appProvider.viewCommands,
             interactionProfile: interactionProfile,
             command: AppCommand.zoomOut,
             label: ShortcutActions.zoomOut,
@@ -165,7 +164,7 @@ List<_ToolbarActionGroup> _buildToolbarActionGroups({
               interactionProfile: interactionProfile,
               onPressed: () {
                 shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-                appProvider.resetCanvasRotation();
+                appProvider.viewCommands.resetCanvasRotation();
               },
             ),
             interactionProfile,
@@ -175,7 +174,7 @@ List<_ToolbarActionGroup> _buildToolbarActionGroups({
           _buildZoomButton(
             key: Keys.floatActionZoomIn,
             shellProvider: shellProvider,
-            appProvider: appProvider,
+            view: appProvider.viewCommands,
             interactionProfile: interactionProfile,
             command: AppCommand.zoomIn,
             label: ShortcutActions.zoomIn,

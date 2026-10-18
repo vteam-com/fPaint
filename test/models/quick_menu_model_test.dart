@@ -4,7 +4,7 @@ import 'package:fpaint/models/quick_menu_model.dart';
 import 'package:fpaint/models/quick_menu_slot.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/tool_descriptor.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/models/tool_kind.dart';
 
 const Offset _anchor = Offset(120, 80);
 
@@ -66,7 +66,7 @@ void main() {
   });
 
   test('recording promotes a tool to the front without duplicating it', () {
-    const ToolDescriptor eraser = ToolDescriptor.gesture(ActionType.eraser);
+    const ToolDescriptor eraser = ToolDescriptor.gesture(ToolKind.eraser);
 
     model.recordTool(eraser);
 

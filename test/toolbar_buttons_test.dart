@@ -6,7 +6,7 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
@@ -275,7 +275,7 @@ void main() {
     testWidgets('shows selector key inside selector tooltip when selector is inactive', (
       WidgetTester tester,
     ) async {
-      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectedTool = ToolKind.brush;
       appProvider.selectorModel.isVisible = false;
 
       await pumpShellTopBar(
@@ -380,7 +380,7 @@ void main() {
 
     testWidgets('selector button enables selector mode on tap', (WidgetTester tester) async {
       shellProvider.deviceSizeSmall = false;
-      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectedTool = ToolKind.brush;
 
       await tester.pumpWidget(
         shellTopBarApp(width: _wideToolbarWidth),
@@ -390,7 +390,7 @@ void main() {
       await tester.tap(find.byKey(Keys.floatActionSelector));
       await tester.pump();
 
-      expect(appProvider.selectedAction, ActionType.selector);
+      expect(appProvider.selectedTool, ToolKind.selector);
     });
 
     testWidgets('selector cancel tap restores previous tool when selector is active without marquee', (
@@ -398,7 +398,7 @@ void main() {
     ) async {
       useRoomyTestView(tester);
       shellProvider.deviceSizeSmall = false;
-      appProvider.selectedAction = ActionType.pencil;
+      appProvider.selectedTool = ToolKind.pencil;
 
       await tester.pumpWidget(
         shellTopBarApp(width: _roomyToolbarWidth),
@@ -407,13 +407,13 @@ void main() {
 
       await tester.tap(find.byKey(Keys.floatActionSelector));
       await tester.pump();
-      expect(appProvider.selectedAction, ActionType.selector);
+      expect(appProvider.selectedTool, ToolKind.selector);
       expect(appProvider.selectorModel.isVisible, isFalse);
 
       await tester.tap(find.byKey(Keys.floatActionSelector));
       await tester.pump();
 
-      expect(appProvider.selectedAction, ActionType.pencil);
+      expect(appProvider.selectedTool, ToolKind.pencil);
       expect(appProvider.selectorModel.isVisible, isFalse);
     });
 
@@ -422,7 +422,7 @@ void main() {
     ) async {
       useRoomyTestView(tester);
       shellProvider.deviceSizeSmall = false;
-      appProvider.selectedAction = ActionType.pencil;
+      appProvider.selectedTool = ToolKind.pencil;
       appProvider.selectorModel.isVisible = true;
 
       await tester.pumpWidget(
@@ -433,7 +433,7 @@ void main() {
       await tester.tap(find.byKey(Keys.floatActionSelector));
       await tester.pump();
 
-      expect(appProvider.selectedAction, ActionType.pencil);
+      expect(appProvider.selectedTool, ToolKind.pencil);
       expect(appProvider.selectorModel.isVisible, isFalse);
     });
 
@@ -625,7 +625,7 @@ void main() {
     ) async {
       useRoomyTestView(tester);
       shellProvider.deviceSizeSmall = true;
-      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectedTool = ToolKind.brush;
 
       await tester.pumpWidget(
         shellTopBarApp(width: _roomyToolbarWidth),
@@ -634,9 +634,9 @@ void main() {
 
       await tester.tap(find.byKey(Keys.floatActionSelector));
       await tester.pump();
-      expect(appProvider.selectedAction, ActionType.selector);
+      expect(appProvider.selectedTool, ToolKind.selector);
 
-      appProvider.selectedAction = ActionType.pencil;
+      appProvider.selectedTool = ToolKind.pencil;
       appProvider.selectorModel.isVisible = true;
       await tester.pumpWidget(
         shellTopBarApp(width: _roomyToolbarWidth),
@@ -645,7 +645,7 @@ void main() {
 
       await tester.tap(find.byKey(Keys.floatActionSelector));
       await tester.pump();
-      expect(appProvider.selectedAction, ActionType.pencil);
+      expect(appProvider.selectedTool, ToolKind.pencil);
       expect(appProvider.selectorModel.isVisible, isFalse);
     });
 
@@ -817,7 +817,7 @@ void main() {
     testWidgets('keeps the visible selection domain horizontally scrollable without overflowing', (
       WidgetTester tester,
     ) async {
-      appProvider.selectedAction = ActionType.selector;
+      appProvider.selectedTool = ToolKind.selector;
       appProvider.selectorModel.isVisible = true;
 
       await pumpShellTopBar(

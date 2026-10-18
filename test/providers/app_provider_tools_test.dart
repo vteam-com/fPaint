@@ -8,6 +8,7 @@ import 'package:fpaint/helpers/shortcut_tooltip.dart';
 import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selector_model.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -194,7 +195,7 @@ void main() {
     });
 
     test('adjusts the brush for a sized paint tool', () {
-      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectedTool = ToolKind.brush;
       appProvider.brushSize = 20;
 
       final double? grown = appProvider.stepBrushSize(increase: true);
@@ -204,7 +205,7 @@ void main() {
     });
 
     test('is a no-op for tools without a brush size', () {
-      appProvider.selectedAction = ActionType.fill;
+      appProvider.selectedTool = ToolKind.fill;
       final double before = appProvider.brushSize;
 
       expect(appProvider.canAdjustBrushSize, isFalse);
@@ -213,13 +214,13 @@ void main() {
     });
 
     test('leaves the text tool alone, which sizes its font separately', () {
-      appProvider.selectedAction = ActionType.text;
+      appProvider.selectedTool = ToolKind.text;
       expect(appProvider.canAdjustBrushSize, isFalse);
       expect(appProvider.stepBrushSize(increase: false), isNull);
     });
 
     test('the slider fraction writes through within the tool range', () {
-      appProvider.selectedAction = ActionType.smudge;
+      appProvider.selectedTool = ToolKind.smudge;
 
       expect(appProvider.applyBrushSizeSliderFraction(1), closeTo(AppLimits.pixelBrushSizeMax.toDouble(), 1e-9));
       expect(appProvider.brushSizeSliderFraction, closeTo(1, 1e-9));
@@ -238,7 +239,7 @@ void main() {
     });
 
     test('writes the dragged size through to the brush', () {
-      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectedTool = ToolKind.brush;
       final double applied = appProvider.applyBrushSizeDrag(startSize: 20, screenDx: 40);
 
       expect(applied, 20 + 40 / AppInteraction.brushSizeDragPixelsPerUnit);
@@ -246,7 +247,7 @@ void main() {
     });
 
     test('offers the wider pixel-brush range for smudge', () {
-      appProvider.selectedAction = ActionType.smudge;
+      appProvider.selectedTool = ToolKind.smudge;
       expect(appProvider.activeBrushSizeMax, AppLimits.pixelBrushSizeMax.toDouble());
 
       final double applied = appProvider.applyBrushSizeDrag(startSize: 100, screenDx: 100000);
@@ -254,7 +255,7 @@ void main() {
     });
 
     test('holds paint tools to the narrower slider range', () {
-      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectedTool = ToolKind.brush;
       expect(appProvider.activeBrushSizeMax, AppLimits.percentMax.toDouble());
 
       final double applied = appProvider.applyBrushSizeDrag(startSize: 50, screenDx: 100000);
@@ -262,7 +263,7 @@ void main() {
     });
 
     test('never drags the size to zero or negative', () {
-      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectedTool = ToolKind.brush;
       final double applied = appProvider.applyBrushSizeDrag(startSize: 5, screenDx: -100000);
 
       expect(applied, greaterThan(0));
@@ -270,7 +271,7 @@ void main() {
     });
 
     test('is absolute from the anchor, so a drag out and back restores the size', () {
-      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectedTool = ToolKind.brush;
       const double start = 30;
 
       appProvider.applyBrushSizeDrag(startSize: start, screenDx: 120);
@@ -293,7 +294,7 @@ void main() {
     });
 
     test('writes the wheel size through to the brush', () {
-      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectedTool = ToolKind.brush;
       // Scrolling up grows the brush.
       final double applied = appProvider.applyBrushSizeWheelScroll(startSize: 20, scrollDy: -120);
 
@@ -302,7 +303,7 @@ void main() {
     });
 
     test('offers the wider pixel-brush range for smudge', () {
-      appProvider.selectedAction = ActionType.smudge;
+      appProvider.selectedTool = ToolKind.smudge;
       expect(appProvider.activeBrushSizeMax, AppLimits.pixelBrushSizeMax.toDouble());
 
       final double applied = appProvider.applyBrushSizeWheelScroll(startSize: 100, scrollDy: -100000);
@@ -310,7 +311,7 @@ void main() {
     });
 
     test('never scrolls the size to zero or negative', () {
-      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectedTool = ToolKind.brush;
       final double applied = appProvider.applyBrushSizeWheelScroll(startSize: 5, scrollDy: 100000);
 
       expect(applied, greaterThan(0));
@@ -459,10 +460,10 @@ void main() {
     test('switching tools disarms the puck', () {
       final AppProvider appProvider = AppProvider(preferences: AppPreferences());
       addTearDown(appProvider.dispose);
-      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectedTool = ToolKind.brush;
       appProvider.armLayerPicker(position: const ui.Offset(12, 34));
 
-      appProvider.selectedAction = ActionType.fill;
+      appProvider.selectedTool = ToolKind.fill;
 
       expect(appProvider.layerPickerPosition, isNull);
     });
@@ -519,7 +520,7 @@ void main() {
   group('shouldCreateSelectionFromFloodFillTap', () {
     test('returns true for selector wand when no selection is active', () {
       final bool result = shouldCreateSelectionFromFloodFillTap(
-        selectedAction: ActionType.selector,
+        selectedTool: ToolKind.selector,
         selectorMode: SelectorMode.wand,
         isSelectionVisible: false,
         selectionPath: null,
@@ -530,7 +531,7 @@ void main() {
 
     test('returns true for selector wand when selection visibility is stale but path is missing', () {
       final bool result = shouldCreateSelectionFromFloodFillTap(
-        selectedAction: ActionType.selector,
+        selectedTool: ToolKind.selector,
         selectorMode: SelectorMode.wand,
         isSelectionVisible: true,
         selectionPath: null,
@@ -543,7 +544,7 @@ void main() {
       final ui.Path selectionPath = ui.Path()..addRect(_selectionRect);
 
       final bool result = shouldCreateSelectionFromFloodFillTap(
-        selectedAction: ActionType.selector,
+        selectedTool: ToolKind.selector,
         selectorMode: SelectorMode.wand,
         isSelectionVisible: true,
         selectionPath: selectionPath,
@@ -554,7 +555,7 @@ void main() {
 
     test('returns false for the fill tool when no selection is active', () {
       final bool result = shouldCreateSelectionFromFloodFillTap(
-        selectedAction: ActionType.fill,
+        selectedTool: ToolKind.fill,
         selectorMode: SelectorMode.wand,
         isSelectionVisible: false,
         selectionPath: null,
@@ -576,7 +577,7 @@ void main() {
     });
 
     test('does nothing when the fill tool has no active selection', () async {
-      appProvider.selectedAction = ActionType.fill;
+      appProvider.selectedTool = ToolKind.fill;
       final int originalActionCount = appProvider.layers.selectedLayer.actionStack.length;
 
       final bool result = await appProvider.prepareFloodFillSelection(const ui.Offset(10, 10));
@@ -598,7 +599,7 @@ void main() {
     });
 
     test('creates a selection for the selector wand when none is active', () async {
-      appProvider.selectedAction = ActionType.selector;
+      appProvider.selectedTool = ToolKind.selector;
       appProvider.selectorModel.mode = SelectorMode.wand;
 
       final bool result = await appProvider.prepareFloodFillSelection(const ui.Offset(10, 10));
@@ -616,7 +617,7 @@ void main() {
     });
 
     test('does nothing for the fill tool while linear fill mode is active', () async {
-      appProvider.selectedAction = ActionType.fill;
+      appProvider.selectedTool = ToolKind.fill;
       appProvider.fillModel.mode = FillMode.linear;
 
       final bool result = await appProvider.prepareFloodFillSelection(const ui.Offset(10, 10));
@@ -628,7 +629,7 @@ void main() {
     });
 
     test('does nothing for the fill tool while radial fill mode is active', () async {
-      appProvider.selectedAction = ActionType.fill;
+      appProvider.selectedTool = ToolKind.fill;
       appProvider.fillModel.mode = FillMode.radial;
 
       final bool result = await appProvider.prepareFloodFillSelection(const ui.Offset(10, 10));
@@ -649,7 +650,7 @@ void main() {
       await preferences.getPref();
       appProvider = AppProvider(preferences: preferences);
       appProvider.undoProvider.clear();
-      appProvider.selectedAction = ActionType.selector;
+      appProvider.selectedTool = ToolKind.selector;
       appProvider.selectorModel.mode = SelectorMode.wand;
     });
 
@@ -741,7 +742,7 @@ void main() {
 
     // Seeds a linear gradient session as the first canvas tap would.
     void startLinearSession() {
-      appProvider.selectedAction = ActionType.fill;
+      appProvider.selectedTool = ToolKind.fill;
       appProvider.fillModel.mode = FillMode.linear;
       appProvider.fillModel.addPoint(
         GradientPoint(offset: const ui.Offset(10, 10), color: const ui.Color(0xFFFF0000)),
@@ -798,7 +799,7 @@ void main() {
       await settlePreview();
 
       // Switching tools routes through applyGradientPreview (implicit Apply).
-      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectedTool = ToolKind.brush;
 
       expect(appProvider.fillModel.isVisible, isFalse);
       expect(appProvider.fillPreviewAction, isNull);
@@ -858,7 +859,7 @@ void main() {
       await preferences.getPref();
       appProvider = AppProvider(preferences: preferences);
       appProvider.undoProvider.clear();
-      appProvider.selectedAction = ActionType.fill; // solid is the default mode
+      appProvider.selectedTool = ToolKind.fill; // solid is the default mode
     });
 
     Future<void> settlePreview() async {
@@ -903,7 +904,7 @@ void main() {
     });
 
     test('extends a pencil stroke without creating another undo action', () {
-      appProvider.selectedAction = ActionType.pencil;
+      appProvider.selectedTool = ToolKind.pencil;
       appProvider.recordExecuteDrawingActionToSelectedLayer(
         action: StrokeAction(
           action: ActionType.pencil,
@@ -933,7 +934,7 @@ void main() {
     });
 
     test('extends an eraser stroke without creating another undo action', () {
-      appProvider.selectedAction = ActionType.eraser;
+      appProvider.selectedTool = ToolKind.eraser;
       appProvider.recordExecuteDrawingActionToSelectedLayer(
         action: StrokeAction(
           action: ActionType.eraser,

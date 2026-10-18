@@ -115,7 +115,6 @@ extension LayerProviderStorageExport on LayerProvider {
         return userAction.textObject?.getBounds();
 
       case ActionType.fill:
-      case ActionType.selector:
         return null;
     }
   }

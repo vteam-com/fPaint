@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/decoded_layer_document.dart';
+import 'package:fpaint/files/decoded_layer_pixels.dart';
 import 'package:fpaint/files/decoded_raster_layer.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
 import 'package:fpaint/files/package_image_bridge.dart';
@@ -19,8 +20,6 @@ part 'file_tiff_encoder.dart';
 
 const String _errorNoLayersToExportAsTiff = 'No layers to export as TIFF.';
 const String _errorCompositeRasterizationFailed = 'Failed to rasterize layered TIFF composite.';
-const String _errorTiffFileNotFoundPrefix = 'TIFF file not found:';
-const String _errorTiffReadFilePrefix = 'Failed to read TIFF file:';
 const String _errorInvalidTiffData = 'Invalid TIFF data or unable to read TIFF info.';
 const String _errorNoTiffFrames = 'TIFF file contained no image frames.';
 const String _errorNoDecodedTiffLayers = 'No layers could be decoded from TIFF file.';
@@ -595,7 +594,7 @@ class _LayerMeta {
   /// Pairs this metadata with the decoded [image] placed at [offset].
   DecodedRasterLayer toDecodedLayer(img.Image image, Offset offset) {
     return DecodedRasterLayer(
-      image: image,
+      pixels: PackageImagePixels(image),
       name: name,
       offset: offset,
       opacity: opacity,
@@ -673,18 +672,4 @@ _LayerMeta? _tryParseJsonMeta(String description, int frameIndex) {
   } on FormatException {
     return null;
   }
-}
-
-/// Loads a TIFF file from disk and decodes it into [layers].
-Future<void> readTiffFromFilePath(
-  LayersProvider layers,
-  String path,
-) {
-  return readLayeredFileFromPath<TiffFileException>(
-    path: path,
-    readBytes: (Uint8List bytes) => readTiffFileFromBytes(layers, bytes),
-    fileNotFoundPrefix: _errorTiffFileNotFoundPrefix,
-    readFailedPrefix: _errorTiffReadFilePrefix,
-    exceptionBuilder: TiffFileException.new,
-  );
 }

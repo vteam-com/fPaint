@@ -47,38 +47,44 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     }
 
     if (!guardSelectedLayerUnlocked(context, appProvider)) {
-      _activePointerId = -1;
+      _releaseActivePointer();
       return false;
     }
 
     return true;
   }
 
-  /// Whether a stroke of [action] erases every visible, unlocked layer: the
-  /// eraser (or the pen's eraser end, [isForced]) under the sticky "All
-  /// layers" scope. An armed effect brush still wins over a non-forced stroke.
+  /// Whether an eraser stroke ([isEraser]) erases every visible, unlocked
+  /// layer: the eraser (or the pen's eraser end, [isForced]) under the sticky
+  /// "All layers" scope. An armed effect brush still wins over a non-forced
+  /// stroke.
   bool _isCrossLayerEraserStroke(
-    AppProvider appProvider,
-    ActionType action, {
+    AppProvider appProvider, {
+    required bool isEraser,
     bool isForced = false,
   }) {
-    return action == ActionType.eraser &&
-        (isForced || !appProvider.effectBrushModel.isArmed) &&
-        appProvider.isCrossLayerEraserScope;
+    return isEraser && (isForced || !appProvider.effectBrushModel.isArmed) && appProvider.isCrossLayerEraserScope;
   }
 
-  /// Returns whether a stroke of [action] may start. A cross-layer erase only
-  /// needs some visible, unlocked layer; when none exists the selected layer
-  /// is hidden or locked too, so its message explains why nothing happens.
+  /// Returns whether a stroke may start. A cross-layer erase only needs some
+  /// visible, unlocked layer; when none exists the selected layer is hidden or
+  /// locked too, so its message explains why nothing happens.
   bool _canStartDrawing(
-    AppProvider appProvider,
-    ActionType action, {
+    AppProvider appProvider, {
+    required bool isEraser,
     bool isForced = false,
   }) {
-    if (_isCrossLayerEraserStroke(appProvider, action, isForced: isForced) && appProvider.hasCrossLayerEditTargets) {
+    if (_isCrossLayerEraserStroke(appProvider, isEraser: isEraser, isForced: isForced) &&
+        appProvider.hasCrossLayerEditTargets) {
       return true;
     }
     return _canStartDrawingOnSelectedLayer(appProvider);
+  }
+
+  /// Releases the active pointer and forgets the gesture it started.
+  void _releaseActivePointer() {
+    _activePointerId = -1;
+    _activeGesture = null;
   }
 
   void _clearSelectionTapTracking() {
@@ -158,7 +164,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   /// selection) just like any other brush, so it takes precedence over the
   /// selector tool instead of starting a new marquee.
   bool _isSelectionGesture(AppProvider appProvider) =>
-      appProvider.selectedAction == ActionType.selector &&
+      appProvider.selectedTool == ToolKind.selector &&
       !appProvider.transformModel.isVisible &&
       !appProvider.effectBrushModel.isArmed;
 
@@ -182,7 +188,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     appProvider.endTolerancePointerLock();
     _clearToleranceDragAnchor();
     appProvider.cancelPixelBrushStroke();
-    _activePointerId = -1;
+    _releaseActivePointer();
   }
 
   /// Finalizes an active pointer interaction and clears temporary drawing state.
@@ -201,71 +207,52 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       return;
     }
 
+    final _ToolGesture? gesture = _activePointerId == event.pointer ? _activeGesture : null;
     appProvider.layers.selectedLayer.isUserDrawing = false;
-    // A pen lifting off a fading press ends its Brush stroke in a 1 px tip.
-    // Only a real lift (not a cancel) and only the stroke this pointer drew.
-    if (event is PointerUpEvent &&
-        _activePointerId == event.pointer &&
-        appProvider.selectedAction == ActionType.brush &&
-        !appProvider.effectBrushModel.isArmed) {
-      appProvider.layers.selectedLayer.taperLastPressureStrokeTip();
+    if (event is PointerUpEvent) {
+      gesture?.lift(appProvider);
     }
-    // Pair with beginStrokePreview: release the frozen baseline (no-op for tools
-    // that never captured one, e.g. smudge/blur, which use the live preview).
-    appProvider.layers.selectedLayer.clearStrokePreview();
+    // Pair with beginStrokePreview: fold the finished stroke into the display
+    // projection, or release the frozen baseline (no-op for tools that never
+    // captured one, e.g. smudge/blur, which use the live preview).
+    appProvider.layers.selectedLayer.finishStrokePreview();
     appProvider.endCrossLayerEraserStroke();
-    final bool isSelectionActive = _isSelectionGesture(appProvider);
 
     if (_activePointerId == event.pointer) {
       // Single-shot: the pick commits on release and the puck disarms, so the
       // next stroke paints instead of re-picking.
       if (appProvider.layerPickerPosition != null) {
-        _activePointerId = -1;
+        _releaseActivePointer();
         appProvider.disarmLayerPicker();
         unawaited(_pickLayerOwningPixel(appProvider, appProvider.toCanvas(event.localPosition)));
         return;
       }
 
       if (_handleEyeDropperPointerEnd(appProvider, event.localPosition)) {
-        _activePointerId = -1;
+        _releaseActivePointer();
         appProvider.update();
         return;
       }
 
-      if (isSelectionActive) {
-        appProvider.selectorCreationEnd();
-        _restoreSelectionMath(appProvider);
-        if (appProvider.selectorModel.mode != SelectorMode.line || !appProvider.selectorModel.isDrawing) {
-          _clearSelectionTapTracking();
-        }
-      } else if (appProvider.pixelBrushSession.isStrokeActive) {
-        appProvider.extendPixelBrushStroke(appProvider.toCanvas(event.localPosition));
-        // Marquee stays visible across the (async) one-shot render, switching to
-        // a processing shimmer while the commit generates the image, then is
-        // cleared once the committed stroke is on the layer.
-        appProvider.setPixelBrushCommitting(committing: true);
-        await appProvider.commitPixelBrushGesture();
-        appProvider.clearPixelBrushGesture();
-        _clearSelectionTapTracking();
-      } else if (appProvider.selectedAction == ActionType.fill &&
-          _toleranceDragAnchorScreen != null &&
-          appProvider.fillModel.mode == FillMode.solid) {
-        // Solid fill commits on release; gradient fill leaves its handle session
-        // open (finalized later via Apply/Cancel) and just falls through.
-        _commitSolidFillDrag(appProvider);
-        _clearSelectionTapTracking();
-      } else {
+      // Awaited only when the gesture truly waits, so a synchronous release
+      // finishes before a still-awaiting start of the same quick tap resumes.
+      final FutureOr<void> ended = gesture?.end(this, appProvider, event);
+      if (ended is Future<void>) {
+        await ended;
+      }
+      if (gesture == null) {
         _clearSelectionTapTracking();
       }
       _resetTransientPointerState(appProvider);
-      appProvider.layers.selectedLayer.clearCache();
+      if (gesture?.maintainsLayerCaches != true) {
+        appProvider.layers.selectedLayer.clearCache();
+      }
       if (!mounted) {
         return;
       }
-      final DraftRecoveryController? controller = InheritedScope.maybeOf<DraftRecoveryController>(context);
-      if (controller != null) {
-        unawaited(controller.flushNow());
-      }
+      // No recovery flush here: a draft re-encodes every layer (seconds on a
+      // large canvas), so it is left to the controller's debounce/max-wait and
+      // to the app-lifecycle flush rather than run on every pen-up.
       appProvider.update();
     }
   }
@@ -314,77 +301,15 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     }
 
     if ((event.buttons & kPrimaryButton) != 0 && _activePointerId == event.pointer) {
-      // An "All layers" erase (eraser tool or pen eraser end) grows one stroke
-      // shared by every target layer, whichever tool dispatch follows.
-      if (appProvider.crossLayerEraser.isActive) {
-        _updateDrawingToolPreview(appProvider, event.localPosition);
-        appProvider.extendCrossLayerEraserStroke(adjustedPosition);
-        return;
-      }
-
-      // The Surface pen eraser (invertedStylus) extends its erase stroke here
-      // regardless of the selected tool. It must not fall through into the
-      // selection / fill / pixel-brush / armed-effect dispatch below.
-      if (event.kind == PointerDeviceKind.invertedStylus) {
-        _updateDrawingToolPreview(appProvider, event.localPosition);
-        _appendPenEraserStrokeLine(appProvider, adjustedPosition);
-        return;
-      }
-
-      if (isSelectionActive) {
-        if (appProvider.selectorModel.mode == SelectorMode.wand) {
-          _updateWandToleranceFromDrag(appProvider, event.localPosition);
-        } else {
-          // The size ring rides along a selection-brush stroke like any brush.
-          if (appProvider.isSelectionBrushActive) {
-            _updateDrawingToolPreview(appProvider, event.localPosition);
-          }
-          appProvider.selectorCreationAdditionalPoint(adjustedPosition);
-        }
-        return;
-      }
-
-      if (appProvider.pixelBrushSession.isStrokeActive) {
-        // No live rasterization: just extend the gesture and redraw the swept-
-        // band marquee. The smudge/blur is rendered once on pointer-up, so the
-        // drag stays responsive at any canvas size and the marquee is the sole
-        // feedback (its round-capped band already shows the affected footprint).
-        appProvider.extendPixelBrushStroke(adjustedPosition);
-        return;
-      }
-
-      _updateDrawingToolPreview(appProvider, event.localPosition);
-
-      if (appProvider.selectedAction == ActionType.fill) {
-        // Solid fill: drag horizontally to adjust the tolerance and re-preview
-        // the filled region live (gradient fill has no tolerance drag anchor).
-        if (_toleranceDragAnchorScreen != null) {
-          _updateFillToleranceFromDrag(appProvider, event.localPosition);
-        }
-        return;
-      }
-
-      if (appProvider.selectedAction == ActionType.pencil) {
-        appProvider.appendLineFromLastUserAction(adjustedPosition);
-      } else if (appProvider.selectedAction == ActionType.eraser) {
-        appProvider.appendLineFromLastUserAction(adjustedPosition);
-      } else if (appProvider.selectedAction == ActionType.brush) {
-        appProvider.layers.selectedLayer.lastActionAppendPosition(
-          position: adjustedPosition,
-          pressure: brushPointerPressure(event, trackpadPressureEnabled: _trackpadPressureEnabled),
-        );
-        appProvider.layers.repaintCanvas();
-      } else {
-        appProvider.updateAction(end: adjustedPosition);
-        appProvider.layers.repaintCanvas();
-      }
+      _activeGesture?.move(this, appProvider, event, adjustedPosition);
     }
   }
 
   /// Starts pointer interactions including drawing, selection, fill, and text placement.
   ///
-  /// Acts as a dispatcher: each tool's behaviour lives in a focused handler so this
-  /// method only decides which one applies for the current pointer-down.
+  /// Claims the cross-cutting gestures first (resize chord, pen eraser, layer
+  /// picker, eyedropper); anything else starts the selected tool's
+  /// [_ToolGesture], which then owns this pointer's moves and release.
   void _handlePointerStart(
     AppProvider appProvider,
     PointerDownEvent event,
@@ -422,11 +347,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     // the persisted selected action (which would disturb the armed effect,
     // eyedropper, and wand-selection state).
     if (isPenEraser) {
-      _activePointerId = event.pointer;
-      _updateDrawingToolPreview(appProvider, event.localPosition);
-      if (_canStartDrawing(appProvider, ActionType.eraser, isForced: true)) {
-        _startDrawingPointer(appProvider, adjustedPosition, forcedAction: ActionType.eraser);
-      }
+      await _startGesture(const _PenEraserGesture(), appProvider, event, adjustedPosition);
       return;
     }
 
@@ -453,37 +374,19 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       return;
     }
 
+    await _startGesture(_gestureFor(appProvider), appProvider, event, adjustedPosition);
+  }
+
+  /// Makes [gesture] the active pointer's gesture and starts it.
+  FutureOr<void> _startGesture(
+    _ToolGesture gesture,
+    AppProvider appProvider,
+    PointerDownEvent event,
+    ui.Offset adjustedPosition,
+  ) {
     _activePointerId = event.pointer;
-
-    final bool isSelectionActive = _isSelectionGesture(appProvider);
-    if (isSelectionActive) {
-      _handleSelectionPointerStart(appProvider, event, adjustedPosition);
-      return;
-    }
-
-    _updateDrawingToolPreview(appProvider, event.localPosition);
-
-    if (!_canStartDrawing(appProvider, appProvider.selectedAction)) {
-      return;
-    }
-
-    if (appProvider.selectedAction == ActionType.text) {
-      _handleTextPointerStart(appProvider, adjustedPosition);
-      return;
-    }
-
-    if (appProvider.selectedAction == ActionType.fill) {
-      await _handleFillPointerStart(appProvider, event.localPosition, adjustedPosition, pointer: event.pointer);
-      return;
-    }
-
-    final bool trackpadPressureEnabled = _trackpadPressureEnabled;
-    _startDrawingPointer(
-      appProvider,
-      adjustedPosition,
-      pressure: brushPointerPressure(event, trackpadPressureEnabled: trackpadPressureEnabled),
-      awaitsPressure: usesTrackpadPressure(event, enabled: trackpadPressureEnabled),
-    );
+    _activeGesture = gesture;
+    return gesture.start(this, appProvider, event, adjustedPosition);
   }
 
   /// Begins a selection at [adjustedPosition], applying modifier math and
@@ -539,14 +442,15 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       }
     }
 
+    // A modal may consume the matching pointer-up, so the pointer is released
+    // now rather than on release.
+    _releaseActivePointer();
     if (selectedText != null) {
-      _activePointerId = -1;
       appProvider.adoptTextToolStateFromObject(selectedText);
       appProvider.selectedTextObject = selectedText;
       return;
     }
 
-    _activePointerId = -1;
     _showTextDialog(appProvider, adjustedPosition);
   }
 
@@ -650,7 +554,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     // is this?" and "what color is this?".
     final Color? color = pick.color;
     if (color != null) {
-      if (appProvider.selectedAction == ActionType.fill) {
+      if (appProvider.selectedTool == ToolKind.fill) {
         appProvider.fillColor = color;
       } else {
         appProvider.brushColor = color;
@@ -695,73 +599,26 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     );
   }
 
-  /// Starts a brush/pencil/eraser or pixel-brush stroke at [adjustedPosition]
-  /// for the active drawing tool.
-  ///
-  /// When [forcedAction] is provided (the Surface pen eraser), that action is
-  /// drawn instead of the persisted [AppProvider.selectedAction] — the pen
-  /// eraser must always erase, and arming it must not mutate the persisted
-  /// selected action (which would disturb an armed effect, eyedropper, or wand
-  /// selection).
-  ///
-  /// [pressure] is the normalized pen pressure of the pointer-down (null for
-  /// mouse, touch, or a pen without pressure). Only a Brush stroke records it,
-  /// which makes that stroke pressure-sensitive for its whole length.
-  /// [awaitsPressure] marks a trackpad Brush stroke whose pressure may only
-  /// arrive after the click: it starts with no samples and back-fills them
-  /// from the first one (see [LayerProvider.lastActionAppendPosition]).
-  void _startDrawingPointer(
+  /// Starts a [StrokeAction] of [type] at [adjustedPosition] on the selected
+  /// layer, with [pressures] when the stroke is pressure-sensitive.
+  void _beginStroke(
     AppProvider appProvider,
+    ActionType type,
     ui.Offset adjustedPosition, {
-    ActionType? forcedAction,
-    double? pressure,
-    bool awaitsPressure = false,
+    List<double>? pressures,
   }) {
-    final ActionType action = forcedAction ?? appProvider.selectedAction;
-
-    // Checked before flagging the selected layer as drawing: under "All
-    // layers" it may be locked and untouched, and each target layer manages
-    // its own drawing flag and stroke preview instead.
-    if (_isCrossLayerEraserStroke(appProvider, action, isForced: forcedAction != null)) {
-      appProvider.startCrossLayerEraserStroke(adjustedPosition);
-      return;
-    }
-
     appProvider.layers.selectedLayer.isUserDrawing = true;
-
-    // An armed effect is a brush too, but a forced (pen-eraser) stroke always
-    // takes precedence: a physical eraser end must not trigger an effect.
-    if (appProvider.effectBrushModel.isArmed && forcedAction == null) {
-      appProvider.startEffectBrushStroke(adjustedPosition);
-      return;
-    }
-
-    if (action == ActionType.smudge) {
-      appProvider.startPixelBrushStroke(adjustedPosition, PixelBrushMode.smudge);
-      return;
-    }
-
-    if (action == ActionType.blurBrush) {
-      appProvider.startPixelBrushStroke(adjustedPosition, PixelBrushMode.blur);
-      return;
-    }
-
     // Freeze the committed composite so the stroke composites baseline + active
     // action each frame instead of replaying the whole stack. Captured before
     // the active action is appended below.
     appProvider.layers.selectedLayer.beginStrokePreview();
-    final bool isBrush = action == ActionType.brush;
     appProvider.recordExecuteDrawingActionToSelectedLayer(
       action: StrokeAction(
-        action: action,
+        action: type,
         positions: <ui.Offset>[adjustedPosition, adjustedPosition],
         brush: appProvider.currentBrush,
         fillColor: appProvider.fillColor,
-        pressures: !isBrush
-            ? null
-            : pressure != null
-            ? <double>[pressure, pressure]
-            : (awaitsPressure ? <double>[] : null),
+        pressures: pressures,
       ),
     );
   }
@@ -773,7 +630,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   /// Mirrors the pencil/eraser line extension in
   /// [AppProvider.appendLineFromLastUserAction] but is driven by the physical
   /// eraser side of the pen rather than the selected tool, so it never depends
-  /// on [AppProvider.selectedAction] being the eraser.
+  /// on [AppProvider.selectedTool] being the eraser.
   void _appendPenEraserStrokeLine(
     AppProvider appProvider,
     Offset adjustedPosition,
@@ -839,7 +696,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
 
     final bool didClose = appProvider.selectorCreationClosePolygon();
     if (didClose) {
-      _activePointerId = -1;
+      _releaseActivePointer();
       _restoreSelectionMath(appProvider);
       _clearSelectionTapTracking();
     }

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -22,7 +23,7 @@ void main() {
     await preferences.getPref();
     appProvider = AppProvider(preferences: preferences);
     appProvider.undoProvider.clear();
-    appProvider.selectedAction = ActionType.eraser;
+    appProvider.selectedTool = ToolKind.eraser;
   });
 
   group('isCrossLayerEraserScope', () {

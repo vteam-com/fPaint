@@ -30,10 +30,13 @@ import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/text_tool_state.dart';
 import 'package:fpaint/models/tool_descriptor.dart';
-import 'package:fpaint/models/tool_family.dart';
+import 'package:fpaint/models/tool_kind.dart';
+import 'package:fpaint/models/tool_scope.dart';
 import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
+import 'package:fpaint/providers/canvas_view_commands.dart';
+import 'package:fpaint/providers/cross_layer_lift_entry.dart';
 import 'package:fpaint/providers/fill_service.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/layer_crop_state.dart';
@@ -43,6 +46,10 @@ import 'package:fpaint/providers/selection_effect_preview_state.dart';
 import 'package:fpaint/providers/selection_effect_renderer.dart';
 import 'package:fpaint/providers/selector_geometry_controller.dart';
 import 'package:fpaint/providers/selector_geometry_host.dart';
+import 'package:fpaint/providers/tool_rail_port.dart';
+import 'package:fpaint/providers/transform_session.dart';
+import 'package:fpaint/providers/transform_session_controller.dart';
+import 'package:fpaint/providers/transform_session_host.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/providers/wand_selection_manager_cache.dart';
 import 'package:fpaint/providers/wand_source_sampler.dart';
@@ -61,10 +68,13 @@ part 'app_provider_selection_commit.dart';
 part 'app_provider_selection_crop.dart';
 part 'app_provider_selection_cross_layer.dart';
 part 'app_provider_selection_effects.dart';
+part 'app_provider_text_edit.dart';
+part 'app_provider_tool_rail.dart';
 part 'app_provider_tools.dart';
+part 'app_provider_transform_host.dart';
+part 'app_provider_view_commands.dart';
 part 'fill_preview_session.dart';
 part 'pixel_brush_session.dart';
-part 'transform_session.dart';
 part 'wand_selection_manager.dart';
 part 'wand_selection_request.dart';
 
@@ -73,13 +83,14 @@ part 'wand_selection_request.dart';
 /// with the canvas, such as clearing the canvas, converting between canvas and screen
 /// coordinates, and performing region-based operations like erasing and cutting.
 class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
+  /// The undo history is the one [layersProvider] records into, so document
+  /// operations (resize, merge, flip) and editor operations always share one
+  /// stack.
   AppProvider({
     AppPreferences? preferences,
     LayersProvider? layersProvider,
-    UndoProvider? undoProvider,
   }) : preferences = preferences ?? AppPreferences(),
-       layers = layersProvider ?? LayersProvider(),
-       _undoProvider = undoProvider ?? UndoProvider() {
+       layers = layersProvider ?? LayersProvider() {
     this.preferences.addListener(_handlePreferencesChanged);
     layers.layerListStructureListenable.addListener(_handleLayerStructureChanged);
     _initCanvas();
@@ -144,10 +155,10 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
     update();
   }
 
-  final UndoProvider _undoProvider;
+  /// Gets the undo provider (shared with [layers]).
+  UndoProvider get undoProvider => layers.undoProvider;
 
-  /// Gets the undo provider.
-  UndoProvider get undoProvider => _undoProvider;
+  UndoProvider get _undoProvider => layers.undoProvider;
 
   final FillService _fillService = FillService();
 
@@ -348,23 +359,50 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
 
   //-------------------------
   // Selected Tool
-  ActionType _selectedAction = ActionType.brush;
-  ActionType _lastNonSelectorAction = ActionType.brush;
+  ToolKind _selectedTool = ToolKind.brush;
+  ToolKind _lastNonSelectorTool = ToolKind.brush;
 
   /// Activates the selector action while remembering the previous non-selector tool.
   void activateSelectionAction() {
-    selectedAction = ActionType.selector;
+    selectedTool = ToolKind.selector;
   }
 
   /// Clears the current selection UI state and returns to the previous tool.
   void clearSelectionAndRestorePreviousTool() {
     selectorModel.clear();
-    selectedAction = _lastNonSelectorAction;
+    selectedTool = _lastNonSelectorTool;
   }
 
+  /// Tool-bound transient state, released when a tool outside its scope is
+  /// selected; see [ToolScope].
+  late final List<ToolScope> _toolScopes = <ToolScope>[
+    ToolScope(
+      tools: const <ToolKind>{ToolKind.selector},
+      release: () {
+        this._discardEffectPreview();
+        wandSelection.reset();
+      },
+    ),
+    ToolScope(
+      tools: const <ToolKind>{ToolKind.fill},
+      // Leaving the fill tool finalizes any live gradient-fill session
+      // (implicit Apply — commit exactly one undo entry and clear), otherwise
+      // just drops any lingering fill config.
+      release: () => isGradientPreviewActive ? applyGradientPreview() : fillModel.clear(),
+      // Start the GPU readback before the first canvas tap.
+      enter: () => unawaited(getSelectedLayerFillImageData(sampleAllLayers: false)),
+    ),
+    ToolScope(
+      tools: const <ToolKind>{ToolKind.smudge, ToolKind.blurBrush},
+      // The smudge source cache is a large CPU buffer, rebuilt on the next
+      // stroke's first commit.
+      release: pixelBrushSession.clearSourceCache,
+    ),
+  ];
+
   /// Sets the selected action.
-  set selectedAction(ActionType value) {
-    final bool selectedActionChanged = value != _selectedAction;
+  set selectedTool(ToolKind value) {
+    final bool selectedActionChanged = value != _selectedTool;
 
     // Picking any tool cancels an armed paint-mode effect brush, so only one
     // gesture tool is ever active — a stroke is never ambiguous.
@@ -382,40 +420,14 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
       layerPickerPosition = null;
     }
 
-    if (value != ActionType.selector) {
-      _lastNonSelectorAction = value;
+    if (value != ToolKind.selector) {
+      _lastNonSelectorTool = value;
     }
 
-    _selectedAction = value;
+    _selectedTool = value;
 
-    if (value != ActionType.selector) {
-      this._discardEffectPreview();
-    }
-
-    if (value != ActionType.fill) {
-      // Leaving the fill tool finalizes any live gradient-fill session (implicit
-      // Apply — commit exactly one undo entry and clear), otherwise just drop
-      // any lingering fill config.
-      if (isGradientPreviewActive) {
-        applyGradientPreview();
-      } else {
-        fillModel.clear();
-      }
-    }
-
-    if (value != ActionType.selector) {
-      wandSelection.reset();
-    }
-
-    if (value != ActionType.smudge && value != ActionType.blurBrush) {
-      // Leaving the pixel-brush tools frees the smudge source cache (a large
-      // CPU buffer) — it is rebuilt on the next stroke's first commit.
-      pixelBrushSession.clearSourceCache();
-    }
-
-    if (value == ActionType.fill) {
-      // Start the GPU readback before the first canvas tap.
-      unawaited(getSelectedLayerFillImageData(sampleAllLayers: false));
+    for (final ToolScope scope in _toolScopes) {
+      scope.apply(value);
     }
 
     if (selectedActionChanged || wasEffectBrushArmed) {
@@ -427,7 +439,7 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
   }
 
   /// Gets the selected action.
-  ActionType get selectedAction => _selectedAction;
+  ToolKind get selectedTool => _selectedTool;
 
   //-------------------------
   // Line Weight
@@ -564,10 +576,10 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
 
   /// Gets the active pixel-brush intensity for the selected tool.
   double get brushIntensity {
-    switch (_selectedAction) {
-      case ActionType.smudge:
+    switch (_selectedTool) {
+      case ToolKind.smudge:
         return preferences.smudgeIntensity;
-      case ActionType.blurBrush:
+      case ToolKind.blurBrush:
         return preferences.blurBrushIntensity;
       default:
         return AppEffects.defaultIntensity;
@@ -576,11 +588,11 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
 
   /// Sets the active pixel-brush intensity for the selected tool.
   set brushIntensity(double value) {
-    switch (_selectedAction) {
-      case ActionType.smudge:
+    switch (_selectedTool) {
+      case ToolKind.smudge:
         preferences.setSmudgeIntensity(value);
         break;
-      case ActionType.blurBrush:
+      case ToolKind.blurBrush:
         preferences.setBlurBrushIntensity(value);
         break;
       default:
@@ -911,6 +923,19 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
   /// prepared image placement, cross-layer lift). See [TransformSession].
   final TransformSession transformSession = TransformSession();
 
+  /// The tool rail's role view of this provider.
+  late final ToolRailPort toolRail = _AppToolRail(this);
+
+  /// The top bar's viewport and whole-canvas commands.
+  late final CanvasViewCommands viewCommands = _AppCanvasViewCommands(this);
+
+  /// Runs duplicate, paste, layer-modify and transform sessions over
+  /// [transformSession].
+  late final TransformSessionController transformController = TransformSessionController(
+    _AppTransformSessionHost(this),
+    transformSession,
+  );
+
   /// The prepared image placement state used by duplicate, paste, and layer modify sessions.
   ImagePlacementModel get imagePlacementModel => transformSession.imagePlacementModel;
 
@@ -984,7 +1009,7 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
   ///
   /// Gates wand-only affordances such as the canvas tolerance control and the
   /// crosshair cursor.
-  bool get isWandSelectionActive => selectedAction == ActionType.selector && selectorModel.mode == SelectorMode.wand;
+  bool get isWandSelectionActive => selectedTool == ToolKind.selector && selectorModel.mode == SelectorMode.wand;
 
   /// Sets the active selector math mode and rebuilds tool options.
   void setSelectorMath(SelectorMath value) {

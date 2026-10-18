@@ -5,6 +5,8 @@ import 'dart:ui' as ui;
 import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/files/decoded_layer_document.dart';
+import 'package:fpaint/files/decoded_raster_layer.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/helpers/image_helper.dart';
@@ -59,11 +61,11 @@ void main() {
     expect(getBlendModeFromOraCompositOp('unknown'), ui.BlendMode.srcOver);
   });
 
-  test('readOraFile throws exception for non-existent file', () async {
+  test('readOraFileFromBytes throws for bytes that are not an ORA archive', () async {
     final LayersProvider layers = LayersProvider();
 
-    expect(
-      () => readImageFromFilePathOra(layers, 'nonexistent.ora'),
+    await expectLater(
+      readOraFileFromBytes(layers, Uint8List.fromList(<int>[1, 2, 3, 4])),
       throwsA(isA<OraFileException>()),
     );
   });
@@ -405,7 +407,7 @@ void main() {
     layers.list.clear();
 
     final XmlDocument xmlDoc = XmlDocument.parse(input);
-    await importFromOraXml(archive, layers, xmlDoc);
+    await applyDecodedDocument(layers, await decodeOraStack(archive, xmlDoc));
 
     expect(layers.length, 4);
     expect(layers.list[0].name, 'Orange');
@@ -416,6 +418,8 @@ void main() {
     expect(layers.list[2].isVisible, isTrue);
     expect(layers.list[3].name, 'Background');
     expect(layers.list[3].isVisible, isTrue);
+    expect(layers.list[0].parentGroupName, 'Fruits');
+    expect(layers.list[2].parentGroupName, isEmpty);
   });
 
   test('readOraFileFromBytes throws for archive missing stack.xml', () async {
@@ -469,7 +473,7 @@ void main() {
     );
   });
 
-  test('importFromOraXml handles layer with missing src gracefully', () async {
+  test('decodeOraStack keeps a layer with no src as an empty layer', () async {
     const String input = '''<?xml version="1.0" encoding="UTF-8"?>
           <image version="0.0.1" w="100" h="100">
             <stack>
@@ -482,14 +486,17 @@ void main() {
     layers.list.clear();
 
     final XmlDocument xmlDoc = XmlDocument.parse(input);
-    await importFromOraXml(archive, layers, xmlDoc);
+    await applyDecodedDocument(layers, await decodeOraStack(archive, xmlDoc));
 
     // Layer without src should still be created but with no image data.
     expect(layers.length, 1);
     expect(layers.list[0].name, 'NoSrc');
+    final DecodedRasterLayer decoded = (await decodeOraStack(archive, xmlDoc)).layers.single;
+    expect(decoded.pixels, isNull);
+    expect(decoded.preserveAlpha, isTrue);
   });
 
-  test('importFromOraXml handles layer with missing png in archive', () async {
+  test('decodeOraStack keeps a layer whose png is missing as an empty layer', () async {
     const String input = '''<?xml version="1.0" encoding="UTF-8"?>
           <image version="0.0.1" w="100" h="100">
             <stack>
@@ -502,7 +509,7 @@ void main() {
     layers.list.clear();
 
     final XmlDocument xmlDoc = XmlDocument.parse(input);
-    await importFromOraXml(archive, layers, xmlDoc);
+    await applyDecodedDocument(layers, await decodeOraStack(archive, xmlDoc));
 
     // Layer with missing PNG should be created without image.
     expect(layers.length, 1);

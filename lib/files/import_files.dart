@@ -6,11 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/export_file_name.dart';
-import 'package:fpaint/files/file_heic.dart' if (dart.library.html) 'package:fpaint/files/file_heic_web.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
-import 'package:fpaint/files/file_ora.dart';
-import 'package:fpaint/files/file_psd.dart';
-import 'package:fpaint/files/file_tiff.dart';
+import 'package:fpaint/files/flat_image_reader.dart';
 import 'package:fpaint/files/import_file_format.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
@@ -20,13 +17,12 @@ import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/security_scoped_file_service.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/widgets/confirm_discard_dialog.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:logging/logging.dart';
 
 const String _defaultCanvasDimension = '800';
-
-const String _loadedImageDefaultName = 'Loaded Image';
 
 final Logger _log = Logger(logNameImportFiles);
 
@@ -223,27 +219,13 @@ Future<void> onFileOpen(BuildContext context) async {
         final String extension = fileExtensionOf(fileName);
         final ImportFileFormat? format = ImportFileFormat.fromExtension(extension);
         if (format != null) {
-          switch (format.decodeKind) {
-            case ImportDecodeKind.ora:
-              // readOraFileFromBytes handles its own clearing and sizing.
-              await readOraFileFromBytes(layers, bytes);
-            case ImportDecodeKind.psd:
-              // readPsdFileFromBytes handles its own clearing and sizing.
-              await readPsdFileFromBytes(layers, bytes);
-            case ImportDecodeKind.tiff:
-              // readTiffFileFromBytes handles its own clearing and sizing.
-              await readTiffFileFromBytes(layers, bytes);
-            case ImportDecodeKind.heif:
-              await _readHeifFromBytes(
-                layers,
-                bytes,
-                l10n,
-                extension: extension,
-                imageName: fileName,
-              );
-            case ImportDecodeKind.image:
-              await readImageFileFromBytes(layers, bytes, l10n, imageName: fileName);
-          }
+          await _readDocument(
+            layers: layers,
+            bytes: bytes,
+            format: format,
+            fileName: fileName,
+            l10n: l10n,
+          );
         }
         layers.clearHasChanged();
         shellProvider.requestCanvasFit();
@@ -365,42 +347,64 @@ Future<bool> openFileFromPath({
     return false;
   }
 
-  try {
-    final String fileName = fileNameOf(path);
-    switch (format.decodeKind) {
-      case ImportDecodeKind.ora:
-        // ORA embeds the selected layer, restored inside the reader.
-        await readImageFromFilePathOra(layers, path);
-        return true;
-      case ImportDecodeKind.psd:
-        // PSD rebuilds the whole stack; it stores no selected-layer marker, so
-        // the selection stays on the layer replaceAll defaults to.
-        await readPsdFromFilePath(layers, path);
-        return true;
-      case ImportDecodeKind.tiff:
-        // TIFF embeds the selected layer, restored inside the reader.
-        await readTiffFromFilePath(layers, path);
-        return true;
-      case ImportDecodeKind.heif:
-        final bool loaded = await _readHeifFromFilePath(
-          layers,
-          path,
-          l10n,
-          extension: extension,
-          imageName: fileName,
-        );
-        _restoreFlatLayerSelection(preferences, layers, path, loaded: loaded);
-        return loaded;
-      case ImportDecodeKind.image:
-        final bool loaded = await readImageFromFilePath(layers, path, l10n, imageName: fileName);
-        _restoreFlatLayerSelection(preferences, layers, path, loaded: loaded);
-        return loaded;
-    }
-  } catch (e) {
-    // General error catch, readImageFromFilePath might have already shown a SnackBar for decode errors
-    _showImportError(l10n.errorProcessingFile(e.toString()));
+  final Uint8List? bytes = await _readFileBytes(path, l10n);
+  if (bytes == null) {
     return false;
   }
+  final bool loaded = await _readDocument(
+    layers: layers,
+    bytes: bytes,
+    format: format,
+    fileName: fileNameOf(path),
+    l10n: l10n,
+  );
+  // Layered formats embed (or lack) their own selection; flat formats fall
+  // back to the per-path preference.
+  if (!format.supportsLayers) {
+    _restoreFlatLayerSelection(preferences, layers, path, loaded: loaded);
+  }
+  return loaded;
+}
+
+/// Reads [path]'s bytes, reporting a read failure and returning null.
+Future<Uint8List?> _readFileBytes(String path, AppLocalizations l10n) async {
+  try {
+    return await File(path).readAsBytes();
+  } catch (e) {
+    _showImportError(l10n.errorReadingFile(e.toString()));
+    return null;
+  }
+}
+
+/// Decodes [bytes] as [format] into [layers] (replacing the document) and
+/// reports any failure to the user. Completes with whether it loaded.
+Future<bool> _readDocument({
+  required LayersProvider layers,
+  required Uint8List bytes,
+  required ImportFileFormat format,
+  required String fileName,
+  required AppLocalizations l10n,
+}) async {
+  try {
+    await format.read(layers, bytes, fileName);
+    return true;
+  } catch (e) {
+    _showImportError(_importErrorMessage(l10n, format, fileName, e));
+    return false;
+  }
+}
+
+/// The user-facing message for a failed decode of [fileName] as [format].
+String _importErrorMessage(
+  AppLocalizations l10n,
+  ImportFileFormat format,
+  String fileName,
+  Object error,
+) {
+  if (error is HeicConversionException) {
+    return l10n.fileFormatNotSupportedOnPlatform(fileExtensionOf(fileName));
+  }
+  return format.supportsLayers ? l10n.errorProcessingFile(error.toString()) : l10n.failedToLoadImage(error.toString());
 }
 
 /// Restores the remembered selection for a flat (non-layered) file.
@@ -437,109 +441,6 @@ final List<String> supportedImageFileExtensions = ImportFileFormat.allExtensions
 /// Returns `true` if the file extension is supported, otherwise `false`.
 bool isFileExtensionSupported(String extension) {
   return supportedImageFileExtensions.contains(extension.toLowerCase());
-}
-
-/// Reads an image file asynchronously.
-///
-/// This function is responsible for handling the process of reading
-/// an image file. It performs the necessary operations to load the
-/// Decodes image bytes, clears layers, sets canvas size, and adds the image.
-/// Handles decoding errors and shows a SnackBar.
-Future<bool> _decodeAndApplyImage(
-  LayersProvider layers,
-  Uint8List imageBytes,
-  AppLocalizations l10n, {
-  String imageName = _loadedImageDefaultName,
-}) async {
-  try {
-    final ui.Image image = await fromBytesToImage(imageBytes);
-
-    await layers.replaceAll(
-      canvasSize: Size(image.width.toDouble(), image.height.toDouble()),
-      addLayers: () async => _addImageAsTopLayer(layers, image, imageName),
-    );
-
-    return true; // Success
-  } catch (e) {
-    _showImportError(l10n.failedToLoadImage(e.toString()));
-    return false; // Failure
-  }
-}
-
-/// Adds [image] as a new top layer named [name] and selects it.
-void _addImageAsTopLayer(
-  LayersProvider layers,
-  ui.Image image,
-  String name,
-) {
-  layers.addTop(name: name);
-  layers.selectedLayer.addImage(imageToAdd: image);
-}
-
-/// Reads an image from the specified file path.
-Future<bool> readImageFromFilePath(
-  LayersProvider layers,
-  String path,
-  AppLocalizations l10n, {
-  String imageName = _loadedImageDefaultName,
-}) async {
-  try {
-    final Uint8List fileBytes = await File(path).readAsBytes();
-    return await _decodeAndApplyImage(layers, fileBytes, l10n, imageName: imageName);
-  } catch (e) {
-    _showImportError(l10n.errorReadingFile(e.toString()));
-    return false;
-  }
-}
-
-/// Reads an image file from a byte array.
-Future<bool> readImageFileFromBytes(
-  LayersProvider layers,
-  Uint8List bytes,
-  AppLocalizations l10n, {
-  String imageName = _loadedImageDefaultName,
-}) async {
-  return await _decodeAndApplyImage(layers, bytes, l10n, imageName: imageName);
-}
-
-/// Reads a HEIF-family file from disk, decodes it via the platform-specific
-/// decoder, and applies the result to [layers].
-Future<bool> _readHeifFromFilePath(
-  LayersProvider layers,
-  String path,
-  AppLocalizations l10n, {
-  required String extension,
-  String imageName = _loadedImageDefaultName,
-}) async {
-  try {
-    final Uint8List fileBytes = await File(path).readAsBytes();
-    final Uint8List decodableBytes = await decodeHeicBytes(fileBytes);
-    return await _decodeAndApplyImage(layers, decodableBytes, l10n, imageName: imageName);
-  } on HeicConversionException {
-    _showImportError(l10n.fileFormatNotSupportedOnPlatform(extension));
-    return false;
-  } catch (e) {
-    _showImportError(l10n.errorReadingFile(e.toString()));
-    return false;
-  }
-}
-
-/// Reads a HEIF-family image from bytes, decodes it via the platform-specific
-/// decoder, and applies the result to [layers].
-Future<bool> _readHeifFromBytes(
-  LayersProvider layers,
-  Uint8List bytes,
-  AppLocalizations l10n, {
-  required String extension,
-  String imageName = _loadedImageDefaultName,
-}) async {
-  try {
-    final Uint8List decodableBytes = await decodeHeicBytes(bytes);
-    return await _decodeAndApplyImage(layers, decodableBytes, l10n, imageName: imageName);
-  } on HeicConversionException {
-    _showImportError(l10n.fileFormatNotSupportedOnPlatform(extension));
-    return false;
-  }
 }
 
 /// The result chosen by the user when dropping a file onto a canvas that
@@ -623,21 +524,40 @@ Future<void> onFileDropped({
   }
 }
 
-/// Decodes the image at [path] and adds it as a new layer on top of the
-/// current layer stack.
+/// Decodes the file at [path] in any openable format and adds it, flattened,
+/// as a new layer on top of the current layer stack.
+///
+/// Layered formats (ORA, PSD, TIFF) are decoded into a scratch document and
+/// composited with their own blend modes and opacities, so the added layer
+/// looks exactly like the file would when opened.
 Future<void> addFileAsLayer({
   required BuildContext context,
   required LayersProvider layers,
   required String path,
 }) async {
-  final String fileName = fileNameOf(path);
   final AppLocalizations l10n = context.l10n;
+  final String fileName = fileNameOf(path);
+  final ImportFileFormat? format = ImportFileFormat.fromFileName(fileName);
+  if (format == null) {
+    _showImportError(l10n.fileFormatNotSupported(fileExtensionOf(fileName)));
+    return;
+  }
+  final Uint8List? bytes = await _readFileBytes(path, l10n);
+  if (bytes == null) {
+    return;
+  }
 
+  final LayersProvider scratch = LayersProvider(undoProvider: UndoProvider());
   try {
-    final Uint8List fileBytes = await File(path).readAsBytes();
-    _addImageAsTopLayer(layers, await fromBytesToImage(fileBytes), fileName);
-    layers.update();
-  } catch (e) {
-    _showImportError(l10n.failedToLoadImage(e.toString()));
+    if (await _readDocument(layers: scratch, bytes: bytes, format: format, fileName: fileName, l10n: l10n)) {
+      final ui.Image flattened = await scratch.capturePainterToImage();
+      // Hand the composite over to [layers]; the scratch document must not
+      // dispose it.
+      scratch.cachedImage = null;
+      addImageAsTopLayer(layers, flattened, fileName);
+      layers.update();
+    }
+  } finally {
+    scratch.dispose();
   }
 }

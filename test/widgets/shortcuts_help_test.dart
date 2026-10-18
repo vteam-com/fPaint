@@ -7,7 +7,7 @@ import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/image_placement_layer_restore_state.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
@@ -490,23 +490,23 @@ void main() {
 
       await tester.sendKeyEvent(LogicalKeyboardKey.keyE);
       await tester.pump();
-      expect(appProvider.selectedAction, ActionType.eraser);
+      expect(appProvider.selectedTool, ToolKind.eraser);
 
       await tester.sendKeyEvent(LogicalKeyboardKey.keyT);
       await tester.pump();
-      expect(appProvider.selectedAction, ActionType.text);
+      expect(appProvider.selectedTool, ToolKind.text);
 
       await tester.sendKeyEvent(LogicalKeyboardKey.keyS);
       await tester.pump();
-      expect(appProvider.selectedAction, ActionType.selector);
+      expect(appProvider.selectedTool, ToolKind.selector);
 
       await tester.sendKeyEvent(LogicalKeyboardKey.keyF);
       await tester.pump();
-      expect(appProvider.selectedAction, ActionType.fill);
+      expect(appProvider.selectedTool, ToolKind.fill);
 
       await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
       await tester.pump();
-      expect(appProvider.selectedAction, ActionType.brush);
+      expect(appProvider.selectedTool, ToolKind.brush);
     });
 
     testWidgets('Cmd/Ctrl + and - zoom the canvas', (WidgetTester tester) async {
@@ -586,7 +586,7 @@ void main() {
       await preferences.getPref();
       final AppProvider appProvider = AppProvider(preferences: preferences);
       final ShellProvider shellProvider = ShellProvider();
-      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectedTool = ToolKind.brush;
       appProvider.brushSize = 20;
 
       await tester.pumpWidget(

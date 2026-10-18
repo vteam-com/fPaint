@@ -181,7 +181,6 @@ Future<FileFlowHost> pumpFileFlowHost(
   final AppProvider app = AppProvider(
     preferences: preferences,
     layersProvider: layers,
-    undoProvider: undo,
   );
   final ShellProvider shell = ShellProvider();
   final FileFlowHost host = FileFlowHost(

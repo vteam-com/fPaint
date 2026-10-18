@@ -8,8 +8,8 @@ import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/render_helper.dart';
 import 'package:fpaint/models/selection_effect.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/transform_model.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/brush_size_edge_slider.dart';
@@ -81,9 +81,11 @@ class MainViewState extends State<MainView> {
                     // rest of this overlay stack.
                     Positioned.fill(
                       child: IgnorePointer(
-                        child: ListenableBuilder(
-                          listenable: appProvider.hudOverlayRepaintListenable,
-                          builder: (BuildContext _, Widget? _) => _buildGestureHudOverlays(appProvider),
+                        child: RepaintBoundary(
+                          child: ListenableBuilder(
+                            listenable: appProvider.hudOverlayRepaintListenable,
+                            builder: (BuildContext _, Widget? _) => _buildGestureHudOverlays(appProvider),
+                          ),
                         ),
                       ),
                     ),
@@ -159,7 +161,7 @@ class MainViewState extends State<MainView> {
                           appProvider.selectorModel.path2,
                         ),
                         enableMoveAndResize:
-                            appProvider.selectedAction == ActionType.selector &&
+                            appProvider.selectedTool == ToolKind.selector &&
                             !appProvider.transformModel.isVisible &&
                             !appProvider.selectorModel.isDrawing,
                         isDrawing: appProvider.selectorModel.isDrawing,
@@ -248,9 +250,11 @@ class MainViewState extends State<MainView> {
                     // bar) — same narrow HUD listenable as the gesture HUDs.
                     Positioned.fill(
                       child: IgnorePointer(
-                        child: ListenableBuilder(
-                          listenable: appProvider.hudOverlayRepaintListenable,
-                          builder: (BuildContext _, Widget? _) => _buildToleranceHudOverlays(appProvider),
+                        child: RepaintBoundary(
+                          child: ListenableBuilder(
+                            listenable: appProvider.hudOverlayRepaintListenable,
+                            builder: (BuildContext _, Widget? _) => _buildToleranceHudOverlays(appProvider),
+                          ),
                         ),
                       ),
                     ),
@@ -335,7 +339,7 @@ class MainViewState extends State<MainView> {
     // while the selector tool is active.
     final bool showBrushSizePreview =
         appProvider.isBrushSizePreviewVisible &&
-        (appProvider.selectedAction != ActionType.selector || appProvider.effectBrushModel.isArmed);
+        (appProvider.selectedTool != ToolKind.selector || appProvider.effectBrushModel.isArmed);
 
     return Stack(
       children: <Widget>[

@@ -24,6 +24,7 @@ import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/fill_service.dart';
@@ -773,7 +774,7 @@ Future<void> activateSelectorTool(WidgetTester tester) async {
   final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 
-  if (appProvider.selectedAction == ActionType.selector || appProvider.selectorModel.isVisible) {
+  if (appProvider.selectedTool == ToolKind.selector || appProvider.selectorModel.isVisible) {
     await _waitForSelectorModeButtons(tester);
     if (_hasSelectorModeButtons()) {
       return;
@@ -1063,10 +1064,10 @@ Future<void> applyEffectViaUi(
 
   // Ensure the selector tool is active so the effect buttons are visible.
   // The bottom controls (including effects button) only render when:
-  // 1. enableMoveAndResize=true (requires selectedAction==selector && !transformMode)
+  // 1. enableMoveAndResize=true (requires selectedTool==selector && !transformMode)
   // 2. isDrawing=false
   // 3. path1 exists
-  appProvider.selectedAction = ActionType.selector;
+  appProvider.selectedTool = ToolKind.selector;
   appProvider.transformModel.isVisible = false;
   appProvider.selectorModel.isDrawing = false;
 
@@ -1374,12 +1375,12 @@ Future<void> _applyBrushAndFillColors(
 /// Selects a drawing action directly through [AppProvider].
 Future<void> _selectDrawingAction(
   WidgetTester tester,
-  ActionType action,
+  ToolKind action,
 ) async {
   final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context);
 
-  appProvider.selectedAction = action;
+  appProvider.selectedTool = action;
   await tester.pump();
 }
 
@@ -1387,7 +1388,7 @@ Future<void> _selectDrawingAction(
 Future<void> drawFreehandStrokeWithHumanGestures(
   WidgetTester tester, {
   required List<Offset> points,
-  ActionType action = ActionType.pencil,
+  ToolKind action = ToolKind.pencil,
   double? brushSize,
   Color? brushColor,
   Color? fillColor,

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/selection_effect.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
@@ -73,11 +73,11 @@ void main() {
   testWidgets('is shown for sized paint tools and hidden for tools without a brush size', (
     WidgetTester tester,
   ) async {
-    appProvider.selectedAction = ActionType.brush;
+    appProvider.selectedTool = ToolKind.brush;
     await pumpMainView(tester);
     expect(find.byKey(Keys.brushSizeEdgeSlider), findsOneWidget);
 
-    appProvider.selectedAction = ActionType.fill;
+    appProvider.selectedTool = ToolKind.fill;
     appProvider.update();
     await tester.pump();
     expect(find.byKey(Keys.brushSizeEdgeSlider), findsNothing);
@@ -88,17 +88,17 @@ void main() {
   ) async {
     await pumpMainView(tester);
 
-    for (final ActionType tool in <ActionType>[
-      ActionType.pencil,
-      ActionType.brush,
-      ActionType.eraser,
-      ActionType.smudge,
-      ActionType.blurBrush,
-      ActionType.line,
-      ActionType.rectangle,
-      ActionType.circle,
+    for (final ToolKind tool in <ToolKind>[
+      ToolKind.pencil,
+      ToolKind.brush,
+      ToolKind.eraser,
+      ToolKind.smudge,
+      ToolKind.blurBrush,
+      ToolKind.line,
+      ToolKind.rectangle,
+      ToolKind.circle,
     ]) {
-      appProvider.selectedAction = tool;
+      appProvider.selectedTool = tool;
       await tester.pump();
       expect(find.byKey(Keys.brushSizeEdgeSlider), findsOneWidget, reason: '$tool');
     }
@@ -107,7 +107,7 @@ void main() {
   testWidgets('is shown for an armed effect brush, even over a tool without a brush size', (
     WidgetTester tester,
   ) async {
-    appProvider.selectedAction = ActionType.selector;
+    appProvider.selectedTool = ToolKind.selector;
     await pumpMainView(tester);
     expect(find.byKey(Keys.brushSizeEdgeSlider), findsNothing);
 
@@ -122,7 +122,7 @@ void main() {
   });
 
   testWidgets('dragging up grows the brush and dragging down shrinks it', (WidgetTester tester) async {
-    appProvider.selectedAction = ActionType.brush;
+    appProvider.selectedTool = ToolKind.brush;
     appProvider.brushSize = 10;
     await pumpMainView(tester);
 
@@ -135,7 +135,7 @@ void main() {
   });
 
   testWidgets('shows a numeric readout and the size ring only while dragging', (WidgetTester tester) async {
-    appProvider.selectedAction = ActionType.brush;
+    appProvider.selectedTool = ToolKind.brush;
     appProvider.brushSize = 10;
     await pumpMainView(tester);
     await tester.pump(AppDefaults.brushSizePreviewDuration);
@@ -161,7 +161,7 @@ void main() {
   testWidgets('straying sideways from the track slows the change for fine control', (
     WidgetTester tester,
   ) async {
-    appProvider.selectedAction = ActionType.brush;
+    appProvider.selectedTool = ToolKind.brush;
     appProvider.brushSize = 10;
     await pumpMainView(tester);
     final double coarse = await dragSlider(tester, dy: -60) - 10;
@@ -175,7 +175,7 @@ void main() {
   });
 
   testWidgets('dragging the slider does not paint on the canvas', (WidgetTester tester) async {
-    appProvider.selectedAction = ActionType.brush;
+    appProvider.selectedTool = ToolKind.brush;
     await pumpMainView(tester);
     final int before = appProvider.layers.selectedLayer.actionStack.length;
 

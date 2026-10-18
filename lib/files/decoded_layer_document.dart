@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
+import 'package:fpaint/files/decoded_layer_pixels.dart';
 import 'package:fpaint/files/decoded_raster_layer.dart';
-import 'package:fpaint/files/package_image_bridge.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 
 /// A validated layered document ready to be applied to the canvas.
@@ -53,10 +53,12 @@ Future<LayerProvider> _appendDecodedLayer(
   newLayer.blendMode = decoded.blendMode;
   newLayer.isVisible = decoded.visible;
   newLayer.isLocked = decoded.locked;
+  newLayer.parentGroupName = decoded.parentGroupName;
+  newLayer.preserveAlpha = decoded.preserveAlpha;
 
-  newLayer.addImage(
-    imageToAdd: await packageImageToUiImage(decoded.image),
-    offset: decoded.offset,
-  );
+  final DecodedLayerPixels? pixels = decoded.pixels;
+  if (pixels != null) {
+    newLayer.addImage(imageToAdd: await pixels.toUiImage(), offset: decoded.offset);
+  }
   return newLayer;
 }

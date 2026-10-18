@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -332,23 +331,21 @@ void main() {
       await drainFileFlowTimers(tester);
     });
 
-    testWidgets('readImageFileFromBytes decodes valid bytes and rejects garbage', (WidgetTester tester) async {
+    testWidgets('addFileAsLayer flattens a layered ORA into one new layer', (WidgetTester tester) async {
       final FileFlowHost host = await pumpFileFlowHost(tester);
-      final AppLocalizations l10n = l10nOf(host);
-      late Uint8List pngBytes;
-      await tester.runAsync(() async {
-        pngBytes = await encodeSolidPng(width: _pngWidth, height: _pngHeight);
+      final String oraPath = await writeFixture(tester, _oraName, () async {
+        final LayersProvider source = LayersProvider()..size = const ui.Size(_fixtureSide * 1.0, _fixtureSide * 1.0);
+        source.addTop(name: _psdName);
+        return createOraArchive(source, includePreviews: false);
       });
+      final int layerCount = host.layers.length;
+      final ui.Size canvasSize = host.layers.size;
 
-      final bool decoded = await runReal(tester, () => readImageFileFromBytes(host.layers, pngBytes, l10n));
-      final bool rejected = await runReal(
-        tester,
-        () => readImageFileFromBytes(host.layers, Uint8List.fromList(_garbageBytes), l10n),
-      );
+      await runReal(tester, () => addFileAsLayer(context: host.context, layers: host.layers, path: oraPath));
 
-      expect(decoded, isTrue);
-      expect(rejected, isFalse);
-      expect(host.layers.size, const ui.Size(_pngWidth * 1.0, _pngHeight * 1.0));
+      expect(host.layers.length, layerCount + 1);
+      expect(host.layers.selectedLayer.name, _oraName);
+      expect(host.layers.size, canvasSize, reason: 'adding a layer must not resize the canvas');
       await drainFileFlowTimers(tester);
     });
   });

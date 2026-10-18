@@ -82,24 +82,11 @@ void main() {
     });
   });
 
-  group('readPsdFromFilePath', () {
-    test('throws when the file does not exist', () async {
-      final LayersProvider layers = createInitializedLayersProvider();
-
-      expect(
-        () => readPsdFromFilePath(layers, 'does/not/exist.psd'),
-        throwsA(isA<PsdFileException>()),
-      );
-    });
-
+  group('readPsdFileFromBytes', () {
     test('throws a PsdFileException for non-PSD bytes', () async {
       final LayersProvider layers = createInitializedLayersProvider();
-      final Directory dir = Directory.systemTemp.createTempSync('fpaint_psd');
-      addTearDown(() => dir.deleteSync(recursive: true));
-      final File notAPsd = File('${dir.path}/broken.psd')..writeAsBytesSync(<int>[1, 2, 3, 4, 5, 6, 7, 8]);
-
       await expectLater(
-        readPsdFromFilePath(layers, notAPsd.path),
+        readPsdFileFromBytes(layers, Uint8List.fromList(<int>[1, 2, 3, 4, 5, 6, 7, 8])),
         throwsA(isA<PsdFileException>()),
       );
     });
@@ -107,7 +94,7 @@ void main() {
     test('loads the sample PSD into the canvas', () async {
       final LayersProvider layers = createInitializedLayersProvider();
 
-      await readPsdFromFilePath(layers, _samplePsdPath);
+      await readPsdFileFromBytes(layers, File(_samplePsdPath).readAsBytesSync());
 
       expect(layers.size, _samplePsdCanvasSize);
       expect(layers.length, 1);
@@ -465,15 +452,15 @@ void main() {
 
   group('import dispatch', () {
     test('a .psd path resolves to the PSD reader', () {
-      // openFileFromPath switches on decodeKind, so this is the wiring that
-      // routes a picked/dropped .psd to readPsdFromFilePath. The reader itself
+      // openFileFromPath reads through the format entry, so this is the wiring
+      // that routes a picked/dropped .psd to the layered PSD reader. The reader itself
       // is exercised directly above; calling openFileFromPath here would need a
       // BuildContext, and testWidgets' fake async never completes the real
       // ui.decodeImageFromList callback the reader awaits.
       final ImportFileFormat? format = ImportFileFormat.fromFileName(_samplePsdPath);
 
       expect(format, ImportFileFormat.psd);
-      expect(format!.decodeKind, ImportDecodeKind.psd);
+      expect(format!.supportsLayers, isTrue);
       expect(isFileExtensionSupported(FileExtensions.psd), isTrue);
     });
   });

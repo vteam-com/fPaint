@@ -2,7 +2,7 @@ import 'package:fpaint/helpers/shortcut_tooltip.dart';
 import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/tool_family.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/models/tool_kind.dart';
 
 /// Shell commands surfaced from more than one place (top toolbar, main menu,
 /// on-canvas quick menu).
@@ -53,7 +53,7 @@ enum AppCommand {
       AppCommand.redo => primaryModifiedShortcut(ShortcutKeys.y),
       AppCommand.zoomIn => primaryModifiedShortcut(ShortcutKeys.plus),
       AppCommand.zoomOut => primaryModifiedShortcut(ShortcutKeys.minus),
-      AppCommand.selector => toolShortcutLabel(ActionType.selector),
+      AppCommand.selector => toolShortcutLabel(ToolKind.selector),
       AppCommand.newDocument || AppCommand.importFile || AppCommand.exportFile => null,
     };
   }

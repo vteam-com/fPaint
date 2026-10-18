@@ -132,12 +132,12 @@ bool shouldUseSelectionRegionFloodFill({
 /// region into the active selection instead of painting immediately.
 @visibleForTesting
 bool shouldCreateSelectionFromFloodFillTap({
-  required ActionType selectedAction,
+  required ToolKind selectedTool,
   required SelectorMode selectorMode,
   required bool isSelectionVisible,
   required ui.Path? selectionPath,
 }) {
-  return selectedAction == ActionType.selector &&
+  return selectedTool == ToolKind.selector &&
       selectorMode == SelectorMode.wand &&
       (!isSelectionVisible || selectionPath == null);
 }
@@ -179,7 +179,7 @@ extension AppProviderTools on AppProvider {
   void activateEyeDropShortcut({Offset? position}) {
     isEyeDropShortcutActive = true;
     final Offset initialPos = position ?? lastPointerPosition ?? canvasCenter;
-    if (selectedAction == ActionType.fill) {
+    if (selectedTool == ToolKind.fill) {
       eyeDropPositionForFill = initialPos;
     } else {
       eyeDropPositionForBrush = initialPos;
@@ -239,7 +239,7 @@ extension AppProviderTools on AppProvider {
   /// armed effect brush overrides the underlying tool's range.
   double get activeBrushSizeMin => _activeBrushSizeRange.min;
 
-  BrushSizeRange get _activeBrushSizeRange => brushSizeRangeFor(selectedAction, effectArmed: effectBrushModel.isArmed);
+  BrushSizeRange get _activeBrushSizeRange => selectedTool.brushSizeRange(effectArmed: effectBrushModel.isArmed);
 
   /// Applies a computed brush [size] to the armed tool if it differs from the
   /// current one. Returns the applied size.
@@ -288,11 +288,11 @@ extension AppProviderTools on AppProvider {
   bool get canAdjustBrushSize =>
       effectBrushModel.isArmed ||
       isSelectionBrushActive ||
-      (selectedAction.isSupported(ActionOptions.brushSize) && selectedAction != ActionType.text);
+      (selectedTool.isSupported(ActionOptions.brushSize) && selectedTool != ToolKind.text);
 
   /// Whether the selection tool is painting its selection with a brush, so
   /// the brush size (slider, `[` / `]`, size ring) sets the band width.
-  bool get isSelectionBrushActive => selectedAction == ActionType.selector && selectorModel.mode == SelectorMode.brush;
+  bool get isSelectionBrushActive => selectedTool == ToolKind.selector && selectorModel.mode == SelectorMode.brush;
 
   /// Grows (`]`, [increase]) or shrinks (`[`) the armed tool's brush size by
   /// one keyboard step. The size HUD ring previews the result at the canvas
@@ -392,7 +392,8 @@ extension AppProviderTools on AppProvider {
     }
 
     final bool canExtendActiveStroke =
-        (last.action == ActionType.pencil || last.action == ActionType.eraser) && last.action == selectedAction;
+        (last.action == ActionType.pencil || last.action == ActionType.eraser) &&
+        last.action == selectedTool.recordType;
     if (canExtendActiveStroke) {
       layers.selectedLayer.lastActionAppendPosition(position: positionEndOfNewLine);
       layers.repaintCanvas();
@@ -420,7 +421,7 @@ extension AppProviderTools on AppProvider {
     bool sampleAllLayers = false,
   }) async {
     if (!shouldCreateSelectionFromFloodFillTap(
-      selectedAction: selectedAction,
+      selectedTool: selectedTool,
       selectorMode: selectorModel.mode,
       isSelectionVisible: selectorModel.isVisible,
       selectionPath: selectorModel.path1,

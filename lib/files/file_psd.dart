@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/decoded_layer_document.dart';
+import 'package:fpaint/files/decoded_layer_pixels.dart';
 import 'package:fpaint/files/decoded_raster_layer.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
 import 'package:fpaint/files/psd_constants.dart';
@@ -14,8 +15,6 @@ import 'package:logging/logging.dart';
 
 final Logger _log = Logger(logNameFilePsd);
 
-const String _errorPsdFileNotFoundPrefix = 'PSD file not found:';
-const String _errorPsdReadFilePrefix = 'Failed to read PSD file:';
 const String _errorInvalidPsdData = 'Invalid PSD data or unable to read PSD info.';
 const String _errorNoDecodedPsdLayers = 'No layers could be decoded from PSD file.';
 
@@ -35,20 +34,6 @@ Future<void> readPsdFileFromBytes(
   // PSD stores layers bottom-first, the order applyDecodedDocument stacks
   // them in, so the PSD z-order is preserved. PSD has no selected-layer marker.
   await applyDecodedDocument(layers, _decodePsdDocument(bytes));
-}
-
-/// Loads a PSD file from disk and decodes it into [layers].
-Future<void> readPsdFromFilePath(
-  LayersProvider layers,
-  String path,
-) {
-  return readLayeredFileFromPath<PsdFileException>(
-    path: path,
-    readBytes: (Uint8List bytes) => readPsdFileFromBytes(layers, bytes),
-    fileNotFoundPrefix: _errorPsdFileNotFoundPrefix,
-    readFailedPrefix: _errorPsdReadFilePrefix,
-    exceptionBuilder: PsdFileException.new,
-  );
 }
 
 /// Runs the PSD decoder, turning malformed input into a null result.
@@ -174,7 +159,7 @@ DecodedRasterLayer? _decodePsdPixelLayer(
   }
 
   return DecodedRasterLayer(
-    image: image,
+    pixels: PackageImagePixels(image),
     name: _resolveLayerName(layer.name),
     offset: Offset((layer.left ?? 0).toDouble(), (layer.top ?? 0).toDouble()),
     opacity: layer.opacity / AppLimits.rgbChannelMax,
@@ -193,7 +178,7 @@ DecodedRasterLayer _decodeMergedPsd(img.PsdImage psd) {
   final img.Image merged = psd.mergedImage ?? psd.renderImage();
 
   return DecodedRasterLayer(
-    image: merged,
+    pixels: PackageImagePixels(merged),
     name: PsdConstants.mergedLayerName,
     offset: Offset.zero,
     opacity: 1,

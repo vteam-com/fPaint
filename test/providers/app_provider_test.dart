@@ -5,6 +5,7 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/brush_hatch.dart';
 import 'package:fpaint/models/hatch_marks.dart';
 import 'package:fpaint/models/hatch_pattern.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -25,6 +26,10 @@ void main() {
       expect(appProvider.layers.length, 1);
     });
 
+    test('shares one undo history with its layers', () {
+      expect(appProvider.undoProvider, same(appProvider.layers.undoProvider));
+    });
+
     test('selectedLayerIndex is 0', () {
       expect(appProvider.layers.selectedLayerIndex, 0);
     });
@@ -33,8 +38,8 @@ void main() {
       expect(appProvider.canvasOffset, Offset.zero);
     });
 
-    test('selectedAction defaults to brush', () {
-      expect(appProvider.selectedAction, ActionType.brush);
+    test('selectedTool defaults to brush', () {
+      expect(appProvider.selectedTool, ToolKind.brush);
     });
 
     test('brushStyle defaults to solid', () {
@@ -74,7 +79,7 @@ void main() {
     });
 
     test('activateEyeDropShortcut sets active state and position for brush', () {
-      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectedTool = ToolKind.brush;
       appProvider.activateEyeDropShortcut(position: const Offset(10, 20));
       expect(appProvider.isEyeDropShortcutActive, isTrue);
       expect(appProvider.eyeDropPositionForBrush, const Offset(10, 20));
@@ -85,7 +90,7 @@ void main() {
     });
 
     test('activateEyeDropShortcut sets position for fill when fill tool selected', () {
-      appProvider.selectedAction = ActionType.fill;
+      appProvider.selectedTool = ToolKind.fill;
       appProvider.activateEyeDropShortcut(position: const Offset(30, 40));
       expect(appProvider.isEyeDropShortcutActive, isTrue);
       expect(appProvider.eyeDropPositionForFill, const Offset(30, 40));
@@ -100,28 +105,28 @@ void main() {
     });
   });
 
-  group('selectedAction', () {
+  group('selectedTool', () {
     test('can be set and read', () {
-      appProvider.selectedAction = ActionType.pencil;
-      expect(appProvider.selectedAction, ActionType.pencil);
+      appProvider.selectedTool = ToolKind.pencil;
+      expect(appProvider.selectedTool, ToolKind.pencil);
     });
 
     test('setting to non-fill clears fill model', () {
       appProvider.fillModel.isVisible = true;
-      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectedTool = ToolKind.brush;
       expect(appProvider.fillModel.isVisible, isFalse);
     });
 
     test('setting to fill does not clear fill model', () {
       appProvider.fillModel.isVisible = true;
-      appProvider.selectedAction = ActionType.fill;
+      appProvider.selectedTool = ToolKind.fill;
       // Fill model should not be cleared
     });
 
     test('notifies listeners', () {
       int notifyCount = 0;
       appProvider.addListener(() => notifyCount++);
-      appProvider.selectedAction = ActionType.eraser;
+      appProvider.selectedTool = ToolKind.eraser;
       expect(notifyCount, 1);
     });
   });

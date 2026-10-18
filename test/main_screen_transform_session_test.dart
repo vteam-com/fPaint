@@ -6,8 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/main_screen.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/transform_model.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/panels/side_panel/side_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -577,7 +577,7 @@ void main() {
   });
 
   testWidgets('right mouse drag pans without drawing', (WidgetTester tester) async {
-    appProvider.selectedAction = ActionType.brush;
+    appProvider.selectedTool = ToolKind.brush;
     await tester.pumpWidget(
       _buildHarness(
         preferences: preferences,
@@ -666,10 +666,12 @@ void main() {
       canvasPanel.visibleCanvasBounds.height,
       closeTo(viewportSize.height / AppInteraction.maxCanvasScale, _geometryEpsilon),
     );
-    expect(
-      find.descendant(of: canvasPanelFinder, matching: find.byType(RepaintBoundary)),
-      findsNothing,
-    );
+    // The canvas's own repaint boundary must stay viewport-sized: a boundary
+    // around a zoomed full-document subtree makes Impeller allocate a texture
+    // past the GPU limit at this zoom.
+    final Finder canvasBoundary = find.descendant(of: canvasPanelFinder, matching: find.byType(RepaintBoundary));
+    expect(canvasBoundary, findsOneWidget);
+    expect(tester.getSize(canvasBoundary), viewportSize);
     expect(tester.takeException(), isNull);
     for (final LayerProvider layer in appProvider.layers.list) {
       layer.cancelPendingThumbnailRebuild();
@@ -677,7 +679,7 @@ void main() {
   });
 
   testWidgets('two-finger touch does not create a drawing action', (WidgetTester tester) async {
-    appProvider.selectedAction = ActionType.brush;
+    appProvider.selectedTool = ToolKind.brush;
     appProvider.brushSize = 24.0;
     shellProvider.shellMode = ShellMode.hidden;
     await tester.pumpWidget(
@@ -808,7 +810,7 @@ void main() {
   ) async {
     final ui.Image image = await _createTestImage();
     addTearDown(image.dispose);
-    appProvider.selectedAction = ActionType.brush;
+    appProvider.selectedTool = ToolKind.brush;
     _startTransformOverlay(appProvider, image);
 
     await tester.pumpWidget(

@@ -57,37 +57,109 @@ Future<void> _commitSmudgePatch(LayerProvider layer, int strokeIndex) async {
     retainCache: true,
   );
   layer.invalidateFullResCache();
-  compactPixelBrushLayerHistory(targetLayer: layer, maxGestureCount: _maxGestureCount);
+  await compactPixelBrushLayerHistory(targetLayer: layer, maxGestureCount: _maxGestureCount);
+}
+
+/// Appends an unrelated (non-pixel-brush) fill, splitting runs of patches.
+void _appendFill(LayerProvider layer, Rect rect) {
+  layer.appendDrawingAction(
+    RegionAction(
+      positions: <Offset>[rect.topLeft, rect.bottomRight],
+      fillColor: _baseFillColor,
+      path: ui.Path()..addRect(rect),
+    ),
+  );
+}
+
+Future<Uint8List> _layerBytes(LayerProvider layer) async {
+  final ui.Image image = layer.toImageForStorage(_layerSize);
+  final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
+  image.dispose();
+  return bytes!.buffer.asUint8List();
+}
+
+/// Appends [patchAction] to [layer] without compacting (the reference stack).
+Future<void> _commitSmudgePatchWithoutCompaction(LayerProvider layer, UserActionDrawing patchAction) async {
+  layer.actionStack.add(patchAction);
 }
 
 void main() {
   group('compactPixelBrushLayerHistory', () {
-    test('keeps the layer content when it flattens past the gesture cap', () async {
+    test('merges a run of consecutive patches over their union', () async {
       final LayerProvider layer = LayerProvider(name: 'Clouds', size: _layerSize, onThumbnailChanged: () {});
-      layer.appendDrawingAction(
-        RegionAction(
-          positions: <Offset>[_baseFillRect.topLeft, _baseFillRect.bottomRight],
-          fillColor: _baseFillColor,
-          path: ui.Path()..addRect(_baseFillRect),
-        ),
-      );
-
+      _appendFill(layer, _baseFillRect);
       for (int stroke = 0; stroke < _strokeCount; stroke++) {
         await _commitSmudgePatch(layer, stroke);
       }
 
       expect(
         layer.actionStack.map((UserActionDrawing action) => action.action),
-        <ActionType>[ActionType.image],
-        reason: 'Exceeding the gesture cap should flatten the history into one image',
+        <ActionType>[ActionType.region, ActionType.smudge],
+        reason: 'The consecutive patches collapse into one patch above the untouched fill',
       );
-      final ui.Image flattened = layer.toImageForStorage(_layerSize);
+      final ImageAction mergedPatch = layer.actionStack.last as ImageAction;
+      expect(mergedPatch.image.width, (_strokeCount * _patchSide).toInt());
+      expect(mergedPatch.image.height, _patchSide.toInt());
+    });
+
+    test('compaction leaves every pixel unchanged', () async {
+      final LayerProvider layer = LayerProvider(name: 'Clouds', size: _layerSize, onThumbnailChanged: () {});
+      _appendFill(layer, _baseFillRect);
+      final LayerProvider uncompacted = LayerProvider(name: 'Ref', size: _layerSize, onThumbnailChanged: () {});
+      for (int stroke = 0; stroke < _strokeCount; stroke++) {
+        await _commitSmudgePatch(layer, stroke);
+        await _commitSmudgePatchWithoutCompaction(uncompacted, layer.actionStack.last);
+      }
+      uncompacted.actionStack.insert(0, layer.actionStack.first);
+
+      expect(layer.actionStack.length, lessThan(uncompacted.actionStack.length));
+      expect(await _layerBytes(layer), equals(await _layerBytes(uncompacted)));
+    });
+
+    test('patches interleaved with other actions fall back to a full flatten', () async {
+      final LayerProvider layer = LayerProvider(name: 'Clouds', size: _layerSize, onThumbnailChanged: () {});
+      for (int stroke = 0; stroke < _maxGestureCount; stroke++) {
+        await _commitSmudgePatch(layer, stroke);
+        _appendFill(layer, Rect.fromLTWH(stroke * _patchSide, _patchSide, _patchSide, _patchSide));
+      }
+      final int opaqueBefore = await _countOpaquePixels(layer.toImageForStorage(_layerSize));
+
+      await _commitSmudgePatch(layer, _maxGestureCount);
+
       expect(
-        await _countOpaquePixels(flattened),
-        (_baseFillRect.width * _baseFillRect.height).toInt(),
+        layer.actionStack.map((UserActionDrawing action) => action.action),
+        <ActionType>[ActionType.image],
+        reason: 'With no adjacent patches to merge, the history flattens into one image',
+      );
+      expect(
+        await _countOpaquePixels(layer.toImageForStorage(_layerSize)),
+        opaqueBefore + (_patchSide * _patchSide).toInt(),
         reason: 'Flattening must preserve every painted pixel, not erase the layer',
       );
-      flattened.dispose();
+    });
+
+    test('a compaction that races a new edit is discarded', () async {
+      final LayerProvider layer = LayerProvider(name: 'Clouds', size: _layerSize, onThumbnailChanged: () {});
+      for (int stroke = 0; stroke < _maxGestureCount; stroke++) {
+        await _commitSmudgePatch(layer, stroke);
+      }
+      final ImageAction lastPatch = layer.actionStack.last as ImageAction;
+      layer.actionStack.add(
+        ImageAction.placed(
+          action: ActionType.smudge,
+          bounds: const Rect.fromLTWH(_maxGestureCount * _patchSide, 0, _patchSide, _patchSide),
+          image: lastPatch.image,
+        ),
+      );
+
+      final Future<void> compaction = compactPixelBrushLayerHistory(
+        targetLayer: layer,
+        maxGestureCount: _maxGestureCount,
+      );
+      _appendFill(layer, _baseFillRect);
+      await compaction;
+
+      expect(layer.actionStack.length, _strokeCount + 1);
     });
 
     test('leaves the history alone while under the gesture cap', () async {
@@ -98,7 +170,7 @@ void main() {
 
       expect(layer.actionStack.length, _maxGestureCount);
       expect(
-        layer.actionStack.every((UserActionDrawing action) => isPixelBrushPersistedActionType(action.action)),
+        layer.actionStack.every((UserActionDrawing action) => action.action.isPixelBrush),
         isTrue,
       );
     });

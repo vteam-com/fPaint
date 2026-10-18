@@ -19,13 +19,12 @@ import 'package:fpaint/models/quick_menu_model.dart';
 import 'package:fpaint/models/quick_menu_slot.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
-import 'package:fpaint/providers/inherited_scope.dart';
 import 'package:fpaint/providers/shell_provider.dart';
-import 'package:fpaint/recovery/draft_recovery_controller.dart';
 import 'package:fpaint/widgets/locked_layer_guard.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
@@ -35,6 +34,7 @@ part 'canvas_gesture_handler_multi_touch.dart';
 part 'canvas_gesture_handler_quick_menu.dart';
 part 'canvas_gesture_handler_rotation.dart';
 part 'canvas_gesture_handler_state_methods.dart';
+part 'canvas_tool_gestures.dart';
 
 /// Handles pointer, pan, and zoom gestures over the canvas widget tree.
 class CanvasGestureHandler extends StatefulWidget {
@@ -50,6 +50,9 @@ class CanvasGestureHandler extends StatefulWidget {
 }
 
 class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
+  /// The tool gesture the active pointer started, or null when it started none
+  /// (a pre-empting chord, picker or eyedropper, or a refused stroke).
+  _ToolGesture? _activeGesture;
   int _activePointerId = -1;
   final List<int> _activePointers = <int>[];
 

@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -81,7 +82,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Arm a brush (not the eraser) so the pen eraser must override it.
-    appProvider.selectedAction = ActionType.brush;
+    appProvider.selectedTool = ToolKind.brush;
     final Offset start = await canvasStart(tester);
 
     // The Windows embedder reports the eraser end as an invertedStylus whose
@@ -96,13 +97,13 @@ void main() {
     );
 
     expect(appProvider.layers.selectedLayer.lastUserAction?.action, ActionType.eraser);
-    expect(appProvider.selectedAction, ActionType.brush, reason: 'The armed tool must be left untouched.');
+    expect(appProvider.selectedTool, ToolKind.brush, reason: 'The armed tool must be left untouched.');
   });
 
   testWidgets('a selected brush still draws a brush with a normal mouse stroke', (
     WidgetTester tester,
   ) async {
-    appProvider.selectedAction = ActionType.brush;
+    appProvider.selectedTool = ToolKind.brush;
     final Offset start = await canvasStart(tester);
 
     await _stroke(tester, start, PointerDeviceKind.mouse, kPrimaryButton);
@@ -111,7 +112,7 @@ void main() {
   });
 
   testWidgets('a selected brush still draws with a single touch stroke', (WidgetTester tester) async {
-    appProvider.selectedAction = ActionType.brush;
+    appProvider.selectedTool = ToolKind.brush;
     final Offset start = await canvasStart(tester);
 
     await _stroke(tester, start, PointerDeviceKind.touch, kPrimaryButton);
@@ -121,7 +122,7 @@ void main() {
 
   testWidgets('pen-only drawing blocks touch but accepts a normal stylus', (WidgetTester tester) async {
     await preferences.setPenOnlyDrawing(true);
-    appProvider.selectedAction = ActionType.brush;
+    appProvider.selectedTool = ToolKind.brush;
     final Offset start = await canvasStart(tester);
     final int initialActionCount = appProvider.layers.selectedLayer.actionStack.length;
 

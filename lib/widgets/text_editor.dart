@@ -4,7 +4,6 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/text_tool_state.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
@@ -41,12 +40,8 @@ class _TextEditorState extends State<TextEditor> {
   }
 
   void _deleteText() {
-    // Find and remove the text object from the action stack
-    final List<UserActionDrawing> actionStack = appProvider.layers.selectedLayer.actionStack;
-    actionStack.removeWhere((UserActionDrawing action) => action.textObject == textObject);
-
+    appProvider.deleteTextObject(textObject);
     appProvider.selectedTextObject = null;
-    appProvider.layers.selectedLayer.clearCache();
     appProvider.update();
   }
 
@@ -70,17 +65,9 @@ class _TextEditorState extends State<TextEditor> {
             _deleteText();
           },
           onSubmitted: (TextObject updatedTextObject) {
-            textObject.text = updatedTextObject.text;
-            textObject.position = updatedTextObject.position;
-            textObject.size = updatedTextObject.size;
-            textObject.color = updatedTextObject.color;
-            textObject.fontFamily = updatedTextObject.fontFamily;
-            textObject.fontWeight = updatedTextObject.fontWeight;
-            textObject.fontStyle = updatedTextObject.fontStyle;
-            textObject.textAlign = updatedTextObject.textAlign;
+            appProvider.updateTextObject(textObject, updatedTextObject);
             appProvider.selectedTextObject = null;
             appProvider.adoptTextToolStateFromObject(updatedTextObject);
-            appProvider.layers.selectedLayer.clearCache();
             appProvider.update();
           },
         );

@@ -444,11 +444,11 @@ void main() {
       recorder.endRecording();
     });
 
-    test('renderLayer with selector action does nothing', () {
+    test('renderLayer with a non-rendering fill marker does nothing', () {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
         NonRenderingAction(
-          action: ActionType.selector,
+          action: ActionType.fill,
           positions: <Offset>[const Offset(10, 10), const Offset(50, 50)],
         ),
       );

@@ -7,7 +7,7 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/tool_descriptor.dart';
 import 'package:fpaint/models/tool_family.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/models/tool_kind.dart';
 
 void main() {
   late AppLocalizations l10n;
@@ -17,38 +17,35 @@ void main() {
   });
 
   group('gesture tools', () {
-    test('every rail gesture tool, including smudge, carries an action', () {
-      final List<ActionType?> gestureActions = <ToolDescriptor>[
+    test('every rail gesture tool, including smudge, carries a tool', () {
+      final List<ToolKind?> gestureTools = <ToolDescriptor>[
         ...brushSectionTools(),
         ...elementSectionTools(),
-      ].where((ToolDescriptor d) => d.action != null).map((ToolDescriptor d) => d.action).toList();
-      expect(gestureActions, contains(ActionType.smudge));
+      ].where((ToolDescriptor d) => d.tool != null).map((ToolDescriptor d) => d.tool).toList();
+      expect(gestureTools, contains(ToolKind.smudge));
     });
 
     test('blur is not a rail gesture tool (it appears as an effect)', () {
-      expect(kGestureToolOrder, contains(ActionType.smudge));
-      expect(kGestureToolOrder, isNot(contains(ActionType.blurBrush)));
+      expect(kGestureToolOrder, contains(ToolKind.smudge));
+      expect(kGestureToolOrder, isNot(contains(ToolKind.blurBrush)));
     });
   });
 
-  group('toolLabel', () {
+  group('ToolKind.label', () {
     test('maps rail actions to their localized labels', () {
-      expect(toolLabel(l10n, ActionType.pencil), l10n.toolPencil);
-      expect(toolLabel(l10n, ActionType.brush), l10n.toolBrush);
-      expect(toolLabel(l10n, ActionType.smudge), l10n.toolSmudge);
-      expect(toolLabel(l10n, ActionType.line), l10n.toolLine);
-      expect(toolLabel(l10n, ActionType.rectangle), l10n.toolRectangle);
-      expect(toolLabel(l10n, ActionType.circle), l10n.toolCircle);
-      expect(toolLabel(l10n, ActionType.fill), l10n.toolPaintBucket);
-      expect(toolLabel(l10n, ActionType.eraser), l10n.toolEraser);
-      expect(toolLabel(l10n, ActionType.text), l10n.toolText);
+      expect(ToolKind.pencil.label(l10n), l10n.toolPencil);
+      expect(ToolKind.brush.label(l10n), l10n.toolBrush);
+      expect(ToolKind.smudge.label(l10n), l10n.toolSmudge);
+      expect(ToolKind.line.label(l10n), l10n.toolLine);
+      expect(ToolKind.rectangle.label(l10n), l10n.toolRectangle);
+      expect(ToolKind.circle.label(l10n), l10n.toolCircle);
+      expect(ToolKind.fill.label(l10n), l10n.toolPaintBucket);
+      expect(ToolKind.eraser.label(l10n), l10n.toolEraser);
+      expect(ToolKind.text.label(l10n), l10n.toolText);
     });
 
-    test('falls back to the enum name for non-rail actions', () {
-      expect(toolLabel(l10n, ActionType.selector), ActionType.selector.name);
-      expect(toolLabel(l10n, ActionType.region), ActionType.region.name);
-      expect(toolLabel(l10n, ActionType.image), ActionType.image.name);
-      expect(toolLabel(l10n, ActionType.cut), ActionType.cut.name);
+    test('localizes the selector, which is not on the rail', () {
+      expect(ToolKind.selector.label(l10n), l10n.toolSelector);
     });
   });
 
@@ -60,7 +57,7 @@ void main() {
     });
 
     test('every gesture tool is covered exactly once across the sections', () {
-      final List<ToolDescriptor> gestures = fullRail().where((ToolDescriptor d) => d.action != null).toList();
+      final List<ToolDescriptor> gestures = fullRail().where((ToolDescriptor d) => d.tool != null).toList();
       expect(gestures.length, kGestureToolOrder.length);
     });
 
@@ -72,15 +69,15 @@ void main() {
   });
 
   group('brush and element sections', () {
-    List<ActionType> gestureActionsOf(List<ToolDescriptor> tools) =>
-        tools.where((ToolDescriptor d) => d.action != null).map((ToolDescriptor d) => d.action!).toList();
+    List<ToolKind> gestureToolsOf(List<ToolDescriptor> tools) =>
+        tools.where((ToolDescriptor d) => d.tool != null).map((ToolDescriptor d) => d.tool!).toList();
 
     test('Brush section holds the freehand painters plus every effect', () {
       final List<ToolDescriptor> tools = brushSectionTools();
-      expect(gestureActionsOf(tools), kBrushToolOrder);
+      expect(gestureToolsOf(tools), kBrushToolOrder);
       expect(
-        gestureActionsOf(tools),
-        containsAll(<ActionType>[ActionType.pencil, ActionType.brush, ActionType.smudge, ActionType.eraser]),
+        gestureToolsOf(tools),
+        containsAll(<ToolKind>[ToolKind.pencil, ToolKind.brush, ToolKind.smudge, ToolKind.eraser]),
       );
       // Effects live in the Brush section.
       final List<ToolDescriptor> effects = tools.where((ToolDescriptor d) => d.effect != null).toList();
@@ -88,37 +85,37 @@ void main() {
     });
 
     test('Elements section is exactly the placement / shape tools', () {
-      expect(gestureActionsOf(elementSectionTools()), kElementToolOrder);
+      expect(gestureToolsOf(elementSectionTools()), kElementToolOrder);
       expect(
         kElementToolOrder,
-        <ActionType>[ActionType.line, ActionType.rectangle, ActionType.circle, ActionType.fill, ActionType.text],
+        <ToolKind>[ToolKind.line, ToolKind.rectangle, ToolKind.circle, ToolKind.fill, ToolKind.text],
       );
       // The Elements section carries no effects.
       expect(elementSectionTools().where((ToolDescriptor d) => d.effect != null), isEmpty);
     });
 
     test('the two sections are disjoint and together cover every gesture tool', () {
-      final Set<ActionType> brush = kBrushToolOrder.toSet();
-      final Set<ActionType> element = kElementToolOrder.toSet();
+      final Set<ToolKind> brush = kBrushToolOrder.toSet();
+      final Set<ToolKind> element = kElementToolOrder.toSet();
       expect(brush.intersection(element), isEmpty);
-      expect(<ActionType>{...brush, ...element}, kGestureToolOrder.toSet());
-      expect(kGestureToolOrder, <ActionType>[...kBrushToolOrder, ...kElementToolOrder]);
+      expect(<ToolKind>{...brush, ...element}, kGestureToolOrder.toSet());
+      expect(kGestureToolOrder, <ToolKind>[...kBrushToolOrder, ...kElementToolOrder]);
     });
   });
 
   group('descriptors expose icon and label', () {
     test('gesture descriptor mirrors its action', () {
-      const ToolDescriptor descriptor = ToolDescriptor.gesture(ActionType.smudge);
-      expect(descriptor.action, ActionType.smudge);
+      const ToolDescriptor descriptor = ToolDescriptor.gesture(ToolKind.smudge);
+      expect(descriptor.tool, ToolKind.smudge);
       expect(descriptor.effect, isNull);
-      expect(descriptor.icon, ActionType.smudge.icon);
+      expect(descriptor.icon, ToolKind.smudge.icon);
       expect(descriptor.label(l10n), l10n.toolSmudge);
     });
 
     test('effect descriptor mirrors its effect', () {
       const ToolDescriptor descriptor = ToolDescriptor.adjust(SelectionEffect.blur);
       expect(descriptor.effect, SelectionEffect.blur);
-      expect(descriptor.action, isNull);
+      expect(descriptor.tool, isNull);
       expect(descriptor.icon, SelectionEffect.blur.icon);
       expect(descriptor.label(l10n), l10n.effectBlur);
     });
@@ -126,29 +123,29 @@ void main() {
 
   group('tool shortcuts shown in rail tooltips', () {
     test('maps the bound tools to their bare key', () {
-      expect(toolShortcutLabel(ActionType.brush), ShortcutKeys.b);
-      expect(toolShortcutLabel(ActionType.eraser), ShortcutKeys.e);
-      expect(toolShortcutLabel(ActionType.selector), ShortcutKeys.s);
-      expect(toolShortcutLabel(ActionType.fill), ShortcutKeys.f);
-      expect(toolShortcutLabel(ActionType.text), ShortcutKeys.t);
+      expect(toolShortcutLabel(ToolKind.brush), ShortcutKeys.b);
+      expect(toolShortcutLabel(ToolKind.eraser), ShortcutKeys.e);
+      expect(toolShortcutLabel(ToolKind.selector), ShortcutKeys.s);
+      expect(toolShortcutLabel(ToolKind.fill), ShortcutKeys.f);
+      expect(toolShortcutLabel(ToolKind.text), ShortcutKeys.t);
     });
 
     test('returns null for tools reachable from the rail only', () {
-      for (final ActionType action in <ActionType>[
-        ActionType.pencil,
-        ActionType.smudge,
-        ActionType.blurBrush,
-        ActionType.line,
-        ActionType.rectangle,
-        ActionType.circle,
+      for (final ToolKind action in <ToolKind>[
+        ToolKind.pencil,
+        ToolKind.smudge,
+        ToolKind.blurBrush,
+        ToolKind.line,
+        ToolKind.rectangle,
+        ToolKind.circle,
       ]) {
         expect(toolShortcutLabel(action), isNull, reason: '${action.name} has no keyboard binding');
       }
     });
 
     test('a gesture descriptor exposes its key, an effect never does', () {
-      expect(const ToolDescriptor.gesture(ActionType.fill).shortcut, ShortcutKeys.f);
-      expect(const ToolDescriptor.gesture(ActionType.pencil).shortcut, isNull);
+      expect(const ToolDescriptor.gesture(ToolKind.fill).shortcut, ShortcutKeys.f);
+      expect(const ToolDescriptor.gesture(ToolKind.pencil).shortcut, isNull);
       expect(const ToolDescriptor.adjust(SelectionEffect.blur).shortcut, isNull);
     });
 
@@ -180,7 +177,7 @@ void main() {
 
   group('equality', () {
     test('descriptors for the same tool are equal and hash alike', () {
-      expect(const ToolDescriptor.gesture(ActionType.brush), const ToolDescriptor.gesture(ActionType.brush));
+      expect(const ToolDescriptor.gesture(ToolKind.brush), const ToolDescriptor.gesture(ToolKind.brush));
       expect(
         const ToolDescriptor.adjust(SelectionEffect.blur).hashCode,
         const ToolDescriptor.adjust(SelectionEffect.blur).hashCode,
@@ -188,8 +185,8 @@ void main() {
     });
 
     test('descriptors for different tools are not equal', () {
-      expect(const ToolDescriptor.gesture(ActionType.brush), isNot(const ToolDescriptor.gesture(ActionType.eraser)));
-      expect(const ToolDescriptor.adjust(SelectionEffect.blur), isNot(const ToolDescriptor.gesture(ActionType.brush)));
+      expect(const ToolDescriptor.gesture(ToolKind.brush), isNot(const ToolDescriptor.gesture(ToolKind.eraser)));
+      expect(const ToolDescriptor.adjust(SelectionEffect.blur), isNot(const ToolDescriptor.gesture(ToolKind.brush)));
     });
   });
 }

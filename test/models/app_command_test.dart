@@ -7,7 +7,7 @@ import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_command.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/tool_family.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/models/tool_kind.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
@@ -32,27 +32,27 @@ void main() {
     });
 
     test('selector reuses the tool shortcut table', () {
-      expect(AppCommand.selector.shortcut, toolShortcutLabel(ActionType.selector));
+      expect(AppCommand.selector.shortcut, toolShortcutLabel(ToolKind.selector));
     });
   });
 
-  group('brushSizeRangeFor', () {
+  group('ToolKind.brushSizeRange', () {
     test('pencil starts at one pixel and caps at the paint range', () {
-      final BrushSizeRange range = brushSizeRangeFor(ActionType.pencil);
+      final BrushSizeRange range = ToolKind.pencil.brushSizeRange();
       expect(range.min, AppMath.one.toDouble());
       expect(range.max, AppLimits.percentMax.toDouble());
     });
 
     test('pixel brushes use the large pixel-brush range', () {
-      for (final ActionType action in <ActionType>[ActionType.smudge, ActionType.blurBrush]) {
-        final BrushSizeRange range = brushSizeRangeFor(action);
+      for (final ToolKind action in <ToolKind>[ToolKind.smudge, ToolKind.blurBrush]) {
+        final BrushSizeRange range = action.brushSizeRange();
         expect(range.min, AppInteraction.minCanvasScale);
         expect(range.max, AppLimits.pixelBrushSizeMax.toDouble());
       }
     });
 
     test('an armed effect overrides the underlying tool range', () {
-      final BrushSizeRange range = brushSizeRangeFor(ActionType.pencil, effectArmed: true);
+      final BrushSizeRange range = ToolKind.pencil.brushSizeRange(effectArmed: true);
       expect(range.min, AppInteraction.minCanvasScale);
       expect(range.max, AppLimits.pixelBrushSizeMax.toDouble());
     });

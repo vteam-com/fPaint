@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/render_helper.dart';
@@ -42,6 +44,9 @@ class AnimatedMarchingAntsPath extends StatefulWidget {
 class _AnimatedMarchingAntsPathState extends State<AnimatedMarchingAntsPath> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
+  /// Measured contours of [AnimatedMarchingAntsPath.path], computed once per
+  /// path so each animation tick only re-extracts dashes.
+  List<ui.PathMetric>? _pathMetrics;
   @override
   void initState() {
     super.initState();
@@ -49,6 +54,7 @@ class _AnimatedMarchingAntsPathState extends State<AnimatedMarchingAntsPath> wit
       vsync: this,
       duration: AppDefaults.animationLoopDuration,
     )..repeat();
+    _measurePath();
   }
 
   @override
@@ -58,20 +64,37 @@ class _AnimatedMarchingAntsPathState extends State<AnimatedMarchingAntsPath> wit
   }
 
   @override
+  void didUpdateWidget(covariant AnimatedMarchingAntsPath oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.path, widget.path)) {
+      _measurePath();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (BuildContext _, Widget? _) {
-        return CustomPaint(
-          painter: MarchingAntsPainter(
-            path: widget.path,
-            linePointStart: widget.linePointStart,
-            linePointEnd: widget.linePointEnd,
-            phase: _controller.value * AppMath.baseTen,
-          ),
-        );
-      },
+    // The ants animate every frame for as long as a selection is visible; the
+    // boundary keeps those ticks from repainting the canvas beneath them.
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (BuildContext _, Widget? _) {
+          return CustomPaint(
+            painter: MarchingAntsPainter(
+              path: widget.path,
+              pathMetrics: _pathMetrics,
+              linePointStart: widget.linePointStart,
+              linePointEnd: widget.linePointEnd,
+              phase: _controller.value * AppMath.baseTen,
+            ),
+          );
+        },
+      ),
     );
+  }
+
+  void _measurePath() {
+    _pathMetrics = widget.path?.computeMetrics().toList();
   }
 }
 
@@ -82,8 +105,10 @@ class MarchingAntsPainter extends CustomPainter {
   /// The [path] parameter specifies the path to draw.
   /// The [phase] parameter specifies the animation phase.
   /// The [linePointStart] and [linePointEnd] parameters specify the start and end points of a line to draw.
+  /// The optional [pathMetrics] are [path]'s precomputed contours.
   MarchingAntsPainter({
     required this.path,
+    this.pathMetrics,
     required this.phase,
     required this.linePointStart,
     required this.linePointEnd,
@@ -91,6 +116,9 @@ class MarchingAntsPainter extends CustomPainter {
 
   /// The path to draw.
   final Path? path;
+
+  /// Precomputed contours of [path]; measured on demand when null.
+  final List<ui.PathMetric>? pathMetrics;
 
   /// The start point of a line to draw.
   final Offset? linePointStart;
@@ -118,8 +146,8 @@ class MarchingAntsPainter extends CustomPainter {
       paint.color = AppColors.overlayDark;
       paint.strokeCap = StrokeCap.round;
 
-      final Path dashPath = createDashedPath(
-        path!,
+      final Path dashPath = createDashedPathFromMetrics(
+        pathMetrics ?? path!.computeMetrics(),
         dashWidth: _antDashWidth,
         dashGap: _antDashSpace,
         phase: phase,
@@ -159,7 +187,10 @@ class MarchingAntsPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
+  bool shouldRepaint(covariant MarchingAntsPainter oldDelegate) {
+    return oldDelegate.phase != phase ||
+        !identical(oldDelegate.path, path) ||
+        oldDelegate.linePointStart != linePointStart ||
+        oldDelegate.linePointEnd != linePointEnd;
   }
 }

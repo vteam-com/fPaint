@@ -136,6 +136,9 @@ class PixelBrushStrokeSession {
     _sourceHeight = regionHeight;
   }
 
+  /// Whether the cached source bytes were recorded for [signature].
+  bool matchesSourceSignature(List<int> signature) => listEquals(_sourceSignature, signature);
+
   /// Records the signature the cached source bytes correspond to.
   void setSourceSignature(List<int> signature) {
     _sourceSignature = signature;

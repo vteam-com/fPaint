@@ -6,19 +6,19 @@ import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/file_webp.dart' show convertImageToWebp;
+import 'package:fpaint/files/png_encoder.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 
 const String _errorFailedToEncodePng = 'Failed to encode the canvas as PNG.';
 
-/// Encodes an in-memory image into PNG bytes, throwing when the engine fails.
+/// Encodes an in-memory image into PNG bytes (see [encodeImageToPngFast]),
+/// throwing when the encode fails.
 Future<Uint8List> _imageToPngBytes(ui.Image image) async {
-  final ByteData byteData = await requireImageByteData<FileSaveException>(
-    image: image,
-    format: ui.ImageByteFormat.png,
-    errorMessage: _errorFailedToEncodePng,
-    exceptionBuilder: FileSaveException.new,
-  );
-  return byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes);
+  final Uint8List? bytes = await encodeImageToPngFast(image);
+  if (bytes == null) {
+    throw const FileSaveException(_errorFailedToEncodePng);
+  }
+  return bytes;
 }
 
 /// Captures the current canvas as PNG-encoded bytes.

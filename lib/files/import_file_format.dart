@@ -1,82 +1,101 @@
+import 'dart:typed_data';
+
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/export_file_name.dart';
+import 'package:fpaint/files/file_heic.dart' if (dart.library.html) 'package:fpaint/files/file_heic_web.dart';
+import 'package:fpaint/files/file_ora.dart';
+import 'package:fpaint/files/file_psd.dart';
+import 'package:fpaint/files/file_tiff.dart';
+import 'package:fpaint/files/flat_image_reader.dart';
+import 'package:fpaint/providers/layers_provider.dart';
 
-/// How a supported input file is turned into layers.
+/// Decodes a file's [bytes] into [layers], replacing the open document.
 ///
-/// Layered formats rebuild the whole layer stack from the file; flat formats
-/// decode to a single image. HEIF-family formats need a platform decode pass
-/// before the bytes can be handed to the image decoder.
-enum ImportDecodeKind {
-  /// ORA — a layered format with its own reader.
-  ora,
+/// [name] names the layer a flat format creates; layered formats keep the
+/// layer names stored in the file. Throws on undecodable input.
+typedef ImportDocumentReader = Future<void> Function(LayersProvider layers, Uint8List bytes, String name);
 
-  /// PSD — a layered format with its own reader.
-  psd,
-
-  /// TIFF — a layered format with its own reader.
-  tiff,
-
-  /// HEIC/AVIF — needs a platform HEIF decode before image decoding.
-  heif,
-
-  /// A format the engine's image decoder handles directly.
-  image,
-}
+/// Extracts the image-decodable preview from a file's bytes, or null when the
+/// file carries none.
+typedef ImportPreviewExtractor = Future<Uint8List?> Function(Uint8List bytes);
 
 /// Static metadata for an importable file format.
 class _ImportFormatConfig {
-  const _ImportFormatConfig({required this.extensions, required this.decodeKind});
+  const _ImportFormatConfig({
+    required this.extensions,
+    required this.reader,
+    this.supportsLayers = false,
+    this.previewExtractor,
+  });
 
   final List<String> extensions;
-  final ImportDecodeKind decodeKind;
+  final ImportDocumentReader reader;
+  final bool supportsLayers;
+
+  /// Null when the file's own bytes are already image-decodable.
+  final ImportPreviewExtractor? previewExtractor;
 }
+
+Future<void> _readOra(LayersProvider layers, Uint8List bytes, String _) => readOraFileFromBytes(layers, bytes);
+
+Future<void> _readPsd(LayersProvider layers, Uint8List bytes, String _) => readPsdFileFromBytes(layers, bytes);
+
+Future<void> _readTiff(LayersProvider layers, Uint8List bytes, String _) => readTiffFileFromBytes(layers, bytes);
+
+/// HEIC/AVIF need a platform HEIF decode before the image decoder sees them.
+Future<void> _readHeif(LayersProvider layers, Uint8List bytes, String name) async =>
+    readFlatImageFromBytes(layers, await decodeHeicBytes(bytes), name);
 
 /// Every file format the app can open.
 ///
-/// Extensions and decode strategy live on the enum entry, so adding a format
-/// means adding one entry rather than editing each `if`/`else` import chain
-/// (Open/Closed).
+/// Extensions and the reader live on the enum entry, so adding a format means
+/// adding one entry rather than editing each open/import flow (Open/Closed).
 enum ImportFileFormat {
   ora(
     _ImportFormatConfig(
       extensions: <String>[FileExtensions.ora],
-      decodeKind: ImportDecodeKind.ora,
+      reader: _readOra,
+      supportsLayers: true,
+      previewExtractor: extractOraPreviewPngBytes,
     ),
   ),
   psd(
     _ImportFormatConfig(
       extensions: <String>[FileExtensions.psd],
-      decodeKind: ImportDecodeKind.psd,
+      reader: _readPsd,
+      supportsLayers: true,
+      previewExtractor: extractPsdPreviewPngBytes,
     ),
   ),
   tiff(
     _ImportFormatConfig(
       extensions: <String>[FileExtensions.tif, FileExtensions.tiff],
-      decodeKind: ImportDecodeKind.tiff,
+      reader: _readTiff,
+      supportsLayers: true,
     ),
   ),
   heic(
     _ImportFormatConfig(
       extensions: <String>[FileExtensions.heic, FileExtensions.avif],
-      decodeKind: ImportDecodeKind.heif,
+      reader: _readHeif,
     ),
   ),
   png(
     _ImportFormatConfig(
       extensions: <String>[FileExtensions.png],
-      decodeKind: ImportDecodeKind.image,
+      reader: readFlatImageFromBytes,
     ),
   ),
   jpeg(
     _ImportFormatConfig(
       extensions: <String>[FileExtensions.jpg, FileExtensions.jpeg],
-      decodeKind: ImportDecodeKind.image,
+      reader: readFlatImageFromBytes,
     ),
   ),
   webp(
     _ImportFormatConfig(
       extensions: <String>[FileExtensions.webp],
-      decodeKind: ImportDecodeKind.image,
+      reader: readFlatImageFromBytes,
     ),
   );
 
@@ -87,8 +106,16 @@ enum ImportFileFormat {
   /// Every file extension that maps to this format; the first is canonical.
   List<String> get extensions => _config.extensions;
 
-  /// How this format's bytes are turned into layers.
-  ImportDecodeKind get decodeKind => _config.decodeKind;
+  /// Decodes this format's bytes into a document; see [ImportDocumentReader].
+  Future<void> read(LayersProvider layers, Uint8List bytes, String name) => _config.reader(layers, bytes, name);
+
+  /// Thumbnail-ready bytes for a file of this format: the embedded composite
+  /// for containers the image decoder cannot read (ORA, PSD), else [bytes]
+  /// as-is.
+  Future<Uint8List?> previewBytes(Uint8List bytes) async {
+    final ImportPreviewExtractor? extractor = _config.previewExtractor;
+    return extractor == null ? bytes : extractor(bytes);
+  }
 
   /// Whether the format rebuilds the full layer stack rather than decoding to
   /// a single flat image.
@@ -96,11 +123,7 @@ enum ImportFileFormat {
   /// Flat formats fall back to a selected-layer preference keyed by file path.
   /// ORA and TIFF embed the selected layer and restore it inside their reader;
   /// PSD has no such marker, so its selection simply defaults to the top layer.
-  bool get supportsLayers => const <ImportDecodeKind>{
-    ImportDecodeKind.ora,
-    ImportDecodeKind.psd,
-    ImportDecodeKind.tiff,
-  }.contains(_config.decodeKind);
+  bool get supportsLayers => _config.supportsLayers;
 
   /// Resolves an import format from a file extension, or null when unsupported.
   static ImportFileFormat? fromExtension(String extension) {

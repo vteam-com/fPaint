@@ -97,6 +97,17 @@ extension LayerDisplayCache on LayerProvider {
     required Rect visibleCanvasBounds,
     required FilterQuality filterQuality,
   }) {
+    // A finished stroke still folding into the projection keeps showing its
+    // baseline + stroke, rather than replaying the whole history meanwhile.
+    if (_strokeFold != null && _strokeBaselineDisplay != null) {
+      canvas.saveLayer(viewportBounds, compositePaint());
+      canvas.transform(viewport.matrix.storage);
+      canvas.clipRect(visibleCanvasBounds, doAntiAlias: false);
+      _renderStrokeBaselineAndTail(canvas);
+      canvas.restore();
+      return;
+    }
+
     final bool cacheEligible =
         _livePreviewBaseline == null && !isUserDrawing && _strokeBaseline == null && !_hasTextContent;
     if (cacheEligible && _displayCache != null) {
@@ -231,6 +242,7 @@ extension LayerDisplayCache on LayerProvider {
     _displayCache?.dispose();
     _displayCache = null;
     _displayCacheScale = 0.0;
+    onDisplayInvalidated?.call();
   }
 
   /// Drops the full-res render cache without scheduling a thumbnail rebuild.

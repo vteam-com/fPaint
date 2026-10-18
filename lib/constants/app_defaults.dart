@@ -26,6 +26,11 @@ class AppDefaults {
   static const Duration animationLoopDuration = Duration(seconds: 1);
   static const Duration clipboardAccessTimeout = Duration(seconds: 2);
   static const Duration recoverySaveDebounce = Duration(seconds: 2);
+
+  /// Longest a dirty document waits for a recovery draft while the user keeps
+  /// painting: each change restarts [recoverySaveDebounce], so without this cap
+  /// a continuous session would never autosave until the app is backgrounded.
+  static const Duration recoverySaveMaxWait = Duration(seconds: 30);
   static const Duration integrationEvidenceCollectionDelay = Duration(seconds: 2);
   static const Duration integrationVisualCheckpointDelay = Duration(milliseconds: 700);
   static const Duration fileImportFeedbackDuration = Duration(seconds: 3);

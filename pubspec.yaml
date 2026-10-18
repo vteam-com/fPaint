@@ -62,7 +62,7 @@ dev_dependencies:
   # Test-only. The app itself is Material-free (see lib/widgets/material_free.dart);
   # widget tests still need a MaterialApp/Scaffold host to pump into, which is all
   # this provides. Nothing under lib/ imports it, so it must not be a main dependency.
-  material_ui: 1.6.0
+  material_ui: 1.7.0
 
 flutter:
   config:

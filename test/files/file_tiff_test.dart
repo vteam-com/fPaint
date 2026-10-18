@@ -330,39 +330,14 @@ void main() {
       expect(layers.get(0).name, 'Existing');
     });
 
-    test('readTiffFromFilePath throws for non-existent file', () async {
+    test('readTiffFileFromBytes throws for a corrupt header', () async {
       final LayersProvider layers = LayersProvider();
       layers.clear();
 
       await expectLater(
-        () => readTiffFromFilePath(layers, '/does/not/exist.tif'),
-        throwsA(
-          isA<TiffFileException>().having(
-            (TiffFileException e) => e.message,
-            'message',
-            contains('not found'),
-          ),
-        ),
+        () => readTiffFileFromBytes(layers, Uint8List.fromList(<int>[0x49, 0x49, 0x2A, 0x00, 0xFF, 0xFF, 0xFF, 0xFF])),
+        throwsA(isA<TiffFileException>()),
       );
-    });
-
-    test('readTiffFromFilePath throws for corrupt file', () async {
-      final LayersProvider layers = LayersProvider();
-      layers.clear();
-
-      // Create a temp file with invalid content.
-      final Directory tempDir = await Directory.systemTemp.createTemp('tiff_test_');
-      final File tempFile = File('${tempDir.path}/corrupt.tif');
-      await tempFile.writeAsBytes(<int>[0x49, 0x49, 0x2A, 0x00, 0xFF, 0xFF, 0xFF, 0xFF]);
-
-      try {
-        await expectLater(
-          () => readTiffFromFilePath(layers, tempFile.path),
-          throwsA(isA<TiffFileException>()),
-        );
-      } finally {
-        await tempDir.delete(recursive: true);
-      }
     });
 
     test('TIFF with valid header but no frames throws', () async {
@@ -449,7 +424,7 @@ void main() {
       expect(layers.get(0).name, corruptedDescription);
     });
 
-    // Note: readTiffFileFromBytes and readTiffFromFilePath are complex functions that
+    // Note: readTiffFileFromBytes is complex functions that
     // involve LayersProvider and file operations, making them suitable for
     // integration testing rather than unit testing.
   });

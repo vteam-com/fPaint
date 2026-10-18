@@ -1,10 +1,5 @@
 part of 'app_provider.dart';
 
-/// Captures the current selection state so duplicate-apply undo can restore it.
-SelectionStateSnapshot captureSelectionState(AppProvider appProvider) {
-  return appProvider.selectorModel.snapshot();
-}
-
 /// Restores a previously captured selection state.
 void restoreSelectionState(
   AppProvider appProvider,
@@ -22,7 +17,7 @@ void selectRectOnCanvas(AppProvider appProvider, Rect bounds) {
 
 /// Commits a placed image as a new layer, selected-layer append, or layer
 /// replacement with undo support.
-void commitPlacedImage(
+void _commitPlacedImage(
   AppProvider appProvider, {
   required ui.Image image,
   required Offset offset,
