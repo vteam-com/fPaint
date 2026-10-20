@@ -4,7 +4,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2.1.2]
+## [2.1.2] - 2026-10-20
 
 ### Add
 
@@ -13,6 +13,10 @@ All notable changes to this project will be documented in this file.
 - Android: opening an image with fPaint from another app (Files, e-mail, "Open with") now loads it.
 - Android adaptive launcher icon.
 - iOS privacy manifest declaring the file-timestamp access used by Recent files and save backups.
+
+### Change
+
+- Saving an ORA file encodes its layers in parallel instead of one at a time, cutting save time for large canvases.
 
 ### Fix
 
