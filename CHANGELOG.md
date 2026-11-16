@@ -4,6 +4,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.3] - 2026-11-16
+
+### Add
+
+- Keyboard shortcuts: Cmd/Ctrl+O opens a document, and Shift+Cmd/Ctrl+N adds a new layer above the selected one.
+
+### Change
+
+- Built with Flutter 3.50. Updated dependencies, including `archive` 4.7.1, `file_picker` 13.3.3, `flutter_svg` 2.4.0 and `image` 4.13.1.
+- The undo button's tooltip lists the most recent actions first.
+- Linux and Windows builds use the fPaint app icon.
+
+### Fix
+
+- If opening a file failed, the current document took on the new file's name and was marked as saved, so the next Save overwrote the file you had tried to open. A failed open now leaves the current document unchanged.
+- Deleting a layer from the Layers panel can be undone.
+- Cut on a locked layer now shows the locked-layer message instead of doing nothing.
+- The paint bucket could fill the wrong region if the selection changed while the fill was being computed.
+- Undo history stays consistent after repeated whole-layer effects on the same layer.
+- Exporting to TIFF no longer holds on to a full copy of every layer in memory.
+- The layer color palette no longer shows colors from an earlier analysis when the layer changes quickly.
+
 ## [2.1.2] - 2026-10-20
 
 ### Add
