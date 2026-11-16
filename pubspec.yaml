@@ -28,26 +28,26 @@ issue_tracker: https://github.com/vteam-com/fPaint/issues
 version: 2.1.2+1
 
 environment:
-  sdk: ">=3.13.3"
-  flutter: ">=3.47.4"
+  sdk: ">=3.14.0"
+  flutter: ">=3.50.0"
 
 dependencies:
-  archive: 4.5.2
+  archive: 4.7.1
   # Required by the gen-l10n output (lib/l10n/app_localizations.dart imports
   # both since Flutter 3.50). App code stays Material-free; see
   # lib/widgets/material_free.dart.
   cupertino_ui: 1.1.6
   desktop_drop: 0.8.4
-  file_picker: 13.1.0
+  file_picker: 13.3.3
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  flutter_svg: 2.3.0
+  flutter_svg: 2.4.0
   fpaint_assets:
     path: packages/fpaint_assets
-  image: 4.12.0
-  imclipboard: 0.3.2
+  image: 4.13.1
+  imclipboard: 0.3.3
   intl: 0.20.3
   logging: 1.3.0
   # Also required by the gen-l10n output; see cupertino_ui above.
@@ -56,8 +56,8 @@ dependencies:
   path_provider: 2.1.6
   shared_preferences: 2.5.6
   url_launcher: 6.3.3
-  vector_math: 2.4.3
-  web: 1.1.1
+  vector_math: 2.4.4
+  web: 1.1.2
   xml: 7.0.1
 
 dev_dependencies:

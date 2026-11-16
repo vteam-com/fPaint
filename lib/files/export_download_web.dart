@@ -15,15 +15,14 @@ const String _htmlAnchorTag = 'a';
 Future<void> exportToDestination({
   required String dialogTitle,
   required String suggestedFileName,
-  required List<String> allowedExtensions,
   required Future<void> Function(String) write,
   AppPreferences? preferences,
   String Function(String)? resolveRecentFilePath,
 }) async {
-  // The browser picks the destination itself, so the dialog title and the
-  // extension filter have nowhere to go, and there is no recent-file list to
-  // record. Only the resolved name reaches the download.
-  _ignoreDesktopOnlyArguments(dialogTitle, allowedExtensions, preferences);
+  // The browser picks the destination itself, so the dialog title has
+  // nowhere to go, and there is no recent-file list to record. Only the
+  // resolved name reaches the download.
+  _ignoreDesktopOnlyArguments(dialogTitle, preferences);
   final String downloadName = resolveRecentFilePath?.call(suggestedFileName) ?? suggestedFileName;
   await write(downloadName);
 }
@@ -32,10 +31,9 @@ Future<void> exportToDestination({
 /// no use for, keeping one shared [exportToDestination] signature.
 void _ignoreDesktopOnlyArguments(
   String dialogTitle,
-  List<String> allowedExtensions,
   AppPreferences? preferences,
 ) {
-  if (dialogTitle.isEmpty || allowedExtensions.isEmpty || preferences == null) {
+  if (dialogTitle.isEmpty || preferences == null) {
     return;
   }
 }

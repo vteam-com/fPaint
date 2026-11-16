@@ -101,8 +101,6 @@ class FakeFilePicker extends FilePickerPlatform {
     String mimeType = _defaultSaveMimeType,
     String? dialogTitle,
     String? initialDirectory,
-    FileType type = FileType.any,
-    List<String>? allowedExtensions,
     void Function(FilePickerStatus)? onFileSaving,
     WindowsOptions windowsOptions = const WindowsOptions(),
     LinuxOptions linuxOptions = const LinuxOptions(),

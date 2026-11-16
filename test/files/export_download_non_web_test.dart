@@ -28,8 +28,6 @@ class _TestSaveFilePicker extends FilePickerPlatform {
     String mimeType = 'application/octet-stream',
     String? dialogTitle,
     String? initialDirectory,
-    FileType type = FileType.any,
-    List<String>? allowedExtensions,
     void Function(FilePickerStatus)? onFileSaving,
     WindowsOptions windowsOptions = const WindowsOptions(),
     LinuxOptions linuxOptions = const LinuxOptions(),
@@ -50,7 +48,6 @@ void main() {
       // mock instances for testing function calls. But we can verify that every
       // format is dispatchable through the single generic entry point.
       for (final SaveFileFormat format in SaveFileFormat.values) {
-        expect(format.pickerExtensions, isNotEmpty);
         expect(format.defaultExportFileName, isNotEmpty);
         expect(format.exportDialogTitle, isNotEmpty);
       }

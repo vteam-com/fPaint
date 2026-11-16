@@ -34,7 +34,6 @@ class _SaveFormatConfig {
     this.supportsLayers = false,
     this.clearsHasChangedOnWrite = false,
     this.normalizeFileName = _unchangedFileName,
-    this.pickerExtensions,
     this.exportDialogTitle = _saveImageTitle,
   });
 
@@ -58,10 +57,6 @@ class _SaveFormatConfig {
 
   /// Adjusts the target file name before saving.
   final SaveFormatFileNameNormalizer normalizeFileName;
-
-  /// Extensions offered in the save dialog, when narrower than [extensions].
-  /// TIFF accepts `.tiff` on open but only ever writes the canonical `.tif`.
-  final List<String>? pickerExtensions;
 
   /// Title shown on the export save dialog.
   final String exportDialogTitle;
@@ -99,7 +94,6 @@ enum SaveFileFormat {
       defaultExportFileName: defaultTiffExportFileName,
       supportsLayers: true,
       normalizeFileName: normalizeTiffExportFileName,
-      pickerExtensions: <String>[FileExtensions.tif],
       exportDialogTitle: _saveImageAsTiffTitle,
     ),
   ),
@@ -136,9 +130,6 @@ enum SaveFileFormat {
 
   /// Suggested file name when exporting with no name in hand.
   String get defaultExportFileName => _config.defaultExportFileName;
-
-  /// Extensions offered in the export save dialog.
-  List<String> get pickerExtensions => _config.pickerExtensions ?? _config.extensions;
 
   /// Title shown on the export save dialog.
   String get exportDialogTitle => _config.exportDialogTitle;

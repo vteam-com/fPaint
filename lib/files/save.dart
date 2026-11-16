@@ -20,7 +20,7 @@ const String _errorFailedToSaveFilePrefix = 'Failed to save file:';
 /// Exports the canvas in [format], prompting for a destination where the
 /// platform has one.
 ///
-/// The dialog title, offered extensions, suggested name and file-name
+/// The dialog title, suggested name and file-name
 /// normalization all come from [format], so adding a format needs no change
 /// here (Open/Closed).
 Future<void> exportAs(
@@ -32,7 +32,6 @@ Future<void> exportAs(
   await exportToDestination(
     dialogTitle: format.exportDialogTitle,
     suggestedFileName: format.normalizeFileName(fileName ?? format.defaultExportFileName),
-    allowedExtensions: format.pickerExtensions,
     write: (String filePath) => format.write(layers, filePath),
     preferences: preferences,
     resolveRecentFilePath: format.normalizeFileName,

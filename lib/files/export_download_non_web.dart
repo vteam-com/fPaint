@@ -30,12 +30,11 @@ String? filePathFromPickerUri(Uri? uri) {
 /// Prompts for a destination and writes the file there.
 ///
 /// Format-agnostic on purpose: the caller supplies the dialog text, the
-/// offered extensions and the writer, so this file never needs to know the
+/// suggested name and the writer, so this file never needs to know the
 /// set of save formats (and stays below `save.dart` in the dependency graph).
 Future<void> exportToDestination({
   required String dialogTitle,
   required String suggestedFileName,
-  required List<String> allowedExtensions,
   required Future<void> Function(String) write,
   AppPreferences? preferences,
   String Function(String)? resolveRecentFilePath,
@@ -43,7 +42,6 @@ Future<void> exportToDestination({
   await _exportWithFilePicker(
     dialogTitle: dialogTitle,
     fileName: suggestedFileName,
-    allowedExtensions: allowedExtensions,
     onFileSelected: write,
     preferences: preferences,
     resolveRecentFilePath: resolveRecentFilePath,
@@ -54,7 +52,6 @@ Future<void> exportToDestination({
 Future<void> _exportWithFilePicker({
   required String dialogTitle,
   required String fileName,
-  required List<String> allowedExtensions,
   required Future<void> Function(String) onFileSelected,
   AppPreferences? preferences,
   String Function(String)? resolveRecentFilePath,
@@ -65,9 +62,10 @@ Future<void> _exportWithFilePicker({
     fileName: fileName,
     // The dialog only chooses a destination here; the real bytes are written by
     // [onFileSelected], which also handles backup rotation and bookmark access.
+    // No extension filter: file_picker's saveFile() never applied one (its
+    // `type`/`allowedExtensions` were no-ops, deprecated in 13.2.0). The
+    // suggested name carries the extension instead.
     bytes: Uint8List(0),
-    type: FileType.custom,
-    allowedExtensions: allowedExtensions,
     windowsOptions: const WindowsOptions(lockParentWindow: true),
     linuxOptions: const LinuxOptions(lockParentWindow: true),
   );

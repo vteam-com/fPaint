@@ -152,24 +152,6 @@ const String _unitTestTiffPickerFileName = 'image.tif';
 /// File-picker suggestion used by WebP exports.
 const String _unitTestWebpPickerFileName = 'image.webp';
 
-/// Save-dialog extension filters used by PNG exports.
-const List<String> _unitTestPngAllowedExtensions = <String>[FileExtensions.png];
-
-/// Save-dialog extension filters used by JPEG exports.
-const List<String> _unitTestJpegAllowedExtensions = <String>[
-  FileExtensions.jpg,
-  FileExtensions.jpeg,
-];
-
-/// Save-dialog extension filters used by ORA exports.
-const List<String> _unitTestOraAllowedExtensions = <String>[FileExtensions.ora];
-
-/// Save-dialog extension filters used by TIFF exports.
-const List<String> _unitTestTiffAllowedExtensions = <String>[FileExtensions.tif];
-
-/// Save-dialog extension filters used by WebP exports.
-const List<String> _unitTestWebpAllowedExtensions = <String>[FileExtensions.webp];
-
 /// Subdirectory for unit test screenshot output within [_unitTestOutputDirectoryPath].
 const String _unitTestScreenshotDirectoryName = 'screenshots';
 
@@ -2166,33 +2148,27 @@ enum UnitTestExportFormat {
   ora(
     shareActionFileName: _unitTestOraShareActionFileName,
     pickerFileName: _unitTestOraPickerFileName,
-    allowedExtensions: _unitTestOraAllowedExtensions,
   ),
   png(
     shareActionFileName: _unitTestPngShareActionFileName,
     pickerFileName: _unitTestPngPickerFileName,
-    allowedExtensions: _unitTestPngAllowedExtensions,
   ),
   jpeg(
     shareActionFileName: _unitTestJpegShareActionFileName,
     pickerFileName: _unitTestJpegPickerFileName,
-    allowedExtensions: _unitTestJpegAllowedExtensions,
   ),
   tiff(
     shareActionFileName: _unitTestTiffShareActionFileName,
     pickerFileName: _unitTestTiffPickerFileName,
-    allowedExtensions: _unitTestTiffAllowedExtensions,
   ),
   webp(
     shareActionFileName: _unitTestWebpShareActionFileName,
     pickerFileName: _unitTestWebpPickerFileName,
-    allowedExtensions: _unitTestWebpAllowedExtensions,
   );
 
   const UnitTestExportFormat({
     required this.shareActionFileName,
     required this.pickerFileName,
-    required this.allowedExtensions,
   });
 
   /// Localized share-sheet label suffix shown for this export format.
@@ -2200,9 +2176,6 @@ enum UnitTestExportFormat {
 
   /// Suggested file name passed into the file picker when this format is exported.
   final String pickerFileName;
-
-  /// File extension filters used by the save dialog.
-  final List<String> allowedExtensions;
 
   /// Returns the localized action text displayed in the export sheet.
   String actionLabel(AppLocalizations l10n) {
@@ -2219,7 +2192,6 @@ class _UnitTestSaveDialogFilePicker extends FilePickerPlatform {
   });
 
   String? lastSuggestedFileName;
-  List<String>? lastAllowedExtensions;
   final String selectedFilePath;
 
   @override
@@ -2229,15 +2201,12 @@ class _UnitTestSaveDialogFilePicker extends FilePickerPlatform {
     String mimeType = 'application/octet-stream',
     String? dialogTitle,
     String? initialDirectory,
-    FileType type = FileType.any,
-    List<String>? allowedExtensions,
     void Function(FilePickerStatus)? onFileSaving,
     WindowsOptions windowsOptions = const WindowsOptions(),
     LinuxOptions linuxOptions = const LinuxOptions(),
     WebOptions webOptions = const WebOptions(),
   }) async {
     lastSuggestedFileName = fileName;
-    lastAllowedExtensions = allowedExtensions == null ? null : List<String>.from(allowedExtensions);
     return Uri.file(selectedFilePath);
   }
 }
@@ -2365,11 +2334,6 @@ Future<void> saveUnitTestArtworkViaExportUi(
       testFilePicker.lastSuggestedFileName,
       format.pickerFileName,
       reason: 'The save dialog should suggest the correct filename for ${format.shareActionFileName}',
-    );
-    expect(
-      testFilePicker.lastAllowedExtensions,
-      format.allowedExtensions,
-      reason: 'The save dialog should filter by ${format.allowedExtensions.join(', ')}',
     );
 
     expect(
