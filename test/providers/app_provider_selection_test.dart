@@ -700,6 +700,71 @@ void main() {
     });
   });
 
+  group('whole-layer effect history', () {
+    Future<void> applyWholeLayerBlur() async {
+      await appProvider.startEffectPreview(SelectionEffect.blur);
+      expect(appProvider.effectPreviewModel.coversEntireLayer, isTrue);
+      await appProvider.confirmEffectPreview();
+    }
+
+    test('collapse keeps every undo record whose actions survive, and none that do not', () async {
+      final Image layerImage = await createFilledLayerImage(
+        width: appProvider.layers.width.toInt(),
+        height: appProvider.layers.height.toInt(),
+        color: const Color(0xFF112233),
+      );
+      // Owned by the layer from here: the collapse must dispose it.
+
+      appProvider.layers.selectedLayer.addImage(imageToAdd: layerImage);
+      appProvider.undoProvider.clear();
+
+      await applyWholeLayerBlur();
+      await applyWholeLayerBlur();
+
+      // A painted (partial) effect stroke records under the effect's name too;
+      // the old name-matched trim threw it away.
+      final Image strokeImage = await createFilledLayerImage(width: 2, height: 2, color: const Color(0xFFFF0000));
+      expect(
+        appProvider.replaceRegion(
+          name: SelectionEffect.blur.name,
+          erasePath: Path()..addRect(const Rect.fromLTWH(0, 0, 2, 2)),
+          replacement: strokeImage,
+          offset: Offset.zero,
+        ),
+        isTrue,
+      );
+
+      await applyWholeLayerBlur();
+
+      final List<UserActionDrawing> stack = appProvider.layers.selectedLayer.actionStack;
+      // Collapsed to the last two generations: E2 (cut+image), stroke, E3.
+      expect(stack.where((UserActionDrawing a) => a.erasesEntireLayer).length, AppLimits.fullLayerImageGenerations);
+      final UserActionDrawing oldestSurvivingBoundary = stack.first;
+      expect(oldestSurvivingBoundary.erasesEntireLayer, isTrue);
+
+      expect(layerImage.debugDisposed, isTrue, reason: 'collapsed seed image is released once unreferenced');
+
+      // Exactly E3 and the stroke remain undoable; undoing both lands on the
+      // E2 generation, which is the new history floor.
+      await appProvider.undoAction();
+      await appProvider.undoAction();
+      expect(appProvider.undoProvider.canUndo, isFalse);
+      expect(appProvider.layers.selectedLayer.actionStack.length, AppMath.pair);
+      expect(identical(appProvider.layers.selectedLayer.actionStack.first, oldestSurvivingBoundary), isTrue);
+    });
+
+    test('two whole-layer effects collapse nothing and trim no history', () async {
+      appProvider.undoProvider.clear();
+      await applyWholeLayerBlur();
+      await applyWholeLayerBlur();
+
+      await appProvider.undoAction();
+      await appProvider.undoAction();
+      expect(appProvider.undoProvider.canUndo, isFalse);
+      expect(appProvider.layers.selectedLayer.actionStack.where((UserActionDrawing a) => a.erasesEntireLayer), isEmpty);
+    });
+  });
+
   group('effect brush', () {
     test('arming an effect exposes it and disarming clears it', () {
       appProvider.armEffectBrush(SelectionEffect.blur);

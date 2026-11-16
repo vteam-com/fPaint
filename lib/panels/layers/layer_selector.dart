@@ -7,7 +7,6 @@ import 'package:fpaint/panels/layers/blend_mode.dart';
 import 'package:fpaint/panels/layers/layer_actions.dart';
 import 'package:fpaint/panels/layers/layer_thumbnail.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_preview.dart';
@@ -384,26 +383,9 @@ class LayerSelector extends StatelessWidget {
     );
   }
 
-  /// Method to insert a new layer above the currently selected one
+  /// Inserts a new layer above the currently selected one (undoable).
   void _onAddLayer(LayersProvider layers) {
-    final AppLocalizations l10n = context.l10n;
-    final UndoProvider undoProvider = UndoProvider.of(context);
-
-    final int currentIndex = layers.selectedLayerIndex;
-
-    undoProvider.executeAction(
-      name: l10n.layerAdd,
-      forward: () {
-        // Add
-        final LayerProvider newLayer = layers.insertAt(currentIndex);
-        // Change selected layer to the new added layer
-        layers.selectedLayerIndex = layers.getLayerIndex(newLayer);
-      },
-      backward: () {
-        layers.removeByIndex(currentIndex);
-        layers.selectedLayerIndex = currentIndex;
-      },
-    );
+    layers.addLayerAbove(undoName: context.l10n.layerAdd);
   }
 
   /// Floats the current layer into modify mode.
@@ -432,7 +414,7 @@ class LayerSelector extends StatelessWidget {
         _onAddLayer(layers);
       case LayerAction.delete:
         if (allowRemoveLayer) {
-          layers.remove(layer);
+          layers.deleteLayer(layer, undoName: context.l10n.layerDelete);
         }
       case LayerAction.mergeBelow:
         if (layer != layers.list.last) {

@@ -21,6 +21,10 @@ const String previewNameAppButtonIcon = 'AppButtonIcon';
 const String previewNameAppButtonChild = 'AppButtonChild';
 const String previewNameAppButtonBuilder = 'AppButtonBuilder';
 const double _previewContainerWidth = 220;
+const Size previewSizeAppButtonText = Size(515, 50);
+const Size previewSizeAppButtonDanger = Size(300, 50);
+const Size previewSizeAppButtonPrimary = Size(515, 50);
+const Size previewSizeAppButtonIcon = Size(852, 40);
 
 /// Shared semantic intents for button labels and icons.
 ///
@@ -520,7 +524,7 @@ Widget _buildButtonPreviewContainer(Widget child) {
 void _noopPreviewAction() {}
 
 /// Widget preview entry for [AppButtonText].
-@Preview(name: previewNameAppButtonText)
+@Preview(name: previewNameAppButtonText, size: previewSizeAppButtonText)
 Widget appButtonTextPreview() {
   return _buildButtonPreviewContainer(
     const AppButtonText(
@@ -531,7 +535,7 @@ Widget appButtonTextPreview() {
 }
 
 /// Widget preview entry for [AppButtonDanger].
-@Preview(name: previewNameAppButtonDanger)
+@Preview(name: previewNameAppButtonDanger, size: previewSizeAppButtonDanger)
 Widget appButtonDangerPreview() {
   return _buildButtonPreviewContainer(
     const AppButtonDanger(
@@ -542,7 +546,7 @@ Widget appButtonDangerPreview() {
 }
 
 /// Widget preview entry for [AppButtonPrimary].
-@Preview(name: previewNameAppButtonPrimary)
+@Preview(name: previewNameAppButtonPrimary, size: previewSizeAppButtonPrimary)
 Widget appButtonPrimaryPreview() {
   return _buildButtonPreviewContainer(
     const AppButtonPrimary(
@@ -553,7 +557,7 @@ Widget appButtonPrimaryPreview() {
 }
 
 /// Widget preview entry for [AppButtonIcon].
-@Preview(name: previewNameAppButtonIcon)
+@Preview(name: previewNameAppButtonIcon, size: previewSizeAppButtonIcon)
 Widget appButtonIconPreview() {
   return _buildButtonPreviewContainer(
     const AppButtonIcon(

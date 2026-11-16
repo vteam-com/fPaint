@@ -31,6 +31,7 @@ const String _missingHeicName = 'missing.heic';
 const String _missingOraName = 'missing.ora';
 const String _unsupportedName = 'notes.txt';
 const String _corruptPngName = 'corrupt.png';
+const String _currentDocumentName = 'current.ora';
 const String _pickerFailure = 'picker failed';
 const List<int> _garbageBytes = <int>[0, 1, 2, 3, 4, 5, 6, 7];
 const TestPsdColor _psdRed = TestPsdColor(255, 0, 0);
@@ -131,6 +132,20 @@ void main() {
       expect(host.layers.hasChanged, isFalse);
       expect(host.preferences.recentFiles.first, path);
       expect(host.fitRequests, greaterThan(0));
+      await drainFileFlowTimers(tester);
+    });
+
+    testWidgets('a failed open keeps the current file name and unsaved state', (WidgetTester tester) async {
+      installFilePicker(FakeFilePicker(pickedPath: pathOf(_missingOraName)));
+      final FileFlowHost host = await pumpFileFlowHost(tester);
+      host.shell.loadedFileName = _currentDocumentName;
+
+      await runReal(tester, () => onFileOpen(host.context));
+
+      // Finishing a failed open used to re-point the old document at the
+      // missing path and mark it clean, so Save would overwrite that file.
+      expect(host.shell.loadedFileName, _currentDocumentName);
+      expect(host.preferences.recentFiles, isEmpty);
       await drainFileFlowTimers(tester);
     });
 

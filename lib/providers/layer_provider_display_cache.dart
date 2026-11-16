@@ -294,7 +294,7 @@ extension LayerDisplayCache on LayerProvider {
   void _installThumbnail(ui.Image thumbnail) {
     _cachedThumbnailImage?.dispose();
     _cachedThumbnailImage = thumbnail;
-    _cacheTopColorsUsed();
+    unawaited(_cacheTopColorsUsed());
   }
 
   /// The panel thumbnail's pixel size: the canvas scaled to
@@ -411,5 +411,34 @@ extension LayerDisplayCache on LayerProvider {
       onThumbnailChanged();
       update();
     });
+  }
+}
+
+/// Panel palette analysis of [LayerProvider]'s thumbnail.
+extension LayerTopColors on LayerProvider {
+  /// Caches the top colors used in the layer, from the current thumbnail.
+  ///
+  /// The result is built locally and assigned in one step, and only by the
+  /// latest run: overlapping runs used to empty the shared list and append to
+  /// it across the await, mixing colors from an older thumbnail into the
+  /// newer one and leaving the list empty meanwhile.
+  Future<void> _cacheTopColorsUsed() async {
+    final int generation = ++_topColorsGeneration;
+    final ui.Image? thumbnail = _cachedThumbnailImage;
+    if (thumbnail == null) {
+      topColorsUsed = <ColorUsage>[];
+      return;
+    }
+    final List<ColorUsage> imageColors = await getImageColors(thumbnail);
+    if (generation != _topColorsGeneration) {
+      return;
+    }
+    final List<ColorUsage> unique = <ColorUsage>[];
+    for (final ColorUsage colorUsage in imageColors) {
+      if (!unique.any((ColorUsage c) => c.color == colorUsage.color)) {
+        unique.add(colorUsage);
+      }
+    }
+    topColorsUsed = unique;
   }
 }

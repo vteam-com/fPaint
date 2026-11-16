@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/viewport_transform_helper.dart';
+import 'package:fpaint/widgets/looping_animation_controller.dart';
 
 /// A loading indicator replacing Material [CircularProgressIndicator].
 class AppProgressIndicator extends StatefulWidget {
@@ -16,10 +17,7 @@ class _AppProgressIndicatorState extends State<AppProgressIndicator> with Single
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: AppDefaults.animationLoopDuration,
-    )..repeat();
+    _controller = createLoopingAnimationController(this);
   }
 
   @override

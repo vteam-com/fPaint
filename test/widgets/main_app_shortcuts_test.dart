@@ -23,12 +23,14 @@ void main() {
   late AppProvider appProvider;
   late ShellProvider shellProvider;
   late int newFromClipboardCount;
+  late int openCount;
 
   setUp(() async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
     appProvider = AppProvider(preferences: AppPreferences());
     shellProvider = ShellProvider();
     newFromClipboardCount = 0;
+    openCount = 0;
   });
 
   Widget buildTestWidget({Widget child = const MainView()}) {
@@ -49,6 +51,7 @@ void main() {
                     appProvider,
                     child,
                     onSave: () async {},
+                    onOpen: () async => openCount++,
                     onNewFromClipboard: () async => newFromClipboardCount++,
                   );
                 },
@@ -172,6 +175,43 @@ void main() {
     expect(newFromClipboardCount, 1);
 
     await tester.pump(_snackBarDismissWait);
+  });
+
+  testWidgets('Ctrl+N also runs New from clipboard, and Cmd/Ctrl+O runs Open', (WidgetTester tester) async {
+    await tester.pumpWidget(buildTestWidget());
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyN);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+    expect(newFromClipboardCount, 1);
+
+    await sendPrimaryChord(tester, LogicalKeyboardKey.keyO);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyO);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+    expect(openCount, 2);
+  });
+
+  testWidgets('Cmd+Shift+N adds an undoable layer above the selected one', (WidgetTester tester) async {
+    await tester.pumpWidget(buildTestWidget());
+    await tester.pumpAndSettle();
+
+    final int layerCount = appProvider.layers.length;
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyN);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    await tester.pump();
+
+    expect(appProvider.layers.length, layerCount + 1);
+    expect(newFromClipboardCount, 0, reason: 'Shift+N must not also run New from clipboard');
+
+    await appProvider.undoAction();
+    expect(appProvider.layers.length, layerCount);
   });
 
   testWidgets('Cmd+X, Cmd+C and Cmd+V reach the region clipboard actions', (WidgetTester tester) async {

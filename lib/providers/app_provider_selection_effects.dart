@@ -160,15 +160,23 @@ extension AppProviderSelectionEffects on AppProvider {
   ///
   /// Every such effect pins a full-canvas texture in the action stack and is
   /// replayed on each cache rebuild, so only the current and previous
-  /// generations are kept; undo history is trimmed to match what survives.
+  /// generations are kept. Undo history is cut at the same boundary first:
+  /// the oldest surviving generation's record and everything older go, so no
+  /// remaining record can pop an action the collapse removed. Trimming before
+  /// collapsing keeps the dropped records' textures reachable until the
+  /// single disposal pass below.
   void _collapseWholeLayerEffectHistory() {
-    undoProvider.trimUndoHistoryWhere(
-      predicate: (RecordAction action) =>
-          SelectionEffect.values.any((SelectionEffect effect) => effect.name == action.name),
-      maxKeep: AppLimits.fullLayerEffectUndoHistory,
+    final LayerProvider layer = layers.selectedLayer;
+    if (layer.fullyErasedActionCount == 0) {
+      return;
+    }
+
+    undoProvider.trimUndoHistoryThroughBoundary(
+      key: layer,
+      keepBoundaries: AppLimits.fullLayerEffectUndoHistory,
     );
 
-    final List<ui.Image> orphaned = layers.selectedLayer.collapseFullyErasedActions();
+    final List<ui.Image> orphaned = layer.collapseFullyErasedActions();
     layers.disposeCommittedImagesIfUnreferenced(orphaned);
   }
 

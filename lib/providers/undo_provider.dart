@@ -1,6 +1,7 @@
 // ignore: fcheck_one_class_per_file
 
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
@@ -101,17 +102,21 @@ class UndoProvider extends ChangeNotifier {
   /// The [forward] parameter is the function to call to execute the action.
   /// The [retainedImages] are GPU textures the action's closures can resurrect
   /// on undo/redo; the owner disposes them once this record leaves history.
+  /// A non-null [historyBoundaryKey] marks the record as a generation boundary;
+  /// see [RecordAction.historyBoundaryKey].
   RecordAction executeAction({
     required String name,
     required void Function() backward,
     required void Function() forward,
     List<ui.Image> retainedImages = const <ui.Image>[],
+    Object? historyBoundaryKey,
   }) {
     final RecordAction action = RecordAction(
       name: name,
       forward: forward,
       backward: backward,
       retainedImages: retainedImages,
+      historyBoundaryKey: historyBoundaryKey,
     );
 
     recordAction(action);
@@ -269,6 +274,42 @@ class UndoProvider extends ChangeNotifier {
     }
   }
 
+  /// Drops the oldest undo records up to and including the boundary record
+  /// that falls just past the latest [keepBoundaries] boundaries for [key].
+  ///
+  /// Records whose [RecordAction.historyBoundaryKey] is identical to [key]
+  /// mark generation boundaries. Counting them from the newest, the first one
+  /// beyond [keepBoundaries] and every older record are removed, so the
+  /// surviving history is always a contiguous suffix. Removing from the
+  /// middle would let an older record replay against state its successors no
+  /// longer describe (layer undo pops actions positionally). A no-op when
+  /// fewer than `keepBoundaries + 1` boundaries are on the stack.
+  void trimUndoHistoryThroughBoundary({
+    required Object key,
+    required int keepBoundaries,
+  }) {
+    if (keepBoundaries < AppMath.zero) {
+      return;
+    }
+
+    int seen = AppMath.zero;
+    for (int index = _undoStack.length - AppMath.one; index >= AppMath.zero; index--) {
+      if (!identical(_undoStack[index].historyBoundaryKey, key)) {
+        continue;
+      }
+      if (seen < keepBoundaries) {
+        seen++;
+        continue;
+      }
+      final int dropCount = index + AppMath.one;
+      final List<RecordAction> dropped = _undoStack.sublist(AppMath.zero, dropCount);
+      _undoStack.removeRange(AppMath.zero, dropCount);
+      _dropRecords(dropped);
+      notifyListeners();
+      return;
+    }
+  }
+
   /// Gets the history of actions that can be undone as a string.
   String getHistoryStringForUndo() {
     return getHistoryString(_undoStack);
@@ -282,7 +323,7 @@ class UndoProvider extends ChangeNotifier {
   /// Gets the history of actions as a string.
   String getHistoryString(List<RecordAction> list) {
     try {
-      return this.getActionsAsStrings(list, AppLimits.topColorCount).join('\n');
+      return this.getActionsAsStrings(list, AppLimits.undoHistoryTooltipEntries).join('\n');
     } catch (error) {
       _log.severe('Failed to get history', error);
       return _errorFallback;
@@ -290,16 +331,16 @@ class UndoProvider extends ChangeNotifier {
   }
 
   /// Gets the actions as a list of strings.
+  ///
+  /// Lists the [numberOfHistoryAction] most recent records (all when null),
+  /// newest first. Both stacks grow at the end, so the newest records are the
+  /// last ones; taking from the front listed the oldest instead.
   List<String> getActionsAsStrings(
     List<RecordAction> list, [
     int? numberOfHistoryAction,
   ]) {
-    return list
-        .take(numberOfHistoryAction ?? list.length)
-        .map((RecordAction action) => action.toString())
-        .toList()
-        .reversed
-        .toList();
+    final int count = numberOfHistoryAction == null ? list.length : min(numberOfHistoryAction, list.length);
+    return list.reversed.take(count).map((RecordAction action) => action.toString()).toList();
   }
 }
 
@@ -310,6 +351,7 @@ class RecordAction {
     required this.backward,
     required this.forward,
     this.retainedImages = const <ui.Image>[],
+    this.historyBoundaryKey,
   });
 
   /// The name of the action.
@@ -331,6 +373,14 @@ class RecordAction {
   /// reintroduce, so a coordinator can keep them alive while the record lives
   /// and dispose them once it is dropped and nothing else references them.
   final List<ui.Image> retainedImages;
+
+  /// Identity of the history this record starts a new generation of, or null.
+  ///
+  /// Set on records that replace an owner's entire content (for example a
+  /// whole-layer effect, keyed by that layer), so
+  /// [UndoProvider.trimUndoHistoryThroughBoundary] can cut history at a
+  /// generation boundary instead of matching records by display name.
+  final Object? historyBoundaryKey;
 
   @override
   String toString() {

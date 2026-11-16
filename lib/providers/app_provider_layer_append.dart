@@ -15,13 +15,15 @@ extension AppProviderLayerAppend on AppProvider {
   /// fresh action per redo or deliberately share one instance. When
   /// [notifyAfterReplay] is true each apply/replay ends with [update].
   ///
-  /// [retainedImages] are the textures the record can resurrect; see
+  /// [retainedImages] are the textures the record can resurrect and
+  /// [historyBoundaryKey] marks a generation boundary; see
   /// [UndoProvider.executeAction].
   void _executeLayerAppend({
     required String name,
     required List<LayerProvider> Function() resolveTargets,
     required List<UserActionDrawing> Function(int) buildActions,
     List<ui.Image> retainedImages = const <ui.Image>[],
+    Object? historyBoundaryKey,
     bool notifyAfterReplay = true,
   }) {
     // Per target, how many actions the latest forward appended, so backward
@@ -31,6 +33,7 @@ extension AppProviderLayerAppend on AppProvider {
     undoProvider.executeAction(
       name: name,
       retainedImages: retainedImages,
+      historyBoundaryKey: historyBoundaryKey,
       forward: () {
         appendedCounts.clear();
         final List<LayerProvider> targets = resolveTargets();

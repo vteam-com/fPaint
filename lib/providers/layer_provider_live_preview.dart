@@ -19,13 +19,11 @@ extension LayerLivePreview on LayerProvider {
 
 /// Action-stack history bounding for [LayerProvider].
 extension LayerHistoryCollapse on LayerProvider {
-  /// Drops actions hidden behind older whole-layer erases.
-  ///
-  /// Each whole-layer generation pins a full-canvas texture and is replayed on
-  /// every cache rebuild, so keeping every one is unbounded in both memory and
-  /// render cost. Returns the images that left the stack; the caller must run
-  /// them through the reachability check before disposing.
-  List<ui.Image> collapseFullyErasedActions() {
+  /// How many actions at the bottom of [actionStack] are hidden behind
+  /// whole-layer erases older than the last
+  /// [AppLimits.fullLayerImageGenerations] generations, i.e. how many
+  /// [collapseFullyErasedActions] would remove. Zero when nothing collapses.
+  int get fullyErasedActionCount {
     final List<int> boundaries = <int>[];
     for (int index = 0; index < actionStack.length; index++) {
       if (actionStack[index].erasesEntireLayer) {
@@ -33,10 +31,23 @@ extension LayerHistoryCollapse on LayerProvider {
       }
     }
     if (boundaries.length <= AppLimits.fullLayerImageGenerations) {
+      return 0;
+    }
+    return boundaries[boundaries.length - AppLimits.fullLayerImageGenerations];
+  }
+
+  /// Drops actions hidden behind older whole-layer erases.
+  ///
+  /// Each whole-layer generation pins a full-canvas texture and is replayed on
+  /// every cache rebuild, so keeping every one is unbounded in both memory and
+  /// render cost. Returns the images that left the stack; the caller must run
+  /// them through the reachability check before disposing.
+  List<ui.Image> collapseFullyErasedActions() {
+    final int collapseTo = fullyErasedActionCount;
+    if (collapseTo == 0) {
       return const <ui.Image>[];
     }
 
-    final int collapseTo = boundaries[boundaries.length - AppLimits.fullLayerImageGenerations];
     final List<ui.Image> removed = <ui.Image>[];
     for (int index = 0; index < collapseTo; index++) {
       final ui.Image? image = actionStack[index].image;

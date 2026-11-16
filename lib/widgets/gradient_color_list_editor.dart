@@ -283,6 +283,17 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
     _notifyChanged();
   }
 
+  /// Swaps the adjacent stops [a] and [b], re-anchors the endpoints, and
+  /// publishes the change to the position fields and the fill model.
+  void _commitAdjacentSwap(int a, int b) {
+    setState(() {
+      _swapAdjacentStops(a, b);
+      _ensureEndpointPositions();
+    });
+    _syncPositionControllers();
+    _notifyChanged();
+  }
+
   /// Enforces fixed endpoint stops at 0% and 100%.
   void _ensureEndpointPositions() {
     if (_positions.isEmpty) {
@@ -300,13 +311,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
     if (!_canMoveDown(index)) {
       return;
     }
-    setState(() {
-      _swapAdjacentStops(index, index + AppMath.one);
-
-      _ensureEndpointPositions();
-    });
-    _syncPositionControllers();
-    _notifyChanged();
+    _commitAdjacentSwap(index, index + AppMath.one);
   }
 
   /// Moves the stop at [index] one position toward the start of the list.
@@ -314,13 +319,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
     if (!_canMoveUp(index)) {
       return;
     }
-    setState(() {
-      _swapAdjacentStops(index - AppMath.one, index);
-
-      _ensureEndpointPositions();
-    });
-    _syncPositionControllers();
-    _notifyChanged();
+    _commitAdjacentSwap(index - AppMath.one, index);
   }
 
   void _notifyChanged() {

@@ -3,6 +3,9 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
+const String previewNameToolAttributeWidget = 'ToolAttributeWidget';
+const Size previewSizeToolAttributeWidget = Size(350, 100);
+
 /// A widget that displays a tool attribute with a label and a child widget.
 class ToolAttributeWidget extends StatelessWidget {
   const ToolAttributeWidget({
@@ -168,7 +171,7 @@ class ToolAttributeWidget extends StatelessWidget {
 }
 
 /// Widget preview entry for [ToolAttributeWidget].
-@Preview(name: 'ToolAttributeWidget')
+@Preview(name: previewNameToolAttributeWidget, size: previewSizeToolAttributeWidget)
 Widget toolAttributeWidgetPreview() {
   return SizedBox(
     width: AppLayout.sidePanelExpandedMin,

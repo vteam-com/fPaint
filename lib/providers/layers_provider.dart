@@ -28,6 +28,7 @@ part 'layers_provider_canvas_geometry.dart';
 part 'layers_provider_document.dart';
 part 'layers_provider_hit_test.dart';
 part 'layers_provider_image_resize.dart';
+part 'layers_provider_layer_commands.dart';
 part 'layers_provider_raster_replacement.dart';
 
 final Logger _log = Logger(logNameLayersProvider);

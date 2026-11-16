@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
@@ -340,8 +340,12 @@ void triggerWandToleranceHaptic(
 /// unawaited turned a host with no haptic handler registered (an engine still
 /// starting up, or a Runner built before the handler existed) into a stream of
 /// unhandled [MissingPluginException]s logged on every notch of every drag.
+///
+/// The platform test uses [defaultTargetPlatform] rather than `dart:io`'s
+/// `Platform`, which throws on web; a browser on a Mac takes the
+/// [HapticFeedback] path, a harmless no-op there.
 void _performHaptic() {
-  if (!Platform.isMacOS) {
+  if (kIsWeb || defaultTargetPlatform != TargetPlatform.macOS) {
     HapticFeedback.mediumImpact();
     return;
   }

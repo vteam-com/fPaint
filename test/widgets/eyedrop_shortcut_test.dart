@@ -43,6 +43,7 @@ void main() {
                     appProvider,
                     const MainView(),
                     onSave: () async {},
+                    onOpen: () async {},
                     onNewFromClipboard: () async {},
                   );
                 },

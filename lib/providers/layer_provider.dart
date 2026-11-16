@@ -159,23 +159,9 @@ class LayerProvider extends ChangeNotifier {
   /// The list of top colors used in the layer.
   List<ColorUsage> topColorsUsed = <ColorUsage>[];
 
-  /// Caches the top colors used in the layer.
-  void _cacheTopColorsUsed() async {
-    topColorsUsed = <ColorUsage>[];
-    if (_cachedThumbnailImage != null) {
-      final List<ColorUsage> imageColors = await getImageColors(
-        _cachedThumbnailImage!,
-      );
-
-      for (final ColorUsage colorUsage in imageColors) {
-        if (!topColorsUsed.any(
-          (ColorUsage c) => c.color == colorUsage.color,
-        )) {
-          topColorsUsed.add(colorUsage);
-        }
-      }
-    }
-  }
+  /// Incremented per `_cacheTopColorsUsed` run so a slower, superseded
+  /// analysis never overwrites the result of a newer thumbnail.
+  int _topColorsGeneration = 0;
 
   ///---------------------------------------
   // Visibility

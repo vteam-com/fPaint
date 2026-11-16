@@ -27,9 +27,10 @@ const Map<SelectorMode, Key> _selectorModeKeys = <SelectorMode, Key>{
 };
 
 final int _selectionModeButtonCount = SelectorMode.values.length;
-const int _selectionScopeButtonCount = AppMath.one;
 const int _selectionClipboardButtonCount = AppMath.pair;
-const int _selectionMathButtonCount = AppMath.triple;
+
+/// Add and Subtract only; both off means New (see the toggles below).
+const int _selectionMathButtonCount = AppMath.pair;
 const int _selectionInvertButtonCount = AppMath.one;
 const int _selectionCanvasActionButtonCount = AppMath.one;
 const int _selectionEffectsButtonCount = AppMath.one;
@@ -41,12 +42,15 @@ bool shouldShowSelectionSubToolbar(AppProvider appProvider) {
 }
 
 /// Estimates the width needed by the selection sub-toolbar.
+///
+/// The per-group counts must match what [buildSelectionSubToolbar] renders;
+/// a widget test pins the two together.
 double estimateSelectionSubToolbarWidth(
   double toolbarIconActionEstimatedWidth, {
   required bool hasVisibleSelection,
   bool includeToggleButton = false,
 }) {
-  int totalButtons = _selectionModeButtonCount + _selectionScopeButtonCount;
+  int totalButtons = _selectionModeButtonCount;
 
   if (hasVisibleSelection) {
     totalButtons +=
@@ -116,6 +120,11 @@ Widget buildSelectionSubToolbar({
         interactionProfile: interactionProfile,
         color: AppColors.textPrimary,
         onPressed: () {
+          // Same lock feedback as the Cmd/Ctrl+X shortcut; without it a locked
+          // layer made the button silently do nothing.
+          if (!guardSelectedLayerUnlocked(context, appProvider)) {
+            return;
+          }
           Future<void>.microtask(() => appProvider.regionCut());
         },
       ),

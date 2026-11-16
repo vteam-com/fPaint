@@ -13,6 +13,9 @@ class AppLimits {
   /// depth-vs-memory trade-off.
   static const int maxUndoHistory = 50;
 
+  /// Most recent undo/redo entries listed in the history tooltip.
+  static const int undoHistoryTooltipEntries = 20;
+
   /// Maximum brush size for the smudge/blur pixel brushes, which benefit from
   /// much larger radii than paint tools.
   static const int pixelBrushSizeMax = 500;

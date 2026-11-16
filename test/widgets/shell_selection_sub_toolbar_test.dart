@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
@@ -16,6 +17,7 @@ import '../helpers/widget_test_harness.dart';
 
 const Size _testViewSize = Size(1200, 600);
 const SelectionEffect _previewedEffect = SelectionEffect.blur;
+const Duration _snackBarDismissWait = Duration(seconds: 5);
 
 void main() {
   late AppProvider appProvider;
@@ -73,8 +75,13 @@ void main() {
 
     await tester.tap(find.byKey(Keys.toolSelectorCut));
     await tester.pump();
-    // A locked layer refuses the cut, leaving the selection in place.
+    // A locked layer refuses the cut, leaving the selection in place, and
+    // says why (the same feedback as the Cmd/Ctrl+X shortcut).
     expect(appProvider.selectorModel.isVisible, isTrue);
+    final String lockedMessage = lookupAppLocalizations(
+      const Locale('en'),
+    ).layerLockedForEditing(appProvider.layers.selectedLayer.name);
+    expect(find.text(lockedMessage), findsOneWidget);
 
     await tester.tap(iconButton(AppIcon.selectorMathInvert));
     await tester.pump();
@@ -88,6 +95,25 @@ void main() {
     await tester.tap(iconButton(AppIcon.selectorMathAdd));
     await tester.pump();
     expect(appProvider.selectorModel.math, SelectorMath.add);
+
+    // Let the locked-layer notice auto-dismiss so no timer outlives the test.
+    await tester.pump(_snackBarDismissWait);
+  });
+
+  testWidgets('the width estimate counts exactly the buttons the toolbar renders', (WidgetTester tester) async {
+    const double buttonWidth = 10;
+    for (final bool hasSelection in <bool>[true, false]) {
+      appProvider.selectorModel.isVisible = hasSelection;
+      await pumpToolbar(tester);
+
+      final Row row = tester.widget<Row>(find.byType(Row).first);
+      final int rendered = row.children.length;
+      expect(
+        estimateSelectionSubToolbarWidth(buttonWidth, hasVisibleSelection: hasSelection),
+        (rendered * buttonWidth) + ((rendered - AppMath.one) * AppSpacing.small),
+        reason: 'selection visible: $hasSelection',
+      );
+    }
   });
 
   testWidgets('copy schedules a region copy of the selection', (WidgetTester tester) async {

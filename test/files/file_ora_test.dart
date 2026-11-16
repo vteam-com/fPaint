@@ -32,6 +32,8 @@ const String _inheritVisibilityStackXml =
 const List<int> _garbageBytes = <int>[0, 1, 2, 3, 4, 5, 6, 7];
 
 void main() {
+  _oraRoundTripRegressionTests();
+
   test('getBlendModeFromOraCompositOp returns correct blend modes', () {
     expect(
       getBlendModeFromOraCompositOp('svg:source-over'),
@@ -554,5 +556,62 @@ void main() {
 
   test('extractOraPreviewPngBytes returns null for bytes that are not a zip', () async {
     expect(await extractOraPreviewPngBytes(_garbageBytes), isNull);
+  });
+}
+
+/// Names of the layers in [layers], top first.
+List<String> _layerNames(LayersProvider layers) =>
+    layers.list.map((LayerProvider layer) => layer.name).toList(growable: false);
+
+void _oraRoundTripRegressionTests() {
+  test('createOraArchive keeps interleaved grouped and loose layers in canvas order', () async {
+    const String top = 'Top';
+    const String middle = 'Middle';
+    const String bottom = 'Bottom';
+    final LayersProvider layers = LayersProvider()
+      ..clear()
+      ..size = const ui.Size(_smallCanvasSide, _smallCanvasSide);
+    // Built bottom-up: [Top (grouped), Middle (loose), Bottom (grouped)].
+    layers.addTop(name: bottom).parentGroupName = _groupName;
+    layers.addTop(name: middle);
+    layers.addTop(name: top).parentGroupName = _groupName;
+    expect(_layerNames(layers), <String>[top, middle, bottom]);
+
+    final List<int> archiveData = await createOraArchive(layers, includePreviews: false);
+    final LayersProvider imported = LayersProvider();
+    await readOraFileFromBytes(imported, Uint8List.fromList(archiveData));
+
+    expect(_layerNames(imported), <String>[top, middle, bottom]);
+    expect(imported.list[0].parentGroupName, _groupName);
+    expect(imported.list[1].parentGroupName, isEmpty);
+    expect(imported.list[2].parentGroupName, _groupName);
+  });
+
+  test('createOraArchive round-trips alpha-preserve on layers with and without pixels', () async {
+    final LayersProvider layers = LayersProvider()..size = const ui.Size(_smallCanvasSide, _smallCanvasSide);
+    // The default document has one white background layer, which has pixels.
+    layers.list[0].preserveAlpha = false;
+    layers.addTop(name: _looseLayerName).preserveAlpha = false;
+
+    final List<int> archiveData = await createOraArchive(layers, includePreviews: false);
+    final XmlDocument stack = XmlDocument.parse(
+      utf8.decode(
+        ZipDecoder().decodeBytes(archiveData).files.firstWhere((ArchiveFile f) => f.name == _stackXmlEntry).content
+            as List<int>,
+      ),
+    );
+    expect(
+      stack.findAllElements(_layerElement).map((XmlElement e) => e.getAttribute('alpha-preserve')),
+      everyElement('false'),
+    );
+
+    final LayersProvider imported = LayersProvider();
+    await readOraFileFromBytes(imported, Uint8List.fromList(archiveData));
+    expect(imported.list.map((LayerProvider layer) => layer.preserveAlpha), everyElement(isFalse));
+
+    layers.list.forEach((LayerProvider layer) => layer.preserveAlpha = true);
+    final LayersProvider reimported = LayersProvider();
+    await readOraFileFromBytes(reimported, Uint8List.fromList(await createOraArchive(layers, includePreviews: false)));
+    expect(reimported.list.map((LayerProvider layer) => layer.preserveAlpha), everyElement(isTrue));
   });
 }

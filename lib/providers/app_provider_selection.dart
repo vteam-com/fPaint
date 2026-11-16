@@ -263,6 +263,8 @@ extension AppProviderSelection on AppProvider {
     this._executeLayerAppend(
       name: name,
       resolveTargets: this._selectedLayerTarget,
+      // A whole-layer replace starts a new generation of this layer's history.
+      historyBoundaryKey: erasesEntireLayer ? layers.selectedLayer : null,
       buildActions: (_) => <UserActionDrawing>[
         CutAction(path: erasePath, erasesEntireLayer: erasesEntireLayer),
         ImageAction.placedAt(image: replacement, offset: offset),

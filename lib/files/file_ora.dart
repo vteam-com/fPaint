@@ -272,8 +272,20 @@ Future<DecodedRasterLayer> _decodeLayer(
     locked: xmlLayer.getAttribute(_oraAttrEditLocked) == _booleanTextTrue,
     selected: xmlLayer.getAttribute(_oraAttrSelected) == _booleanTextTrue,
     parentGroupName: stackName,
-    preserveAlpha: src == null || xmlLayer.getAttribute(_oraAttrAlphaPreserve) == _booleanTextTrue,
+    preserveAlpha: _readOraAlphaPreserve(xmlLayer.getAttribute(_oraAttrAlphaPreserve), hasPixels: src != null),
   );
+}
+
+/// Resolves a layer's alpha-preserve flag from its ORA attribute text.
+///
+/// An explicit attribute always wins. Without one, a layer with pixels takes
+/// the OpenRaster default (off) and an empty layer keeps fPaint's default
+/// (on), matching documents written before fPaint stored the flag.
+bool _readOraAlphaPreserve(String? attributeText, {required bool hasPixels}) {
+  if (attributeText != null) {
+    return attributeText == _booleanTextTrue;
+  }
+  return !hasPixels;
 }
 
 /// Converts ORA visibility text into a layer-visible flag.
@@ -420,6 +432,7 @@ Future<List<int>> createOraArchive(
       _oraAttrCompositeOp: _getOraCompositeOpFromBlendMode(layer.blendMode),
       _oraAttrEditLocked: layer.isLocked,
       _oraAttrSelected: i == layers.selectedLayerIndex,
+      _oraAttrAlphaPreserve: layer.preserveAlpha,
     };
 
     if (_isOraLayerImageEmpty(layer)) {
@@ -482,35 +495,7 @@ Future<List<int>> createOraArchive(
       builder.element(
         _oraElementStack,
         nest: () {
-          final Map<String, List<Map<String, dynamic>>> groupedLayers = <String, List<Map<String, dynamic>>>{};
-          final List<Map<String, dynamic>> ungroupedLayers = <Map<String, dynamic>>[];
-
-          for (final Map<String, dynamic> layerData in layersData) {
-            final String parentGroupNameOfLayer = layerData[_oraLayerMetaParentGroupName] as String? ?? '';
-
-            if (parentGroupNameOfLayer.isNotEmpty) {
-              groupedLayers
-                  .putIfAbsent(
-                    parentGroupNameOfLayer,
-                    () => <Map<String, dynamic>>[],
-                  )
-                  .add(layerData);
-            } else {
-              ungroupedLayers.add(layerData);
-            }
-          }
-
-          for (final String groupName in groupedLayers.keys) {
-            builder.element(
-              _oraElementStack,
-              nest: () {
-                builder.attribute(_oraAttrName, groupName);
-                buildLayers(builder, groupedLayers[groupName]!);
-              },
-            );
-          }
-
-          buildLayers(builder, ungroupedLayers);
+          _buildOraStackChildren(builder, layersData);
         },
       );
     },
@@ -646,6 +631,46 @@ ui.Image _createOraThumbnailImage(ui.Image mergedImage) {
   );
 }
 
+/// Emits [layersData] into the root stack in their original (top-first)
+/// order, wrapping each consecutive run of layers that share a parent group
+/// in one nested `stack` element.
+///
+/// Grouping by run, rather than collecting each group into one bucket,
+/// keeps the saved order identical to the canvas order when grouped and
+/// ungrouped layers are interleaved. A group split by other layers becomes
+/// two same-named stacks, which read back as the same group.
+void _buildOraStackChildren(
+  XmlBuilder builder,
+  List<Map<String, dynamic>> layersData,
+) {
+  int runStart = 0;
+  while (runStart < layersData.length) {
+    final String groupName = _oraParentGroupName(layersData[runStart]);
+    int runEnd = runStart + AppMath.one;
+    while (runEnd < layersData.length && _oraParentGroupName(layersData[runEnd]) == groupName) {
+      runEnd++;
+    }
+    final List<Map<String, dynamic>> run = layersData.sublist(runStart, runEnd);
+    if (groupName.isEmpty) {
+      buildLayers(builder, run);
+    } else {
+      builder.element(
+        _oraElementStack,
+        nest: () {
+          builder.attribute(_oraAttrName, groupName);
+          buildLayers(builder, run);
+        },
+      );
+    }
+    runStart = runEnd;
+  }
+}
+
+/// Returns the parent group recorded for one exported layer, or empty.
+String _oraParentGroupName(Map<String, dynamic> layerData) {
+  return layerData[_oraLayerMetaParentGroupName] as String? ?? '';
+}
+
 /// Builds the layers for the specified file or canvas.
 ///
 /// This function is responsible for constructing and organizing
@@ -663,6 +688,7 @@ void buildLayers(
     final String? compositeOp = layerData[_oraAttrCompositeOp] as String?;
     final bool isLocked = layerData[_oraAttrEditLocked] as bool? ?? false;
     final bool isSelected = layerData[_oraAttrSelected] as bool? ?? false;
+    final bool? preserveAlpha = layerData[_oraAttrAlphaPreserve] as bool?;
 
     builder.element(
       _oraElementLayer,
@@ -678,6 +704,9 @@ void buildLayers(
         }
         if (isSelected) {
           builder.attribute(_oraAttrSelected, _booleanTextTrue);
+        }
+        if (preserveAlpha != null) {
+          builder.attribute(_oraAttrAlphaPreserve, preserveAlpha ? _booleanTextTrue : _booleanTextFalse);
         }
         builder.attribute(_oraAttrSrc, layerData[_oraAttrSrc]);
         builder.attribute(_oraAttrX, layerData[_oraAttrX]);

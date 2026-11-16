@@ -1,12 +1,14 @@
 import 'dart:async';
 
+import 'package:cupertino_ui/cupertino_ui.dart' show GlobalCupertinoLocalizations;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart' show GlobalWidgetsLocalizations;
 import 'package:fpaint/l10n/app_localizations_en.dart';
 import 'package:fpaint/l10n/app_localizations_es.dart';
 import 'package:fpaint/l10n/app_localizations_fr.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:material_ui/material_ui.dart' show GlobalMaterialLocalizations;
 
 // ignore_for_file: type=lint
 

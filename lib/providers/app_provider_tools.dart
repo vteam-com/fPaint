@@ -470,6 +470,9 @@ extension AppProviderTools on AppProvider {
     Offset position, {
     required bool sampleAllLayers,
   }) async {
+    // Resolved before the await: the origin modifier and selection are the
+    // user's intent at tap time, not whatever is held when the pixels arrive.
+    final ui.Path? regionPathOverride = _selectionRegionFloodFillOverridePath;
     final FillImageData? imageData = await getSelectedLayerFillImageData(sampleAllLayers: sampleAllLayers);
     if (imageData == null) {
       return null;
@@ -483,7 +486,7 @@ extension AppProviderTools on AppProvider {
       hatchPattern: fillModel.hatchEnabled ? hatchPattern.copyWith(crossed: fillModel.hatchCrossed) : null,
       tolerance: tolerance,
       clipPath: selectorModel.activeClipPath,
-      regionPathOverride: _selectionRegionFloodFillOverridePath,
+      regionPathOverride: regionPathOverride,
     );
     return (action.path?.getBounds().isEmpty ?? true) ? null : action;
   }
@@ -492,6 +495,9 @@ extension AppProviderTools on AppProvider {
   /// from the **cached** layer pixels (+ isolate). Returns null when the gradient
   /// config or resolved region is unusable (an empty, path-less action).
   Future<UserActionDrawing?> _buildGradientFillAction(FillModel fillModel) async {
+    // Resolved before the await: the origin modifier and selection are the
+    // user's intent at tap time, not whatever is held when the pixels arrive.
+    final ui.Path? regionPathOverride = _selectionRegionFloodFillOverridePath;
     final FillImageData? imageData = await getSelectedLayerFillImageData(sampleAllLayers: fillModel.sampleAllLayers);
     if (imageData == null) {
       return null;
@@ -502,7 +508,7 @@ extension AppProviderTools on AppProvider {
       tolerance: tolerance,
       clipPath: selectorModel.activeClipPath,
       toCanvas: toCanvas,
-      regionPathOverride: _selectionRegionFloodFillOverridePath,
+      regionPathOverride: regionPathOverride,
     );
     return action.path == null ? null : action;
   }

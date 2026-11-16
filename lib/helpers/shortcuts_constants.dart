@@ -13,7 +13,6 @@ abstract class ShortcutCategories {
 abstract class ShortcutActions {
   static const String save = 'Save';
   static const String open = 'Open';
-  static const String newCanvas = 'New Canvas';
   static const String undo = 'Undo';
   static const String redo = 'Redo';
   static const String cut = 'Cut';
@@ -51,7 +50,7 @@ abstract class ShortcutActions {
   static const String wandSampleAllLayers = 'Edge Detection: Sample All Layers';
   static const String floodFillSampleAllLayers = 'Flood Fill: Sample All Layers';
   static const String newLayer = 'New Layer';
-  static const String deleteLayer = 'Delete Layer';
+  static const String eraseSelection = 'Erase Selection';
   static const String selectLayerAtPixel = 'Select Layer at Tapped Pixel';
 }
 
@@ -85,6 +84,7 @@ abstract class ShortcutModifiers {
 abstract class ShortcutKeys {
   static const String zero = '0';
   static const String escape = 'Esc';
+  static const String backspace = 'Backspace';
   static const String f1 = 'F1';
   static const String slash = '/';
   static const String plus = '+';

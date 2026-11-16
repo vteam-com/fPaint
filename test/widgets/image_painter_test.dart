@@ -1,8 +1,8 @@
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/widgets/image_painter.dart';
+import 'package:material_ui/material_ui.dart';
 
 Future<ui.Image> _makeImage(int width, int height) {
   final ui.PictureRecorder recorder = ui.PictureRecorder();

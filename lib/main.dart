@@ -12,6 +12,7 @@ import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/main_screen.dart';
 import 'package:fpaint/pages/platforms_page.dart';
 import 'package:fpaint/pages/settings_page.dart';
+import 'package:fpaint/panels/side_panel/recent_files_dialog.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/inherited_provider.dart' show InheritedControllerScope;
@@ -264,23 +265,32 @@ Future<void> _handleFileOpened(String filePath) async {
   // An iOS document opened in place from the Files app comes with a bookmark;
   // opening through it grants access, and keeping it lets Save write back.
   final String? bookmark = await SecurityScopedFileService.openedFileBookmark(filePath);
-  mainApp.appProvider.layers.clear();
+  final BuildContext context = mainApp.navigatorKey.currentContext!;
+  final AppPreferences preferences = mainApp.appPreferences;
+  final LayersProvider layers = mainApp.appProvider.layers;
+  // The reader replaces the document itself, so a failed open leaves the
+  // current one in place, as the other open paths do.
   final bool success = await SecurityScopedFileService.withResolvedBookmark<bool>(
     bookmarkBase64: bookmark,
     fallbackPath: filePath,
     action: (String resolvedPath) => openFileFromPath(
-      context: mainApp.navigatorKey.currentContext!,
-      layers: mainApp.appProvider.layers,
+      context: context,
+      layers: layers,
       path: resolvedPath,
+      preferences: preferences,
     ),
   );
 
-  // Update the shell provider with the file name if successful
+  // Same finish as every other open: file name, clean state, canvas fit and
+  // the recent-files entry.
   if (success) {
-    mainApp.shellProvider.loadedFileName = filePath;
-    await AppPreferences.of(
-      mainApp.navigatorKey.currentContext!,
-    ).addRecentFile(filePath, bookmark: bookmark);
+    await finishDocumentOpen(
+      shellProvider: mainApp.shellProvider,
+      layers: layers,
+      preferences: preferences,
+      path: filePath,
+      bookmark: bookmark,
+    );
   }
 }
 
@@ -335,8 +345,10 @@ class MyApp extends StatelessWidget {
               controller: layersProvider,
               child: InheritedControllerScope<UndoProvider>(
                 controller: undoProvider,
+                // Only the locale is read here: listening to AppProvider too
+                // rebuilt the whole app shell on every editor notification.
                 child: ListenableBuilder(
-                  listenable: Listenable.merge(<Listenable>[appProvider, appPreferences]),
+                  listenable: appPreferences,
                   builder: (BuildContext _, Widget? _) {
                     return RepaintBoundary(
                       key: Keys.appScreenshotBoundary,
@@ -382,6 +394,7 @@ class MyApp extends StatelessWidget {
                               appProvider.layers,
                               appPreferences,
                             ),
+                            onOpen: () => showImportSheet(context),
                             onNewFromClipboard: () => newDocumentFromClipboardGuarded(
                               context,
                               appProvider: appProvider,

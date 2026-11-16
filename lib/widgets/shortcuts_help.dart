@@ -36,7 +36,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
         shortcuts: <_ShortcutEntry>[
           _shortcutEntry(<String>[mod, ShortcutKeys.s], ShortcutActions.save),
           _shortcutEntry(<String>[mod, ShortcutKeys.o], ShortcutActions.open),
-          _shortcutEntry(<String>[mod, ShortcutKeys.n], ShortcutActions.newCanvas),
+          _shortcutEntry(<String>[mod, ShortcutKeys.n], l10n.newFromClipboard),
         ],
       ),
       (
@@ -117,6 +117,11 @@ class ShortcutsHelpDialog extends StatelessWidget {
             <String>[shift, subtractModifier],
             ShortcutActions.intersectWithSelection,
           ),
+          _shortcutEntry(
+            <String>[ShortcutLabels.delete],
+            ShortcutActions.eraseSelection,
+            alternateKeys: <String>[ShortcutKeys.backspace],
+          ),
           _shortcutEntry(<String>[mod], ShortcutActions.wandSampleAllLayers),
           _shortcutEntry(<String>[mod], ShortcutActions.floodFillSampleAllLayers),
         ],
@@ -125,7 +130,6 @@ class ShortcutsHelpDialog extends StatelessWidget {
         title: ShortcutCategories.layers,
         shortcuts: <_ShortcutEntry>[
           _shortcutEntry(<String>[mod, shift, ShortcutKeys.n], ShortcutActions.newLayer),
-          _shortcutEntry(<String>[ShortcutLabels.delete], ShortcutActions.deleteLayer),
           _shortcutEntry(<String>[shift, subtractModifier], ShortcutActions.selectLayerAtPixel),
         ],
       ),

@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
@@ -32,6 +33,29 @@ void main() {
 
     tearDown(() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(hapticChannel, null);
+    });
+
+    test('uses the macOS haptic channel only when the target platform is macOS', () {
+      final List<String> calls = <String>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        hapticChannel,
+        (MethodCall call) async {
+          calls.add(call.method);
+          return null;
+        },
+      );
+
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      try {
+        triggerWandToleranceHaptic(4, 9);
+      } finally {
+        debugDefaultTargetPlatformOverride = null;
+      }
+      expect(calls, hasLength(1));
+
+      // Any other target (and web) takes the HapticFeedback path instead.
+      triggerWandToleranceHaptic(4, 9);
+      expect(calls, hasLength(1));
     });
 
     test('runs without error whether or not it crosses a snap interval', () {

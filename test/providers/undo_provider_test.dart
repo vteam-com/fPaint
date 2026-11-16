@@ -352,8 +352,9 @@ void main() {
         ],
         2,
       );
-      // Takes first 2 (A, B), then reverses
-      expect(result, <String>['B', 'A']);
+      // The newest records sit at the end of a stack: the two most recent,
+      // newest first.
+      expect(result, <String>['C', 'B']);
     });
   });
 
@@ -403,6 +404,63 @@ void main() {
       provider.undo();
       expect(provider.canUndo, isFalse, reason: 'older records were evicted');
       expect(value, 3, reason: 'the three evicted increments are permanent');
+    });
+  });
+
+  group('trimUndoHistoryThroughBoundary', () {
+    final Object layerA = Object();
+    final Object layerB = Object();
+
+    void record(String name, {Object? boundaryKey}) {
+      provider.executeAction(name: name, forward: () {}, backward: () {}, historyBoundaryKey: boundaryKey);
+    }
+
+    test('drops the boundary past the kept ones and everything older, as a prefix', () {
+      record('a');
+      record('effect1', boundaryKey: layerA);
+      record('b');
+      record('effect2', boundaryKey: layerA);
+      record('other-layer', boundaryKey: layerB);
+      record('c');
+
+      provider.trimUndoHistoryThroughBoundary(key: layerA, keepBoundaries: 1);
+
+      expect(
+        provider.getHistoryStringForUndo(),
+        provider.getHistoryString(<RecordAction>[
+          RecordAction(name: 'b', forward: () {}, backward: () {}),
+          RecordAction(name: 'effect2', forward: () {}, backward: () {}),
+          RecordAction(name: 'other-layer', forward: () {}, backward: () {}),
+          RecordAction(name: 'c', forward: () {}, backward: () {}),
+        ]),
+      );
+    });
+
+    test('is a no-op with too few boundaries or a negative keep count', () {
+      record('a');
+      record('effect1', boundaryKey: layerA);
+      final String before = provider.getHistoryStringForUndo();
+
+      provider.trimUndoHistoryThroughBoundary(key: layerA, keepBoundaries: 1);
+      provider.trimUndoHistoryThroughBoundary(key: layerB, keepBoundaries: 0);
+      provider.trimUndoHistoryThroughBoundary(key: layerA, keepBoundaries: -1);
+
+      expect(provider.getHistoryStringForUndo(), before);
+    });
+
+    test('keepBoundaries 0 drops through the newest boundary', () {
+      record('a');
+      record('effect1', boundaryKey: layerA);
+      record('b');
+
+      provider.trimUndoHistoryThroughBoundary(key: layerA, keepBoundaries: 0);
+
+      expect(
+        provider.getHistoryStringForUndo(),
+        provider.getHistoryString(<RecordAction>[
+          RecordAction(name: 'b', forward: () {}, backward: () {}),
+        ]),
+      );
     });
   });
 }

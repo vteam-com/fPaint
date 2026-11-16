@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/viewport_transform_helper.dart';
+import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/tool_family.dart';
 import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -20,14 +21,15 @@ import 'package:fpaint/widgets/shortcuts_help.dart';
 /// The [shellProvider] parameter is the [ShellProvider] instance used to manage the application's shell.
 /// The [appProvider] parameter is the [AppProvider] instance used to manage the application's state.
 /// The [child] parameter is the widget to wrap with the keyboard shortcuts and actions.
-/// [onSave] and [onNewFromClipboard] run the document Save and guarded
-/// "New from clipboard" flows, which live above the widget layer.
+/// [onSave], [onOpen] and [onNewFromClipboard] run the document Save, Open
+/// and guarded "New from clipboard" flows, which live above the widget layer.
 Widget shortCutsForMainApp(
   BuildContext context,
   ShellProvider shellProvider,
   AppProvider appProvider,
   Widget child, {
   required Future<void> Function() onSave,
+  required Future<void> Function() onOpen,
   required Future<void> Function() onNewFromClipboard,
 }) {
   final Map<ShortcutActivator, Intent> shortcuts = _buildShortcuts();
@@ -87,6 +89,15 @@ Widget shortCutsForMainApp(
       ),
       SaveIntent: CallbackAction<SaveIntent>(
         onInvoke: (SaveIntent _) async => await onSave(),
+      ),
+      OpenIntent: CallbackAction<OpenIntent>(
+        onInvoke: (OpenIntent _) async => await onOpen(),
+      ),
+      NewLayerIntent: CallbackAction<NewLayerIntent>(
+        onInvoke: (NewLayerIntent _) {
+          appProvider.layers.addLayerAbove(undoName: context.l10n.layerAdd);
+          return null;
+        },
       ),
       CutIntent: CallbackAction<CutIntent>(
         onInvoke: (CutIntent _) async {
@@ -387,6 +398,18 @@ class NewDocumentFromClipboardImage extends Intent {
   const NewDocumentFromClipboardImage();
 }
 
+/// An [Intent] that opens a document.
+class OpenIntent extends Intent {
+  /// Creates an [OpenIntent].
+  const OpenIntent();
+}
+
+/// An [Intent] that inserts a new layer above the selected one.
+class NewLayerIntent extends Intent {
+  /// Creates a [NewLayerIntent].
+  const NewLayerIntent();
+}
+
 /// An [Intent] that triggers the cut action.
 class CutIntent extends Intent {
   /// Creates a [CutIntent].
@@ -514,6 +537,12 @@ Map<ShortcutActivator, Intent> _buildShortcuts() {
   // Save
   addCrossPlatformShortcut(LogicalKeyboardKey.keyS, const SaveIntent());
 
+  // Open
+  addPrimaryModifierShortcut(shortcuts, LogicalKeyboardKey.keyO, const OpenIntent());
+
+  // New layer above the selected one (exactly Shift + Cmd/Ctrl + N).
+  addPrimaryModifierShortcut(shortcuts, LogicalKeyboardKey.keyN, const NewLayerIntent(), shift: true);
+
   // Cut
   addCrossPlatformShortcut(LogicalKeyboardKey.keyX, const CutIntent());
 
@@ -540,8 +569,8 @@ Map<ShortcutActivator, Intent> _buildShortcuts() {
   // Tab key (no duplicates needed)
   shortcuts[LogicalKeySet(LogicalKeyboardKey.tab)] = const ToggleShellModeIntent();
 
-  // New document from Clipboard (only Meta)
-  shortcuts[LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyN)] = const NewDocumentFromClipboardImage();
+  // New document from Clipboard (exactly Cmd/Ctrl + N, as in macOS Preview).
+  addPrimaryModifierShortcut(shortcuts, LogicalKeyboardKey.keyN, const NewDocumentFromClipboardImage());
 
   // Escape
   shortcuts[LogicalKeySet(LogicalKeyboardKey.escape)] = const EscapeIntent();

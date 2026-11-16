@@ -210,36 +210,46 @@ Future<void> onFileOpen(BuildContext context) async {
       linuxOptions: const LinuxOptions(lockParentWindow: true),
     );
 
-    if (result != null) {
-      // layers.clear(); // Removed from here
+    if (result == null) {
+      return;
+    }
 
-      if (kIsWeb) {
-        final Uint8List bytes = await result.readAsBytes();
-        final String fileName = result.name; // Get filename for naming the layer
-        final String extension = fileExtensionOf(fileName);
-        final ImportFileFormat? format = ImportFileFormat.fromExtension(extension);
-        if (format != null) {
-          await _readDocument(
-            layers: layers,
-            bytes: bytes,
-            format: format,
-            fileName: fileName,
-            l10n: l10n,
-          );
-        }
+    // Every branch finishes the open only when the document actually loaded:
+    // finishing a failed open pointed the untouched old document at the new
+    // path and marked it clean, so the next Save overwrote that file with it.
+    if (kIsWeb) {
+      final Uint8List bytes = await result.readAsBytes();
+      final String fileName = result.name; // Get filename for naming the layer
+      final String extension = fileExtensionOf(fileName);
+      final ImportFileFormat? format = ImportFileFormat.fromExtension(extension);
+      if (format == null) {
+        _showImportError(l10n.fileFormatNotSupported(extension));
+        return;
+      }
+      final bool loaded = await _readDocument(
+        layers: layers,
+        bytes: bytes,
+        format: format,
+        fileName: fileName,
+        l10n: l10n,
+      );
+      if (loaded) {
+        // Web has no file paths, so there is no recent-files entry to add.
         layers.clearHasChanged();
         shellProvider.requestCanvasFit();
-      } else {
-        final String path = result.path!;
-        shellProvider.loadedFileName = path;
-        if (context.mounted) {
-          await openFileFromPath(
-            context: context,
-            layers: layers,
-            path: path,
-            preferences: preferences,
-          );
-        }
+      }
+    } else {
+      final String path = result.path!;
+      if (!context.mounted) {
+        return;
+      }
+      final bool loaded = await openFileFromPath(
+        context: context,
+        layers: layers,
+        path: path,
+        preferences: preferences,
+      );
+      if (loaded) {
         await finishDocumentOpen(
           shellProvider: shellProvider,
           layers: layers,
@@ -271,8 +281,7 @@ Future<void> _openInPlaceDocument({
     if (document == null || !context.mounted) {
       return;
     }
-    shellProvider.loadedFileName = document.path;
-    await SecurityScopedFileService.withResolvedBookmark<bool>(
+    final bool loaded = await SecurityScopedFileService.withResolvedBookmark<bool>(
       bookmarkBase64: document.bookmark,
       fallbackPath: document.path,
       action: (String resolvedPath) => openFileFromPath(
@@ -282,6 +291,9 @@ Future<void> _openInPlaceDocument({
         preferences: preferences,
       ),
     );
+    if (!loaded) {
+      return;
+    }
     await finishDocumentOpen(
       shellProvider: shellProvider,
       layers: layers,

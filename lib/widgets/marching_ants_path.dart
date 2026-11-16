@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/render_helper.dart';
+import 'package:fpaint/widgets/looping_animation_controller.dart';
 
 /// Length of each marching-ants dash (px).
 const double _antDashWidth = 4;
@@ -50,10 +51,7 @@ class _AnimatedMarchingAntsPathState extends State<AnimatedMarchingAntsPath> wit
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: AppDefaults.animationLoopDuration,
-    )..repeat();
+    _controller = createLoopingAnimationController(this);
     _measurePath();
   }
 

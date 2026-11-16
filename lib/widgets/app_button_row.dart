@@ -19,6 +19,11 @@ const String previewNameAppButtonRowDefault = 'AppButtonRowDefault';
 const String previewNameAppButtonRowWithIcon = 'AppButtonRowWithIcon';
 const String previewNameAppButtonRowCompact = 'AppButtonRowCompact';
 const double _previewWideContainerWidth = AppLayout.sidePanelExpandedMin;
+const Size previewSizeAppRowIconButton = Size(200, 60);
+const Size previewSizeAppRowPrimaryButton = Size(516, 50);
+const Size previewSizeAppButtonRowDefault = Size(600, 60);
+const Size previewSizeAppButtonRowWithIcon = Size(340, 100);
+const Size previewSizeAppButtonRowCompact = Size(130, 100);
 
 /// Semantic placement slots supported by [AppButtonRow].
 enum AppButtonRowSlot {
@@ -375,7 +380,7 @@ Widget appRowDangerButtonPreview() {
 }
 
 /// Widget preview entry for [AppRowIconButton].
-@Preview(name: previewNameAppRowIconButton)
+@Preview(name: previewNameAppRowIconButton, size: previewSizeAppRowIconButton)
 Widget appRowIconButtonPreview() {
   return _buildButtonRowPreviewContainer(
     width: _previewWideContainerWidth,
@@ -400,7 +405,7 @@ Widget appRowSecondaryButtonPreview() {
 }
 
 /// Widget preview entry for [AppRowPrimaryButton].
-@Preview(name: previewNameAppRowPrimaryButton)
+@Preview(name: previewNameAppRowPrimaryButton, size: previewSizeAppRowPrimaryButton)
 Widget appRowPrimaryButtonPreview() {
   return _buildButtonRowPreviewContainer(
     width: _previewWideContainerWidth,
@@ -412,7 +417,7 @@ Widget appRowPrimaryButtonPreview() {
 }
 
 /// Widget preview entry for [AppButtonRow] with danger and trailing actions.
-@Preview(name: previewNameAppButtonRowDefault, size: Size(600, 60))
+@Preview(name: previewNameAppButtonRowDefault, size: previewSizeAppButtonRowDefault)
 Widget appButtonRowDefaultPreview() {
   return const AppButtonRow(
     actions: <Widget>[
@@ -433,7 +438,7 @@ Widget appButtonRowDefaultPreview() {
 }
 
 /// Widget preview entry for [AppButtonRow] including centered icon controls.
-@Preview(name: previewNameAppButtonRowWithIcon, size: Size(600, 60))
+@Preview(name: previewNameAppButtonRowWithIcon, size: previewSizeAppButtonRowWithIcon)
 Widget appButtonRowWithIconPreview() {
   return const AppButtonRow(
     actions: <Widget>[
@@ -460,7 +465,7 @@ Widget appButtonRowWithIconPreview() {
 }
 
 /// Widget preview entry for [AppButtonRow] in narrow containers.
-@Preview(name: previewNameAppButtonRowCompact, size: Size(100, 100))
+@Preview(name: previewNameAppButtonRowCompact, size: previewSizeAppButtonRowCompact)
 Widget appButtonRowCompactPreview() {
   return const AppButtonRow(
     actions: <Widget>[

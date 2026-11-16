@@ -20,6 +20,7 @@ import 'package:fpaint/widgets/fill_preview_overlay.dart';
 import 'package:fpaint/widgets/fill_widget.dart';
 import 'package:fpaint/widgets/layer_picker_puck.dart';
 import 'package:fpaint/widgets/locked_layer_guard.dart';
+import 'package:fpaint/widgets/looping_animation_controller.dart';
 import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
@@ -729,10 +730,10 @@ class _PixelBrushProcessingShimmer extends StatefulWidget {
 
 class _PixelBrushProcessingShimmerState extends State<_PixelBrushProcessingShimmer>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
+  late final AnimationController _controller = createLoopingAnimationController(
+    this,
     duration: _sweepPeriod,
-  )..repeat();
+  );
   static const Duration _sweepPeriod = Duration(milliseconds: 1100);
   @override
   void dispose() {

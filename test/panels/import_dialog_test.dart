@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart' as flutter_material show MaterialLocalizations, TimeOfDay;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -9,6 +8,7 @@ import 'package:fpaint/panels/side_panel/recent_files_dialog.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:material_ui/material_ui.dart' as flutter_material show MaterialLocalizations, TimeOfDay;
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/widget_test_harness.dart';

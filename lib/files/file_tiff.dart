@@ -116,9 +116,23 @@ Future<List<_LayerFrame>> _buildLayerFrames(LayersProvider layers) async {
   for (int i = layers.length - 1; i >= 0; i--) {
     final LayerProvider layer = layers.get(i);
     final ui.Image layerImage = layer.toImageForStorage(layers.size);
-    final Rect exportBounds = await _resolveLayerExportBounds(layerImage, layers.size);
-    final ui.Image croppedLayerImage = cropImage(layerImage, exportBounds);
-    final img.Image? decoded = await uiImageToPackageImage(croppedLayerImage);
+    final Rect exportBounds;
+    final img.Image? decoded;
+    try {
+      exportBounds = await _resolveLayerExportBounds(layerImage, layers.size);
+      final ui.Image croppedLayerImage = cropImage(layerImage, exportBounds);
+      try {
+        decoded = await uiImageToPackageImage(croppedLayerImage);
+      } finally {
+        // Both textures are export-only: free them once the readback is done
+        // (full-canvas per layer, so leaking them added up fast on big
+        // canvases). The crop is disposed first since it is drawn from
+        // layerImage.
+        croppedLayerImage.dispose();
+      }
+    } finally {
+      layerImage.dispose();
+    }
 
     if (decoded == null) {
       continue;
