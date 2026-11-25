@@ -1,4 +1,5 @@
 export 'app_brush_grain.dart';
+export 'app_brush_library.dart';
 export 'app_colors.dart';
 export 'app_config.dart';
 export 'app_defaults.dart';

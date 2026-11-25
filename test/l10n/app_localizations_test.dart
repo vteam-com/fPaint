@@ -51,7 +51,10 @@ void _exerciseAllStrings(AppLocalizations l10n) {
   expect(l10n.blendModeScreenDescription, isNotEmpty);
   expect(l10n.blendModeSoftLightDescription, isNotEmpty);
   expect(l10n.browseFiles, isNotEmpty);
-  expect(l10n.brush, isNotEmpty);
+  expect(l10n.brushCategoryInking, isNotEmpty);
+  expect(l10n.brushCategoryLines, isNotEmpty);
+  expect(l10n.brushCategorySketching, isNotEmpty);
+  expect(l10n.brushLibrary, isNotEmpty);
   expect(l10n.brushColor, isNotEmpty);
   expect(l10n.brushSize, isNotEmpty);
   expect(l10n.brushStyle, isNotEmpty);

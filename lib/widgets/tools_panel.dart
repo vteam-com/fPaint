@@ -388,17 +388,10 @@ class ToolsPanel extends StatelessWidget {
               compact: minimal,
               name: l10n.brushStyle,
               icon: AppIcon.lineStyle,
-              onOpenPicker: () {
-                showBrushStylePicker(
-                  context,
-                  appProvider.brushStyle,
-                  (BrushStyle selectedBrushStyle) => appProvider.brushStyle = selectedBrushStyle,
-                );
-              },
-              inlineControl: brushStyleDropDown(
-                context,
-                appProvider.brushStyle,
-                (BrushStyle selectedBrushStyle) => appProvider.brushStyle = selectedBrushStyle,
+              onOpenPicker: () => _openBrushLibrary(context, appProvider),
+              inlineControl: BrushStyleSwatch(
+                value: appProvider.brushStyle,
+                onTap: () => _openBrushLibrary(context, appProvider),
               ),
             ),
           );
@@ -629,6 +622,15 @@ class ToolsPanel extends StatelessWidget {
     if (appProvider.brushStyle != style) {
       appProvider.brushStyle = style;
     }
+  }
+
+  /// Opens the visual brush library bound to the provider's brush style.
+  void _openBrushLibrary(BuildContext context, AppProvider appProvider) {
+    showBrushStylePicker(
+      context,
+      appProvider.brushStyle,
+      (BrushStyle selectedBrushStyle) => appProvider.brushStyle = selectedBrushStyle,
+    );
   }
 }
 

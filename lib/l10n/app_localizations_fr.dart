@@ -87,10 +87,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get browseFiles => 'Parcourir...';
 
   @override
-  String get brush => 'Pinceau';
+  String get brushCategoryInking => 'Encrage';
+
+  @override
+  String get brushCategoryLines => 'Lignes';
+
+  @override
+  String get brushCategorySketching => 'Esquisse';
 
   @override
   String get brushColor => 'Couleur du pinceau';
+
+  @override
+  String get brushLibrary => 'Bibliothèque de pinceaux';
 
   @override
   String get brushSize => 'Taille du pinceau';

@@ -48,6 +48,33 @@ enum BrushStyle {
   /// Whether this style paints the canvas-locked hatch pattern and therefore
   /// uses `MyBrush.hatch` / the hatch pattern settings.
   bool get isHatch => this == BrushStyle.hatch || this == BrushStyle.crossHatch;
+
+  /// The brush-library section this style is listed under.
+  BrushStyleCategory get category => switch (this) {
+    BrushStyle.solid ||
+    BrushStyle.dash ||
+    BrushStyle.dotted ||
+    BrushStyle.dashDot ||
+    BrushStyle.slash => BrushStyleCategory.lines,
+    BrushStyle.soft || BrushStyle.grain => BrushStyleCategory.sketching,
+    BrushStyle.hatch || BrushStyle.crossHatch || BrushStyle.hatchMarks => BrushStyleCategory.inking,
+  };
+}
+
+/// Sections of the visual brush library, in display order.
+enum BrushStyleCategory {
+  /// Geometric line styles: solid, dashed, dotted, slashes.
+  lines,
+
+  /// Natural-media styles: soft airbrush and grainy pencil.
+  sketching,
+
+  /// Pen-and-ink shading: hatching, cross-hatching and hatch marks.
+  inking;
+
+  /// The styles listed in this section, in enum order.
+  List<BrushStyle> get styles =>
+      BrushStyle.values.where((BrushStyle style) => style.category == this).toList(growable: false);
 }
 
 /// Represents a brush with a specific style, color, and size.

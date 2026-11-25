@@ -17,6 +17,7 @@ import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/brush_intensity_picker.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
+import 'package:fpaint/widgets/brush_style_picker.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/hatch_settings_picker.dart';
@@ -157,23 +158,8 @@ Future<void> selectToolByKey(WidgetTester tester, Key key) async {
 
 AppLocalizations _l10n(WidgetTester tester) => mainViewContext(tester).l10n;
 
-/// The localized label the brush-style dropdown shows for [style].
-String brushStyleLabel(AppLocalizations l10n, BrushStyle style) {
-  return switch (style) {
-    BrushStyle.solid => l10n.brushStyleSolid,
-    BrushStyle.dash => l10n.brushStyleDash,
-    BrushStyle.dotted => l10n.brushStyleDotted,
-    BrushStyle.dashDot => l10n.brushStyleDashDot,
-    BrushStyle.slash => l10n.brushStyleSlash,
-    BrushStyle.soft => l10n.brushStyleSoft,
-    BrushStyle.grain => l10n.brushStyleGrain,
-    BrushStyle.hatch => l10n.brushStyleHatch,
-    BrushStyle.crossHatch => l10n.brushStyleCrossHatch,
-    BrushStyle.hatchMarks => l10n.brushStyleHatchMarks,
-  };
-}
-
-/// Picks [style] from the tool panel's brush-style dropdown.
+/// Picks [style] from the brush library: taps the tool panel's stroke swatch,
+/// taps the style's tile in the library sheet, then closes the sheet.
 ///
 /// The active tool must support brush styles (Brush, Line, Rectangle, Circle).
 Future<void> selectBrushStyleViaUi(WidgetTester tester, BrushStyle style) async {
@@ -182,18 +168,23 @@ Future<void> selectBrushStyleViaUi(WidgetTester tester, BrushStyle style) async 
     return;
   }
   await _settleToolPanel(tester);
-  final Finder dropdown = find.byType(AppDropdown<int>);
-  expect(dropdown, findsOneWidget, reason: 'Brush style dropdown should be shown');
-  await tester.ensureVisible(dropdown.first);
+  final Finder swatch = find.byKey(Keys.toolBrushStyleSwatch);
+  expect(swatch, findsOneWidget, reason: 'Brush style swatch should be shown');
+  await tester.ensureVisible(swatch);
   await tester.pump();
-  await tapLikeHumanWithoutSettling(tester, tester.getCenter(dropdown.first));
+  await tapLikeHumanWithoutSettling(tester, tester.getCenter(swatch));
   await pumpForDialogTransition(tester);
 
-  final Finder item = find.text(brushStyleLabel(_l10n(tester), style));
-  expect(item, findsAtLeastNWidgets(1), reason: 'Brush style "$style" should be listed');
-  await tapLikeHumanWithoutSettling(tester, tester.getCenter(item.last));
-  await pumpForDialogTransition(tester);
+  final Finder tile = find.byKey(ValueKey<BrushStyle>(style));
+  expect(tile, findsOneWidget, reason: 'Brush library should list "${brushStyleLabel(_l10n(tester), style)}"');
+  await tester.ensureVisible(tile);
+  await tester.pump();
+  await tapLikeHumanWithoutSettling(tester, tester.getCenter(tile));
+  await tester.pump();
   expect(appProvider.brushStyle, style);
+
+  Navigator.of(tester.element(tile)).pop();
+  await pumpForDialogTransition(tester);
 }
 
 /// Sets the brush size through the tool panel's size slider.

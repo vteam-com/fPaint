@@ -84,10 +84,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get browseFiles => 'Explorar archivos...';
 
   @override
-  String get brush => 'Pincel';
+  String get brushCategoryInking => 'Entintado';
+
+  @override
+  String get brushCategoryLines => 'Líneas';
+
+  @override
+  String get brushCategorySketching => 'Bocetos';
 
   @override
   String get brushColor => 'Color del pincel';
+
+  @override
+  String get brushLibrary => 'Biblioteca de pinceles';
 
   @override
   String get brushSize => 'Tamaño del pincel';

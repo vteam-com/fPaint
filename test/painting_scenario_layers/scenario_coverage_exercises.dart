@@ -2114,7 +2114,8 @@ Future<void> _exerciseToleranceAndTopColors(
 // Brush style picker
 // ---------------------------------------------------------------------------
 
-/// Exercises the brush style picker dropdown.
+/// Exercises the brush library: opens it from the stroke swatch, picks a
+/// style by its tile, and closes the sheet.
 Future<void> _exerciseBrushStylePicker(
   PaintingScenarioSession session,
 ) async {
@@ -2126,26 +2127,22 @@ Future<void> _exerciseBrushStylePicker(
   await tapByTooltip(tester, brushL10n.toolBrush);
   await tester.pump();
 
-  // Find brush style picker (AppDropdown).
-  final Finder dropdown = find.byType(AppDropdown<int>);
-  if (dropdown.evaluate().isNotEmpty) {
-    await tester.ensureVisible(dropdown.first);
+  final Finder swatch = find.byKey(Keys.toolBrushStyleSwatch);
+  if (swatch.evaluate().isNotEmpty) {
+    await tester.ensureVisible(swatch.first);
     await pumpForUnitTestUiSettle(tester);
-    final Finder dropdownTapTarget = find.byType(AppDropdown<int>).hitTestable();
-    final Finder resolvedDropdownTapTarget = dropdownTapTarget.evaluate().isNotEmpty ? dropdownTapTarget : dropdown;
-    await tester.tap(resolvedDropdownTapTarget.first, warnIfMissed: false);
+    await tester.tap(swatch.first, warnIfMissed: false);
     await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
-    // Tap a different style by its localized text.
-    final Finder dashItem = find.text(brushL10n.brushStyleDash);
-    if (dashItem.evaluate().isNotEmpty) {
-      await tester.tap(dashItem.last);
-      await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
-    } else {
-      // Dismiss.
-      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-      await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
+    final Finder dashTile = find.byKey(const ValueKey<BrushStyle>(BrushStyle.dash));
+    if (dashTile.evaluate().isNotEmpty) {
+      await tester.ensureVisible(dashTile.first);
+      await tester.pump();
+      await tester.tap(dashTile.first);
+      await tester.pump();
     }
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
   }
 
   // Switch back to pencil.

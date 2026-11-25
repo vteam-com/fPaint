@@ -70,37 +70,71 @@ void main() {
     });
   });
 
-  group('brushStyleDropDown', () {
-    testWidgets('displays all brush styles in dropdown', (WidgetTester tester) async {
+  group('BrushLibrary', () {
+    testWidgets('lists every style as a tile under its category heading', (WidgetTester tester) async {
       BrushStyle? selected;
-
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
-            body: Builder(
-              builder: (BuildContext context) {
-                return brushStyleDropDown(
-                  context,
-                  BrushStyle.solid,
-                  (BrushStyle value) {
-                    selected = value;
-                  },
-                );
-              },
+            body: SingleChildScrollView(
+              child: BrushLibrary(
+                value: BrushStyle.solid,
+                onChanged: (BrushStyle value) => selected = value,
+              ),
             ),
           ),
         ),
       );
+      await tester.pumpAndSettle();
 
-      // Find and tap the dropdown to open it
-      final Finder dropdown = find.byType(AppDropdown<int>);
-      expect(dropdown, findsOneWidget);
+      for (final BrushStyle style in BrushStyle.values) {
+        expect(find.byKey(ValueKey<BrushStyle>(style)), findsOneWidget);
+      }
+      expect(find.text('Lines'), findsOneWidget);
+      expect(find.text('Sketching'), findsOneWidget);
+      expect(find.text('Inking'), findsOneWidget);
+      expect(find.byType(BrushStrokePreview), findsNWidgets(BrushStyle.values.length));
 
-      // Verify it shows the initial value
-      expect(find.text('Solid'), findsOneWidget);
-      expect(selected, isNull);
+      await tester.ensureVisible(find.byKey(const ValueKey<BrushStyle>(BrushStyle.grain)));
+      await tester.tap(find.byKey(const ValueKey<BrushStyle>(BrushStyle.grain)));
+      expect(selected, BrushStyle.grain);
+    });
+
+    test('every style belongs to exactly one category', () {
+      final List<BrushStyle> listed = BrushStyleCategory.values
+          .expand((BrushStyleCategory category) => category.styles)
+          .toList();
+      expect(listed.toSet(), BrushStyle.values.toSet());
+      expect(listed.length, BrushStyle.values.length);
+    });
+
+    test('preview path stays inside the preview bounds', () {
+      const Size size = Size(100, 40);
+      final Rect bounds = brushPreviewPath(size).getBounds();
+      expect((Offset.zero & size).contains(bounds.topLeft), isTrue);
+      expect((Offset.zero & size).contains(bounds.bottomRight), isTrue);
+    });
+  });
+
+  group('BrushStyleSwatch', () {
+    testWidgets('shows the style name and reports taps', (WidgetTester tester) async {
+      int taps = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: BrushStyleSwatch(value: BrushStyle.soft, onTap: () => taps++),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Soft'), findsOneWidget);
+      await tester.tap(find.byType(BrushStyleSwatch));
+      expect(taps, 1);
     });
   });
 
@@ -132,8 +166,9 @@ void main() {
       await tester.tap(find.text('Open Picker'));
       await tester.pumpAndSettle();
 
-      // Dialog should be visible with brush label
-      expect(find.text('Brush'), findsOneWidget);
+      // The sheet should show the brush library.
+      expect(find.text('Brush library'), findsOneWidget);
+      expect(find.byType(BrushLibrary), findsOneWidget);
     });
   });
 }

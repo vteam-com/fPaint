@@ -108,6 +108,7 @@ class Keys {
   static const Key toolBrushIntensityTool = Key('tool-brush-intensity-tool');
   static const Key toolBrushIntensityButton = Key('tool-brush-intensity-button');
   static const Key toolBrushIntensitySlider = Key('tool-brush-intensity-slider');
+  static const Key toolBrushStyleSwatch = Key('tool-brush-style-swatch');
   static const Key toolBrushHatchButton = Key('tool-brush-hatch-button');
   static const Key toolBrushHatchSlider = Key('tool-brush-hatch-slider');
   static const Key hatchAngleSlider = Key('hatch-angle-slider');

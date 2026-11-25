@@ -86,10 +86,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get browseFiles => 'Browse Files...';
 
   @override
-  String get brush => 'Brush';
+  String get brushCategoryInking => 'Inking';
+
+  @override
+  String get brushCategoryLines => 'Lines';
+
+  @override
+  String get brushCategorySketching => 'Sketching';
 
   @override
   String get brushColor => 'Brush Color';
+
+  @override
+  String get brushLibrary => 'Brush library';
 
   @override
   String get brushSize => 'Brush Size';

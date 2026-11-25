@@ -226,17 +226,35 @@ abstract class AppLocalizations {
   /// **'Browse Files...'**
   String get browseFiles;
 
-  /// No description provided for @brush.
+  /// No description provided for @brushCategoryInking.
   ///
   /// In en, this message translates to:
-  /// **'Brush'**
-  String get brush;
+  /// **'Inking'**
+  String get brushCategoryInking;
+
+  /// No description provided for @brushCategoryLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Lines'**
+  String get brushCategoryLines;
+
+  /// No description provided for @brushCategorySketching.
+  ///
+  /// In en, this message translates to:
+  /// **'Sketching'**
+  String get brushCategorySketching;
 
   /// No description provided for @brushColor.
   ///
   /// In en, this message translates to:
   /// **'Brush Color'**
   String get brushColor;
+
+  /// No description provided for @brushLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Brush library'**
+  String get brushLibrary;
 
   /// No description provided for @brushSize.
   ///

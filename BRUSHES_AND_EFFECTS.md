@@ -113,10 +113,26 @@ axis. Heavy blur stays the dedicated **Blur** effect.
 
 ---
 
+## Choosing a brush style: the brush library
+
+Brush styles are picked visually, Procreate-style, never from a text list:
+
+- **Inline swatch** (tools panel): the current style drawn as a sample stroke
+  plus its name (`BrushStyleSwatch`). Tapping it, or the option's button, opens
+  the library.
+- **Library sheet** (`BrushLibrary`): every `BrushStyle` as a tile with a live
+  stroke preview, grouped by `BrushStyleCategory` (Lines / Sketching / Inking).
+  Tapping a tile selects it and the sheet stays open, so styles can be compared.
+- Previews call the real `drawPathWithBrushStyle`, so a tile always matches
+  what the brush lays down. A new `BrushStyle` must get a category in
+  `BrushStyle.category`; the exhaustive `switch` makes the compiler enforce it.
+
+---
+
 ## Canvas-locked patterns: hatching
 
 **Hatch** and **Cross-hatch** are `BrushStyle`s, not tools: pick Brush (or Line /
-Rectangle / Circle) and choose them from the Brush Style dropdown. The stroke is
+Rectangle / Circle) and choose them in the brush library (above). The stroke is
 a *mask* over a stationary field of parallel lines sampled in canvas space (the
 same paper-locked `ImageShader` trick as the Grain style), so overlapping strokes
 reveal one coherent hatch rather than stacking lines — which is what makes
