@@ -4,6 +4,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2.0] - 2026-11-25
+
+### Change
+
+- Add tag-driven desktop releases and in-app auto-update
+- DRY the brush library: shared hatch/prewarm helpers, tap target, test harness
+- Replace brush-style dropdown with a visual brush library
+- update packages
+- Move magnifying eye dropper and main view states to private classes, make layer selector, tools panel, color selector, side panel, main screen, main shell, transform session, layer actions, layer visibility icon, blend mode, and top menu and layers panel tests, add magnifying eye dropper, main view, layer selector, tools panel, color selector, and side panel tests, fix layer thumbnail, layer selector, tools panel, main view, side panel, layer actions, layer blend mode cancel, main screen, showcase painting helpers, webp Huffman codec, webp transform codec, webp VP8L encoder, color selector, main screen, and list helper, and move webp bit writer, webp cl symbol, list helper, blend mode, tool family rail, and hatch tool option to models and widgets.
+
 ## [2.1.3] - 2026-11-16
 
 ### Add
