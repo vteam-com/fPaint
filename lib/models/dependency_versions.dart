@@ -31,7 +31,7 @@ const Map<String, String> dependencyVersions = <String, String>{
   'flutter_launcher_icons': '0.14.4',
   'flutter_lints': '6.0.0',
   'flutter_localizations': '0.0.0',
-  'flutter_svg': '2.5.0',
+  'flutter_svg': '2.5.1',
   'flutter_test': '0.0.0',
   'flutter_web_plugins': '0.0.0',
   'flutter': '0.0.0',

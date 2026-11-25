@@ -2,7 +2,7 @@
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 CHECK_FAILURE_EXIT_CODE="1"
-FCHECK_VERSION="1.6.1"
+FCHECK_VERSION="1.6.5"
 TEST_OUTPUT_DIR="$ROOT_DIR/test/output"
 COVERAGE_LCOV_FILE="$ROOT_DIR/coverage/lcov.info"
 COVERAGE_SUMMARY_FILE="$TEST_OUTPUT_DIR/cc.txt"
@@ -176,7 +176,7 @@ if [ "$fcheck_exit_code" -ne 0 ]; then
 fi
 
 echo --- Analyze
-flutter analyze lib test --no-pub
+flutter analyze --no-pub
 
 echo --- Test
 test_started_at="$(date +%s)"

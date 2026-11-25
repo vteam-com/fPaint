@@ -43,12 +43,12 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  flutter_svg: 2.5.0
+  flutter_svg: 2.5.1
   fpaint_assets:
     path: packages/fpaint_assets
+  http: 1.6.0
   image: 4.13.1
   imclipboard: 0.3.3
-  http: 1.6.0
   intl: 0.20.3
   logging: 1.3.0
   # Also required by the gen-l10n output; see cupertino_ui above.
