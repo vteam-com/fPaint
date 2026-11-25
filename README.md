@@ -237,7 +237,7 @@ Set these in the repository's Actions secrets (Settings → Secrets and variable
 | `MACOS_CERTIFICATE_PASSWORD`   | The `.p12` export password                                                      |
 | `APPLE_API_KEY`                | Contents of the App Store Connect API key `.p8` (notarization)                  |
 | `APPLE_API_KEY_ID`             | That key's ID                                                                   |
-| `APPLE_API_ISSUER_ID`          | The App Store Connect issuer ID                                                 |
+| `APPLE_API_ISSUER_ID`          | The issuer ID (UUID) of a Team API key; leave unset for an Individual key       |
 
 ## Code of Conduct
 

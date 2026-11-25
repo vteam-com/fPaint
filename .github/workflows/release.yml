@@ -131,13 +131,23 @@ jobs:
           API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
         run: |
-          if [[ -z "$API_KEY" || -z "$API_KEY_ID" || -z "$API_ISSUER_ID" ]]; then
-            echo "::error::Set the APPLE_API_KEY, APPLE_API_KEY_ID and APPLE_API_ISSUER_ID secrets: see README \"Releasing\""
+          if [[ -z "$API_KEY" || -z "$API_KEY_ID" ]]; then
+            echo "::error::Set the APPLE_API_KEY and APPLE_API_KEY_ID secrets: see README \"Releasing\""
             exit 1
           fi
 
           printf '%s\n' "$API_KEY" >"$RUNNER_TEMP/api_key.p8"
-          auth=(--key "$RUNNER_TEMP/api_key.p8" --key-id "$API_KEY_ID" --issuer "$API_ISSUER_ID")
+          auth=(--key "$RUNNER_TEMP/api_key.p8" --key-id "$API_KEY_ID")
+          # A Team API key needs its issuer (a UUID); an Individual key has
+          # none, so leave APPLE_API_ISSUER_ID unset for one
+          issuer="$(tr -d '[:space:]' <<<"$API_ISSUER_ID")"
+          if [[ -n "$issuer" ]]; then
+            if [[ ! "$issuer" =~ ^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$ ]]; then
+              echo "::error::APPLE_API_ISSUER_ID is not a UUID: copy the Issuer ID from App Store Connect › Users and Access › Integrations, or delete the secret for an Individual API key"
+              exit 1
+            fi
+            auth+=(--issuer "$issuer")
+          fi
           submission="$RUNNER_TEMP/notarize.zip"
           result="$RUNNER_TEMP/notarization.json"
           ditto -c -k --keepParent "$MACOS_APP" "$submission"
