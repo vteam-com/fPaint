@@ -13,13 +13,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/main.dart' as app;
-import 'package:fpaint/panels/layers/layer_actions.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_buttons.dart';
 import 'package:fpaint/widgets/app_popup_menu.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
+import 'package:fpaint/widgets/layer_actions.dart';
 import 'package:image/image.dart' as img;
 import 'package:shared_preferences/shared_preferences.dart';
 

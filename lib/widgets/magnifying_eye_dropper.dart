@@ -27,11 +27,11 @@ class MagnifyingEyeDropper extends StatefulWidget {
   final Offset pointerPosition;
 
   @override
-  MagnifyingEyeDropperState createState() => MagnifyingEyeDropperState();
+  State<MagnifyingEyeDropper> createState() => _MagnifyingEyeDropperState();
 }
 
 /// The state for [MagnifyingEyeDropper].
-class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> with MagnifierSampling<MagnifyingEyeDropper> {
+class _MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> with MagnifierSampling<MagnifyingEyeDropper> {
   /// The selected color.
   Color? _selectedColor;
   @override

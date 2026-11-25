@@ -2,7 +2,7 @@
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
-import 'package:fpaint/helpers/list_helper.dart';
+import 'package:fpaint/models/list_helper.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 

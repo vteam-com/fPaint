@@ -8,7 +8,6 @@ import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
-import 'package:fpaint/panels/tools/tools_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
@@ -19,6 +18,7 @@ import 'package:fpaint/widgets/app_slider.dart';
 import 'package:fpaint/widgets/halftone_size_picker.dart';
 import 'package:fpaint/widgets/hatch_marks_picker.dart';
 import 'package:fpaint/widgets/hatch_settings_picker.dart';
+import 'package:fpaint/widgets/tools_panel.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

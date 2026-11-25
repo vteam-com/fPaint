@@ -3,8 +3,8 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_en.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
-import 'package:fpaint/panels/layers/layer_actions.dart';
 import 'package:fpaint/providers/layers_provider.dart';
+import 'package:fpaint/widgets/layer_actions.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {

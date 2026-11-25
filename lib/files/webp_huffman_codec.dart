@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
-import 'package:fpaint/files/webp_bit_writer.dart';
-import 'package:fpaint/files/webp_cl_symbol.dart';
 import 'package:fpaint/files/webp_encoder_shared.dart';
+import 'package:fpaint/models/webp_bit_writer.dart';
+import 'package:fpaint/models/webp_cl_symbol.dart';
 
 /// Builds, encodes, and writes Huffman codes for the VP8L bitstream.
 class WebPHuffmanCodec {

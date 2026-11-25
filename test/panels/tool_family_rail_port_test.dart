@@ -3,8 +3,8 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/tool_descriptor.dart';
 import 'package:fpaint/models/tool_kind.dart';
-import 'package:fpaint/panels/tools/tool_family_rail.dart';
 import 'package:fpaint/providers/tool_rail_port.dart';
+import 'package:fpaint/widgets/tool_family_rail.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/painting_test_helpers.dart';

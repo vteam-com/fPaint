@@ -14,13 +14,13 @@ import 'package:fpaint/models/hatch_marks.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
-import 'package:fpaint/panels/layers/layer_thumbnail.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/brush_intensity_picker.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/hatch_settings_picker.dart';
+import 'package:fpaint/widgets/layer_thumbnail.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:material_ui/material_ui.dart';
 

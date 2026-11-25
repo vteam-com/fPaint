@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/files/webp_bit_writer.dart';
 import 'package:fpaint/files/webp_huffman_codec.dart';
+import 'package:fpaint/models/webp_bit_writer.dart';
 
 void main() {
   group('WebPHuffmanCodec', () {

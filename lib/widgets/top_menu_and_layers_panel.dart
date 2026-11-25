@@ -6,10 +6,10 @@ import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
-import 'package:fpaint/panels/layers/layer_selector.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_buttons.dart';
+import 'package:fpaint/widgets/layer_selector.dart';
 import 'package:fpaint/widgets/side_panel_header.dart';
 
 /// A widget that displays the layers panel in the top split of the side panel.

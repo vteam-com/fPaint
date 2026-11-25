@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
-import 'package:fpaint/panels/side_panel/top_menu_and_layers_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/top_menu_and_layers_panel.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

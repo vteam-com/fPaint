@@ -4,13 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/import_files.dart';
-import 'package:fpaint/panels/side_panel/side_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/shell_top_bar.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:fpaint/widgets/side_panel.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 
 /// The main screen of the application, which extends the `StatelessWidget` class.

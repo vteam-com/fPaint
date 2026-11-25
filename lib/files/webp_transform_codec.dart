@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
-import 'package:fpaint/files/webp_bit_writer.dart';
 import 'package:fpaint/files/webp_encoder_shared.dart';
 import 'package:fpaint/files/webp_huffman_codec.dart';
+import 'package:fpaint/models/webp_bit_writer.dart';
 
 /// Applies and writes VP8L spatial transforms (subtract-green, predictor).
 class WebPTransformCodec {

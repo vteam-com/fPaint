@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/helpers/list_helper.dart';
+import 'package:fpaint/models/list_helper.dart';
 
 void main() {
   group('ListHelper Tests', () {

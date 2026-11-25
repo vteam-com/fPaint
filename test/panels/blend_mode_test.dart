@@ -2,7 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
-import 'package:fpaint/panels/layers/blend_mode.dart';
+import 'package:fpaint/widgets/blend_mode.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:material_ui/material_ui.dart' show MaterialApp, Scaffold;
 

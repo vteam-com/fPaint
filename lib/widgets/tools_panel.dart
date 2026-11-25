@@ -9,8 +9,6 @@ import 'package:fpaint/models/hatch_marks.dart';
 import 'package:fpaint/models/hatch_pattern.dart';
 import 'package:fpaint/models/tool_kind.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
-import 'package:fpaint/panels/tools/hatch_tool_option.dart';
-import 'package:fpaint/panels/tools/tool_family_rail.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/brush_intensity_picker.dart';
@@ -21,11 +19,13 @@ import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/gradient_color_list_editor.dart';
 import 'package:fpaint/widgets/halftone_size_picker.dart';
+import 'package:fpaint/widgets/hatch_tool_option.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/picker_slider_tool_option.dart';
 import 'package:fpaint/widgets/text_attributes_widget.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
 import 'package:fpaint/widgets/tool_attribute_widget.dart';
+import 'package:fpaint/widgets/tool_family_rail.dart';
 import 'package:fpaint/widgets/top_colors.dart';
 
 /// Represents a panel that displays tools for the application.
