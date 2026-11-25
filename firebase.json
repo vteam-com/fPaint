@@ -6,15 +6,21 @@
       "**/.*",
       "**/node_modules/**"
     ],
-    "headers": [
+    "redirects": [
       {
-        "source": "/downloads/**",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "public, max-age=3600"
-          }
-        ]
+        "source": "/downloads/flutter-macos-app.zip",
+        "destination": "https://github.com/vteam-com/fPaint/releases/latest/download/fPaint-macos.zip",
+        "type": 302
+      },
+      {
+        "source": "/downloads/flutter-windows-app.zip",
+        "destination": "https://github.com/vteam-com/fPaint/releases/latest/download/fPaint-windows.zip",
+        "type": 302
+      },
+      {
+        "source": "/downloads/flutter-linux-app.zip",
+        "destination": "https://github.com/vteam-com/fPaint/releases/latest/download/fPaint-linux.tar.gz",
+        "type": 302
       }
     ],
     "rewrites": [

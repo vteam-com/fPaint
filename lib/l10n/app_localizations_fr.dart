@@ -768,6 +768,29 @@ class AppLocalizationsFr extends AppLocalizations {
       'Vous avez des modifications non enregistrees. Voulez-vous quitter quand meme ?';
 
   @override
+  String updateAvailableTooltip(Object version) {
+    return 'Mettre à jour vers fPaint $version et redémarrer';
+  }
+
+  @override
+  String get updateFailed => 'Échec de la mise à jour';
+
+  @override
+  String get updateFailedInvalidBuild => 'La mise à jour téléchargée est endommagée. Réessayez plus tard.';
+
+  @override
+  String get updateFailedNetwork =>
+      'La mise à jour n\'a pas pu être téléchargée. Vérifiez votre connexion et réessayez.';
+
+  @override
+  String updateFailedNotWritable(Object folder) {
+    return 'fPaint ne peut pas écrire dans $folder. Déplacez fPaint dans un dossier où vous pouvez écrire, puis relancez la mise à jour.';
+  }
+
+  @override
+  String get updateFailedUnpack => 'La mise à jour téléchargée n\'a pas pu être décompressée.';
+
+  @override
   String get webBrowser => 'Navigateur Web';
 
   @override

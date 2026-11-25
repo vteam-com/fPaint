@@ -1504,6 +1504,42 @@ abstract class AppLocalizations {
   /// **'You have unsaved changes. Do you want to quit anyway?'**
   String get unsavedChangesQuitPrompt;
 
+  /// No description provided for @updateAvailableTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Update to fPaint {version} and restart'**
+  String updateAvailableTooltip(Object version);
+
+  /// No description provided for @updateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Update failed'**
+  String get updateFailed;
+
+  /// No description provided for @updateFailedInvalidBuild.
+  ///
+  /// In en, this message translates to:
+  /// **'The downloaded update is damaged. Try again later.'**
+  String get updateFailedInvalidBuild;
+
+  /// No description provided for @updateFailedNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'The update could not be downloaded. Check your connection and try again.'**
+  String get updateFailedNetwork;
+
+  /// No description provided for @updateFailedNotWritable.
+  ///
+  /// In en, this message translates to:
+  /// **'fPaint cannot write in {folder}. Move fPaint to a folder you can write in, then update again.'**
+  String updateFailedNotWritable(Object folder);
+
+  /// No description provided for @updateFailedUnpack.
+  ///
+  /// In en, this message translates to:
+  /// **'The downloaded update could not be unpacked.'**
+  String get updateFailedUnpack;
+
   /// No description provided for @webBrowser.
   ///
   /// In en, this message translates to:

@@ -327,6 +327,22 @@
   "unsavedChangesDiscardAndOpenPrompt": "Tienes cambios no guardados. Quieres descartarlos y abrir el nuevo archivo?",
   "unsavedChangesIndicatorTooltip": "El documento tiene cambios no guardados",
   "unsavedChangesQuitPrompt": "Tienes cambios no guardados. Quieres salir de todos modos?",
+  "updateAvailableTooltip": "Actualizar a fPaint {version} y reiniciar",
+  "@updateAvailableTooltip": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "updateFailed": "La actualización falló",
+  "updateFailedInvalidBuild": "La actualización descargada está dañada. Inténtalo más tarde.",
+  "updateFailedNetwork": "No se pudo descargar la actualización. Revisa tu conexión e inténtalo de nuevo.",
+  "updateFailedNotWritable": "fPaint no puede escribir en {folder}. Mueve fPaint a una carpeta donde puedas escribir y vuelve a actualizar.",
+  "@updateFailedNotWritable": {
+    "placeholders": {
+      "folder": {}
+    }
+  },
+  "updateFailedUnpack": "No se pudo descomprimir la actualización descargada.",
   "webBrowser": "Navegador web",
   "width": "Ancho"
 }

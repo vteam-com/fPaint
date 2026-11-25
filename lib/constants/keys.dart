@@ -5,6 +5,9 @@ class Keys {
   static const Key floatActionSelector = Key('floating_action_selector');
   static const Key floatActionUndo = Key('floating_action_undo');
   static const Key floatActionRedo = Key('floating_action_redo');
+
+  /// The top-bar button installing a newer fPaint release.
+  static const Key toolbarUpdateButton = Key('toolbar_update_button');
   static const Key floatActionMenuToggle = Key('floating_action_menu_toggle');
   static const Key floatActionZoomIn = Key('floating_action_zoom_in');
   static const Key floatActionZoomOut = Key('floating_action_zoom_out');

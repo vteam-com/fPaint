@@ -329,6 +329,22 @@
   "unsavedChangesDiscardAndOpenPrompt": "Vous avez des modifications non enregistrees. Voulez-vous les ignorer et ouvrir le nouveau fichier ?",
   "unsavedChangesIndicatorTooltip": "Le document contient des modifications non enregistrees",
   "unsavedChangesQuitPrompt": "Vous avez des modifications non enregistrees. Voulez-vous quitter quand meme ?",
+  "updateAvailableTooltip": "Mettre à jour vers fPaint {version} et redémarrer",
+  "@updateAvailableTooltip": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "updateFailed": "Échec de la mise à jour",
+  "updateFailedInvalidBuild": "La mise à jour téléchargée est endommagée. Réessayez plus tard.",
+  "updateFailedNetwork": "La mise à jour n'a pas pu être téléchargée. Vérifiez votre connexion et réessayez.",
+  "updateFailedNotWritable": "fPaint ne peut pas écrire dans {folder}. Déplacez fPaint dans un dossier où vous pouvez écrire, puis relancez la mise à jour.",
+  "@updateFailedNotWritable": {
+    "placeholders": {
+      "folder": {}
+    }
+  },
+  "updateFailedUnpack": "La mise à jour téléchargée n'a pas pu être décompressée.",
   "webBrowser": "Navigateur Web",
   "width": "Largeur"
 }

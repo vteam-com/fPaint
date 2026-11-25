@@ -1,0 +1,25 @@
+name: Setup Flutter
+description: >
+  Installs the Flutter SDK pinned in .flutter-version, the native build
+  libraries on Linux, and the project's packages. Shared by the CI, Release
+  and Deploy workflows.
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version-file: .flutter-version
+        cache: true
+
+    - name: Install Linux build dependencies
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang cmake ninja-build g++ pkg-config libgtk-3-dev liblzma-dev
+
+    - name: Get dependencies
+      shell: bash
+      run: flutter pub get

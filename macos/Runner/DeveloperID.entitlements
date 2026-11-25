@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Entitlements of the macOS build published on GitHub Releases (signed with a
+  Developer ID by .github/workflows/release.yml). Unlike Release.entitlements,
+  it runs outside the App Sandbox, so the in-app updater can replace the
+  installed fPaint.app. Hardened runtime is applied at signing.
+-->
+<plist version="1.0">
+	<dict>
+	</dict>
+</plist>

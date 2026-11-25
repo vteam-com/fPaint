@@ -765,6 +765,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unsavedChangesQuitPrompt => 'You have unsaved changes. Do you want to quit anyway?';
 
   @override
+  String updateAvailableTooltip(Object version) {
+    return 'Update to fPaint $version and restart';
+  }
+
+  @override
+  String get updateFailed => 'Update failed';
+
+  @override
+  String get updateFailedInvalidBuild => 'The downloaded update is damaged. Try again later.';
+
+  @override
+  String get updateFailedNetwork => 'The update could not be downloaded. Check your connection and try again.';
+
+  @override
+  String updateFailedNotWritable(Object folder) {
+    return 'fPaint cannot write in $folder. Move fPaint to a folder you can write in, then update again.';
+  }
+
+  @override
+  String get updateFailedUnpack => 'The downloaded update could not be unpacked.';
+
+  @override
   String get webBrowser => 'Web Browser';
 
   @override

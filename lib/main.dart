@@ -20,6 +20,7 @@ import 'package:fpaint/providers/security_scoped_file_service.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/recovery/draft_recovery_controller.dart';
+import 'package:fpaint/updates/app_update_controller.dart';
 import 'package:fpaint/widgets/inherited_scope.dart';
 import 'package:fpaint/widgets/interaction_density.dart';
 import 'package:fpaint/widgets/material_free.dart';
@@ -99,6 +100,7 @@ Future<void> main() async {
   TrackpadPressure.instance.listen();
 
   runApp(mainApp);
+  mainApp.appUpdateController.start();
 
   // After the app is running, check for a file that was pending at launch.
   WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -311,6 +313,9 @@ class MyApp extends StatelessWidget {
     layersProvider: layersProvider,
   );
 
+  /// Finds and installs newer desktop releases; inert outside published builds.
+  final AppUpdateController appUpdateController = AppUpdateController.forThisBuild();
+
   /// Manages autosave snapshots and startup draft recovery.
   late final DraftRecoveryController draftRecoveryController = DraftRecoveryController(
     preferences: appPreferences,
@@ -335,92 +340,95 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return InheritedScope<DraftRecoveryController>(
       controller: draftRecoveryController,
-      child: InheritedControllerScope<ShellProvider>(
-        controller: shellProvider,
-        child: InheritedControllerScope<AppPreferences>(
-          controller: appPreferences,
-          child: InheritedControllerScope<AppProvider>(
-            controller: appProvider,
-            child: InheritedControllerScope<LayersProvider>(
-              controller: layersProvider,
-              child: InheritedControllerScope<UndoProvider>(
-                controller: undoProvider,
-                // Only the locale is read here: listening to AppProvider too
-                // rebuilt the whole app shell on every editor notification.
-                child: ListenableBuilder(
-                  listenable: appPreferences,
-                  builder: (BuildContext _, Widget? _) {
-                    return RepaintBoundary(
-                      key: Keys.appScreenshotBoundary,
-                      child: WidgetsApp(
-                        debugShowCheckedModeBanner: false,
-                        navigatorKey: navigatorKey,
-                        title: appName,
-                        color: AppColors.primary,
-                        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-                          return PageRouteBuilder<T>(
-                            settings: settings,
-                            pageBuilder: (
-                              BuildContext context,
-                              Animation<double> _,
-                              Animation<double> _,
-                            ) => builder(context),
-                          );
-                        },
-                        localizationsDelegates: AppLocalizations.localizationsDelegates,
-                        supportedLocales: AppLocalizations.supportedLocales,
-                        locale: appPreferences.preferredLocale,
-                        localeResolutionCallback: (Locale? locale, Iterable<Locale> supportedLocales) {
-                          if (locale == null) {
-                            return const Locale('en');
-                          }
-
-                          for (final Locale supportedLocale in supportedLocales) {
-                            if (supportedLocale.languageCode == locale.languageCode) {
-                              return supportedLocale;
+      child: InheritedControllerScope<AppUpdateController>(
+        controller: appUpdateController,
+        child: InheritedControllerScope<ShellProvider>(
+          controller: shellProvider,
+          child: InheritedControllerScope<AppPreferences>(
+            controller: appPreferences,
+            child: InheritedControllerScope<AppProvider>(
+              controller: appProvider,
+              child: InheritedControllerScope<LayersProvider>(
+                controller: layersProvider,
+                child: InheritedControllerScope<UndoProvider>(
+                  controller: undoProvider,
+                  // Only the locale is read here: listening to AppProvider too
+                  // rebuilt the whole app shell on every editor notification.
+                  child: ListenableBuilder(
+                    listenable: appPreferences,
+                    builder: (BuildContext _, Widget? _) {
+                      return RepaintBoundary(
+                        key: Keys.appScreenshotBoundary,
+                        child: WidgetsApp(
+                          debugShowCheckedModeBanner: false,
+                          navigatorKey: navigatorKey,
+                          title: appName,
+                          color: AppColors.primary,
+                          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+                            return PageRouteBuilder<T>(
+                              settings: settings,
+                              pageBuilder: (
+                                BuildContext context,
+                                Animation<double> _,
+                                Animation<double> _,
+                              ) => builder(context),
+                            );
+                          },
+                          localizationsDelegates: AppLocalizations.localizationsDelegates,
+                          supportedLocales: AppLocalizations.supportedLocales,
+                          locale: appPreferences.preferredLocale,
+                          localeResolutionCallback: (Locale? locale, Iterable<Locale> supportedLocales) {
+                            if (locale == null) {
+                              return const Locale('en');
                             }
-                          }
 
-                          return const Locale('en');
-                        },
-                        routes: <String, WidgetBuilder>{
-                          '/': (BuildContext context) => shortCutsForMainApp(
-                            context,
-                            shellProvider,
-                            appProvider,
-                            const MainScreen(),
-                            onSave: () => saveLoadedFileWithFeedback(
-                              shellProvider,
-                              appProvider.layers,
-                              appPreferences,
-                            ),
-                            onOpen: () => showImportSheet(context),
-                            onNewFromClipboard: () => newDocumentFromClipboardGuarded(
+                            for (final Locale supportedLocale in supportedLocales) {
+                              if (supportedLocale.languageCode == locale.languageCode) {
+                                return supportedLocale;
+                              }
+                            }
+
+                            return const Locale('en');
+                          },
+                          routes: <String, WidgetBuilder>{
+                            '/': (BuildContext context) => shortCutsForMainApp(
                               context,
-                              appProvider: appProvider,
-                              shellProvider: shellProvider,
-                            ),
-                          ),
-                          '/settings': (_) => const SettingsPage(),
-                          '/platforms': (_) => const PlatformsPage(),
-                        },
-                        builder: (BuildContext _, Widget? child) {
-                          // Above the navigator, so pages, dialogs, and popups
-                          // all follow the input modality's control density.
-                          return ListenableBuilder(
-                            listenable: shellProvider,
-                            builder: (BuildContext _, Widget? _) => InteractionDensity(
-                              profile: shellProvider.interactionLayoutProfile,
-                              child: DefaultTextStyle(
-                                style: const TextStyle(fontFamily: appFontFamily),
-                                child: child ?? const SizedBox.shrink(),
+                              shellProvider,
+                              appProvider,
+                              const MainScreen(),
+                              onSave: () => saveLoadedFileWithFeedback(
+                                shellProvider,
+                                appProvider.layers,
+                                appPreferences,
+                              ),
+                              onOpen: () => showImportSheet(context),
+                              onNewFromClipboard: () => newDocumentFromClipboardGuarded(
+                                context,
+                                appProvider: appProvider,
+                                shellProvider: shellProvider,
                               ),
                             ),
-                          );
-                        },
-                      ),
-                    );
-                  },
+                            '/settings': (_) => const SettingsPage(),
+                            '/platforms': (_) => const PlatformsPage(),
+                          },
+                          builder: (BuildContext _, Widget? child) {
+                            // Above the navigator, so pages, dialogs, and popups
+                            // all follow the input modality's control density.
+                            return ListenableBuilder(
+                              listenable: shellProvider,
+                              builder: (BuildContext _, Widget? _) => InteractionDensity(
+                                profile: shellProvider.interactionLayoutProfile,
+                                child: DefaultTextStyle(
+                                  style: const TextStyle(fontFamily: appFontFamily),
+                                  child: child ?? const SizedBox.shrink(),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),

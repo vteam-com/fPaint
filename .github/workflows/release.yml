@@ -1,0 +1,243 @@
+name: Release
+
+# Builds fPaint for macOS, Windows and Linux only when the code is declared
+# ready, never on a plain push to main:
+#   - tool/release.sh sets pubspec's version, writes the CHANGELOG entry and
+#     pushes its tag (v2.2.0), which checks, builds and publishes the three
+#     builds as the latest GitHub Release. The in-app updater and the
+#     download links (releases/latest/download/fPaint-<os>.*) read it.
+#   - "Run workflow" on the Actions tab checks and builds any branch, the
+#     builds kept as workflow artifacts only, to try a release out.
+# The macOS build is signed with the Developer ID certificate, outside the
+# App Sandbox (macos/Runner/DeveloperID.entitlements) so it can update
+# itself, and notarized by Apple. Secrets: see README "Releasing".
+# Only the latest build is kept, to save storage: a release deletes the older
+# releases (their tags stay), and each run prunes earlier build artifacts.
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  # pubspec.yaml holds the version tool/release.sh sets and tags; a tag naming
+  # another version stops the release before it checks
+  version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check the tag matches pubspec.yaml
+        if: github.ref_type == 'tag'
+        run: |
+          version="$(sed -n 's/^version: *\([^+]*\).*/\1/p' pubspec.yaml)"
+          if [[ "$GITHUB_REF_NAME" != "v$version" ]]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match pubspec.yaml's version $version; release with tool/release.sh"
+            exit 1
+          fi
+
+  checks:
+    needs: version
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  build:
+    needs: checks
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos
+            runner: macos-latest
+            asset: fPaint-macos.zip
+          - platform: windows
+            runner: windows-latest
+            asset: fPaint-windows.zip
+          - platform: linux
+            runner: ubuntu-latest
+            asset: fPaint-linux.tar.gz
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      # No version in the name, so releases/latest/download/<asset> always
+      # finds the newest; names match lib/updates/app_update_constants.dart
+      ASSET: ${{ matrix.asset }}
+      MACOS_APP: build/macos/Build/Products/Release/fPaint.app
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ./.github/actions/setup-flutter
+
+      # FPAINT_UPDATE_CHANNEL turns the in-app updater on; local and store
+      # builds leave it unset and never update themselves
+      - name: Build
+        run: flutter build ${{ matrix.platform }} --release --dart-define=FPAINT_UPDATE_CHANNEL=github
+
+      # Signs inside out, each framework before the app holding it, with the
+      # hardened runtime and secure timestamp notarization requires.
+      - name: Sign macOS
+        if: matrix.platform == 'macos'
+        env:
+          CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        run: |
+          if [[ -z "$CERTIFICATE" || -z "$CERTIFICATE_PASSWORD" ]]; then
+            echo "::error::Set the MACOS_CERTIFICATE and MACOS_CERTIFICATE_PASSWORD secrets: see README \"Releasing\""
+            exit 1
+          fi
+
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          keychain_password="$(uuidgen)"
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          base64 --decode <<<"$CERTIFICATE" >"$RUNNER_TEMP/certificate.p12"
+          security import "$RUNNER_TEMP/certificate.p12" -k "$keychain" \
+            -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          rm "$RUNNER_TEMP/certificate.p12"
+          security set-key-partition-list -S apple-tool:,apple: -s \
+            -k "$keychain_password" "$keychain" >/dev/null
+          security list-keychains -d user -s "$keychain"
+
+          identity="$(security find-identity -v -p codesigning "$keychain" |
+            awk '/"Developer ID Application: / { print $2; exit }')"
+          if [[ -z "$identity" ]]; then
+            echo "::error::MACOS_CERTIFICATE holds no valid Developer ID Application certificate"
+            exit 1
+          fi
+
+          find "$MACOS_APP/Contents/Frameworks" -depth \
+            \( -name '*.framework' -o -name '*.dylib' \) -print0 |
+          while IFS= read -r -d '' code; do
+            codesign --force --timestamp --options runtime --sign "$identity" "$code"
+          done
+          codesign --force --timestamp --options runtime --sign "$identity" \
+            --entitlements macos/Runner/DeveloperID.entitlements "$MACOS_APP"
+          codesign --verify --strict --deep --verbose=2 "$MACOS_APP"
+
+      # `notarytool submit --wait` can end well on a rejected app, so the
+      # status decides; Apple's log of a rejection says what to fix.
+      - name: Notarize macOS
+        if: matrix.platform == 'macos'
+        timeout-minutes: 60
+        env:
+          API_KEY: ${{ secrets.APPLE_API_KEY }}
+          API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+        run: |
+          if [[ -z "$API_KEY" || -z "$API_KEY_ID" || -z "$API_ISSUER_ID" ]]; then
+            echo "::error::Set the APPLE_API_KEY, APPLE_API_KEY_ID and APPLE_API_ISSUER_ID secrets: see README \"Releasing\""
+            exit 1
+          fi
+
+          printf '%s\n' "$API_KEY" >"$RUNNER_TEMP/api_key.p8"
+          auth=(--key "$RUNNER_TEMP/api_key.p8" --key-id "$API_KEY_ID" --issuer "$API_ISSUER_ID")
+          submission="$RUNNER_TEMP/notarize.zip"
+          result="$RUNNER_TEMP/notarization.json"
+          ditto -c -k --keepParent "$MACOS_APP" "$submission"
+          xcrun notarytool submit "$submission" "${auth[@]}" --wait \
+            --output-format json >"$result" || true
+          cat "$result"
+          if [[ "$(jq -r '.status // empty' "$result" || true)" != "Accepted" ]]; then
+            id="$(jq -r '.id // empty' "$result" || true)"
+            [[ -z "$id" ]] || xcrun notarytool log "$id" "${auth[@]}"
+            echo "::error::Apple did not notarize the app; its log above says why"
+            exit 1
+          fi
+
+          xcrun stapler staple "$MACOS_APP"
+          spctl --assess --type execute --verbose=2 "$MACOS_APP"
+
+      - name: Package macOS
+        if: matrix.platform == 'macos'
+        run: ditto -c -k --keepParent "$MACOS_APP" "$ASSET"
+
+      - name: Package Windows
+        if: matrix.platform == 'windows'
+        run: 7z a "$GITHUB_WORKSPACE/$ASSET" ./build/windows/x64/runner/Release/*
+
+      - name: Package Linux
+        if: matrix.platform == 'linux'
+        run: tar -czf "$ASSET" -C build/linux/x64/release bundle
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: fPaint-${{ matrix.platform }}
+          path: ${{ env.ASSET }}
+          if-no-files-found: error
+
+  # Published at once so the download links and the in-app updater see it as
+  # soon as the run ends; then older releases go (their tags stay)
+  release:
+    if: github.ref_type == 'tag'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/download-artifact@v7
+        with:
+          path: dist
+          merge-multiple: true
+
+      # The CHANGELOG section tool/release.sh wrote for this version
+      - name: Release notes
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v heading="## [$version]" '
+            index($0, heading) == 1 { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md >"$RUNNER_TEMP/notes.md"
+          [[ -s "$RUNNER_TEMP/notes.md" ]] || echo "fPaint $version" >"$RUNNER_TEMP/notes.md"
+
+      - name: Publish the release
+        run: >
+          gh release create "$GITHUB_REF_NAME" dist/*
+          --repo "$GITHUB_REPOSITORY"
+          --title "fPaint ${GITHUB_REF_NAME#v}"
+          --notes-file "$RUNNER_TEMP/notes.md"
+          --latest
+          --verify-tag
+
+      - name: Delete the older releases
+        run: |
+          gh release list --repo "$GITHUB_REPOSITORY" --json tagName \
+            --jq '.[] | select(.tagName != env.GITHUB_REF_NAME) | .tagName' |
+          while read -r tag; do
+            gh release delete "$tag" --repo "$GITHUB_REPOSITORY" --yes
+          done
+
+  # A tag run's builds now live in its release, so every fPaint build
+  # artifact goes; a manual run keeps its own and deletes earlier ones.
+  prune:
+    needs: [build, release]
+    if: ${{ !cancelled() && needs.build.result == 'success' && needs.release.result != 'failure' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Delete the older builds
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KEEP_RUN: ${{ github.ref_type == 'tag' && 'none' || github.run_id }}
+        run: |
+          gh api --paginate "repos/$GITHUB_REPOSITORY/actions/artifacts" --jq '
+            .artifacts[]
+            | select(.name | startswith("fPaint-"))
+            | select(.expired | not)
+            | select((.workflow_run.id | tostring) != env.KEEP_RUN)
+            | .id' |
+          while read -r id; do
+            gh api --method DELETE "repos/$GITHUB_REPOSITORY/actions/artifacts/$id"
+          done

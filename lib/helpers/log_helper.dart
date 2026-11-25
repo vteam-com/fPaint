@@ -9,6 +9,9 @@ const String logNameAppProvider = 'AppProvider';
 const String logNameAppSnackbar = 'AppSnackbar';
 const String logNameColorPicker = 'ColorPicker';
 const String logNameFileHeic = 'FileHeic';
+
+/// Logger name for the desktop self-updater.
+const String logNameAppUpdate = 'AppUpdate';
 const String logNameFileOra = 'FileOra';
 const String logNameFilePsd = 'FilePsd';
 const String logNameFileTiff = 'FileTiff';

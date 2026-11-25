@@ -2,6 +2,7 @@ import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/import_files.dart';
+import 'package:fpaint/files/quit_confirmation.dart';
 import 'package:fpaint/helpers/shortcut_tooltip.dart';
 import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -19,6 +20,7 @@ import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:fpaint/widgets/shell_selection_sub_toolbar.dart';
 import 'package:fpaint/widgets/toolbar_icon_button.dart';
+import 'package:fpaint/widgets/update_button.dart';
 
 part 'shell_top_bar_responsive_groups.dart';
 
@@ -129,6 +131,13 @@ class ShellTopBar extends StatelessWidget {
                 appProvider,
                 interactionProfile,
               ),
+            ),
+          ),
+          UpdateButton(
+            interactionProfile: interactionProfile,
+            confirmQuit: (BuildContext context) => confirmQuitWithUnsavedChanges(
+              layers: appProvider.layers,
+              context: context,
             ),
           ),
           const MainMenu(),

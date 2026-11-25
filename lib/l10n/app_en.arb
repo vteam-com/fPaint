@@ -336,6 +336,22 @@
   "unsavedChangesDiscardAndOpenPrompt": "You have unsaved changes. Do you want to discard them and open the new file?",
   "unsavedChangesIndicatorTooltip": "Document has unsaved changes",
   "unsavedChangesQuitPrompt": "You have unsaved changes. Do you want to quit anyway?",
+  "updateAvailableTooltip": "Update to fPaint {version} and restart",
+  "@updateAvailableTooltip": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "updateFailed": "Update failed",
+  "updateFailedInvalidBuild": "The downloaded update is damaged. Try again later.",
+  "updateFailedNetwork": "The update could not be downloaded. Check your connection and try again.",
+  "updateFailedNotWritable": "fPaint cannot write in {folder}. Move fPaint to a folder you can write in, then update again.",
+  "@updateFailedNotWritable": {
+    "placeholders": {
+      "folder": {}
+    }
+  },
+  "updateFailedUnpack": "The downloaded update could not be unpacked.",
   "webBrowser": "Web Browser",
   "width": "Width"
 }

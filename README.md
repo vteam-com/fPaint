@@ -180,35 +180,64 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ## CI/CD Pipeline
 
-Every push to `main` triggers the following automated pipeline:
+| Workflow      | File                                                  | Trigger                                  |
+| ------------- | ----------------------------------------------------- | ---------------------------------------- |
+| CI            | `.github/workflows/ci.yml`                            | Push/PR to `main` or `develop`           |
+| Deploy (web)  | `.github/workflows/firebase-hosting-merge.yml`        | After CI succeeds on `main`              |
+| PR Preview    | `.github/workflows/firebase-hosting-pull-request.yml` | Pull requests                            |
+| Release       | `.github/workflows/release.yml`                       | A `vX.Y.Z` tag, or manual (test build)   |
+| Store Release | `.github/workflows/store-release.yml`                 | Manual (iOS TestFlight, Google Play)     |
 
-```text
-Push to main
-  └─► CI (ci.yml)
-       ├─ Analyze (flutter analyze, dart format)
-       └─ Test (flutter test --coverage → Codecov)
-            │
-            ▼ on success
-       Deploy Pipeline (firebase-hosting-merge.yml)
-       ├─► Build Linux   ─┐
-       ├─► Build Windows  ├─ parallel
-       ├─► Build macOS   ─┘
-       │         │
-       │         ▼ all complete
-       └─► Build Web + Deploy
-            ├─ flutter build web
-            ├─ Copy desktop zips into build/web/downloads/
-            └─ Deploy to paint.vteam.com (Firebase Hosting)
+Every push to `main` runs CI and, when it passes, redeploys the web app to
+[paint.vteam.com](https://paint.vteam.com). Desktop builds are only made by a release.
+
+### Releasing
+
+```sh
+tool/release.sh patch   # or minor, major, or an exact X.Y.Z
 ```
 
-| Workflow     | File                                                  | Trigger                        |
-| ------------ | ----------------------------------------------------- | ------------------------------ |
-| CI           | `.github/workflows/ci.yml`                            | Push/PR to `main` or `develop` |
-| Deploy       | `.github/workflows/firebase-hosting-merge.yml`        | After CI succeeds on `main`    |
-| PR Preview   | `.github/workflows/firebase-hosting-pull-request.yml` | Pull requests                  |
-| Desktop Only | `.github/workflows/build-apps.yml`                    | Manual (`workflow_dispatch`)   |
+The script, run on a clean, up-to-date `main`:
 
-The desktop downloads at `paint.vteam.com/downloads/` are built and deployed automatically with each release. The **"Available on..."** page in the app links directly to these URLs.
+1. Bumps `version:` in `pubspec.yaml` (the build number goes up by one).
+2. Writes a `CHANGELOG.md` entry with one line per commit since the last release, shows it, and lets you
+   edit it (`e`) before you confirm (`y`).
+3. Runs `tool/check.sh`, then commits `Release vX.Y.Z`, tags it, and pushes both.
+
+The tag starts **Release**, which runs CI, builds macOS, Windows and Linux, and publishes them as the
+latest GitHub Release, with the changelog entry as release notes. Older releases are deleted, but their tags are kept.
+
+| Asset                 | Contents                                    |
+| --------------------- | ------------------------------------------- |
+| `fPaint-macos.zip`    | `fPaint.app`, Developer ID signed, notarized |
+| `fPaint-windows.zip`  | The Windows runner folder                   |
+| `fPaint-linux.tar.gz` | The Linux `bundle` folder                   |
+
+Download links always point at `https://github.com/vteam-com/fPaint/releases/latest/download/<asset>`.
+The old `paint.vteam.com/downloads/flutter-*-app.zip` URLs redirect there.
+
+### Auto-update
+
+Desktop builds published by the Release workflow check GitHub for a newer release shortly after launch and
+every few hours. When one exists, a download button appears in the top bar. Clicking it asks about
+unsaved changes, downloads the build, quits, swaps the new version in, and restarts.
+Only those builds update themselves: the workflow builds with `--dart-define=FPAINT_UPDATE_CHANNEL=github`.
+Local, App Store, Play Store and web builds never do.
+
+The GitHub macOS build runs outside the App Sandbox (`macos/Runner/DeveloperID.entitlements`) so it can
+replace its own bundle. Store builds keep `Release.entitlements`.
+
+### Release secrets
+
+Set these in the repository's Actions secrets (Settings → Secrets and variables → Actions):
+
+| Secret                         | Value                                                                           |
+| ------------------------------ | ------------------------------------------------------------------------------- |
+| `MACOS_CERTIFICATE`            | Base64 of the Developer ID Application certificate `.p12` (`base64 -i cert.p12`) |
+| `MACOS_CERTIFICATE_PASSWORD`   | The `.p12` export password                                                      |
+| `APPLE_API_KEY`                | Contents of the App Store Connect API key `.p8` (notarization)                  |
+| `APPLE_API_KEY_ID`             | That key's ID                                                                   |
+| `APPLE_API_ISSUER_ID`          | The App Store Connect issuer ID                                                 |
 
 ## Code of Conduct
 

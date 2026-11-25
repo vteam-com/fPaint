@@ -5,6 +5,8 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
+  # The Release workflow runs these checks before it builds
+  workflow_call:
 
 jobs:
   analyze:
@@ -13,14 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version-file: .flutter-version
-          cache: true
-
-      - name: Install dependencies
-        run: flutter pub get
+      - uses: ./.github/actions/setup-flutter
 
       - name: Analyze code
         run: flutter analyze
@@ -34,14 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version-file: .flutter-version
-          cache: true
-
-      - name: Install dependencies
-        run: flutter pub get
+      - uses: ./.github/actions/setup-flutter
 
       - name: Run tests
         run: flutter test --coverage
