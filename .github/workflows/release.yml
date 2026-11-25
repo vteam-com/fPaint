@@ -3,8 +3,8 @@ name: Release
 # Builds fPaint for macOS, Windows and Linux only when the code is declared
 # ready, never on a plain push to main:
 #   - tool/release.sh sets pubspec's version, writes the CHANGELOG entry and
-#     pushes its tag (v2.2.0), which checks, builds and publishes the three
-#     builds as the latest GitHub Release. The in-app updater and the
+#     pushes its tag (v2.2.0), which waits for CI on that commit, then builds
+#     and publishes the three builds as the latest GitHub Release. The in-app updater and the
 #     download links (releases/latest/download/fPaint-<os>.*) read it.
 #   - "Run workflow" on the Actions tab checks and builds any branch, the
 #     builds kept as workflow artifacts only, to try a release out.
@@ -39,13 +39,44 @@ jobs:
             exit 1
           fi
 
-  checks:
+  # tool/release.sh pushes main and the tag together, so CI is already
+  # checking this commit: wait for its result instead of checking twice
+  ci-result:
+    if: github.ref_type == 'tag'
     needs: version
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Wait for CI on this commit
+        run: |
+          for _ in $(seq 1 30); do
+            run_id="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml \
+              --commit "$GITHUB_SHA" --event push --limit 1 --json databaseId --jq '.[0].databaseId')"
+            [[ -n "$run_id" ]] && break
+            sleep 10
+          done
+          if [[ -z "$run_id" ]]; then
+            echo "::error::No CI run for $GITHUB_SHA: push the commit to main (tool/release.sh does) before its tag"
+            exit 1
+          fi
+          echo "Waiting for CI run $run_id"
+          gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status --interval 30 >/dev/null
+
+  # A manual run builds a branch CI may never have checked
+  checks:
+    if: github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/ci.yml
     secrets: inherit
 
   build:
-    needs: checks
+    needs: [version, ci-result, checks]
+    if: >-
+      ${{ !cancelled() && needs.version.result == 'success'
+      && (needs.ci-result.result == 'success' || needs.checks.result == 'success') }}
     strategy:
       fail-fast: false
       matrix:
