@@ -216,7 +216,9 @@ jobs:
   # Published at once so the download links and the in-app updater see it as
   # soon as the run ends; then older releases go (their tags stay)
   release:
-    if: github.ref_type == 'tag'
+    # Explicit result check: a plain `needs: build` is skipped whenever any
+    # job upstream was skipped, and `checks` always is on a tag
+    if: ${{ !cancelled() && github.ref_type == 'tag' && needs.build.result == 'success' }}
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -263,7 +265,12 @@ jobs:
   # artifact goes; a manual run keeps its own and deletes earlier ones.
   prune:
     needs: [build, release]
-    if: ${{ !cancelled() && needs.build.result == 'success' && needs.release.result != 'failure' }}
+    # A tag run prunes only once its builds live in the release; a manual run
+    # (no release) keeps its own builds and deletes those of earlier runs
+    if: >-
+      ${{ !cancelled() && needs.build.result == 'success'
+      && (needs.release.result == 'success'
+      || (github.ref_type != 'tag' && needs.release.result == 'skipped')) }}
     runs-on: ubuntu-latest
     permissions:
       actions: write
