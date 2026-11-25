@@ -3,10 +3,10 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
+import 'package:fpaint/models/app_update_exception.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/updates/app_release.dart';
 import 'package:fpaint/updates/app_update_controller.dart';
-import 'package:fpaint/updates/app_update_exception.dart';
 import 'package:fpaint/widgets/app_snackbar.dart';
 import 'package:fpaint/widgets/toolbar_icon_button.dart';
 

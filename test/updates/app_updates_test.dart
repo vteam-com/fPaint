@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/models/app_update_exception.dart';
 import 'package:fpaint/updates/app_release.dart';
 import 'package:fpaint/updates/app_update_constants.dart';
 import 'package:fpaint/updates/app_update_controller.dart';
-import 'package:fpaint/updates/app_update_exception.dart';
 import 'package:fpaint/updates/app_updater.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';

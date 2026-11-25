@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fpaint/models/app_update_exception.dart';
 import 'package:fpaint/updates/app_release.dart';
 import 'package:fpaint/updates/app_update_constants.dart';
-import 'package:fpaint/updates/app_update_exception.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 
