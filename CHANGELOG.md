@@ -4,6 +4,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2.1] - 2026-11-25
+
+### Change
+
+- udpate allowed words
+- Release: reuse the commit's CI run instead of re-running checks on tags
+
 ## [2.2.0] - 2026-11-25
 
 ### Change
