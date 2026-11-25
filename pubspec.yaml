@@ -36,14 +36,14 @@ dependencies:
   # Required by the gen-l10n output (lib/l10n/app_localizations.dart imports
   # both since Flutter 3.50). App code stays Material-free; see
   # lib/widgets/material_free.dart.
-  cupertino_ui: 1.1.6
+  cupertino_ui: 1.1.7
   desktop_drop: 0.8.4
-  file_picker: 13.3.3
+  file_picker: 13.4.1
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  flutter_svg: 2.4.0
+  flutter_svg: 2.5.0
   fpaint_assets:
     path: packages/fpaint_assets
   image: 4.13.1
@@ -51,7 +51,7 @@ dependencies:
   intl: 0.20.3
   logging: 1.3.0
   # Also required by the gen-l10n output; see cupertino_ui above.
-  material_ui: 1.11.0
+  material_ui: 1.11.1
   multi_split_view: 3.6.2
   path_provider: 2.1.6
   shared_preferences: 2.5.6
