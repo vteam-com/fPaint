@@ -5,13 +5,15 @@ import 'package:fpaint/widgets/brush_style_picker.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../helpers/widget_test_harness.dart';
+
 void main() {
+  final AppLocalizations l10n = lookupAppLocalizations(const Locale('en'));
+
   group('BrushStylePicker', () {
     testWidgets('renders with initial value and localized label', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
+        buildLocalizedTestApp(
           home: Scaffold(
             body: BrushStylePicker(
               title: 'Style',
@@ -23,14 +25,12 @@ void main() {
       );
 
       // Should show the formatted value with localized label
-      expect(find.textContaining('Solid'), findsAtLeastNWidgets(1));
+      expect(find.textContaining(brushStyleLabel(l10n, BrushStyle.solid)), findsAtLeastNWidgets(1));
     });
 
     testWidgets('renders dash style label', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
+        buildLocalizedTestApp(
           home: Scaffold(
             body: BrushStylePicker(
               title: 'Style',
@@ -41,21 +41,16 @@ void main() {
         ),
       );
 
-      expect(find.textContaining('Dash'), findsAtLeastNWidgets(1));
+      expect(find.textContaining(brushStyleLabel(l10n, BrushStyle.dash)), findsAtLeastNWidgets(1));
     });
   });
 
   group('hatch labels', () {
     testWidgets('renders hatch and cross-hatch style labels', (WidgetTester tester) async {
-      for (final (BrushStyle style, String label) in <(BrushStyle, String)>[
-        (BrushStyle.hatch, 'Hatch'),
-        (BrushStyle.crossHatch, 'Cross-hatch'),
-        (BrushStyle.hatchMarks, 'Hatch marks'),
-      ]) {
+      for (final BrushStyle style in BrushStyleCategory.inking.styles) {
+        final String label = brushStyleLabel(l10n, style);
         await tester.pumpWidget(
-          MaterialApp(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
+          buildLocalizedTestApp(
             home: Scaffold(
               body: BrushStylePicker(
                 title: 'Style',
@@ -74,9 +69,7 @@ void main() {
     testWidgets('lists every style as a tile under its category heading', (WidgetTester tester) async {
       BrushStyle? selected;
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
+        buildLocalizedTestApp(
           home: Scaffold(
             body: SingleChildScrollView(
               child: BrushLibrary(
@@ -92,9 +85,9 @@ void main() {
       for (final BrushStyle style in BrushStyle.values) {
         expect(find.byKey(ValueKey<BrushStyle>(style)), findsOneWidget);
       }
-      expect(find.text('Lines'), findsOneWidget);
-      expect(find.text('Sketching'), findsOneWidget);
-      expect(find.text('Inking'), findsOneWidget);
+      for (final BrushStyleCategory category in BrushStyleCategory.values) {
+        expect(find.text(brushStyleCategoryLabel(l10n, category)), findsOneWidget);
+      }
       expect(find.byType(BrushStrokePreview), findsNWidgets(BrushStyle.values.length));
 
       await tester.ensureVisible(find.byKey(const ValueKey<BrushStyle>(BrushStyle.grain)));
@@ -122,9 +115,7 @@ void main() {
     testWidgets('shows the style name and reports taps', (WidgetTester tester) async {
       int taps = 0;
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
+        buildLocalizedTestApp(
           home: Scaffold(
             body: BrushStyleSwatch(value: BrushStyle.soft, onTap: () => taps++),
           ),
@@ -132,7 +123,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Soft'), findsOneWidget);
+      expect(find.text(brushStyleLabel(l10n, BrushStyle.soft)), findsOneWidget);
       await tester.tap(find.byType(BrushStyleSwatch));
       expect(taps, 1);
     });
@@ -141,9 +132,7 @@ void main() {
   group('showBrushStylePicker', () {
     testWidgets('opens a picker dialog', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
+        buildLocalizedTestApp(
           home: Scaffold(
             body: Builder(
               builder: (BuildContext context) {
@@ -167,7 +156,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // The sheet should show the brush library.
-      expect(find.text('Brush library'), findsOneWidget);
+      expect(find.text(l10n.brushLibrary), findsOneWidget);
       expect(find.byType(BrushLibrary), findsOneWidget);
     });
   });

@@ -2,10 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
-import 'package:fpaint/models/brush_grain.dart';
-import 'package:fpaint/models/brush_hatch.dart';
 import 'package:fpaint/models/brush_style.dart';
-import 'package:fpaint/models/hatch_pattern.dart';
 import 'package:fpaint/models/render_helper.dart';
 
 /// Paints a sample S-curve stroke with the real brush renderer, so the preview
@@ -53,12 +50,7 @@ class _BrushStrokePreviewState extends State<BrushStrokePreview> {
   /// Grain and hatch styles sample async-generated tiles; repaint once ready so
   /// the preview shows the texture instead of the solid fallback.
   void _prewarmTextures() {
-    final Future<void>? pending = switch (widget.style) {
-      BrushStyle.grain => BrushGrain.instance.prewarm(),
-      BrushStyle.hatch => BrushHatch.instance.prewarm(const HatchPattern()),
-      BrushStyle.crossHatch => BrushHatch.instance.prewarm(const HatchPattern(crossed: true)),
-      _ => null,
-    };
+    final Future<void>? pending = prewarmBrushStyleTextures(widget.style);
     pending?.then((void _) {
       if (mounted) {
         setState(() {});
@@ -105,4 +97,43 @@ Path brushPreviewPath(Size size) {
     path.lineTo(inset + span * t, midY - math.sin(angle) * amplitude);
   }
   return path;
+}
+
+/// The shared tap target for brush-preview controls (library tile, inline
+/// swatch): an accessible button that hit-tests its whole box.
+class BrushPreviewTapTarget extends StatelessWidget {
+  /// Creates a [BrushPreviewTapTarget].
+  const BrushPreviewTapTarget({
+    super.key,
+    required this.label,
+    required this.onTap,
+    required this.child,
+    this.isSelected = false,
+  });
+
+  /// The visual content.
+  final Widget child;
+
+  /// Whether the control is announced as selected.
+  final bool isSelected;
+
+  /// Accessible name of the control.
+  final String label;
+
+  /// Called when tapped.
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: label,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: child,
+      ),
+    );
+  }
 }

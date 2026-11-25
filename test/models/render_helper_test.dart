@@ -644,6 +644,20 @@ void main() {
       renderText(canvas, textObject);
     });
   });
+
+  group('brush style texture helpers', () {
+    test('hatchPatternForStyle crosses only cross-hatch', () {
+      expect(hatchPatternForStyle(BrushStyle.crossHatch).crossed, isTrue);
+      expect(hatchPatternForStyle(BrushStyle.hatch, const HatchPattern(crossed: true)).crossed, isFalse);
+    });
+
+    test('prewarmBrushStyleTextures only warms textured styles', () async {
+      expect(prewarmBrushStyleTextures(BrushStyle.solid), isNull);
+      await prewarmBrushStyleTextures(BrushStyle.grain);
+      await prewarmBrushStyleTextures(BrushStyle.crossHatch);
+      expect(BrushGrain.instance.tile, isNotNull);
+    });
+  });
 }
 
 Future<Color> _pixelColorAt(ui.Image image, int x, int y) async {

@@ -25,27 +25,23 @@ class BrushStyleSwatch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String label = brushStyleLabel(context.l10n, value);
-    return Semantics(
-      button: true,
+    return BrushPreviewTapTarget(
+      key: Keys.toolBrushStyleSwatch,
       label: label,
-      child: GestureDetector(
-        key: Keys.toolBrushStyleSwatch,
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            SizedBox(
-              width: AppBrushLibrary.swatchWidth,
-              height: AppBrushLibrary.swatchHeight,
-              child: BrushStrokePreview(style: value, brushSize: AppBrushLibrary.swatchBrushSize),
-            ),
-            const SizedBox(width: AppSpacing.small),
-            Flexible(
-              child: AppText(label, maxLines: 1, overflow: TextOverflow.ellipsis),
-            ),
-          ],
-        ),
+      onTap: onTap,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          SizedBox(
+            width: AppBrushLibrary.swatchWidth,
+            height: AppBrushLibrary.swatchHeight,
+            child: BrushStrokePreview(style: value, brushSize: AppBrushLibrary.swatchBrushSize),
+          ),
+          const SizedBox(width: AppSpacing.small),
+          Flexible(
+            child: AppText(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ),
+        ],
       ),
     );
   }

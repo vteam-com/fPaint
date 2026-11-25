@@ -2127,23 +2127,7 @@ Future<void> _exerciseBrushStylePicker(
   await tapByTooltip(tester, brushL10n.toolBrush);
   await tester.pump();
 
-  final Finder swatch = find.byKey(Keys.toolBrushStyleSwatch);
-  if (swatch.evaluate().isNotEmpty) {
-    await tester.ensureVisible(swatch.first);
-    await pumpForUnitTestUiSettle(tester);
-    await tester.tap(swatch.first, warnIfMissed: false);
-    await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
-
-    final Finder dashTile = find.byKey(const ValueKey<BrushStyle>(BrushStyle.dash));
-    if (dashTile.evaluate().isNotEmpty) {
-      await tester.ensureVisible(dashTile.first);
-      await tester.pump();
-      await tester.tap(dashTile.first);
-      await tester.pump();
-    }
-    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-    await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
-  }
+  await selectBrushStyleViaUi(tester, BrushStyle.dash, lenient: true);
 
   // Switch back to pencil.
   await tapByTooltip(tester, brushL10n.toolPencil);

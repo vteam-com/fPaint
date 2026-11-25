@@ -162,13 +162,18 @@ AppLocalizations _l10n(WidgetTester tester) => mainViewContext(tester).l10n;
 /// taps the style's tile in the library sheet, then closes the sheet.
 ///
 /// The active tool must support brush styles (Brush, Line, Rectangle, Circle).
-Future<void> selectBrushStyleViaUi(WidgetTester tester, BrushStyle style) async {
+/// When [lenient] is true (coverage exercises), a missing swatch is skipped
+/// instead of failing the test.
+Future<void> selectBrushStyleViaUi(WidgetTester tester, BrushStyle style, {bool lenient = false}) async {
   final AppProvider appProvider = appProviderFromTester(tester);
   if (appProvider.brushStyle == style) {
     return;
   }
   await _settleToolPanel(tester);
   final Finder swatch = find.byKey(Keys.toolBrushStyleSwatch);
+  if (lenient && swatch.evaluate().isEmpty) {
+    return;
+  }
   expect(swatch, findsOneWidget, reason: 'Brush style swatch should be shown');
   await tester.ensureVisible(swatch);
   await tester.pump();

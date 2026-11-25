@@ -492,6 +492,24 @@ double softStrokeBlurSigma(double brushSize) => brushSize * AppStroke.softBlurSi
 double softStrokeOutset(double brushSize) =>
     brushSize * AppVisual.half + softStrokeBlurSigma(brushSize) * AppStroke.softBlurExtentSigmas;
 
+/// Returns [base] with its crossing set by [brushStyle]: crossed only for
+/// [BrushStyle.crossHatch]. The single source of truth for which hatch tile a
+/// hatch style samples.
+HatchPattern hatchPatternForStyle(BrushStyle brushStyle, [HatchPattern base = const HatchPattern()]) {
+  return base.copyWith(crossed: brushStyle == BrushStyle.crossHatch);
+}
+
+/// Starts generating the async texture tile [brushStyle] samples, or returns
+/// null when the style draws without one. Mirrors the tiles
+/// [drawPathWithBrushStyle] reads, so callers can repaint once it is ready.
+Future<void>? prewarmBrushStyleTextures(BrushStyle brushStyle, [HatchPattern hatch = const HatchPattern()]) {
+  return switch (brushStyle) {
+    BrushStyle.grain => BrushGrain.instance.prewarm(),
+    BrushStyle.hatch || BrushStyle.crossHatch => BrushHatch.instance.prewarm(hatchPatternForStyle(brushStyle, hatch)),
+    _ => null,
+  };
+}
+
 /// Draws a path with a brush style.
 ///
 /// The [canvas] parameter is the canvas to draw on.
@@ -521,7 +539,7 @@ void drawPathWithBrushStyle(
       // The stroke is a mask over a stationary line field, so overlapping
       // strokes build one coherent hatch instead of doubling up. Falls back to
       // a solid stroke until the async tile is ready.
-      applyHatchPaint(paint, hatch.copyWith(crossed: brushStyle == BrushStyle.crossHatch));
+      applyHatchPaint(paint, hatchPatternForStyle(brushStyle, hatch));
       canvas.drawPath(path, paint);
     case BrushStyle.soft:
       // Feather the stroke edges into a soft "airbrush" falloff. The paint is

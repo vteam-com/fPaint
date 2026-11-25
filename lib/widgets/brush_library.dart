@@ -75,40 +75,36 @@ class _BrushTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      selected: isSelected,
+    return BrushPreviewTapTarget(
       label: label,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: Container(
-          width: AppBrushLibrary.tileWidth,
-          padding: const EdgeInsets.all(AppSpacing.small),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.hover : AppColors.surface,
-            borderRadius: BorderRadius.circular(AppRadius.medium),
-            border: Border.all(
-              color: isSelected ? AppColors.selected : AppColors.divider,
-              width: isSelected ? AppBrushLibrary.selectedBorderWidth : AppBrushLibrary.borderWidth,
+      isSelected: isSelected,
+      onTap: onTap,
+      child: Container(
+        width: AppBrushLibrary.tileWidth,
+        padding: const EdgeInsets.all(AppSpacing.small),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.hover : AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.medium),
+          border: Border.all(
+            color: isSelected ? AppColors.selected : AppColors.divider,
+            width: isSelected ? AppBrushLibrary.selectedBorderWidth : AppBrushLibrary.borderWidth,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            SizedBox(
+              height: AppBrushLibrary.tilePreviewHeight,
+              width: double.infinity,
+              child: BrushStrokePreview(style: style, brushSize: AppBrushLibrary.previewBrushSize),
             ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              SizedBox(
-                height: AppBrushLibrary.tilePreviewHeight,
-                width: double.infinity,
-                child: BrushStrokePreview(style: style, brushSize: AppBrushLibrary.previewBrushSize),
-              ),
-              AppText(
-                label,
-                variant: isSelected ? AppTextVariant.bodyBold : AppTextVariant.body,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
+            AppText(
+              label,
+              variant: isSelected ? AppTextVariant.bodyBold : AppTextVariant.body,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );
